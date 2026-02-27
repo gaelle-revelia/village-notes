@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { X, Plus } from "lucide-react";
+import { X, Plus, Check } from "lucide-react";
 
 interface Intervenant {
   nom: string;
@@ -21,7 +21,6 @@ const SPECIALITES = [
   "Psychomotricien",
   "Médecin MPR",
   "Orthophoniste",
-  "Autre",
 ];
 
 export function StepVillage({ prenomEnfant, onNext, onSkip }: StepVillageProps) {
@@ -29,6 +28,30 @@ export function StepVillage({ prenomEnfant, onNext, onSkip }: StepVillageProps) 
   const [nom, setNom] = useState("");
   const [specialite, setSpecialite] = useState("");
   const [showForm, setShowForm] = useState(false);
+  const [showAutreInput, setShowAutreInput] = useState(false);
+  const [autreValue, setAutreValue] = useState("");
+  const autreInputRef = useRef<HTMLInputElement>(null);
+
+  const handleAutreClick = () => {
+    if (showAutreInput) {
+      setShowAutreInput(false);
+      setAutreValue("");
+      if (specialite && !SPECIALITES.includes(specialite)) {
+        setSpecialite("");
+      }
+    } else {
+      setShowAutreInput(true);
+      setSpecialite("");
+      setTimeout(() => autreInputRef.current?.focus(), 0);
+    }
+  };
+
+  const confirmAutre = () => {
+    if (autreValue.trim()) {
+      setSpecialite(autreValue.trim());
+      setShowAutreInput(false);
+    }
+  };
 
   const addIntervenant = () => {
     if (!nom.trim()) return;
@@ -91,12 +114,12 @@ export function StepVillage({ prenomEnfant, onNext, onSkip }: StepVillageProps) 
           </div>
           <div className="space-y-2">
             <Label htmlFor="int-specialite">Spécialité</Label>
-            <div className="flex flex-wrap gap-2">
+           <div className="flex flex-wrap gap-2">
               {SPECIALITES.map((s) => (
                 <button
                   key={s}
                   type="button"
-                  onClick={() => setSpecialite(s)}
+                  onClick={() => { setSpecialite(s); setShowAutreInput(false); setAutreValue(""); }}
                   className={`rounded-lg border px-3 py-1.5 text-sm transition-colors ${
                     specialite === s
                       ? "border-primary bg-primary text-primary-foreground"
@@ -106,7 +129,42 @@ export function StepVillage({ prenomEnfant, onNext, onSkip }: StepVillageProps) 
                   {s}
                 </button>
               ))}
+              <button
+                type="button"
+                onClick={handleAutreClick}
+                className={`rounded-lg border px-3 py-1.5 text-sm transition-colors ${
+                  (showAutreInput || (specialite && !SPECIALITES.includes(specialite)))
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border bg-background text-foreground hover:border-primary"
+                }`}
+              >
+                {specialite && !SPECIALITES.includes(specialite) && !showAutreInput
+                  ? specialite
+                  : "Autre"}
+              </button>
             </div>
+            {showAutreInput && (
+              <div className="flex gap-2 mt-2">
+                <Input
+                  ref={autreInputRef}
+                  value={autreValue}
+                  onChange={(e) => setAutreValue(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && confirmAutre()}
+                  placeholder="Ex : Neuropsychologue, Orthoptiste..."
+                  className="rounded-lg flex-1"
+                  maxLength={100}
+                />
+                <Button
+                  type="button"
+                  size="icon"
+                  onClick={confirmAutre}
+                  disabled={!autreValue.trim()}
+                  className="rounded-lg shrink-0"
+                >
+                  <Check className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
           </div>
           <div className="flex gap-2 pt-2">
             <Button

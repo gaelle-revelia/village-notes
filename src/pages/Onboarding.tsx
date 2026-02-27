@@ -93,6 +93,14 @@ const Onboarding = () => {
   return (
     <main className="flex min-h-screen flex-col bg-background px-4 py-6">
       <div className="mx-auto w-full max-w-[400px] flex-1 flex flex-col">
+        {step > 1 && step < 4 && (
+          <button
+            onClick={() => setStep(step - 1)}
+            className="mb-4 self-start text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            ← Retour
+          </button>
+        )}
         {step < 4 && (
           <div className="mb-8">
             <ProgressBar currentStep={step} totalSteps={4} />
