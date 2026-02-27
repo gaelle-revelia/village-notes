@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, Search, ChevronRight, X, Activity, Hand, Brain, Stethoscope, MessageCircle, User, Waves } from "lucide-react";
 import BottomNavBar from "@/components/BottomNavBar";
+import { ProfileAvatar } from "@/components/ProfileAvatar";
 import {
   Dialog,
   DialogContent,
@@ -167,9 +168,12 @@ const Timeline = () => {
     <div className="flex min-h-screen flex-col" style={{ backgroundColor: "#F4F1EA" }}>
       {/* Header with search */}
       <header className="sticky top-0 z-10 px-4 py-3 space-y-3" style={{ backgroundColor: "#F4F1EA" }}>
-        <h1 className="text-xl font-semibold" style={{ fontFamily: "'Crimson Text', Georgia, serif", color: "#2A2A2A" }}>
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-semibold" style={{ fontFamily: "'Crimson Text', Georgia, serif", color: "#2A2A2A" }}>
             The Village
           </h1>
+          <ProfileAvatar />
+        </div>
         {memos.length > 0 && (
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: "#8B7D8B" }} />
