@@ -1,8 +1,65 @@
-import { Navigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { Mic, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { MemoCard } from "@/components/memo/MemoCard";
+
+interface Memo {
+  id: string;
+  created_at: string;
+  processing_status: string;
+  transcription_raw: string | null;
+  content_structured: any;
+  intervenant_id: string | null;
+  intervenant?: { nom: string; specialite: string | null } | null;
+}
 
 const Timeline = () => {
   const { user, loading } = useAuth();
+  const navigate = useNavigate();
+  const [memos, setMemos] = useState<Memo[]>([]);
+  const [loadingMemos, setLoadingMemos] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchMemos = async () => {
+      const { data } = await supabase
+        .from("memos")
+        .select("id, created_at, processing_status, transcription_raw, content_structured, intervenant_id")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(50);
+
+      if (data && data.length > 0) {
+        // Fetch intervenants for memos that have one
+        const intervenantIds = [...new Set(data.filter(m => m.intervenant_id).map(m => m.intervenant_id!))];
+        let intervenantsMap: Record<string, { nom: string; specialite: string | null }> = {};
+
+        if (intervenantIds.length > 0) {
+          const { data: intervenants } = await supabase
+            .from("intervenants")
+            .select("id, nom, specialite")
+            .in("id", intervenantIds);
+
+          if (intervenants) {
+            intervenantsMap = Object.fromEntries(intervenants.map(i => [i.id, { nom: i.nom, specialite: i.specialite }]));
+          }
+        }
+
+        setMemos(data.map(m => ({
+          ...m,
+          intervenant: m.intervenant_id ? intervenantsMap[m.intervenant_id] || null : null,
+        })));
+      }
+      setLoadingMemos(false);
+    };
+
+    fetchMemos();
+  }, [user]);
 
   if (loading) {
     return (
@@ -12,26 +69,78 @@ const Timeline = () => {
     );
   }
 
-  if (!user) {
-    return <Navigate to="/auth" replace />;
-  }
+  if (!user) return <Navigate to="/auth" replace />;
+
+  const filteredMemos = searchQuery.trim()
+    ? memos.filter(m => {
+        const q = searchQuery.toLowerCase();
+        const structured = m.content_structured as any;
+        return (
+          m.transcription_raw?.toLowerCase().includes(q) ||
+          structured?.resume?.toLowerCase().includes(q) ||
+          structured?.tags?.some((t: string) => t.toLowerCase().includes(q)) ||
+          m.intervenant?.nom.toLowerCase().includes(q)
+        );
+      })
+    : memos;
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      <header className="sticky top-0 z-10 flex items-center justify-between border-b bg-card px-4 py-3">
+      <header className="sticky top-0 z-10 border-b bg-card px-4 py-3 space-y-3">
         <h1 className="text-xl font-semibold text-card-foreground">The Village</h1>
+        {memos.length > 0 && (
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Rechercher dans vos notes..."
+              className="pl-9 rounded-xl"
+            />
+          </div>
+        )}
       </header>
 
-      <main className="flex-1 flex items-center justify-center px-4 py-8">
-        <div className="text-center space-y-4 max-w-[300px]">
-          <p className="text-lg text-foreground">
-            Votre timeline est prête. Enregistrez votre premier mémo après la prochaine séance.
-          </p>
-          <button className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-primary-foreground font-medium">
-            Enregistrer un mémo
-          </button>
-        </div>
+      <main className="flex-1 px-4 py-4 pb-24">
+        {loadingMemos ? (
+          <div className="space-y-3">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="h-28 rounded-xl bg-muted animate-pulse" />
+            ))}
+          </div>
+        ) : filteredMemos.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center space-y-4">
+            {memos.length === 0 ? (
+              <>
+                <span className="text-4xl">🌿</span>
+                <h2 className="text-lg font-semibold text-card-foreground">
+                  Votre timeline est prête
+                </h2>
+                <p className="text-muted-foreground text-sm max-w-[260px]">
+                  Enregistrez votre premier mémo après la prochaine séance. C'est rapide et facile.
+                </p>
+              </>
+            ) : (
+              <p className="text-muted-foreground">Aucun résultat pour « {searchQuery} »</p>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {filteredMemos.map(memo => (
+              <MemoCard key={memo.id} memo={memo} />
+            ))}
+          </div>
+        )}
       </main>
+
+      {/* FAB */}
+      <button
+        onClick={() => navigate("/record")}
+        className="fixed bottom-6 right-6 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 hover:scale-105 transition-transform"
+        aria-label="Enregistrer un mémo"
+      >
+        <Mic className="h-6 w-6" />
+      </button>
     </div>
   );
 };

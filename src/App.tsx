@@ -7,6 +7,7 @@ import Auth from "./pages/Auth";
 import Timeline from "./pages/Timeline";
 import Onboarding from "./pages/Onboarding";
 import ResetPassword from "./pages/ResetPassword";
+import RecordMemo from "./pages/RecordMemo";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -23,6 +24,7 @@ const App = () => (
           <Route path="/timeline" element={<Timeline />} />
           <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/record" element={<RecordMemo />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

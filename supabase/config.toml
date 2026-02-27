@@ -1,1 +1,4 @@
 project_id = "akmxieztulckunxfttfg"
+
+[functions.process-memo]
+verify_jwt = false
