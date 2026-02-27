@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate, useParams, Navigate } from "react-router-dom";
-import { ArrowLeft, Pencil, X, Plus } from "lucide-react";
+import { ArrowLeft, Pencil, X, Plus, Trash2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useEnfantId } from "@/hooks/useEnfantId";
@@ -193,7 +193,7 @@ const MemoResult = () => {
     toast({
       title: "Mémo supprimé",
       duration: 2000,
-      style: { backgroundColor: "#7C9885", color: "#FFFFFF", border: "none" },
+      style: { backgroundColor: "#C4626B", color: "#FFFFFF", border: "none" },
     });
     navigate("/timeline");
   };
@@ -295,13 +295,22 @@ const MemoResult = () => {
               <ArrowLeft className="h-4 w-4" />
               Retour
             </button>
-            <button
-              onClick={enterEditMode}
-              style={{ background: "none", border: "none" }}
-              aria-label="Modifier"
-            >
-              <Pencil size={20} color="#6B8CAE" />
-            </button>
+            <div className="flex items-center" style={{ gap: 16 }}>
+              <button
+                onClick={() => setDeleteModalOpen(true)}
+                style={{ background: "none", border: "none" }}
+                aria-label="Supprimer"
+              >
+                <Trash2 size={20} color="#C4626B" />
+              </button>
+              <button
+                onClick={enterEditMode}
+                style={{ background: "none", border: "none" }}
+                aria-label="Modifier"
+              >
+                <Pencil size={20} color="#6B8CAE" />
+              </button>
+            </div>
           </>
         )}
       </header>
