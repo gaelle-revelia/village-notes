@@ -78,30 +78,39 @@ export type Database = {
           content_structured: Json | null
           created_at: string
           enfant_id: string | null
+          file_url: string | null
           id: string
           intervenant_id: string | null
+          memo_date: string
           processing_status: string
           transcription_raw: string | null
+          type: string
           user_id: string
         }
         Insert: {
           content_structured?: Json | null
           created_at?: string
           enfant_id?: string | null
+          file_url?: string | null
           id?: string
           intervenant_id?: string | null
+          memo_date?: string
           processing_status?: string
           transcription_raw?: string | null
+          type?: string
           user_id: string
         }
         Update: {
           content_structured?: Json | null
           created_at?: string
           enfant_id?: string | null
+          file_url?: string | null
           id?: string
           intervenant_id?: string | null
+          memo_date?: string
           processing_status?: string
           transcription_raw?: string | null
+          type?: string
           user_id?: string
         }
         Relationships: [
