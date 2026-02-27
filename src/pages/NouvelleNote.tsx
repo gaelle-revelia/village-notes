@@ -6,12 +6,15 @@ import { useEnfantId } from "@/hooks/useEnfantId";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { MemoDatePicker } from "@/components/memo/MemoDatePicker";
+import { Button } from "@/components/ui/button";
 
 interface Intervenant {
   id: string;
   nom: string;
   specialite: string | null;
 }
+
+type ProcessingStatus = "idle" | "structuring" | "done" | "error";
 
 const NouvelleNote = () => {
   const { user, loading: authLoading } = useAuth();
@@ -23,8 +26,8 @@ const NouvelleNote = () => {
   const [intervenantId, setIntervenantId] = useState<string | null>(null);
   const [intervenants, setIntervenants] = useState<Intervenant[]>([]);
   const [text, setText] = useState("");
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [processingStatus, setProcessingStatus] = useState<ProcessingStatus>("idle");
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     if (!enfantId) return;
@@ -48,33 +51,124 @@ const NouvelleNote = () => {
 
   const handleSave = async () => {
     if (!text.trim()) return;
-    setSaving(true);
-    setError(null);
+    setProcessingStatus("structuring");
+
     try {
-      const { error: dbError } = await supabase.from("memos").insert({
-        user_id: user.id,
-        enfant_id: enfantId,
-        intervenant_id: intervenantId,
-        transcription_raw: text.trim(),
-        content_structured: null,
-        processing_status: "done",
-        type: "note" as any,
-        memo_date: memoDate.toISOString().split("T")[0] as any,
+      // 1. Insert memo with processing_status='structuring'
+      const { data: memo, error: memoError } = await supabase
+        .from("memos")
+        .insert({
+          user_id: user.id,
+          enfant_id: enfantId,
+          intervenant_id: intervenantId,
+          transcription_raw: text.trim(),
+          content_structured: null,
+          processing_status: "structuring",
+          type: "note" as any,
+          memo_date: memoDate.toISOString().split("T")[0] as any,
+        })
+        .select("id")
+        .single();
+
+      if (memoError || !memo) throw new Error("Impossible de créer la note");
+
+      // 2. Call edge function for AI structuring (text mode)
+      const { data: fnData, error: fnError } = await supabase.functions.invoke("process-memo", {
+        body: {
+          memo_id: memo.id,
+          mode: "text",
+          text_input: text.trim(),
+        },
       });
-      if (dbError) throw dbError;
-      toast({
-        title: "Note enregistrée ✓",
-        duration: 2000,
-        style: { backgroundColor: "#7C9885", color: "#FFFFFF", border: "none" },
-      });
-      navigate("/timeline");
+
+      if (fnError) throw new Error(fnError.message || "Échec du traitement");
+      if (fnData?.error) throw new Error(fnData.error);
+
+      // Done → navigate to result
+      setProcessingStatus("done");
+      navigate(`/memo-result/${memo.id}`);
     } catch (err) {
-      console.error(err);
-      setError("Une erreur est survenue. Veuillez réessayer.");
-    } finally {
-      setSaving(false);
+      console.error("Process note error:", err);
+      setErrorMessage(err instanceof Error ? err.message : "Une erreur est survenue");
+      setProcessingStatus("error");
     }
   };
+
+  // Processing overlay
+  if (processingStatus !== "idle") {
+    if (processingStatus === "error") {
+      return (
+        <div className="flex min-h-screen flex-col items-center justify-center px-4" style={{ backgroundColor: "#F4F1EA" }}>
+          <div
+            className="w-full max-w-[360px] text-center"
+            style={{
+              backgroundColor: "#FFFFFF",
+              border: "1px solid #E8E3DB",
+              borderRadius: 12,
+              padding: 32,
+            }}
+          >
+            <div className="text-4xl mb-4">⚠️</div>
+            <h2
+              style={{ fontFamily: "'Crimson Text', Georgia, serif", fontSize: 20, fontWeight: 600, color: "#2A2A2A", marginBottom: 8 }}
+            >
+              Une erreur est survenue
+            </h2>
+            <p style={{ fontFamily: "Inter, sans-serif", fontSize: 14, color: "#8B7D8B", marginBottom: 24 }}>
+              Votre note a bien été enregistrée. Nous réessaierons de la traiter automatiquement.
+            </p>
+            {errorMessage && (
+              <p style={{ fontFamily: "Inter, sans-serif", fontSize: 12, color: "#8B7D8B", marginBottom: 24 }}>
+                {errorMessage}
+              </p>
+            )}
+            <button
+              onClick={() => navigate("/timeline")}
+              style={{
+                width: "100%",
+                height: 48,
+                borderRadius: 12,
+                border: "none",
+                fontFamily: "Inter, sans-serif",
+                fontSize: 15,
+                fontWeight: 600,
+                color: "#FFFFFF",
+                backgroundColor: "#6B8CAE",
+                cursor: "pointer",
+              }}
+            >
+              Retour à la timeline
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    // Structuring state
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center px-4" style={{ backgroundColor: "#F4F1EA" }}>
+        <div
+          className="w-full max-w-[360px] text-center"
+          style={{
+            backgroundColor: "#FFFFFF",
+            border: "1px solid #E8E3DB",
+            borderRadius: 12,
+            padding: 32,
+          }}
+        >
+          <div className="text-4xl mb-4 animate-pulse">✨</div>
+          <h2
+            style={{ fontFamily: "'Crimson Text', Georgia, serif", fontSize: 20, fontWeight: 600, color: "#2A2A2A", marginBottom: 8 }}
+          >
+            Organisation en cours...
+          </h2>
+          <p style={{ fontFamily: "Inter, sans-serif", fontSize: 14, color: "#8B7D8B" }}>
+            On structure vos notes automatiquement.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen flex-col" style={{ backgroundColor: "#F4F1EA" }}>
@@ -189,13 +283,6 @@ const NouvelleNote = () => {
               }}
             />
           </div>
-
-          {/* Error */}
-          {error && (
-            <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#C4626B", textAlign: "center" }}>
-              {error}
-            </p>
-          )}
         </div>
       </main>
 
@@ -211,7 +298,7 @@ const NouvelleNote = () => {
         <div className="mx-auto max-w-[400px]">
           <button
             onClick={handleSave}
-            disabled={!text.trim() || saving}
+            disabled={!text.trim() || processingStatus !== "idle"}
             style={{
               width: "100%",
               height: 52,
@@ -222,12 +309,12 @@ const NouvelleNote = () => {
               fontWeight: 600,
               color: "#FFFFFF",
               backgroundColor: !text.trim() ? "#C4BDB8" : "#6B8CAE",
-              opacity: saving ? 0.7 : 1,
-              cursor: !text.trim() || saving ? "not-allowed" : "pointer",
+              opacity: processingStatus !== "idle" ? 0.7 : 1,
+              cursor: !text.trim() || processingStatus !== "idle" ? "not-allowed" : "pointer",
               transition: "background-color 0.2s ease",
             }}
           >
-            {saving ? "Enregistrement..." : "Enregistrer la note"}
+            Enregistrer la note
           </button>
         </div>
       </div>
