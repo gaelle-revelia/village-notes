@@ -17,6 +17,9 @@ import ProfileSettings from "./pages/ProfileSettings";
 import VillageSettings from "./pages/VillageSettings";
 import ChildProfile from "./pages/ChildProfile";
 import AppSettings from "./pages/AppSettings";
+import SelenaScreen from "./pages/SelenaScreen";
+import OutilsScreen from "./pages/OutilsScreen";
+import ExplorerScreen from "./pages/ExplorerScreen";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +34,9 @@ const App = () => (
           <Route path="/" element={<Navigate to="/auth" replace />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/timeline" element={<Timeline />} />
+          <Route path="/selena" element={<SelenaScreen />} />
+          <Route path="/outils" element={<OutilsScreen />} />
+          <Route path="/explorer" element={<ExplorerScreen />} />
           <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/record" element={<RecordMemo />} />
