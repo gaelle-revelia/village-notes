@@ -314,6 +314,15 @@ const Timeline = () => {
                               const { icon: Icon, bg } = getSpecialiteAvatar(memo.intervenant!.specialite);
                               return (
                                 <div className="flex items-center" style={{ gap: 6 }}>
+                                  <span
+                                    style={{
+                                      fontFamily: "Inter, sans-serif",
+                                      fontSize: 12,
+                                      color: "#8B7D8B",
+                                    }}
+                                  >
+                                    {memo.intervenant!.nom}
+                                  </span>
                                   <div
                                     className="flex items-center justify-center shrink-0"
                                     style={{
@@ -336,15 +345,6 @@ const Timeline = () => {
                                       <Icon size={16} color="#FFFFFF" />
                                     )}
                                   </div>
-                                  <span
-                                    style={{
-                                      fontFamily: "Inter, sans-serif",
-                                      fontSize: 12,
-                                      color: "#8B7D8B",
-                                    }}
-                                  >
-                                    {memo.intervenant!.nom}
-                                  </span>
                                 </div>
                               );
                             })()}
