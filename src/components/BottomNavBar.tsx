@@ -18,15 +18,16 @@ const BottomNavBar = () => {
     <nav
       className="fixed bottom-0 left-0 right-0 z-30 flex items-center justify-around"
       style={{
-        height: 64,
+        height: 60,
         backgroundColor: "#FFFFFF",
-        borderTop: "1px solid #E8E3DB",
+        borderTop: "1px solid #F0EBE3",
         boxShadow: "0 -2px 8px rgba(42,42,42,0.04)",
+        paddingBottom: "env(safe-area-inset-bottom, 0px)",
       }}
     >
       {tabs.map((tab) => {
         const active = location.pathname === tab.path;
-        const color = active ? "#6B8CAE" : "#A8A0A8";
+        const color = active ? "#6B8CAE" : "#C4BDB8";
         return (
           <button
             key={tab.path}
@@ -38,7 +39,7 @@ const BottomNavBar = () => {
             <span
               style={{
                 fontFamily: "Inter, sans-serif",
-                fontSize: 11,
+                fontSize: 10,
                 fontWeight: active ? 600 : 400,
                 color,
                 marginTop: 2,
