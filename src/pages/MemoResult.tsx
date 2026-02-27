@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate, useParams, Navigate } from "react-router-dom";
-import { ArrowLeft, Pencil, X, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, Pencil, X, Plus, Trash2, ChevronDown } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useEnfantId } from "@/hooks/useEnfantId";
@@ -85,6 +85,7 @@ const MemoResult = () => {
   const [saving, setSaving] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [originalNoteOpen, setOriginalNoteOpen] = useState(false);
 
   useEffect(() => {
     if (!id || !user) return;
@@ -140,7 +141,7 @@ const MemoResult = () => {
       transcription_raw: editTranscription || null,
     };
 
-    if (memo.type === "vocal") {
+    if (memo.type === "vocal" || memo.type === "note") {
       updatedFields.content_structured = {
         ...(memo.content_structured || {}),
         resume: editResume || undefined,
@@ -151,7 +152,7 @@ const MemoResult = () => {
     } else if (memo.type === "evenement") {
       updatedFields.content_structured = editResume ? { resume: editResume } : null;
     }
-    // For 'note' and 'document', content_structured stays as-is
+    // For 'document', content_structured stays as-is
 
     const { error } = await supabase
       .from("memos")
@@ -378,12 +379,12 @@ const MemoResult = () => {
             </p>
           ) : null}
 
-          {/* Transcription — for note, vocal, evenement */}
-          {(memo.type === "note" || memo.type === "vocal" || memo.type === "evenement") && (
+          {/* Transcription — for vocal, evenement (editable); for note: shown as collapsible in view mode */}
+          {(memo.type === "vocal" || memo.type === "evenement") && (
             editing ? (
               <div style={cardStyle}>
                 <label style={{ fontFamily: "Inter, sans-serif", fontSize: 12, fontWeight: 600, color: "#A8A0A8", letterSpacing: "0.08em", textTransform: "uppercase" as const, display: "block", marginBottom: 8 }}>
-                  {memo.type === "evenement" ? "Titre" : memo.type === "vocal" ? "Transcription" : "Votre note"}
+                  {memo.type === "evenement" ? "Titre" : "Transcription"}
                 </label>
                 {memo.type === "evenement" ? (
                   <input
@@ -400,22 +401,26 @@ const MemoResult = () => {
                   />
                 )}
               </div>
-            ) : memo.transcription_raw ? (
-              memo.type === "note" ? (
-                <div style={cardStyle}>
-                  <h3 style={{ fontFamily: "Inter, sans-serif", fontSize: 12, fontWeight: 600, color: "#A8A0A8", letterSpacing: "0.08em", textTransform: "uppercase" as const, marginBottom: 8 }}>
-                    Note
-                  </h3>
-                  <p style={{ fontFamily: "Inter, sans-serif", fontSize: 15, color: "#2A2A2A", lineHeight: 1.6, whiteSpace: "pre-wrap" as const }}>
-                    {memo.transcription_raw}
-                  </p>
-                </div>
-              ) : null
             ) : null
           )}
 
-          {/* Resume — vocal & evenement */}
-          {(memo.type === "vocal" || memo.type === "evenement") && (
+          {/* Note type: transcription editable in edit mode */}
+          {memo.type === "note" && editing && (
+            <div style={cardStyle}>
+              <label style={{ fontFamily: "Inter, sans-serif", fontSize: 12, fontWeight: 600, color: "#A8A0A8", letterSpacing: "0.08em", textTransform: "uppercase" as const, display: "block", marginBottom: 8 }}>
+                Votre note
+              </label>
+              <textarea
+                value={editTranscription}
+                onChange={(e) => setEditTranscription(e.target.value)}
+                rows={5}
+                style={editInputStyle}
+              />
+            </div>
+          )}
+
+          {/* Resume — vocal, note & evenement */}
+          {(memo.type === "vocal" || memo.type === "note" || memo.type === "evenement") && (
             editing ? (
               <div style={cardStyle}>
                 <label style={{ fontFamily: "Inter, sans-serif", fontSize: 12, fontWeight: 600, color: "#A8A0A8", letterSpacing: "0.08em", textTransform: "uppercase" as const, display: "block", marginBottom: 8 }}>
@@ -440,8 +445,8 @@ const MemoResult = () => {
             ) : null
           )}
 
-          {/* Details — vocal only */}
-          {memo.type === "vocal" && (
+          {/* Details — vocal & note */}
+          {(memo.type === "vocal" || memo.type === "note") && (
             editing ? (
               <div style={cardStyle}>
                 <label style={{ fontFamily: "Inter, sans-serif", fontSize: 12, fontWeight: 600, color: "#A8A0A8", letterSpacing: "0.08em", textTransform: "uppercase" as const, display: "block", marginBottom: 8 }}>
@@ -471,8 +476,8 @@ const MemoResult = () => {
             ) : null
           )}
 
-          {/* Suggestions — vocal only */}
-          {memo.type === "vocal" && (
+          {/* Suggestions — vocal & note */}
+          {(memo.type === "vocal" || memo.type === "note") && (
             editing ? (
               <div style={cardStyle}>
                 <label style={{ fontFamily: "Inter, sans-serif", fontSize: 12, fontWeight: 600, color: "#A8A0A8", letterSpacing: "0.08em", textTransform: "uppercase" as const, display: "block", marginBottom: 8 }}>
@@ -502,8 +507,8 @@ const MemoResult = () => {
             ) : null
           )}
 
-          {/* Tags — vocal only */}
-          {memo.type === "vocal" && (
+          {/* Tags — vocal & note */}
+          {(memo.type === "vocal" || memo.type === "note") && (
             editing ? (
               <div style={cardStyle}>
                 <label style={{ fontFamily: "Inter, sans-serif", fontSize: 12, fontWeight: 600, color: "#A8A0A8", letterSpacing: "0.08em", textTransform: "uppercase" as const, display: "block", marginBottom: 8 }}>
@@ -597,6 +602,48 @@ const MemoResult = () => {
                 })}
               </div>
             ) : null
+          )}
+
+          {/* Collapsible "Note originale" — for note type in view mode */}
+          {memo.type === "note" && !editing && memo.transcription_raw && (
+            <div>
+              <button
+                onClick={() => setOriginalNoteOpen(!originalNoteOpen)}
+                className="flex items-center gap-1"
+                style={{
+                  fontFamily: "Inter, sans-serif",
+                  fontSize: 13,
+                  color: "#8B7D8B",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  padding: 0,
+                }}
+              >
+                <ChevronDown
+                  size={16}
+                  style={{
+                    transition: "transform 0.2s ease",
+                    transform: originalNoteOpen ? "rotate(180deg)" : "rotate(0deg)",
+                  }}
+                />
+                Note originale
+              </button>
+              {originalNoteOpen && (
+                <div style={{ marginTop: 8 }}>
+                  <p style={{
+                    fontFamily: "Inter, sans-serif",
+                    fontSize: 14,
+                    color: "#6B5B73",
+                    fontStyle: "italic",
+                    lineHeight: 1.6,
+                    whiteSpace: "pre-wrap" as const,
+                  }}>
+                    {memo.transcription_raw}
+                  </p>
+                </div>
+              )}
+            </div>
           )}
 
           {/* Delete link in edit mode */}
