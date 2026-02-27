@@ -73,10 +73,9 @@ serve(async (req) => {
     let transcription = "";
 
     if (mode === "text") {
-      // Text mode: use the text input directly
       transcription = text_input || "";
     } else {
-      // Voice mode: download audio and transcribe via Gemini
+      // Voice mode: download from audio-temp bucket and transcribe
       await supabase
         .from("memos")
         .update({ processing_status: "transcribing" })
@@ -84,7 +83,7 @@ serve(async (req) => {
 
       const storagePath = `${userId}/${memo_id}.webm`;
       const { data: audioData, error: downloadError } = await supabase.storage
-        .from("voice-memos")
+        .from("audio-temp")
         .download(storagePath);
 
       if (downloadError || !audioData) {
@@ -163,10 +162,10 @@ serve(async (req) => {
       transcription = transcribeResult.choices?.[0]?.message?.content || "";
 
       // Delete audio file immediately after successful transcription
-      await supabase.storage.from("voice-memos").remove([storagePath]);
+      await supabase.storage.from("audio-temp").remove([storagePath]);
     }
 
-    // Save transcription
+    // Save transcription and update status
     await supabase
       .from("memos")
       .update({ transcription_raw: transcription, processing_status: "structuring" })
@@ -181,7 +180,7 @@ serve(async (req) => {
       ? await supabase.from("intervenants").select("nom, specialite").eq("id", memo.intervenant_id).single()
       : { data: null };
 
-    // Structure with Gemini using tool calling
+    // Structure with Gemini using tool calling — updated prompt per spec
     const structureResponse = await fetch(
       "https://ai.gateway.lovable.dev/v1/chat/completions",
       {
@@ -195,15 +194,17 @@ serve(async (req) => {
           messages: [
             {
               role: "system",
-              content: `Tu es un assistant d'organisation pour parents d'enfants en situation de handicap.
-Tu structures les notes de séances de manière claire et bienveillante.
+              content: `Tu es un assistant organisationnel pour parents d'enfants en rééducation.
+Tu reçois la transcription d'une note vocale d'un parent après une séance.
 
 RÈGLES ABSOLUES :
-- Tu ne JAMAIS diagnostiques, recommandes ou évalues cliniquement
-- Tu n'utilises QUE le vocabulaire employé par le parent
-- Tu ne reformules pas en jargon médical
-- Tu organises et structures les observations du parent, rien de plus
-- Ton ton est chaleureux, encourageant et respectueux
+❌ Tu ne fais JAMAIS de diagnostic, pronostic ou recommandation médicale
+❌ Tu ne déduces JAMAIS ce que l'enfant "est" — seulement ce que le parent "a observé"
+❌ Tu n'interprètes JAMAIS les données médicales
+❌ Tu n'utilises PAS de jargon médical que le parent n'a pas utilisé lui-même
+✅ Tu organises, résumes, tagges et structures CE QUE LE PARENT A DIT
+✅ Tu utilises le vocabulaire du parent, pas un vocabulaire médical inventé
+✅ Le ton est bienveillant, sobre, factuel
 
 ${enfant ? `Enfant : ${enfant.prenom}${enfant.diagnostic_label ? ` (${enfant.diagnostic_label})` : ""}` : ""}
 ${intervenant ? `Intervenant : ${intervenant.nom}${intervenant.specialite ? ` — ${intervenant.specialite}` : ""}` : ""}`,
@@ -224,27 +225,29 @@ ${intervenant ? `Intervenant : ${intervenant.nom}${intervenant.specialite ? ` �
                   properties: {
                     resume: {
                       type: "string",
-                      description: "Résumé en 1-2 phrases de la séance",
+                      description: "1-2 phrases résumant la séance selon les mots du parent",
                     },
-                    points_cles: {
+                    details: {
                       type: "array",
                       items: { type: "string" },
-                      description: "Points importants à retenir (3-5 max)",
+                      description: "Points rapportés par le parent (3-5 max)",
                     },
                     suggestions: {
                       type: "array",
                       items: { type: "string" },
-                      description:
-                        "Suggestions d'actions ou de suivi mentionnées par le parent (0-3, uniquement si le parent les a évoquées)",
+                      description: "Actions détectées dans la note si présentes (0-3)",
                     },
                     tags: {
                       type: "array",
                       items: { type: "string" },
-                      description:
-                        "Tags descriptifs pour catégoriser (ex: motricité, communication, alimentation, sommeil, progrès, difficulté). 1-4 tags.",
+                      description: "Domaine ou intervenant détecté (ex: moteur, sensoriel, cognitif, social, administratif). 1-4 tags.",
+                    },
+                    intervenant_detected: {
+                      type: "string",
+                      description: "Nom de l'intervenant mentionné dans la note, ou null",
                     },
                   },
-                  required: ["resume", "points_cles", "tags"],
+                  required: ["resume", "details", "tags"],
                   additionalProperties: false,
                 },
               },
