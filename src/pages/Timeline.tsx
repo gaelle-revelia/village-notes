@@ -15,6 +15,8 @@ import { MemoCard } from "@/components/memo/MemoCard";
 interface Memo {
   id: string;
   created_at: string;
+  memo_date?: string;
+  type?: string;
   processing_status: string;
   transcription_raw: string | null;
   content_structured: any;
@@ -43,8 +45,9 @@ const Timeline = () => {
     const fetchMemos = async () => {
       const { data } = await supabase
         .from("memos")
-        .select("id, created_at, processing_status, transcription_raw, content_structured, intervenant_id")
+        .select("id, created_at, memo_date, type, processing_status, transcription_raw, content_structured, intervenant_id")
         .eq("user_id", user.id)
+        .order("memo_date", { ascending: false })
         .order("created_at", { ascending: false })
         .limit(50);
 
@@ -92,8 +95,10 @@ const Timeline = () => {
         return (
           m.transcription_raw?.toLowerCase().includes(q) ||
           structured?.resume?.toLowerCase().includes(q) ||
+          structured?.details?.some((d: string) => d.toLowerCase().includes(q)) ||
           structured?.tags?.some((t: string) => t.toLowerCase().includes(q)) ||
-          m.intervenant?.nom.toLowerCase().includes(q)
+          m.intervenant?.nom.toLowerCase().includes(q) ||
+          m.type?.toLowerCase().includes(q)
         );
       })
     : memos;

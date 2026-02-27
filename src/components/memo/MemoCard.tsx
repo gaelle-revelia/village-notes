@@ -1,81 +1,146 @@
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Loader2 } from "lucide-react";
+import { Loader2, Mic, FileText, File, Flag } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface MemoCardProps {
   memo: {
     id: string;
     created_at: string;
+    memo_date?: string;
+    type?: string;
     processing_status: string;
+    transcription_raw?: string | null;
     content_structured: any;
     intervenant?: { nom: string; specialite: string | null } | null;
   };
 }
 
-const TAG_COLORS: Record<string, string> = {
-  motricité: "bg-blue-100 text-blue-800",
-  communication: "bg-purple-100 text-purple-800",
-  alimentation: "bg-amber-100 text-amber-800",
-  sommeil: "bg-indigo-100 text-indigo-800",
-  progrès: "bg-emerald-100 text-emerald-800",
-  difficulté: "bg-red-100 text-red-800",
-  autonomie: "bg-teal-100 text-teal-800",
-  comportement: "bg-orange-100 text-orange-800",
+const TAG_DOMAIN_COLORS: Record<string, string> = {
+  moteur: "#6B8CAE",
+  motricité: "#6B8CAE",
+  sensoriel: "#7C9885",
+  cognitif: "#C4A162",
+  social: "#9B8DB5",
+  administratif: "#A8A0A8",
+  langage: "#9B8DB5",
+  communication: "#9B8DB5",
+  orthophonie: "#6B8CAE",
+  alimentation: "#7C9885",
+  sommeil: "#C4A162",
+  progrès: "#7C9885",
+  difficulté: "#C4A162",
+  autonomie: "#6B8CAE",
+  comportement: "#9B8DB5",
 };
 
 function getTagColor(tag: string): string {
-  const normalized = tag.toLowerCase();
-  for (const [key, value] of Object.entries(TAG_COLORS)) {
-    if (normalized.includes(key)) return value;
+  const lower = tag.toLowerCase();
+  for (const [key, color] of Object.entries(TAG_DOMAIN_COLORS)) {
+    if (lower.includes(key)) return color;
   }
-  return "bg-muted text-muted-foreground";
+  return "#A8A0A8";
 }
 
+const TYPE_CONFIG: Record<string, { icon: typeof Mic; label: string; emoji: string }> = {
+  vocal: { icon: Mic, label: "Mémo vocal", emoji: "🎙" },
+  note: { icon: FileText, label: "Note", emoji: "📝" },
+  document: { icon: File, label: "Document", emoji: "📄" },
+  evenement: { icon: Flag, label: "Événement", emoji: "📌" },
+};
+
 export function MemoCard({ memo }: MemoCardProps) {
+  const navigate = useNavigate();
   const structured = memo.content_structured as {
     resume?: string;
+    details?: string[];
+    points_cles?: string[];
     tags?: string[];
+    description?: string;
   } | null;
 
   const isProcessing = memo.processing_status !== "done" && memo.processing_status !== "error";
+  const memoType = (memo.type as string) || "vocal";
+  const typeConfig = TYPE_CONFIG[memoType] || TYPE_CONFIG.vocal;
+  const TypeIcon = typeConfig.icon;
+
+  // Display date: prefer memo_date, fallback to created_at
+  const displayDate = memo.memo_date
+    ? format(new Date(memo.memo_date), "d MMM yyyy", { locale: fr })
+    : format(new Date(memo.created_at), "d MMM yyyy", { locale: fr });
+
+  // Summary text based on type
+  let summaryText = structured?.resume || null;
+  if (!summaryText && memoType === "evenement") {
+    summaryText = memo.transcription_raw || structured?.description || null;
+  }
+  if (!summaryText && memoType === "note") {
+    summaryText = memo.transcription_raw || null;
+  }
+
+  const tags = structured?.tags || [];
+
+  const handleClick = () => {
+    if (memo.processing_status === "done") {
+      navigate(`/memo-result/${memo.id}`);
+    }
+  };
 
   return (
-    <div className="rounded-xl border bg-card p-4 space-y-2">
-      {/* Header: date + intervenant */}
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-sm text-muted-foreground">
-            {format(new Date(memo.created_at), "d MMM yyyy · HH:mm", { locale: fr })}
-          </p>
-          {memo.intervenant && (
-            <p className="text-xs text-muted-foreground">
-              {memo.intervenant.nom}
-              {memo.intervenant.specialite && ` · ${memo.intervenant.specialite}`}
-            </p>
-          )}
+    <div
+      onClick={handleClick}
+      className="rounded-xl border border-border bg-card p-4 space-y-2.5 shadow-[0_2px_8px_rgba(42,42,42,0.06)] cursor-pointer hover:shadow-[0_4px_12px_rgba(42,42,42,0.1)] transition-shadow"
+    >
+      {/* Header: type icon + date + intervenant + status */}
+      <div className="flex items-start gap-3">
+        {/* Type icon badge */}
+        <div
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
+          style={{ backgroundColor: `${getTagColor(memoType === "vocal" ? "moteur" : memoType)}15` }}
+        >
+          <TypeIcon className="h-4 w-4" style={{ color: "hsl(var(--primary))" }} />
         </div>
-        {isProcessing && <Loader2 className="h-4 w-4 text-muted-foreground animate-spin" />}
-        {memo.processing_status === "error" && (
-          <span className="text-xs text-destructive">Erreur</span>
-        )}
+
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              {typeConfig.label}
+            </p>
+            {isProcessing && <Loader2 className="h-3.5 w-3.5 text-muted-foreground animate-spin" />}
+            {memo.processing_status === "error" && (
+              <span className="text-xs font-medium" style={{ color: "hsl(var(--rouge-enregistrement))" }}>
+                Erreur
+              </span>
+            )}
+          </div>
+          <p className="text-sm text-muted-foreground">
+            {displayDate}
+            {memo.intervenant && ` · ${memo.intervenant.nom}`}
+          </p>
+        </div>
       </div>
 
       {/* Summary */}
-      {structured?.resume && (
-        <p className="text-sm text-card-foreground line-clamp-2">{structured.resume}</p>
+      {summaryText && (
+        <p className="text-[15px] text-foreground leading-relaxed line-clamp-2">
+          {summaryText}
+        </p>
       )}
 
-      {isProcessing && !structured?.resume && (
+      {isProcessing && !summaryText && (
         <p className="text-sm text-muted-foreground italic">Traitement en cours...</p>
       )}
 
-      {/* Tags */}
-      {structured?.tags && structured.tags.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          {structured.tags.map((tag, i) => (
+      {/* Tags with domain-colored left border */}
+      {tags.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 pt-0.5">
+          {tags.map((tag, i) => (
             <span
               key={i}
-              className={`rounded-md px-2 py-0.5 text-xs font-medium ${getTagColor(tag)}`}
+              className="rounded-lg px-2.5 py-1 text-xs font-medium text-foreground bg-card"
+              style={{
+                borderLeft: `3px solid ${getTagColor(tag)}`,
+              }}
             >
               {tag}
             </span>
