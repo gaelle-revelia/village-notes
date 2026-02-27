@@ -157,17 +157,17 @@ const Timeline = () => {
       </button>
 
       <Dialog open={sheetOpen} onOpenChange={setSheetOpen}>
-        <DialogContent hideClose className="sm:max-w-sm rounded-2xl border-none shadow-xl p-0 gap-0 [&~[data-state]]:bg-black/40">
-          <DialogHeader className="sr-only">
-            <DialogTitle>Ajouter</DialogTitle>
+        <DialogContent hideClose className="w-[85vw] max-w-md rounded-2xl border-none shadow-xl p-0 gap-0 [&~[data-state]]:bg-black/40">
+          <DialogHeader className="flex flex-row items-center justify-end px-4 pt-3 pb-0">
+            <DialogTitle className="sr-only">Ajouter</DialogTitle>
+            <button
+              onClick={() => setSheetOpen(false)}
+              className="rounded-full p-1 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            >
+              <X className="h-4 w-4" />
+            </button>
           </DialogHeader>
-          <button
-            onClick={() => setSheetOpen(false)}
-            className="absolute right-4 top-4 rounded-full p-1 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-          >
-            <X className="h-4 w-4" />
-          </button>
-          <nav className="px-2 py-4">
+          <nav className="px-2 pb-4 pt-1">
             {menuItems.map((item) => (
               <button
                 key={item.route}
