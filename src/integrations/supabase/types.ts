@@ -145,6 +145,30 @@ export type Database = {
         }
         Relationships: []
       }
+      specialties: {
+        Row: {
+          created_at: string
+          id: string
+          is_default: boolean
+          name: string
+          name_normalized: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          name: string
+          name_normalized: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          name?: string
+          name_normalized?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

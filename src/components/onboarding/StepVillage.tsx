@@ -1,8 +1,9 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { X, Plus, Check } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Intervenant {
   nom: string;
@@ -15,14 +16,6 @@ interface StepVillageProps {
   onSkip: () => void;
 }
 
-const SPECIALITES = [
-  "Kinésithérapeute",
-  "Ergothérapeute",
-  "Psychomotricien",
-  "Médecin MPR",
-  "Orthophoniste",
-];
-
 export function StepVillage({ prenomEnfant, onNext, onSkip }: StepVillageProps) {
   const [intervenants, setIntervenants] = useState<Intervenant[]>([]);
   const [nom, setNom] = useState("");
@@ -30,13 +23,25 @@ export function StepVillage({ prenomEnfant, onNext, onSkip }: StepVillageProps) 
   const [showForm, setShowForm] = useState(false);
   const [showAutreInput, setShowAutreInput] = useState(false);
   const [autreValue, setAutreValue] = useState("");
+  const [defaultSpecialties, setDefaultSpecialties] = useState<string[]>([]);
   const autreInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    supabase
+      .from("specialties")
+      .select("name")
+      .eq("is_default", true)
+      .order("name")
+      .then(({ data }) => {
+        if (data) setDefaultSpecialties(data.map((d) => d.name));
+      });
+  }, []);
 
   const handleAutreClick = () => {
     if (showAutreInput) {
       setShowAutreInput(false);
       setAutreValue("");
-      if (specialite && !SPECIALITES.includes(specialite)) {
+      if (specialite && !defaultSpecialties.includes(specialite)) {
         setSpecialite("");
       }
     } else {
@@ -46,11 +51,34 @@ export function StepVillage({ prenomEnfant, onNext, onSkip }: StepVillageProps) 
     }
   };
 
-  const confirmAutre = () => {
-    if (autreValue.trim()) {
-      setSpecialite(autreValue.trim());
-      setShowAutreInput(false);
+  const confirmAutre = async () => {
+    const trimmed = autreValue.trim();
+    if (!trimmed) return;
+
+    const normalized = trimmed.toLowerCase();
+
+    // Check if already exists
+    const { data: existing } = await supabase
+      .from("specialties")
+      .select("name")
+      .eq("name_normalized", normalized)
+      .maybeSingle();
+
+    if (existing) {
+      setSpecialite(existing.name);
+    } else {
+      // Insert new custom specialty
+      const { data: inserted } = await supabase
+        .from("specialties")
+        .insert({ name: trimmed, name_normalized: normalized, is_default: false })
+        .select("name")
+        .single();
+
+      setSpecialite(inserted?.name ?? trimmed);
     }
+
+    setShowAutreInput(false);
+    setAutreValue("");
   };
 
   const addIntervenant = () => {
@@ -115,7 +143,7 @@ export function StepVillage({ prenomEnfant, onNext, onSkip }: StepVillageProps) 
           <div className="space-y-2">
             <Label htmlFor="int-specialite">Spécialité</Label>
            <div className="flex flex-wrap gap-2">
-              {SPECIALITES.map((s) => (
+              {defaultSpecialties.map((s) => (
                 <button
                   key={s}
                   type="button"
@@ -133,12 +161,12 @@ export function StepVillage({ prenomEnfant, onNext, onSkip }: StepVillageProps) 
                 type="button"
                 onClick={handleAutreClick}
                 className={`rounded-lg border px-3 py-1.5 text-sm transition-colors ${
-                  (showAutreInput || (specialite && !SPECIALITES.includes(specialite)))
+                  (showAutreInput || (specialite && !defaultSpecialties.includes(specialite)))
                     ? "border-primary bg-primary text-primary-foreground"
                     : "border-border bg-background text-foreground hover:border-primary"
                 }`}
               >
-                {specialite && !SPECIALITES.includes(specialite) && !showAutreInput
+                {specialite && !defaultSpecialties.includes(specialite) && !showAutreInput
                   ? specialite
                   : "Autre"}
               </button>
@@ -149,7 +177,7 @@ export function StepVillage({ prenomEnfant, onNext, onSkip }: StepVillageProps) 
                   ref={autreInputRef}
                   value={autreValue}
                   onChange={(e) => setAutreValue(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && confirmAutre()}
+                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); confirmAutre(); } }}
                   placeholder="Ex : Neuropsychologue, Orthoptiste..."
                   className="rounded-lg flex-1"
                   maxLength={100}
