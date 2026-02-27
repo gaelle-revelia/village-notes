@@ -47,6 +47,7 @@ export type Database = {
           enfant_id: string
           id: string
           nom: string
+          photo_url: string | null
           specialite: string | null
         }
         Insert: {
@@ -54,6 +55,7 @@ export type Database = {
           enfant_id: string
           id?: string
           nom: string
+          photo_url?: string | null
           specialite?: string | null
         }
         Update: {
@@ -61,6 +63,7 @@ export type Database = {
           enfant_id?: string
           id?: string
           nom?: string
+          photo_url?: string | null
           specialite?: string | null
         }
         Relationships: [

@@ -1,0 +1,1 @@
+ALTER TABLE public.intervenants ADD COLUMN IF NOT EXISTS photo_url text DEFAULT NULL;

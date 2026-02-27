@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Search, ChevronRight, X } from "lucide-react";
+import { Plus, Search, ChevronRight, X, Activity, Hand, Brain, Stethoscope, MessageCircle, User, Waves } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -21,7 +21,18 @@ interface Memo {
   transcription_raw: string | null;
   content_structured: any;
   intervenant_id: string | null;
-  intervenant?: { nom: string; specialite: string | null } | null;
+  intervenant?: { nom: string; specialite: string | null; photo_url?: string | null } | null;
+}
+
+function getSpecialiteAvatar(specialite: string | null): { icon: typeof Activity; bg: string } {
+  const s = (specialite || "").toLowerCase();
+  if (s.includes("kinésithérapeute") || s.includes("kiné")) return { icon: Activity, bg: "#6B8CAE" };
+  if (s.includes("ergothérapeute") || s.includes("ergo")) return { icon: Hand, bg: "#7C9885" };
+  if (s.includes("psychomotric")) return { icon: Brain, bg: "#9B8DB5" };
+  if (s.includes("médecin") || s.includes("mpr")) return { icon: Stethoscope, bg: "#C4A162" };
+  if (s.includes("orthophoniste")) return { icon: MessageCircle, bg: "#7C9885" };
+  if (s.includes("piscine") || s.includes("parent")) return { icon: Waves, bg: "#6B8CAE" };
+  return { icon: User, bg: "#A8A0A8" };
 }
 
 const TAG_COLORS: Record<string, string> = {
@@ -79,16 +90,16 @@ const Timeline = () => {
 
       if (data && data.length > 0) {
         const intervenantIds = [...new Set(data.filter(m => m.intervenant_id).map(m => m.intervenant_id!))];
-        let intervenantsMap: Record<string, { nom: string; specialite: string | null }> = {};
+        let intervenantsMap: Record<string, { nom: string; specialite: string | null; photo_url: string | null }> = {};
 
         if (intervenantIds.length > 0) {
           const { data: intervenants } = await supabase
             .from("intervenants")
-            .select("id, nom, specialite")
+            .select("id, nom, specialite, photo_url")
             .in("id", intervenantIds);
 
           if (intervenants) {
-            intervenantsMap = Object.fromEntries(intervenants.map(i => [i.id, { nom: i.nom, specialite: i.specialite }]));
+            intervenantsMap = Object.fromEntries(intervenants.map(i => [i.id, { nom: i.nom, specialite: i.specialite, photo_url: (i as any).photo_url || null }]));
           }
         }
 
@@ -288,7 +299,7 @@ const Timeline = () => {
                             boxShadow: "0 2px 8px rgba(42,42,42,0.06)",
                           }}
                         >
-                          {/* Top row: date + intervenant */}
+                          {/* Top row: date + avatar + intervenant */}
                           <div className="flex items-center justify-between">
                             <span
                               style={{
@@ -299,17 +310,44 @@ const Timeline = () => {
                             >
                               {displayDate}
                             </span>
-                            {memo.intervenant && (
-                              <span
-                                style={{
-                                  fontFamily: "Inter, sans-serif",
-                                  fontSize: 12,
-                                  color: "#8B7D8B",
-                                }}
-                              >
-                                {memo.intervenant.nom}
-                              </span>
-                            )}
+                            {memo.intervenant && (() => {
+                              const { icon: Icon, bg } = getSpecialiteAvatar(memo.intervenant!.specialite);
+                              return (
+                                <div className="flex items-center" style={{ gap: 6 }}>
+                                  <div
+                                    className="flex items-center justify-center shrink-0"
+                                    style={{
+                                      width: 32,
+                                      height: 32,
+                                      borderRadius: "50%",
+                                      backgroundColor: bg,
+                                      border: "2px solid #F4F1EA",
+                                      overflow: "hidden",
+                                    }}
+                                    title={memo.intervenant!.nom}
+                                  >
+                                    {memo.intervenant!.photo_url ? (
+                                      <img
+                                        src={memo.intervenant!.photo_url}
+                                        alt={memo.intervenant!.nom}
+                                        className="w-full h-full object-cover"
+                                      />
+                                    ) : (
+                                      <Icon size={16} color="#FFFFFF" />
+                                    )}
+                                  </div>
+                                  <span
+                                    style={{
+                                      fontFamily: "Inter, sans-serif",
+                                      fontSize: 12,
+                                      color: "#8B7D8B",
+                                    }}
+                                  >
+                                    {memo.intervenant!.nom}
+                                  </span>
+                                </div>
+                              );
+                            })()}
                           </div>
 
                           {/* Resume */}
