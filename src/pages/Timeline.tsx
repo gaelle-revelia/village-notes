@@ -1,16 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, Search, ChevronRight, X } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { MemoCard } from "@/components/memo/MemoCard";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
 interface Memo {
   id: string;
@@ -22,6 +22,32 @@ interface Memo {
   content_structured: any;
   intervenant_id: string | null;
   intervenant?: { nom: string; specialite: string | null } | null;
+}
+
+const TAG_COLORS: Record<string, string> = {
+  moteur: "#6B8CAE",
+  motricité: "#6B8CAE",
+  kinésithérapie: "#6B8CAE",
+  psychomotricité: "#6B8CAE",
+  sensoriel: "#7C9885",
+  cognitif: "#C4A162",
+  social: "#9B8DB5",
+  administratif: "#A8A0A8",
+};
+
+function getTagColor(tag: string): string {
+  const lower = tag.toLowerCase();
+  for (const [key, color] of Object.entries(TAG_COLORS)) {
+    if (lower.includes(key)) return color;
+  }
+  return "#A8A0A8";
+}
+
+function hexToRgba(hex: string, alpha: number): string {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r},${g},${b},${alpha})`;
 }
 
 const Timeline = () => {
@@ -52,7 +78,6 @@ const Timeline = () => {
         .limit(50);
 
       if (data && data.length > 0) {
-        // Fetch intervenants for memos that have one
         const intervenantIds = [...new Set(data.filter(m => m.intervenant_id).map(m => m.intervenant_id!))];
         let intervenantsMap: Record<string, { nom: string; specialite: string | null }> = {};
 
@@ -78,53 +103,87 @@ const Timeline = () => {
     fetchMemos();
   }, [user]);
 
+  const filteredMemos = useMemo(() => {
+    if (!searchQuery.trim()) return memos;
+    const q = searchQuery.toLowerCase();
+    return memos.filter(m => {
+      const structured = m.content_structured as any;
+      return (
+        m.transcription_raw?.toLowerCase().includes(q) ||
+        structured?.resume?.toLowerCase().includes(q) ||
+        structured?.details?.some((d: string) => d.toLowerCase().includes(q)) ||
+        structured?.tags?.some((t: string) => t.toLowerCase().includes(q)) ||
+        m.intervenant?.nom.toLowerCase().includes(q) ||
+        m.type?.toLowerCase().includes(q)
+      );
+    });
+  }, [memos, searchQuery]);
+
+  // Group memos by month
+  const grouped = useMemo(() => {
+    const groups: { key: string; label: string; memos: Memo[] }[] = [];
+    const map = new Map<string, Memo[]>();
+
+    for (const memo of filteredMemos) {
+      const d = new Date(memo.memo_date || memo.created_at);
+      const key = `${d.getFullYear()}-${String(d.getMonth()).padStart(2, "0")}`;
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(memo);
+    }
+
+    for (const [key, items] of map) {
+      const [y, m] = key.split("-");
+      const d = new Date(Number(y), Number(m), 1);
+      const label = format(d, "MMMM yyyy", { locale: fr }).toUpperCase();
+      groups.push({ key, label, memos: items });
+    }
+
+    return groups;
+  }, [filteredMemos]);
+
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="animate-pulse text-muted-foreground">Chargement...</div>
+      <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: "#F4F1EA" }}>
+        <div className="animate-pulse" style={{ color: "#8B7D8B" }}>Chargement...</div>
       </div>
     );
   }
 
   if (!user) return <Navigate to="/auth" replace />;
 
-  const filteredMemos = searchQuery.trim()
-    ? memos.filter(m => {
-        const q = searchQuery.toLowerCase();
-        const structured = m.content_structured as any;
-        return (
-          m.transcription_raw?.toLowerCase().includes(q) ||
-          structured?.resume?.toLowerCase().includes(q) ||
-          structured?.details?.some((d: string) => d.toLowerCase().includes(q)) ||
-          structured?.tags?.some((t: string) => t.toLowerCase().includes(q)) ||
-          m.intervenant?.nom.toLowerCase().includes(q) ||
-          m.type?.toLowerCase().includes(q)
-        );
-      })
-    : memos;
-
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <header className="sticky top-0 z-10 border-b bg-card px-4 py-3 space-y-3">
-        <h1 className="text-xl font-semibold text-card-foreground">The Village</h1>
+    <div className="flex min-h-screen flex-col" style={{ backgroundColor: "#F4F1EA" }}>
+      {/* Header with search */}
+      <header className="sticky top-0 z-10 px-4 py-3 space-y-3" style={{ backgroundColor: "#F4F1EA" }}>
+        <h1 className="text-xl font-semibold" style={{ fontFamily: "'Crimson Text', Georgia, serif", color: "#2A2A2A" }}>
+          The Village
+        </h1>
         {memos.length > 0 && (
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: "#8B7D8B" }} />
+            <input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Rechercher dans vos notes..."
-              className="pl-9 rounded-xl"
+              className="w-full pl-9 pr-3 py-2.5 outline-none"
+              style={{
+                backgroundColor: "#FFFFFF",
+                border: "1px solid #E8E3DB",
+                borderRadius: 8,
+                fontFamily: "Inter, sans-serif",
+                fontSize: 14,
+                color: "#2A2A2A",
+              }}
             />
           </div>
         )}
       </header>
 
-      <main className="flex-1 px-4 py-4 pb-24">
+      <main className="flex-1 px-4 pb-24">
         {loadingMemos ? (
-          <div className="space-y-3">
+          <div className="space-y-3 pt-4">
             {[1, 2, 3].map(i => (
-              <div key={i} className="h-28 rounded-xl bg-muted animate-pulse" />
+              <div key={i} className="h-28 rounded-xl animate-pulse" style={{ backgroundColor: "#E8E3DB" }} />
             ))}
           </div>
         ) : filteredMemos.length === 0 ? (
@@ -132,30 +191,205 @@ const Timeline = () => {
             {memos.length === 0 ? (
               <>
                 <span className="text-4xl">🌿</span>
-                <h2 className="text-lg font-semibold text-card-foreground">
+                <h2 className="text-lg font-semibold" style={{ color: "#2A2A2A" }}>
                   Votre timeline est prête
                 </h2>
-                <p className="text-muted-foreground text-sm max-w-[260px]">
+                <p className="text-sm max-w-[260px]" style={{ color: "#8B7D8B" }}>
                   Enregistrez votre premier mémo après la prochaine séance. C'est rapide et facile.
                 </p>
               </>
             ) : (
-              <p className="text-muted-foreground">Aucun résultat pour « {searchQuery} »</p>
+              <p style={{ color: "#8B7D8B" }}>Aucun résultat pour « {searchQuery} »</p>
             )}
           </div>
         ) : (
-          <div className="space-y-3">
-            {filteredMemos.map(memo => (
-              <MemoCard key={memo.id} memo={memo} />
+          <div>
+            {grouped.map((group) => (
+              <div key={group.key}>
+                {/* Month header */}
+                <div
+                  className="sticky top-[88px] z-[5]"
+                  style={{
+                    paddingTop: 24,
+                    paddingBottom: 8,
+                    backgroundColor: "#F4F1EA",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontFamily: "Inter, sans-serif",
+                      fontSize: 11,
+                      fontWeight: 600,
+                      color: "#8B7D8B",
+                      letterSpacing: "0.08em",
+                    }}
+                  >
+                    {group.label}
+                  </span>
+                </div>
+
+                {/* Timeline entries */}
+                <div className="relative" style={{ paddingLeft: 36 }}>
+                  {/* Vertical line */}
+                  <div
+                    className="absolute top-0 bottom-0"
+                    style={{
+                      left: 15,
+                      width: 2,
+                      backgroundColor: "#E8E3DB",
+                    }}
+                  />
+
+                  {group.memos.map((memo) => {
+                    const structured = memo.content_structured as {
+                      resume?: string;
+                      tags?: string[];
+                    } | null;
+                    const displayDate = memo.memo_date
+                      ? format(new Date(memo.memo_date), "dd MMM", { locale: fr })
+                      : format(new Date(memo.created_at), "dd MMM", { locale: fr });
+                    const tags = structured?.tags || [];
+                    const visibleTags = tags.slice(0, 3);
+                    const extraCount = tags.length - 3;
+
+                    return (
+                      <div
+                        key={memo.id}
+                        className="relative"
+                        style={{ marginBottom: 12 }}
+                      >
+                        {/* Dot */}
+                        <div
+                          className="absolute"
+                          style={{
+                            left: -25,
+                            top: 18,
+                            width: 10,
+                            height: 10,
+                            borderRadius: "50%",
+                            backgroundColor: "#6B8CAE",
+                            border: "2px solid #F4F1EA",
+                          }}
+                        />
+
+                        {/* Card */}
+                        <div
+                          onClick={() => {
+                            if (memo.processing_status === "done") {
+                              navigate(`/memo-result/${memo.id}`);
+                            }
+                          }}
+                          className="cursor-pointer transition-shadow"
+                          style={{
+                            backgroundColor: "#FFFFFF",
+                            border: "1px solid #E8E3DB",
+                            borderRadius: 12,
+                            padding: 16,
+                            boxShadow: "0 2px 8px rgba(42,42,42,0.06)",
+                          }}
+                        >
+                          {/* Top row: date + intervenant */}
+                          <div className="flex items-center justify-between">
+                            <span
+                              style={{
+                                fontFamily: "Inter, sans-serif",
+                                fontSize: 12,
+                                color: "#8B7D8B",
+                              }}
+                            >
+                              {displayDate}
+                            </span>
+                            {memo.intervenant && (
+                              <span
+                                style={{
+                                  fontFamily: "Inter, sans-serif",
+                                  fontSize: 12,
+                                  color: "#8B7D8B",
+                                }}
+                              >
+                                {memo.intervenant.nom}
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Resume */}
+                          {structured?.resume && (
+                            <p
+                              className="line-clamp-2"
+                              style={{
+                                marginTop: 8,
+                                fontFamily: "Inter, sans-serif",
+                                fontSize: 14,
+                                fontWeight: 400,
+                                color: "#2A2A2A",
+                                lineHeight: 1.5,
+                              }}
+                            >
+                              {structured.resume}
+                            </p>
+                          )}
+
+                          {/* Tags */}
+                          {visibleTags.length > 0 && (
+                            <div className="flex flex-wrap items-center" style={{ marginTop: 8, gap: 6 }}>
+                              {visibleTags.map((tag, i) => {
+                                const color = getTagColor(tag);
+                                return (
+                                  <span
+                                    key={i}
+                                    style={{
+                                      borderRadius: 6,
+                                      borderLeft: `3px solid ${color}`,
+                                      backgroundColor: hexToRgba(color, 0.1),
+                                      padding: "3px 8px",
+                                      fontFamily: "Inter, sans-serif",
+                                      fontSize: 11,
+                                      color: "#6B5B73",
+                                    }}
+                                  >
+                                    {tag}
+                                  </span>
+                                );
+                              })}
+                              {extraCount > 0 && (
+                                <span
+                                  style={{
+                                    fontFamily: "Inter, sans-serif",
+                                    fontSize: 11,
+                                    color: "#8B7D8B",
+                                  }}
+                                >
+                                  +{extraCount}
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             ))}
           </div>
         )}
       </main>
 
-      {/* FAB + */}
+      {/* FAB */}
       <button
         onClick={() => setSheetOpen(true)}
-        className="fixed bottom-6 right-6 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 hover:scale-105 transition-transform"
+        className="fixed z-20 flex items-center justify-center"
+        style={{
+          bottom: 24,
+          right: 24,
+          height: 56,
+          width: 56,
+          borderRadius: "50%",
+          backgroundColor: "#6B8CAE",
+          color: "#FFFFFF",
+          boxShadow: "0 4px 16px rgba(107,140,174,0.4)",
+          border: "none",
+        }}
         aria-label="Ajouter"
       >
         <Plus className="h-6 w-6" />
@@ -167,7 +401,8 @@ const Timeline = () => {
             <DialogTitle className="sr-only">Ajouter</DialogTitle>
             <button
               onClick={() => setSheetOpen(false)}
-              className="rounded-full p-1 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              className="rounded-full p-1 hover:bg-muted transition-colors"
+              style={{ color: "#8B7D8B" }}
             >
               <X className="h-4 w-4" />
             </button>
@@ -181,10 +416,10 @@ const Timeline = () => {
               >
                 <span className="text-2xl">{item.icon}</span>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-foreground">{item.label}</p>
-                  <p className="text-sm text-muted-foreground">{item.description}</p>
+                  <p className="font-semibold" style={{ color: "#2A2A2A" }}>{item.label}</p>
+                  <p className="text-sm" style={{ color: "#8B7D8B" }}>{item.description}</p>
                 </div>
-                <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground" />
+                <ChevronRight className="h-5 w-5 shrink-0" style={{ color: "#8B7D8B" }} />
               </button>
             ))}
           </nav>
