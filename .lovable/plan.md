@@ -1,69 +1,98 @@
 
 
-## Plan: Add 3 columns to `memos` + Build 4 creation screens
+## Complete Voice Memo Recording Feature
 
-### 1. Database Migration
+### Overview
 
-Add 3 new columns to the `memos` table:
-- `type` (text, NOT NULL, default `'vocal'` -- default needed so existing rows don't break)
-- `memo_date` (date, NOT NULL, default `CURRENT_DATE`)
-- `file_url` (text, nullable)
+Rebuild the NouveauMemoVocal screen with the exact design system, processing pipeline, freemium gate, and result screen. The existing `process-memo` edge function already handles transcription + structuring via Lovable AI (Gemini) -- we'll refactor it to match the new spec (updated system prompt, new structured output format, `audio-temp` bucket, status updates).
 
-A CHECK constraint will enforce `type IN ('vocal', 'note', 'document', 'evenement')`.
+### Important: AI Provider
 
-Existing memos will default to `type='vocal'` and `memo_date=CURRENT_DATE`.
+The spec mentions OpenAI Whisper and GPT-4o, but this project uses **Lovable AI gateway** (pre-configured, no extra API key needed). Gemini handles both audio transcription (multimodal) and text structuring with tool calling. The result is identical -- we just don't need an `OPENAI_API_KEY`.
 
-### 2. Shared Components
+---
 
-**IntervenantSelect** -- A reusable dropdown/select for picking an intervenant (nom + specialite), used by screens 1-3. Fetches from `intervenants` table filtered by `enfant_id`.
+### 1. Database: Create `audio-temp` Storage Bucket
 
-**useEnfantId hook** -- Extract the "fetch first enfant" logic (already in `RecordMemo.tsx`) into a small shared hook so all 4 screens can reuse it.
+Create a new storage bucket `audio-temp` (private) for temporary audio uploads. Add RLS policies so authenticated users can upload/read/delete their own files (path prefix = `user_id/`).
 
-### 3. Screen Implementations
+### 2. Freemium Gate
 
-All screens share the same layout pattern: header with back arrow to `/timeline`, form fields, and a save button that inserts into `memos`.
+Before recording starts, query the count of vocal memos this month. If >= 10, show a modal instead of starting the recording. The modal has a "Passer en Premium" button (shows "bientot disponible" toast) and a "Pas maintenant" dismiss button.
 
-**Screen 1 -- NouveauMemoVocal** (`/nouveau-memo-vocal`, type='vocal')
-- Fields: memo_date (date picker, default today), intervenant_id (optional select), audio recording
-- Reuses existing `RecordingView` and `TextInputView` components
-- On save: inserts memo with `type='vocal'`, `processing_status='pending'`, calls `process-memo` edge function (same as current `RecordMemo`)
-- Essentially a refactored version of the existing `RecordMemo` page with memo_date added
+### 3. NouveauMemoVocal Screen Redesign
 
-**Screen 2 -- NouvelleNote** (`/nouvelle-note`, type='note')
-- Fields: memo_date (date picker), intervenant_id (optional select), text content (textarea)
-- On save: inserts memo with `type='note'`, `transcription_raw=text`, `processing_status='done'`
-- No AI processing for now
+Complete rewrite following the exact design system:
 
-**Screen 3 -- NouveauDocument** (`/nouveau-document`, type='document')
-- Fields: memo_date (date picker), intervenant_id (optional select), file upload (PDF/image)
-- On save: uploads file to `voice-memos` bucket (or a new `documents` bucket), stores URL in `file_url`, inserts memo with `type='document'`, `processing_status='pending'`
+**Header**: Back arrow + "Nouveau memo" (H2, Crimson Text)
 
-**Screen 4 -- NouvelEvenement** (`/nouvel-evenement`, type='evenement')
-- Fields: memo_date (date picker), title (short text input), description (optional textarea)
-- No intervenant picker
-- On save: inserts memo with `type='evenement'`, `transcription_raw=title`, `content_structured={ description }`, `processing_status='done'`
+**Date field**: "Date de la seance" label, formatted DD MMMM YYYY, tappable date picker. Uses existing `MemoDatePicker` component (minor style tweaks).
 
-### 4. Technical Details
+**Intervenant selection**: Fetch intervenants by enfant_id. Display as selectable chips (not a dropdown). Single select, optional. Styled per spec (selected: #6B8CAE bg, white text / unselected: white bg, #E8E3DB border, #6B5B73 text). Empty state: muted text, no blocking.
+
+**Recording button**: Large centered button (min-height 64px, border-radius 12px). Default: #6B8CAE bg, "Enregistrer" label. Recording: #E05555 bg, "Arreter", pulse animation. Timer below. Text fallback link below.
+
+**Processing overlay**: Full-screen white overlay (not navigation) showing current step with icon/title/subtitle. Steps: uploading, transcribing, structuring, done, error. On done: navigate to `/memo-result/:id`. On error: show message + "Retour a la timeline" button. Memo row is kept on error.
+
+### 4. Edge Function Refactor: `process-memo`
+
+Update the existing `process-memo` function:
+
+- Accept `audio_path` parameter (for `audio-temp` bucket)
+- Download from `audio-temp` bucket instead of `voice-memos`
+- Update status to `transcribing` then `structuring` then `done`
+- Use the new system prompt from the spec (strict rules about no diagnosis, parent vocabulary only)
+- Update structured output schema: `resume`, `details` (was `points_cles`), `suggestions`, `tags`, `intervenant_detected`
+- Delete audio from `audio-temp` after transcription
+- On any failure: set `processing_status = 'error'`, never delete the memo
+
+### 5. MemoResult Screen
+
+New page at `/memo-result/:id`:
+
+- Fetches the memo by ID from the database
+- Header: back arrow + "Memo enregistre" with vert-nature accent
+- Date + intervenant name in muted text
+- Card sections: Resume, Details (bullet list), A retenir (suggestions, if non-empty), Tags row
+- Tags styled as rectangles with 4px left border colored by domain (Moteur: #6B8CAE, Sensoriel: #7C9885, Cognitif: #C4A162, Social: #9B8DB5, Administratif/default: #A8A0A8)
+- Bottom button: "Retour a la timeline"
+
+### 6. Client-Side Pipeline Flow
+
+1. User taps "Enregistrer" (after freemium check passes)
+2. Request mic permission (handle denial with message)
+3. Record audio (MediaRecorder, webm)
+4. On stop: show processing overlay at "uploading" step
+5. Insert memo row (type='vocal', processing_status='uploading')
+6. Upload blob to `audio-temp/{user_id}/{memo_id}.webm`
+7. Update overlay to "transcribing", invoke `process-memo` edge function
+8. Edge function returns result; update overlay to "structuring" briefly, then navigate to result page
+9. On error: show error overlay, keep memo row
+
+### 7. Routing
+
+Add route `/memo-result/:id` in App.tsx for the new MemoResult page.
+
+---
+
+### Files to Create/Modify
 
 ```text
-Files to create/modify:
-+----------------------------------------------+
-| NEW: src/hooks/useEnfantId.ts                |  shared hook
-| NEW: src/components/memo/IntervenantSelect.tsx|  reusable select
-| NEW: src/components/memo/MemoDatePicker.tsx   |  reusable date picker
-| EDIT: src/pages/NouveauMemoVocal.tsx          |  full implementation
-| EDIT: src/pages/NouvelleNote.tsx              |  full implementation
-| EDIT: src/pages/NouveauDocument.tsx           |  full implementation
-| EDIT: src/pages/NouvelEvenement.tsx           |  full implementation
-| MIGRATION: add type, memo_date, file_url     |  DB schema change
-+----------------------------------------------+
++--------------------------------------------------+
+| NEW:  src/pages/MemoResult.tsx                   |  Result display page
+| EDIT: src/pages/NouveauMemoVocal.tsx             |  Full redesign
+| EDIT: src/components/memo/RecordingView.tsx      |  Style updates
+| EDIT: src/components/memo/MemoResultView.tsx     |  Adapt to new schema
+| EDIT: supabase/functions/process-memo/index.ts   |  New prompt + schema
+| EDIT: src/App.tsx                                |  Add /memo-result route
+| MIGRATION: Create audio-temp bucket + policies   |  Storage setup
++--------------------------------------------------+
 ```
 
-- Date picker uses the existing `Calendar` + `Popover` (Shadcn pattern) with `pointer-events-auto`
-- IntervenantSelect uses existing `Select` component from shadcn
-- File upload for documents uses Supabase Storage (`voice-memos` bucket or a new `documents` bucket)
-- All screens auto-set `user_id` from `useAuth()` and `enfant_id` from `useEnfantId()`
-- Back button navigates to `/timeline` without saving
-- Toast notifications on success/error
-- The existing `RecordMemo` page and `/record` route remain untouched (backward compatible)
+### Design System Applied
+
+- All colors, typography, spacing, card styles, tag styles, and button styles follow the spec exactly
+- Crimson Text for headings, Inter for body
+- Mobile-first (375px base), 8px spacing grid
+- No gradients anywhere
 
