@@ -38,14 +38,14 @@ function getSpecialiteAvatar(specialite: string | null): { icon: typeof Activity
 }
 
 const TAG_COLORS: Record<string, string> = {
-  moteur: "#6B8CAE",
-  motricité: "#6B8CAE",
-  kinésithérapie: "#6B8CAE",
-  psychomotricité: "#6B8CAE",
-  sensoriel: "#7C9885",
-  cognitif: "#C4A162",
-  social: "#9B8DB5",
-  administratif: "#A8A0A8",
+  moteur: "#5A7A9A",
+  motricité: "#5A7A9A",
+  kinésithérapie: "#5A7A9A",
+  psychomotricité: "#8B7DAA",
+  sensoriel: "#6A8875",
+  cognitif: "#A8884D",
+  social: "#8B7DAA",
+  administratif: "#8B8B8B",
 };
 
 function getTagColor(tag: string): string {
@@ -53,7 +53,7 @@ function getTagColor(tag: string): string {
   for (const [key, color] of Object.entries(TAG_COLORS)) {
     if (lower.includes(key)) return color;
   }
-  return "#A8A0A8";
+  return "#8B8B8B";
 }
 
 function hexToRgba(hex: string, alpha: number): string {
@@ -167,25 +167,25 @@ const Timeline = () => {
   return (
     <div className="flex min-h-screen flex-col" style={{ backgroundColor: "#F4F1EA" }}>
       {/* Header with search */}
-      <header className="sticky top-0 z-10 px-4 py-3 space-y-3" style={{ backgroundColor: "#F4F1EA" }}>
+      <header className="sticky top-0 z-10 px-4 space-y-3" style={{ backgroundColor: "#F4F1EA", paddingTop: 20, paddingBottom: 12 }}>
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-semibold" style={{ fontFamily: "'Crimson Text', Georgia, serif", color: "#2A2A2A" }}>
+          <h1 style={{ fontFamily: "'Crimson Text', Georgia, serif", fontSize: 28, fontWeight: 600, color: "#2A2A2A" }}>
             The Village
           </h1>
           <ProfileAvatar />
         </div>
         {memos.length > 0 && (
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: "#8B7D8B" }} />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: "#A8A0A8" }} />
             <input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Rechercher dans vos notes..."
-              className="w-full pl-9 pr-3 py-2.5 outline-none"
+              placeholder="Rechercher..."
+              className="w-full pl-10 pr-4 py-2.5 outline-none"
               style={{
                 backgroundColor: "#FFFFFF",
                 border: "1px solid #E8E3DB",
-                borderRadius: 8,
+                borderRadius: 24,
                 fontFamily: "Inter, sans-serif",
                 fontSize: 14,
                 color: "#2A2A2A",
@@ -199,7 +199,7 @@ const Timeline = () => {
         {loadingMemos ? (
           <div className="space-y-3 pt-4">
             {[1, 2, 3].map(i => (
-              <div key={i} className="h-28 rounded-xl animate-pulse" style={{ backgroundColor: "#E8E3DB" }} />
+              <div key={i} className="h-28 animate-pulse" style={{ backgroundColor: "#E8E3DB", borderRadius: 16 }} />
             ))}
           </div>
         ) : filteredMemos.length === 0 ? (
@@ -224,10 +224,10 @@ const Timeline = () => {
               <div key={group.key}>
                 {/* Month header */}
                 <div
-                  className="sticky top-[88px] z-[5]"
+                  className="sticky top-[100px] z-[5]"
                   style={{
-                    paddingTop: 24,
-                    paddingBottom: 8,
+                    paddingTop: 32,
+                    paddingBottom: 12,
                     backgroundColor: "#F4F1EA",
                   }}
                 >
@@ -235,9 +235,9 @@ const Timeline = () => {
                     style={{
                       fontFamily: "Inter, sans-serif",
                       fontSize: 11,
-                      fontWeight: 600,
-                      color: "#8B7D8B",
-                      letterSpacing: "0.08em",
+                      fontWeight: 700,
+                      color: "#A8A0A8",
+                      letterSpacing: "0.12em",
                     }}
                   >
                     {group.label}
@@ -245,13 +245,13 @@ const Timeline = () => {
                 </div>
 
                 {/* Timeline entries */}
-                <div className="relative" style={{ paddingLeft: 36 }}>
+                <div className="relative" style={{ paddingLeft: 44 }}>
                   {/* Vertical line */}
                   <div
                     className="absolute top-0 bottom-0"
                     style={{
-                      left: 15,
-                      width: 2,
+                      left: 16,
+                      width: 1,
                       backgroundColor: "#E8E3DB",
                     }}
                   />
@@ -272,19 +272,19 @@ const Timeline = () => {
                       <div
                         key={memo.id}
                         className="relative"
-                        style={{ marginBottom: 12 }}
+                        style={{ marginBottom: 10 }}
                       >
-                        {/* Dot */}
+                        {/* Dot — hollow */}
                         <div
                           className="absolute"
                           style={{
-                            left: -25,
-                            top: 18,
-                            width: 10,
-                            height: 10,
+                            left: -32,
+                            top: 20,
+                            width: 8,
+                            height: 8,
                             borderRadius: "50%",
-                            backgroundColor: "#6B8CAE",
-                            border: "2px solid #F4F1EA",
+                            backgroundColor: "#FFFFFF",
+                            border: "2px solid #6B8CAE",
                           }}
                         />
 
@@ -295,13 +295,13 @@ const Timeline = () => {
                               navigate(`/memo-result/${memo.id}`);
                             }
                           }}
-                          className="cursor-pointer transition-shadow"
+                          className="cursor-pointer transition-shadow hover:shadow-lg"
                           style={{
                             backgroundColor: "#FFFFFF",
-                            border: "1px solid #E8E3DB",
-                            borderRadius: 12,
-                            padding: 16,
-                            boxShadow: "0 2px 8px rgba(42,42,42,0.06)",
+                            border: "none",
+                            borderRadius: 16,
+                            padding: "16px 20px",
+                            boxShadow: "0 1px 4px rgba(42,42,42,0.06), 0 4px 16px rgba(42,42,42,0.04)",
                           }}
                         >
                           {/* Top row: date + avatar + intervenant */}
@@ -310,7 +310,8 @@ const Timeline = () => {
                               style={{
                                 fontFamily: "Inter, sans-serif",
                                 fontSize: 12,
-                                color: "#8B7D8B",
+                                fontWeight: 500,
+                                color: "#A8A0A8",
                               }}
                             >
                               {displayDate}
@@ -323,7 +324,8 @@ const Timeline = () => {
                                     style={{
                                       fontFamily: "Inter, sans-serif",
                                       fontSize: 12,
-                                      color: "#8B7D8B",
+                                      fontWeight: 500,
+                                      color: "#6B5B73",
                                     }}
                                   >
                                     {memo.intervenant!.nom}
@@ -331,8 +333,8 @@ const Timeline = () => {
                                   <div
                                     className="flex items-center justify-center shrink-0"
                                     style={{
-                                      width: 32,
-                                      height: 32,
+                                      width: 28,
+                                      height: 28,
                                       borderRadius: "50%",
                                       backgroundColor: bg,
                                       border: "2px solid #F4F1EA",
@@ -362,7 +364,7 @@ const Timeline = () => {
                               style={{
                                 marginTop: 8,
                                 fontFamily: "Inter, sans-serif",
-                                fontSize: 14,
+                                fontSize: 15,
                                 fontWeight: 400,
                                 color: "#2A2A2A",
                                 lineHeight: 1.5,
@@ -374,7 +376,7 @@ const Timeline = () => {
 
                           {/* Tags */}
                           {visibleTags.length > 0 && (
-                            <div className="flex flex-wrap items-center" style={{ marginTop: 8, gap: 6 }}>
+                            <div className="flex flex-wrap items-center" style={{ marginTop: 12, gap: 6 }}>
                               {visibleTags.map((tag, i) => {
                                 const color = getTagColor(tag);
                                 return (
@@ -383,11 +385,12 @@ const Timeline = () => {
                                     style={{
                                       borderRadius: 6,
                                       borderLeft: `3px solid ${color}`,
-                                      backgroundColor: hexToRgba(color, 0.1),
-                                      padding: "3px 8px",
+                                      backgroundColor: hexToRgba(color, 0.08),
+                                      padding: "4px 10px",
                                       fontFamily: "Inter, sans-serif",
                                       fontSize: 11,
-                                      color: "#6B5B73",
+                                      fontWeight: 500,
+                                      color: color,
                                     }}
                                   >
                                     {tag}
@@ -423,19 +426,19 @@ const Timeline = () => {
         onClick={() => setSheetOpen(true)}
         className="fixed z-20 flex items-center justify-center"
         style={{
-          bottom: 88,
-          right: 24,
-          height: 56,
-          width: 56,
+          bottom: 80,
+          right: 20,
+          height: 52,
+          width: 52,
           borderRadius: "50%",
           backgroundColor: "#6B8CAE",
           color: "#FFFFFF",
-          boxShadow: "0 4px 16px rgba(107,140,174,0.4)",
+          boxShadow: "0 4px 20px rgba(107,140,174,0.35)",
           border: "none",
         }}
         aria-label="Ajouter"
       >
-        <Plus className="h-6 w-6" />
+        <Plus className="h-5 w-5" />
       </button>
 
       <Dialog open={sheetOpen} onOpenChange={setSheetOpen}>
