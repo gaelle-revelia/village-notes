@@ -2,8 +2,14 @@ import { useState, useEffect } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Mic, Search } from "lucide-react";
+import { Plus, Search, ChevronRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 import { MemoCard } from "@/components/memo/MemoCard";
 
 interface Memo {
@@ -22,6 +28,14 @@ const Timeline = () => {
   const [memos, setMemos] = useState<Memo[]>([]);
   const [loadingMemos, setLoadingMemos] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [sheetOpen, setSheetOpen] = useState(false);
+
+  const menuItems = [
+    { icon: "🎙️", label: "Note vocale", description: "Enregistrer une séance à la voix", route: "/nouveau-memo-vocal" },
+    { icon: "📝", label: "Note écrite", description: "Ajouter une observation ou une pensée", route: "/nouvelle-note" },
+    { icon: "📄", label: "Document", description: "Importer un compte rendu ou une photo", route: "/nouveau-document" },
+    { icon: "📌", label: "Événement", description: "Noter un fait marquant", route: "/nouvel-evenement" },
+  ];
 
   useEffect(() => {
     if (!user) return;
@@ -133,14 +147,38 @@ const Timeline = () => {
         )}
       </main>
 
-      {/* FAB */}
+      {/* FAB + */}
       <button
-        onClick={() => navigate("/record")}
+        onClick={() => setSheetOpen(true)}
         className="fixed bottom-6 right-6 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 hover:scale-105 transition-transform"
-        aria-label="Enregistrer un mémo"
+        aria-label="Ajouter"
       >
-        <Mic className="h-6 w-6" />
+        <Plus className="h-6 w-6" />
       </button>
+
+      <Drawer open={sheetOpen} onOpenChange={setSheetOpen}>
+        <DrawerContent>
+          <DrawerHeader className="sr-only">
+            <DrawerTitle>Ajouter</DrawerTitle>
+          </DrawerHeader>
+          <nav className="px-2 pb-6 pt-2">
+            {menuItems.map((item) => (
+              <button
+                key={item.route}
+                onClick={() => { setSheetOpen(false); navigate(item.route); }}
+                className="flex w-full items-center gap-4 rounded-xl px-4 py-3 text-left hover:bg-muted transition-colors"
+              >
+                <span className="text-2xl">{item.icon}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-foreground">{item.label}</p>
+                  <p className="text-sm text-muted-foreground">{item.description}</p>
+                </div>
+                <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground" />
+              </button>
+            ))}
+          </nav>
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 };
