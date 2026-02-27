@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, Navigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Pencil, X } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { useEnfantId } from "@/hooks/useEnfantId";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -23,7 +25,14 @@ interface MemoData {
   content_structured: StructuredContent | null;
   transcription_raw: string | null;
   intervenant_id: string | null;
+  enfant_id: string | null;
   intervenants?: { nom: string; specialite: string | null } | null;
+}
+
+interface Intervenant {
+  id: string;
+  nom: string;
+  specialite: string | null;
 }
 
 const TAG_DOMAIN_COLORS: Record<string, string> = {
@@ -46,15 +55,18 @@ function getTagColor(tag: string): string {
 const MemoResult = () => {
   const { id } = useParams<{ id: string }>();
   const { user, loading: authLoading } = useAuth();
+  const { enfantId } = useEnfantId();
   const navigate = useNavigate();
   const [memo, setMemo] = useState<MemoData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [intervenants, setIntervenants] = useState<Intervenant[]>([]);
 
   useEffect(() => {
     if (!id || !user) return;
     supabase
       .from("memos")
-      .select("id, memo_date, content_structured, transcription_raw, intervenant_id, intervenants(nom, specialite)")
+      .select("id, memo_date, content_structured, transcription_raw, intervenant_id, enfant_id, intervenants(nom, specialite)")
       .eq("id", id)
       .eq("user_id", user.id)
       .single()
@@ -63,6 +75,40 @@ const MemoResult = () => {
         setLoading(false);
       });
   }, [id, user]);
+
+  // Fetch intervenants when modal opens
+  useEffect(() => {
+    if (!modalOpen || !enfantId) return;
+    supabase
+      .from("intervenants")
+      .select("id, nom, specialite")
+      .eq("enfant_id", enfantId)
+      .order("nom")
+      .then(({ data }) => setIntervenants(data || []));
+  }, [modalOpen, enfantId]);
+
+  const handleSelectIntervenant = async (intervenantId: string | null) => {
+    if (!memo) return;
+    const { error } = await supabase
+      .from("memos")
+      .update({ intervenant_id: intervenantId })
+      .eq("id", memo.id);
+    if (error) return;
+
+    // Optimistic update
+    const selected = intervenants.find((i) => i.id === intervenantId);
+    setMemo({
+      ...memo,
+      intervenant_id: intervenantId,
+      intervenants: selected ? { nom: selected.nom, specialite: selected.specialite } : null,
+    });
+    setModalOpen(false);
+    toast({
+      title: "Intervenant mis à jour",
+      duration: 2000,
+      className: "bg-[hsl(var(--vert-nature))] text-white border-none",
+    });
+  };
 
   if (authLoading || loading) {
     return (
@@ -84,7 +130,9 @@ const MemoResult = () => {
   const details = structured?.details || structured?.points_cles || [];
   const suggestions = structured?.suggestions || [];
   const tags = structured?.tags || [];
-  const intervenantName = (memo.intervenants as any)?.nom || null;
+  const intervenantData = memo.intervenants as any;
+  const intervenantName = intervenantData?.nom || null;
+  const intervenantSpec = intervenantData?.specialite || null;
   const formattedDate = format(new Date(memo.memo_date), "dd MMMM yyyy", { locale: fr });
 
   return (
@@ -110,8 +158,24 @@ const MemoResult = () => {
             </h2>
             <p className="text-sm text-muted-foreground">
               {formattedDate}
-              {intervenantName && ` · ${intervenantName}`}
             </p>
+            {intervenantName ? (
+              <button
+                onClick={() => setModalOpen(true)}
+                className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {intervenantName}{intervenantSpec ? ` · ${intervenantSpec}` : ""}
+                <Pencil className="h-4 w-4" />
+              </button>
+            ) : (
+              <button
+                onClick={() => setModalOpen(true)}
+                className="text-sm font-medium hover:underline"
+                style={{ color: "#6B8CAE" }}
+              >
+                + Associer un intervenant
+              </button>
+            )}
           </div>
 
           {/* Resume card */}
@@ -188,6 +252,60 @@ const MemoResult = () => {
           </Button>
         </div>
       </main>
+
+      {/* Intervenant selection modal */}
+      {modalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          onClick={() => setModalOpen(false)}
+        >
+          <div className="absolute inset-0 bg-black/50" />
+          <div
+            className="relative z-10 w-[90%] max-w-[360px] rounded-xl bg-card p-5 shadow-[0_2px_8px_rgba(42,42,42,0.06)]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setModalOpen(false)}
+              className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
+            >
+              <X className="h-5 w-5" />
+            </button>
+            <h3 className="font-serif text-lg font-semibold text-card-foreground mb-4">
+              Avec quel intervenant ?
+            </h3>
+            <div className="space-y-1 max-h-[50vh] overflow-y-auto">
+              {intervenants.map((int) => (
+                <button
+                  key={int.id}
+                  onClick={() => handleSelectIntervenant(int.id)}
+                  className="flex w-full items-center rounded-lg px-3 text-left transition-colors"
+                  style={{
+                    minHeight: "44px",
+                    backgroundColor: memo?.intervenant_id === int.id ? "#E8EDF4" : undefined,
+                  }}
+                >
+                  <div>
+                    <p className="font-medium text-card-foreground text-[15px]">{int.nom}</p>
+                    {int.specialite && (
+                      <p className="text-xs text-muted-foreground">{int.specialite}</p>
+                    )}
+                  </div>
+                </button>
+              ))}
+              <button
+                onClick={() => handleSelectIntervenant(null)}
+                className="flex w-full items-center rounded-lg px-3 text-left text-muted-foreground hover:text-foreground transition-colors"
+                style={{
+                  minHeight: "44px",
+                  backgroundColor: memo?.intervenant_id === null ? "#E8EDF4" : undefined,
+                }}
+              >
+                Aucun intervenant
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
