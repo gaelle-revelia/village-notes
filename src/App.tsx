@@ -12,6 +12,7 @@ import NouveauMemoVocal from "./pages/NouveauMemoVocal";
 import NouvelleNote from "./pages/NouvelleNote";
 import NouveauDocument from "./pages/NouveauDocument";
 import NouvelEvenement from "./pages/NouvelEvenement";
+import MemoResult from "./pages/MemoResult";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
           <Route path="/nouvelle-note" element={<NouvelleNote />} />
           <Route path="/nouveau-document" element={<NouveauDocument />} />
           <Route path="/nouvel-evenement" element={<NouvelEvenement />} />
+          <Route path="/memo-result/:id" element={<MemoResult />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
