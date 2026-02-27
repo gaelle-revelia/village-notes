@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Search, ChevronRight, X, Activity, Hand, Brain, Stethoscope, MessageCircle, User, Waves } from "lucide-react";
+import { Plus, Search, ChevronRight, X, Activity, Hand, Brain, Stethoscope, MessageCircle, User, Waves, Users, Heart, Settings, LogOut } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -68,6 +68,8 @@ const Timeline = () => {
   const [loadingMemos, setLoadingMemos] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [enfantPrenom, setEnfantPrenom] = useState<string | null>(null);
 
   const menuItems = [
     { icon: "🎙️", label: "Note vocale", description: "Enregistrer une séance à la voix", route: "/nouveau-memo-vocal" },
@@ -78,6 +80,17 @@ const Timeline = () => {
 
   useEffect(() => {
     if (!user) return;
+
+    // Fetch enfant name
+    supabase
+      .from("enfants")
+      .select("prenom")
+      .eq("user_id", user.id)
+      .limit(1)
+      .single()
+      .then(({ data }) => {
+        if (data) setEnfantPrenom(data.prenom);
+      });
 
     const fetchMemos = async () => {
       const { data } = await supabase
@@ -166,9 +179,29 @@ const Timeline = () => {
     <div className="flex min-h-screen flex-col" style={{ backgroundColor: "#F4F1EA" }}>
       {/* Header with search */}
       <header className="sticky top-0 z-10 px-4 py-3 space-y-3" style={{ backgroundColor: "#F4F1EA" }}>
-        <h1 className="text-xl font-semibold" style={{ fontFamily: "'Crimson Text', Georgia, serif", color: "#2A2A2A" }}>
-          The Village
-        </h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-semibold" style={{ fontFamily: "'Crimson Text', Georgia, serif", color: "#2A2A2A" }}>
+            The Village
+          </h1>
+          <button
+            onClick={() => setProfileOpen(true)}
+            className="flex items-center justify-center shrink-0"
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: "50%",
+              backgroundColor: "#6B8CAE",
+              border: "none",
+              fontFamily: "Inter, sans-serif",
+              fontSize: 13,
+              fontWeight: 600,
+              color: "#FFFFFF",
+            }}
+            aria-label="Menu profil"
+          >
+            {user?.email?.[0]?.toUpperCase() || "?"}
+          </button>
+        </div>
         {memos.length > 0 && (
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: "#8B7D8B" }} />
@@ -463,6 +496,83 @@ const Timeline = () => {
           </nav>
         </DialogContent>
       </Dialog>
+
+      {/* Profile bottom sheet */}
+      {profileOpen && (
+        <div className="fixed inset-0 z-50">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0"
+            style={{ backgroundColor: "rgba(0,0,0,0.4)" }}
+            onClick={() => setProfileOpen(false)}
+          />
+          {/* Sheet */}
+          <div
+            className="absolute bottom-0 left-0 right-0"
+            style={{
+              backgroundColor: "#FFFFFF",
+              borderRadius: "16px 16px 0 0",
+              boxShadow: "0 -2px 16px rgba(42,42,42,0.08)",
+            }}
+          >
+            {/* Drag handle */}
+            <div className="flex justify-center pt-3 pb-1">
+              <div style={{ width: 36, height: 4, borderRadius: 2, backgroundColor: "#E8E3DB" }} />
+            </div>
+
+            {/* User info */}
+            <div style={{ padding: 16, borderBottom: "1px solid #E8E3DB" }}>
+              <span style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#8B7D8B" }}>
+                {user?.email || ""}
+              </span>
+            </div>
+
+            {/* Menu rows */}
+            <nav className="py-1">
+              {[
+                { icon: User, label: "Mon profil", desc: "Modifier mes informations", route: "/profil" },
+                { icon: Users, label: "Mon village", desc: "Gérer les intervenants", route: "/village" },
+                { icon: Heart, label: `Profil de ${enfantPrenom || "mon enfant"}`, desc: "Modifier le profil de mon enfant", route: "/enfant" },
+                { icon: Settings, label: "Paramètres", desc: "Notifications, confidentialité", route: "/parametres" },
+              ].map((item) => (
+                <button
+                  key={item.route}
+                  onClick={() => { setProfileOpen(false); navigate(item.route); }}
+                  className="flex w-full items-center gap-4 px-4 py-3 text-left hover:bg-muted transition-colors"
+                  style={{ minHeight: 44 }}
+                >
+                  <item.icon size={20} style={{ color: "#6B8CAE", flexShrink: 0 }} />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold" style={{ fontFamily: "Inter, sans-serif", fontSize: 14, color: "#2A2A2A" }}>{item.label}</p>
+                    <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#8B7D8B" }}>{item.desc}</p>
+                  </div>
+                  <ChevronRight size={18} style={{ color: "#8B7D8B", flexShrink: 0 }} />
+                </button>
+              ))}
+            </nav>
+
+            {/* Divider + Logout */}
+            <div style={{ borderTop: "1px solid #E8E3DB" }}>
+              <button
+                onClick={async () => {
+                  await supabase.auth.signOut();
+                  navigate("/auth");
+                }}
+                className="flex w-full items-center gap-4 px-4 py-3 text-left hover:bg-muted transition-colors"
+                style={{ minHeight: 44 }}
+              >
+                <LogOut size={20} style={{ color: "#C4626B", flexShrink: 0 }} />
+                <span style={{ fontFamily: "Inter, sans-serif", fontSize: 14, fontWeight: 600, color: "#C4626B" }}>
+                  Se déconnecter
+                </span>
+              </button>
+            </div>
+
+            {/* Safe area spacing */}
+            <div style={{ height: 16 }} />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

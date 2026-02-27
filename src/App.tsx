@@ -13,6 +13,10 @@ import NouvelleNote from "./pages/NouvelleNote";
 import NouveauDocument from "./pages/NouveauDocument";
 import NouvelEvenement from "./pages/NouvelEvenement";
 import MemoResult from "./pages/MemoResult";
+import ProfileSettings from "./pages/ProfileSettings";
+import VillageSettings from "./pages/VillageSettings";
+import ChildProfile from "./pages/ChildProfile";
+import AppSettings from "./pages/AppSettings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,6 +39,10 @@ const App = () => (
           <Route path="/nouveau-document" element={<NouveauDocument />} />
           <Route path="/nouvel-evenement" element={<NouvelEvenement />} />
           <Route path="/memo-result/:id" element={<MemoResult />} />
+          <Route path="/profil" element={<ProfileSettings />} />
+          <Route path="/village" element={<VillageSettings />} />
+          <Route path="/enfant" element={<ChildProfile />} />
+          <Route path="/parametres" element={<AppSettings />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
