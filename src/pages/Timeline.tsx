@@ -2,14 +2,14 @@ import { useState, useEffect } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Search, ChevronRight } from "lucide-react";
+import { Plus, Search, ChevronRight, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { MemoCard } from "@/components/memo/MemoCard";
 
 interface Memo {
@@ -156,12 +156,18 @@ const Timeline = () => {
         <Plus className="h-6 w-6" />
       </button>
 
-      <Drawer open={sheetOpen} onOpenChange={setSheetOpen}>
-        <DrawerContent>
-          <DrawerHeader className="sr-only">
-            <DrawerTitle>Ajouter</DrawerTitle>
-          </DrawerHeader>
-          <nav className="px-2 pb-6 pt-2">
+      <Dialog open={sheetOpen} onOpenChange={setSheetOpen}>
+        <DialogContent hideClose className="sm:max-w-sm rounded-2xl border-none shadow-xl p-0 gap-0 [&~[data-state]]:bg-black/40">
+          <DialogHeader className="sr-only">
+            <DialogTitle>Ajouter</DialogTitle>
+          </DialogHeader>
+          <button
+            onClick={() => setSheetOpen(false)}
+            className="absolute right-4 top-4 rounded-full p-1 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+          >
+            <X className="h-4 w-4" />
+          </button>
+          <nav className="px-2 py-4">
             {menuItems.map((item) => (
               <button
                 key={item.route}
@@ -177,8 +183,8 @@ const Timeline = () => {
               </button>
             ))}
           </nav>
-        </DrawerContent>
-      </Drawer>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
