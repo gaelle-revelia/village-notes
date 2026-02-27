@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +13,7 @@ interface SignupFormProps {
 }
 
 export function SignupForm({ onSwitchToLogin, onSuccess }: SignupFormProps) {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [consent, setConsent] = useState(false);
@@ -63,7 +65,7 @@ export function SignupForm({ onSwitchToLogin, onSuccess }: SignupFormProps) {
       return;
     }
 
-    onSuccess(email);
+    navigate("/onboarding");
   };
 
   return (
