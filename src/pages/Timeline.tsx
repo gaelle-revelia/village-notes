@@ -357,8 +357,8 @@ const Timeline = () => {
                             })()}
                           </div>
 
-                          {/* Resume */}
-                          {structured?.resume && (
+                          {/* Resume / fallback to transcription_raw */}
+                          {(structured?.resume || memo.transcription_raw) && (
                             <p
                               className="line-clamp-2"
                               style={{
@@ -370,7 +370,7 @@ const Timeline = () => {
                                 lineHeight: 1.5,
                               }}
                             >
-                              {structured.resume}
+                              {structured?.resume || memo.transcription_raw}
                             </p>
                           )}
 
