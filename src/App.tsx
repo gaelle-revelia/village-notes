@@ -8,6 +8,10 @@ import Timeline from "./pages/Timeline";
 import Onboarding from "./pages/Onboarding";
 import ResetPassword from "./pages/ResetPassword";
 import RecordMemo from "./pages/RecordMemo";
+import NouveauMemoVocal from "./pages/NouveauMemoVocal";
+import NouvelleNote from "./pages/NouvelleNote";
+import NouveauDocument from "./pages/NouveauDocument";
+import NouvelEvenement from "./pages/NouvelEvenement";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +29,10 @@ const App = () => (
           <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/record" element={<RecordMemo />} />
+          <Route path="/nouveau-memo-vocal" element={<NouveauMemoVocal />} />
+          <Route path="/nouvelle-note" element={<NouvelleNote />} />
+          <Route path="/nouveau-document" element={<NouveauDocument />} />
+          <Route path="/nouvel-evenement" element={<NouvelEvenement />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
