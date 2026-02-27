@@ -12,8 +12,17 @@ export default {
         "2xl": "1400px",
       },
     },
+    fontFamily: {
+      sans: ['Inter', '-apple-system', 'system-ui', 'sans-serif'],
+      serif: ['Crimson Text', 'Georgia', 'serif'],
+    },
     extend: {
       colors: {
+        "vert-nature": "hsl(var(--vert-nature))",
+        "ocre-doux": "hsl(var(--ocre-doux))",
+        "rouge-enregistrement": "hsl(var(--rouge-enregistrement))",
+        "violet-doux": "hsl(var(--violet-doux))",
+        "gris-tag": "hsl(var(--gris-tag))",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
