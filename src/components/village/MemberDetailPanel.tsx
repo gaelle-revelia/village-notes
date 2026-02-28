@@ -3,6 +3,13 @@ import { createPortal } from "react-dom";
 import { X, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type Intervenant = {
   id: string;
@@ -138,48 +145,89 @@ export default function MemberDetailPanel({
 
         {/* Fields */}
         <div className="flex flex-col gap-4 px-5 flex-1">
-          <FieldBlock label="STRUCTURE / LIEU">
-            <Input
-              value={structure}
-              onChange={(e) => setStructure(e.target.value)}
-              placeholder="Ajouter..."
-              className="bg-white/30 border-white/50 placeholder:italic placeholder:text-[#9A9490] text-sm text-[#1E1A1A]"
-              maxLength={200}
-            />
-          </FieldBlock>
+          {member.type === "famille" ? (
+            <>
+              <FieldBlock label="RELATION">
+                <Select value={specialite} onValueChange={setSpecialite}>
+                  <SelectTrigger className="bg-white/30 border-white/50 text-sm text-[#1E1A1A]">
+                    <SelectValue placeholder="Choisir…" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {["Papa", "Maman", "Grand-parents", "Parrain", "Marraine"].map((r) => (
+                      <SelectItem key={r} value={r}>{r}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FieldBlock>
 
-          <FieldBlock label="TÉLÉPHONE">
-            <Input
-              value={telephone}
-              onChange={(e) => setTelephone(e.target.value)}
-              placeholder="Ajouter..."
-              className="bg-white/30 border-white/50 placeholder:italic placeholder:text-[#9A9490] text-sm text-[#1E1A1A]"
-              type="tel"
-              maxLength={20}
-            />
-          </FieldBlock>
+              <FieldBlock label="TÉLÉPHONE">
+                <Input
+                  value={telephone}
+                  onChange={(e) => setTelephone(e.target.value)}
+                  placeholder="Ajouter..."
+                  className="bg-white/30 border-white/50 placeholder:italic placeholder:text-[#9A9490] text-sm text-[#1E1A1A]"
+                  type="tel"
+                  maxLength={20}
+                />
+              </FieldBlock>
 
-          <FieldBlock label="EMAIL">
-            <Input
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Ajouter..."
-              className="bg-white/30 border-white/50 placeholder:italic placeholder:text-[#9A9490] text-sm text-[#1E1A1A]"
-              type="email"
-              maxLength={255}
-            />
-          </FieldBlock>
+              <FieldBlock label="EMAIL">
+                <Input
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Ajouter..."
+                  className="bg-white/30 border-white/50 placeholder:italic placeholder:text-[#9A9490] text-sm text-[#1E1A1A]"
+                  type="email"
+                  maxLength={255}
+                />
+              </FieldBlock>
+            </>
+          ) : (
+            <>
+              <FieldBlock label="STRUCTURE / LIEU">
+                <Input
+                  value={structure}
+                  onChange={(e) => setStructure(e.target.value)}
+                  placeholder="Ajouter..."
+                  className="bg-white/30 border-white/50 placeholder:italic placeholder:text-[#9A9490] text-sm text-[#1E1A1A]"
+                  maxLength={200}
+                />
+              </FieldBlock>
 
-          <FieldBlock label="NOTES LIBRES">
-            <Textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Ajouter..."
-              className="bg-white/30 border-white/50 placeholder:italic placeholder:text-[#9A9490] text-sm text-[#1E1A1A] resize-none"
-              rows={3}
-              maxLength={500}
-            />
-          </FieldBlock>
+              <FieldBlock label="TÉLÉPHONE">
+                <Input
+                  value={telephone}
+                  onChange={(e) => setTelephone(e.target.value)}
+                  placeholder="Ajouter..."
+                  className="bg-white/30 border-white/50 placeholder:italic placeholder:text-[#9A9490] text-sm text-[#1E1A1A]"
+                  type="tel"
+                  maxLength={20}
+                />
+              </FieldBlock>
+
+              <FieldBlock label="EMAIL">
+                <Input
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Ajouter..."
+                  className="bg-white/30 border-white/50 placeholder:italic placeholder:text-[#9A9490] text-sm text-[#1E1A1A]"
+                  type="email"
+                  maxLength={255}
+                />
+              </FieldBlock>
+
+              <FieldBlock label="NOTES LIBRES">
+                <Textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="Ajouter..."
+                  className="bg-white/30 border-white/50 placeholder:italic placeholder:text-[#9A9490] text-sm text-[#1E1A1A] resize-none"
+                  rows={3}
+                  maxLength={500}
+                />
+              </FieldBlock>
+            </>
+          )}
         </div>
 
         {/* Footer */}
