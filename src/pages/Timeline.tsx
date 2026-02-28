@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Search, ChevronRight, X, Activity, Hand, Brain, Stethoscope, MessageCircle, User, Waves } from "lucide-react";
+import { Plus, Search, ChevronRight, X, Activity, Hand, Brain, Stethoscope, MessageCircle, User, Waves, Heart } from "lucide-react";
 import BottomNavBar from "@/components/BottomNavBar";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
 import {
@@ -26,41 +26,74 @@ interface Memo {
   intervenant?: { nom: string; specialite: string | null; photo_url?: string | null } | null;
 }
 
-function getSpecialiteAvatar(specialite: string | null): { icon: typeof Activity; bg: string } {
-  const s = (specialite || "").toLowerCase();
-  if (s.includes("kinésithérapeute") || s.includes("kiné")) return { icon: Activity, bg: "#6B8CAE" };
-  if (s.includes("ergothérapeute") || s.includes("ergo")) return { icon: Hand, bg: "#7C9885" };
-  if (s.includes("psychomotric")) return { icon: Brain, bg: "#9B8DB5" };
-  if (s.includes("médecin") || s.includes("mpr")) return { icon: Stethoscope, bg: "#C4A162" };
-  if (s.includes("orthophoniste")) return { icon: MessageCircle, bg: "#7C9885" };
-  if (s.includes("piscine") || s.includes("parent")) return { icon: Waves, bg: "#6B8CAE" };
-  return { icon: User, bg: "#A8A0A8" };
-}
-
-const TAG_COLORS: Record<string, string> = {
-  moteur: "#5A7A9A",
-  motricité: "#5A7A9A",
-  kinésithérapie: "#5A7A9A",
-  psychomotricité: "#8B7DAA",
-  sensoriel: "#6A8875",
-  cognitif: "#A8884D",
-  social: "#8B7DAA",
-  administratif: "#8B8B8B",
+// --- Domain color system (Knowledge File) ---
+const DOMAIN_COLORS: Record<string, string> = {
+  moteur: "#E8736A",       // Corail
+  motricité: "#E8736A",
+  kinésithérapie: "#E8736A",
+  physique: "#E8736A",
+  cognitif: "#8B74E0",     // Lavande
+  psychomotricité: "#8B74E0",
+  psychomoteur: "#8B74E0",
+  sensoriel: "#44A882",    // Menthe
+  communication: "#44A882",
+  langage: "#44A882",
+  orthophonie: "#44A882",
+  "bien-être": "#E8A44A",  // Abricot
+  émotionnel: "#E8A44A",
+  sommeil: "#E8A44A",
+  alimentation: "#E8A44A",
+  comportement: "#E8A44A",
+  médical: "#8A9BAE",      // Gris
+  administratif: "#8A9BAE",
+  progrès: "#44A882",
+  difficulté: "#E8A44A",
+  autonomie: "#8B74E0",
+  social: "#8B74E0",
 };
 
-function getTagColor(tag: string): string {
+function getDomainColor(tag: string): string {
   const lower = tag.toLowerCase();
-  for (const [key, color] of Object.entries(TAG_COLORS)) {
+  for (const [key, color] of Object.entries(DOMAIN_COLORS)) {
     if (lower.includes(key)) return color;
   }
-  return "#8B8B8B";
+  return "#8A9BAE";
 }
 
-function hexToRgba(hex: string, alpha: number): string {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  return `rgba(${r},${g},${b},${alpha})`;
+function getDomainsFromTags(tags: string[]): string[] {
+  const seen = new Set<string>();
+  const colors: string[] = [];
+  for (const tag of tags) {
+    const c = getDomainColor(tag);
+    if (!seen.has(c)) {
+      seen.add(c);
+      colors.push(c);
+    }
+    if (colors.length >= 3) break;
+  }
+  return colors;
+}
+
+// --- Intervenant avatar system (Knowledge File) ---
+const SPECIALITE_AVATARS: Record<string, { icon: typeof Activity; gradient: string }> = {
+  kiné: { icon: Activity, gradient: "linear-gradient(135deg, #E8736A, #E8845A)" },
+  kinésithérapeute: { icon: Activity, gradient: "linear-gradient(135deg, #E8736A, #E8845A)" },
+  psychomotric: { icon: Brain, gradient: "linear-gradient(135deg, #8B74E0, #5CA8D8)" },
+  ergothérapeute: { icon: Hand, gradient: "linear-gradient(135deg, #44A882, #4E96C8)" },
+  ergo: { icon: Hand, gradient: "linear-gradient(135deg, #44A882, #4E96C8)" },
+  parent: { icon: Heart, gradient: "linear-gradient(135deg, #E8736A, #C85A8A)" },
+  médecin: { icon: Stethoscope, gradient: "linear-gradient(135deg, #8A9BAE, #6B7F94)" },
+  mpr: { icon: Stethoscope, gradient: "linear-gradient(135deg, #8A9BAE, #6B7F94)" },
+  orthophoniste: { icon: MessageCircle, gradient: "linear-gradient(135deg, #44A882, #4E96C8)" },
+  piscine: { icon: Waves, gradient: "linear-gradient(135deg, #44A882, #4E96C8)" },
+};
+
+function getSpecialiteAvatar(specialite: string | null): { icon: typeof Activity; gradient: string } {
+  const s = (specialite || "").toLowerCase();
+  for (const [key, val] of Object.entries(SPECIALITE_AVATARS)) {
+    if (s.includes(key)) return val;
+  }
+  return { icon: User, gradient: "linear-gradient(135deg, #8A9BAE, #6B7F94)" };
 }
 
 const Timeline = () => {
@@ -132,7 +165,6 @@ const Timeline = () => {
     });
   }, [memos, searchQuery]);
 
-  // Group memos by month
   const grouped = useMemo(() => {
     const groups: { key: string; label: string; memos: Memo[] }[] = [];
     const map = new Map<string, Memo[]>();
@@ -156,8 +188,8 @@ const Timeline = () => {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: "#F4F1EA" }}>
-        <div className="animate-pulse" style={{ color: "#8B7D8B" }}>Chargement...</div>
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="animate-pulse text-muted-foreground">Chargement...</div>
       </div>
     );
   }
@@ -165,30 +197,30 @@ const Timeline = () => {
   if (!user) return <Navigate to="/auth" replace />;
 
   return (
-    <div className="flex min-h-screen flex-col" style={{ backgroundColor: "#F4F1EA" }}>
-      {/* Header with search */}
-      <header className="sticky top-0 z-10 px-4 space-y-3" style={{ backgroundColor: "#F4F1EA", paddingTop: 20, paddingBottom: 12 }}>
+    <div className="flex min-h-screen flex-col">
+      {/* Header */}
+      <header className="sticky top-0 z-10 px-4 space-y-3" style={{ paddingTop: 20, paddingBottom: 12 }}>
         <div className="flex items-center justify-between">
-          <h1 style={{ fontFamily: "'Crimson Text', Georgia, serif", fontSize: 28, fontWeight: 600, color: "#2A2A2A" }}>
+          <h1 className="text-[28px] font-semibold text-foreground">
             The Village
           </h1>
           <ProfileAvatar />
         </div>
         {memos.length > 0 && (
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: "#A8A0A8" }} />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Rechercher..."
-              className="w-full pl-10 pr-4 py-2.5 outline-none"
+              className="w-full pl-10 pr-4 py-2.5 outline-none text-sm text-foreground placeholder:text-muted-foreground"
               style={{
-                backgroundColor: "#FFFFFF",
-                border: "1px solid #E8E3DB",
-                borderRadius: 24,
-                fontFamily: "Inter, sans-serif",
-                fontSize: 14,
-                color: "#2A2A2A",
+                background: "rgba(255, 255, 255, 0.45)",
+                backdropFilter: "blur(12px) saturate(1.4)",
+                WebkitBackdropFilter: "blur(12px) saturate(1.4)",
+                border: "1px solid rgba(255, 255, 255, 0.65)",
+                borderRadius: 14,
+                boxShadow: "0 2px 8px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.7)",
               }}
             />
           </div>
@@ -199,7 +231,7 @@ const Timeline = () => {
         {loadingMemos ? (
           <div className="space-y-3 pt-4">
             {[1, 2, 3].map(i => (
-              <div key={i} className="h-28 animate-pulse" style={{ backgroundColor: "#E8E3DB", borderRadius: 16 }} />
+              <div key={i} className="h-28 animate-pulse rounded-2xl bg-muted" />
             ))}
           </div>
         ) : filteredMemos.length === 0 ? (
@@ -207,15 +239,15 @@ const Timeline = () => {
             {memos.length === 0 ? (
               <>
                 <span className="text-4xl">🌿</span>
-                <h2 className="text-lg font-semibold" style={{ color: "#2A2A2A" }}>
+                <h2 className="text-lg font-semibold text-foreground">
                   Votre timeline est prête
                 </h2>
-                <p className="text-sm max-w-[260px]" style={{ color: "#8B7D8B" }}>
+                <p className="text-sm max-w-[260px] text-muted-foreground">
                   Enregistrez votre premier mémo après la prochaine séance. C'est rapide et facile.
                 </p>
               </>
             ) : (
-              <p style={{ color: "#8B7D8B" }}>Aucun résultat pour « {searchQuery} »</p>
+              <p className="text-muted-foreground">Aucun résultat pour « {searchQuery} »</p>
             )}
           </div>
         ) : (
@@ -223,36 +255,22 @@ const Timeline = () => {
             {grouped.map((group) => (
               <div key={group.key}>
                 {/* Month header */}
-                <div
-                  className="sticky top-[100px] z-[5]"
-                  style={{
-                    paddingTop: 32,
-                    paddingBottom: 12,
-                    backgroundColor: "#F4F1EA",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontFamily: "Inter, sans-serif",
-                      fontSize: 11,
-                      fontWeight: 700,
-                      color: "#A8A0A8",
-                      letterSpacing: "0.12em",
-                    }}
-                  >
+                <div className="sticky top-[100px] z-[5] pt-8 pb-3">
+                  <span className="text-[11px] font-bold tracking-[0.12em] text-muted-foreground uppercase">
                     {group.label}
                   </span>
                 </div>
 
                 {/* Timeline entries */}
                 <div className="relative" style={{ paddingLeft: 44 }}>
-                  {/* Vertical line */}
+                  {/* Vertical line — gradient corail → lavande → menthe */}
                   <div
                     className="absolute top-0 bottom-0"
                     style={{
                       left: 16,
-                      width: 1,
-                      backgroundColor: "#E8E3DB",
+                      width: 1.5,
+                      background: "linear-gradient(180deg, #E8736A 0%, #8B74E0 50%, #44A882 100%)",
+                      opacity: 0.25,
                     }}
                   />
 
@@ -265,16 +283,12 @@ const Timeline = () => {
                       ? format(new Date(memo.memo_date), "dd MMM", { locale: fr })
                       : format(new Date(memo.created_at), "dd MMM", { locale: fr });
                     const tags = structured?.tags || [];
-                    const visibleTags = tags.slice(0, 3);
-                    const extraCount = tags.length - 3;
+                    const domainColors = getDomainsFromTags(tags);
+                    const primaryDomainColor = domainColors[0] || "#8A9BAE";
 
                     return (
-                      <div
-                        key={memo.id}
-                        className="relative"
-                        style={{ marginBottom: 10 }}
-                      >
-                        {/* Dot — hollow */}
+                      <div key={memo.id} className="relative" style={{ marginBottom: 10 }}>
+                        {/* Dot — colored by primary domain */}
                         <div
                           className="absolute"
                           style={{
@@ -283,61 +297,63 @@ const Timeline = () => {
                             width: 8,
                             height: 8,
                             borderRadius: "50%",
-                            backgroundColor: "#FFFFFF",
-                            border: "2px solid #6B8CAE",
+                            backgroundColor: primaryDomainColor,
                           }}
                         />
 
-                        {/* Card */}
+                        {/* Card — liquid glass */}
                         <div
                           onClick={() => {
                             if (memo.processing_status === "done") {
                               navigate(`/memo-result/${memo.id}`);
                             }
                           }}
-                          className="cursor-pointer transition-shadow hover:shadow-lg"
+                          className="cursor-pointer transition-shadow"
                           style={{
-                            backgroundColor: "#FFFFFF",
-                            border: "none",
+                            background: "rgba(255, 255, 255, 0.52)",
+                            backdropFilter: "blur(16px) saturate(1.6)",
+                            WebkitBackdropFilter: "blur(16px) saturate(1.6)",
+                            border: "1px solid rgba(255, 255, 255, 0.72)",
                             borderRadius: 16,
                             padding: "16px 20px",
-                            boxShadow: "0 1px 4px rgba(42,42,42,0.06), 0 4px 16px rgba(42,42,42,0.04)",
+                            boxShadow: "0 4px 16px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8)",
                           }}
                         >
-                          {/* Top row: date + avatar + intervenant */}
+                          {/* Top row: domain dots + date + avatar + intervenant */}
                           <div className="flex items-center justify-between">
-                            <span
-                              style={{
-                                fontFamily: "Inter, sans-serif",
-                                fontSize: 12,
-                                fontWeight: 500,
-                                color: "#A8A0A8",
-                              }}
-                            >
-                              {displayDate}
-                            </span>
-                            {memo.intervenant && (() => {
-                              const { icon: Icon, bg } = getSpecialiteAvatar(memo.intervenant!.specialite);
-                              return (
-                                <div className="flex items-center" style={{ gap: 6 }}>
-                                  <span
+                            <div className="flex items-center gap-2">
+                              {/* Domain dots */}
+                              <div className="flex items-center gap-1">
+                                {domainColors.map((color, i) => (
+                                  <div
+                                    key={i}
                                     style={{
-                                      fontFamily: "Inter, sans-serif",
-                                      fontSize: 12,
-                                      fontWeight: 500,
-                                      color: "#6B5B73",
+                                      width: 6,
+                                      height: 6,
+                                      borderRadius: "50%",
+                                      backgroundColor: color,
                                     }}
-                                  >
+                                  />
+                                ))}
+                              </div>
+                              <span className="text-xs font-medium text-muted-foreground">
+                                {displayDate}
+                              </span>
+                            </div>
+                            {memo.intervenant && (() => {
+                              const { icon: Icon, gradient } = getSpecialiteAvatar(memo.intervenant!.specialite);
+                              return (
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-xs font-medium text-muted-foreground">
                                     {memo.intervenant!.nom}
                                   </span>
                                   <div
                                     className="flex items-center justify-center shrink-0"
                                     style={{
-                                      width: 28,
-                                      height: 28,
+                                      width: 22,
+                                      height: 22,
                                       borderRadius: "50%",
-                                      backgroundColor: bg,
-                                      border: "2px solid #F4F1EA",
+                                      background: gradient,
                                       overflow: "hidden",
                                     }}
                                     title={memo.intervenant!.nom}
@@ -349,7 +365,7 @@ const Timeline = () => {
                                         className="w-full h-full object-cover"
                                       />
                                     ) : (
-                                      <Icon size={16} color="#FFFFFF" />
+                                      <Icon size={12} color="#FFFFFF" />
                                     )}
                                   </div>
                                 </div>
@@ -357,59 +373,14 @@ const Timeline = () => {
                             })()}
                           </div>
 
-                          {/* Resume / fallback to transcription_raw */}
+                          {/* Resume — 1 sentence max */}
                           {(structured?.resume || memo.transcription_raw) && (
-                            <p
-                              className="line-clamp-2"
-                              style={{
-                                marginTop: 8,
-                                fontFamily: "Inter, sans-serif",
-                                fontSize: 15,
-                                fontWeight: 400,
-                                color: "#2A2A2A",
-                                lineHeight: 1.5,
-                              }}
-                            >
+                            <p className="line-clamp-2 mt-2 text-[15px] text-foreground leading-relaxed">
                               {structured?.resume || memo.transcription_raw}
                             </p>
                           )}
 
-                          {/* Tags */}
-                          {visibleTags.length > 0 && (
-                            <div className="flex flex-wrap items-center" style={{ marginTop: 12, gap: 6 }}>
-                              {visibleTags.map((tag, i) => {
-                                const color = getTagColor(tag);
-                                return (
-                                  <span
-                                    key={i}
-                                    style={{
-                                      borderRadius: 6,
-                                      borderLeft: `3px solid ${color}`,
-                                      backgroundColor: hexToRgba(color, 0.08),
-                                      padding: "4px 10px",
-                                      fontFamily: "Inter, sans-serif",
-                                      fontSize: 11,
-                                      fontWeight: 500,
-                                      color: color,
-                                    }}
-                                  >
-                                    {tag}
-                                  </span>
-                                );
-                              })}
-                              {extraCount > 0 && (
-                                <span
-                                  style={{
-                                    fontFamily: "Inter, sans-serif",
-                                    fontSize: 11,
-                                    color: "#8B7D8B",
-                                  }}
-                                >
-                                  +{extraCount}
-                                </span>
-                              )}
-                            </div>
-                          )}
+                          {/* No text tags — domain dots above are sufficient */}
                         </div>
                       </div>
                     );
@@ -421,19 +392,19 @@ const Timeline = () => {
         )}
       </main>
 
-      {/* FAB */}
+      {/* FAB — gradient corail → lavande */}
       <button
         onClick={() => setSheetOpen(true)}
         className="fixed z-20 flex items-center justify-center"
         style={{
           bottom: 80,
           right: 20,
-          height: 52,
-          width: 52,
+          height: 46,
+          width: 46,
           borderRadius: "50%",
-          backgroundColor: "#6B8CAE",
+          background: "linear-gradient(135deg, #E8736A, #8B74E0)",
           color: "#FFFFFF",
-          boxShadow: "0 4px 20px rgba(107,140,174,0.35)",
+          boxShadow: "0 6px 20px rgba(139,116,224,0.4)",
           border: "none",
         }}
         aria-label="Ajouter"
@@ -447,8 +418,7 @@ const Timeline = () => {
             <DialogTitle className="sr-only">Ajouter</DialogTitle>
             <button
               onClick={() => setSheetOpen(false)}
-              className="rounded-full p-1 hover:bg-muted transition-colors"
-              style={{ color: "#8B7D8B" }}
+              className="rounded-full p-1 hover:bg-muted transition-colors text-muted-foreground"
             >
               <X className="h-4 w-4" />
             </button>
@@ -462,10 +432,10 @@ const Timeline = () => {
               >
                 <span className="text-2xl">{item.icon}</span>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold" style={{ color: "#2A2A2A" }}>{item.label}</p>
-                  <p className="text-sm" style={{ color: "#8B7D8B" }}>{item.description}</p>
+                  <p className="font-semibold text-foreground">{item.label}</p>
+                  <p className="text-sm text-muted-foreground">{item.description}</p>
                 </div>
-                <ChevronRight className="h-5 w-5 shrink-0" style={{ color: "#8B7D8B" }} />
+                <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground" />
               </button>
             ))}
           </nav>

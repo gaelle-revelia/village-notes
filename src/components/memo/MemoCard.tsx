@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Loader2, Mic, FileText, File, Flag } from "lucide-react";
+import { Loader2, Activity, Hand, Brain, Stethoscope, MessageCircle, User, Heart, Waves } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface MemoCardProps {
@@ -12,42 +12,79 @@ interface MemoCardProps {
     processing_status: string;
     transcription_raw?: string | null;
     content_structured: any;
-    intervenant?: { nom: string; specialite: string | null } | null;
+    intervenant?: { nom: string; specialite: string | null; photo_url?: string | null } | null;
   };
 }
 
-const TAG_DOMAIN_COLORS: Record<string, string> = {
-  moteur: "#6B8CAE",
-  motricité: "#6B8CAE",
-  sensoriel: "#7C9885",
-  cognitif: "#C4A162",
-  social: "#9B8DB5",
-  administratif: "#A8A0A8",
-  langage: "#9B8DB5",
-  communication: "#9B8DB5",
-  orthophonie: "#6B8CAE",
-  alimentation: "#7C9885",
-  sommeil: "#C4A162",
-  progrès: "#7C9885",
-  difficulté: "#C4A162",
-  autonomie: "#6B8CAE",
-  comportement: "#9B8DB5",
+// --- Domain color system (Knowledge File) ---
+const DOMAIN_COLORS: Record<string, string> = {
+  moteur: "#E8736A",
+  motricité: "#E8736A",
+  kinésithérapie: "#E8736A",
+  physique: "#E8736A",
+  cognitif: "#8B74E0",
+  psychomotricité: "#8B74E0",
+  psychomoteur: "#8B74E0",
+  sensoriel: "#44A882",
+  communication: "#44A882",
+  langage: "#44A882",
+  orthophonie: "#44A882",
+  "bien-être": "#E8A44A",
+  émotionnel: "#E8A44A",
+  sommeil: "#E8A44A",
+  alimentation: "#E8A44A",
+  comportement: "#E8A44A",
+  médical: "#8A9BAE",
+  administratif: "#8A9BAE",
+  progrès: "#44A882",
+  difficulté: "#E8A44A",
+  autonomie: "#8B74E0",
+  social: "#8B74E0",
 };
 
-function getTagColor(tag: string): string {
+function getDomainColor(tag: string): string {
   const lower = tag.toLowerCase();
-  for (const [key, color] of Object.entries(TAG_DOMAIN_COLORS)) {
+  for (const [key, color] of Object.entries(DOMAIN_COLORS)) {
     if (lower.includes(key)) return color;
   }
-  return "#A8A0A8";
+  return "#8A9BAE";
 }
 
-const TYPE_CONFIG: Record<string, { icon: typeof Mic; label: string; emoji: string }> = {
-  vocal: { icon: Mic, label: "Mémo vocal", emoji: "🎙" },
-  note: { icon: FileText, label: "Note", emoji: "📝" },
-  document: { icon: File, label: "Document", emoji: "📄" },
-  evenement: { icon: Flag, label: "Événement", emoji: "📌" },
+function getDomainsFromTags(tags: string[]): string[] {
+  const seen = new Set<string>();
+  const colors: string[] = [];
+  for (const tag of tags) {
+    const c = getDomainColor(tag);
+    if (!seen.has(c)) {
+      seen.add(c);
+      colors.push(c);
+    }
+    if (colors.length >= 3) break;
+  }
+  return colors;
+}
+
+// --- Intervenant avatar system ---
+const SPECIALITE_AVATARS: Record<string, { icon: typeof Activity; gradient: string }> = {
+  kiné: { icon: Activity, gradient: "linear-gradient(135deg, #E8736A, #E8845A)" },
+  kinésithérapeute: { icon: Activity, gradient: "linear-gradient(135deg, #E8736A, #E8845A)" },
+  psychomotric: { icon: Brain, gradient: "linear-gradient(135deg, #8B74E0, #5CA8D8)" },
+  ergothérapeute: { icon: Hand, gradient: "linear-gradient(135deg, #44A882, #4E96C8)" },
+  ergo: { icon: Hand, gradient: "linear-gradient(135deg, #44A882, #4E96C8)" },
+  parent: { icon: Heart, gradient: "linear-gradient(135deg, #E8736A, #C85A8A)" },
+  médecin: { icon: Stethoscope, gradient: "linear-gradient(135deg, #8A9BAE, #6B7F94)" },
+  mpr: { icon: Stethoscope, gradient: "linear-gradient(135deg, #8A9BAE, #6B7F94)" },
+  orthophoniste: { icon: MessageCircle, gradient: "linear-gradient(135deg, #44A882, #4E96C8)" },
+  piscine: { icon: Waves, gradient: "linear-gradient(135deg, #44A882, #4E96C8)" },
 };
+
+function getSpecialiteAvatar(specialite: string | null): { icon: typeof Activity; gradient: string } {
+  const s = (specialite || "").toLowerCase();
+  for (const [key, val] of Object.entries(SPECIALITE_AVATARS)) {
+    if (s.includes(key)) return val;
+  }
+  return { icon: User, gradient: "linear-gradient(135deg, #8A9BAE, #6B7F94)" };
+}
 
 export function MemoCard({ memo }: MemoCardProps) {
   const navigate = useNavigate();
@@ -60,25 +97,21 @@ export function MemoCard({ memo }: MemoCardProps) {
   } | null;
 
   const isProcessing = memo.processing_status !== "done" && memo.processing_status !== "error";
-  const memoType = (memo.type as string) || "vocal";
-  const typeConfig = TYPE_CONFIG[memoType] || TYPE_CONFIG.vocal;
-  const TypeIcon = typeConfig.icon;
 
-  // Display date: prefer memo_date, fallback to created_at
   const displayDate = memo.memo_date
     ? format(new Date(memo.memo_date), "d MMM yyyy", { locale: fr })
     : format(new Date(memo.created_at), "d MMM yyyy", { locale: fr });
 
-  // Summary text based on type
   let summaryText = structured?.resume || null;
-  if (!summaryText && memoType === "evenement") {
+  if (!summaryText && memo.type === "evenement") {
     summaryText = memo.transcription_raw || structured?.description || null;
   }
-  if (!summaryText && memoType === "note") {
+  if (!summaryText && memo.type === "note") {
     summaryText = memo.transcription_raw || null;
   }
 
   const tags = structured?.tags || [];
+  const domainColors = getDomainsFromTags(tags);
 
   const handleClick = () => {
     if (memo.processing_status === "done") {
@@ -89,35 +122,74 @@ export function MemoCard({ memo }: MemoCardProps) {
   return (
     <div
       onClick={handleClick}
-      className="rounded-xl border border-border bg-card p-4 space-y-2.5 shadow-[0_2px_8px_rgba(42,42,42,0.06)] cursor-pointer hover:shadow-[0_4px_12px_rgba(42,42,42,0.1)] transition-shadow"
+      className="cursor-pointer transition-shadow space-y-2"
+      style={{
+        background: "rgba(255, 255, 255, 0.52)",
+        backdropFilter: "blur(16px) saturate(1.6)",
+        WebkitBackdropFilter: "blur(16px) saturate(1.6)",
+        border: "1px solid rgba(255, 255, 255, 0.72)",
+        borderRadius: 16,
+        padding: "16px 20px",
+        boxShadow: "0 4px 16px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8)",
+      }}
     >
-      {/* Header: type icon + date + intervenant + status */}
-      <div className="flex items-start gap-3">
-        {/* Type icon badge */}
-        <div
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
-          style={{ backgroundColor: `${getTagColor(memoType === "vocal" ? "moteur" : memoType)}15` }}
-        >
-          <TypeIcon className="h-4 w-4" style={{ color: "hsl(var(--primary))" }} />
+      {/* Header: domain dots + date + intervenant avatar */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          {/* Domain dots */}
+          <div className="flex items-center gap-1">
+            {domainColors.map((color, i) => (
+              <div
+                key={i}
+                style={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: "50%",
+                  backgroundColor: color,
+                }}
+              />
+            ))}
+          </div>
+          <p className="text-xs font-medium text-muted-foreground">
+            {displayDate}
+          </p>
+          {isProcessing && <Loader2 className="h-3.5 w-3.5 text-muted-foreground animate-spin" />}
+          {memo.processing_status === "error" && (
+            <span className="text-xs font-medium text-destructive">Erreur</span>
+          )}
         </div>
 
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              {typeConfig.label}
-            </p>
-            {isProcessing && <Loader2 className="h-3.5 w-3.5 text-muted-foreground animate-spin" />}
-            {memo.processing_status === "error" && (
-              <span className="text-xs font-medium" style={{ color: "hsl(var(--rouge-enregistrement))" }}>
-                Erreur
+        {memo.intervenant && (() => {
+          const { icon: Icon, gradient } = getSpecialiteAvatar(memo.intervenant!.specialite);
+          return (
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs font-medium text-muted-foreground">
+                {memo.intervenant!.nom}
               </span>
-            )}
-          </div>
-          <p className="text-sm text-muted-foreground">
-            {displayDate}
-            {memo.intervenant && ` · ${memo.intervenant.nom}`}
-          </p>
-        </div>
+              <div
+                className="flex items-center justify-center shrink-0"
+                style={{
+                  width: 22,
+                  height: 22,
+                  borderRadius: "50%",
+                  background: gradient,
+                  overflow: "hidden",
+                }}
+                title={memo.intervenant!.nom}
+              >
+                {memo.intervenant!.photo_url ? (
+                  <img
+                    src={memo.intervenant!.photo_url}
+                    alt={memo.intervenant!.nom}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <Icon size={12} color="#FFFFFF" />
+                )}
+              </div>
+            </div>
+          );
+        })()}
       </div>
 
       {/* Summary */}
@@ -131,22 +203,7 @@ export function MemoCard({ memo }: MemoCardProps) {
         <p className="text-sm text-muted-foreground italic">Traitement en cours...</p>
       )}
 
-      {/* Tags with domain-colored left border */}
-      {tags.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 pt-0.5">
-          {tags.map((tag, i) => (
-            <span
-              key={i}
-              className="rounded-lg px-2.5 py-1 text-xs font-medium text-foreground bg-card"
-              style={{
-                borderLeft: `3px solid ${getTagColor(tag)}`,
-              }}
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
-      )}
+      {/* No text tags — domain dots are the visual encoding */}
     </div>
   );
 }
