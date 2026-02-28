@@ -245,7 +245,18 @@ const Timeline = () => {
   return (
     <div className="flex min-h-screen flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-10 px-4 space-y-3" style={{ paddingTop: 20, paddingBottom: 12 }}>
+      <header
+        className="sticky top-0 z-10 px-4 space-y-3"
+        style={{
+          paddingTop: 20,
+          paddingBottom: 12,
+          background: "rgba(255, 255, 255, 0.72)",
+          backdropFilter: "blur(20px) saturate(1.5)",
+          WebkitBackdropFilter: "blur(20px) saturate(1.5)",
+          borderBottom: "1px solid rgba(255, 255, 255, 0.6)",
+          boxShadow: "0 2px 12px rgba(0,0,0,0.05)",
+        }}
+      >
         <div className="flex items-center justify-between">
           <h1 className="text-[28px] font-semibold text-foreground">
             The Village
