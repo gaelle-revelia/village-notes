@@ -1,72 +1,59 @@
 
 
-## Replace Edit Dialog with Slide-In Detail Panel
+## Fix MemoCard layout and Timeline dots to match design spec
 
-### What changes
+### 1. Refactor MemoCard.tsx — card layout and styling
 
-**Single file**: `src/pages/VillageSettings.tsx`
+**Line 1 (card-meta):** Restructure the flex row:
+- LEFT side (`flex items-center gap-[7px]`):
+  - Domain dots: change from 6px to **7px** diameter
+  - Add vertical **separator**: 1px wide, 11px tall, `rgba(0,0,0,0.1)`
+  - Avatar circle: **20px**, gradient per specialite, Lucide icon at **10px** white
+  - Prenom: DM Sans **11px**, weight 500, color `#1E1A1A`
+- RIGHT side:
+  - Date only: DM Sans **10px**, color `#9A9490`
 
-Replace the current `<Dialog>` edit modal (lines 394-488) with a custom slide-in panel rendered via `createPortal`.
+**Line 2 (resume):** Change font to **12.5px**, line-height **1.45**, color `#1E1A1A`
 
-### Panel Component: `MemberDetailPanel`
+**Card container:**
+- Padding: change from `16px 20px` to **`11px 13px`**
+- Box-shadow: remove the extra `0 1px 3px` sub-shadow
 
-An inline component (or section within the same file) that renders via `createPortal(document.body)` when `editTarget` is set.
+**When no intervenant:** Still show dots + separator area but skip avatar and prenom
 
-**Overlay**:
-- Fixed fullscreen, `bg-black/30`, z-50
-- Tap to close (sets `editTarget` to null without saving)
-- Fade-in 300ms
+### 2. Refactor Timeline.tsx — timeline dots and line
 
-**Panel container**:
-- Fixed, `inset-y-0 right-0`, z-50
-- Width: `w-[65%]` on mobile, `md:w-[40%]` on desktop
-- Background: `rgba(255,255,255,0.85)`, `backdrop-filter: blur(20px) saturate(1.5)`
-- Border-left: `1px solid rgba(255,255,255,0.65)`
-- Shadow: `box-shadow: -4px 0 24px rgba(0,0,0,0.08)`
-- Slide animation: CSS transition `transform 300ms ease` from `translateX(100%)` to `translateX(0)`
-- Overflow-y auto for scrolling on small screens
+**Timeline dot** (replace current solid circle):
+```css
+width: 11px
+height: 11px
+border-radius: 50%
+background: rgba(255,255,255,0.7)
+backdrop-filter: blur(4px)
+border: 2.5px solid [primaryDomainColor]
+box-shadow: 0 0 0 3px [primaryDomainColor at 14% opacity]
+margin-top: 13px
+z-index: 1
+```
 
-**Panel header**:
-- Close button (X icon) top-right
-- Large avatar: 56px circle with gradient (reusing `getAvatarGradient`), first letter
-- Member name in DM Sans 18px semibold #1E1A1A
-- Specialite in DM Sans 14px #9A9490
-- Type badge: small pill "Pro" or "Famille" with Lavande bg for Pro, Corail-Rose for Famille
+**Timeline line:**
+- Remove `opacity: 0.25`
+- Use opacity-in-color stops: `rgba(232,115,106,0.4)`, `rgba(139,116,224,0.4)`, `rgba(68,168,130,0.3)`
+- Add `border-radius: 2px`
 
-**Editable fields section** (4 fields, each as a labeled block):
-- Label: DM Sans 11px uppercase tracking-wider, color #9A9490
-- Value: DM Sans 14px, color #1E1A1A
-- When empty, show placeholder "Ajouter..." in #9A9490 italic
-- Fields use `<Input>` and `<Textarea>` (for notes) with transparent/glass-like styling (`bg-white/30 border-white/50`)
-- Fields: Structure / Lieu, Telephone, Email, Notes libres
+**Replace inline card JSX** in Timeline.tsx with `<MemoCard memo={memo} />` import to eliminate duplication.
 
-**Footer**:
-- "Enregistrer" button: `background: linear-gradient(135deg, #E8736A, #8B74E0)`, white text, rounded-xl
-- "Annuler" text button: closes panel, resets form state
+### 3. Files changed
 
-### Animation approach
+| File | Change |
+|------|--------|
+| `src/components/memo/MemoCard.tsx` | Restructure layout, fix sizes, add separator, fix fonts/padding |
+| `src/pages/Timeline.tsx` | Fix dot style, fix line gradient, replace inline card with MemoCard import |
 
-Use React state to manage open/visible two-phase pattern (same as ProfileAvatar):
-1. `editTarget` being set triggers portal mount with `translateX(100%)`
-2. `requestAnimationFrame` flips a `visible` boolean to `true`, transitioning to `translateX(0)`
-3. On close: flip `visible` to `false`, wait 300ms via `setTimeout`, then set `editTarget(null)` to unmount
+### Technical details
 
-### What is removed
-
-- The entire `<Dialog open={!!editTarget}>` block (lines 394-488) -- replaced by the panel
-- Dialog/DialogContent/DialogHeader/DialogTitle/DialogFooter imports can be removed if no longer used (but Add Dialog still uses them, so they stay)
-
-### What is NOT touched
-
-- Member list cards, filter tabs, add button, add dialog
-- Delete AlertDialog (stays as-is, can still be triggered from panel)
-- `getAvatarGradient`, `glassCard`, fetch/add/delete logic
-- No other files, no routing, no auth changes
-
-### Technical Details
-
-- Touch/swipe-right-to-close: attach a `touchstart`/`touchmove`/`touchend` listener on the panel. Track horizontal delta; if swipe-right > 80px, close.
-- The edit state variables (`editNom`, `editTelephone`, etc.) are reused as-is
-- `handleEdit` saves to Supabase, closes panel, refetches members -- same logic, just closes panel instead of dialog
-- The "Retirer" action inside the panel sets `deleteTarget` (opening the existing AlertDialog) and closes the panel
+- MemoCard will need to export `getDomainsFromTags` (or a `getPrimaryDomainColor` helper) so Timeline can use it for the timeline dot color
+- Timeline already has domain color logic duplicated — will remove it and import from MemoCard
+- The `RevealCard` wrapper in Timeline stays as-is (not in scope)
+- No changes to data fetching, routing, auth, bottom nav, FAB, or header
 
