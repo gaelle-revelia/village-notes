@@ -1,10 +1,9 @@
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate, useParams, Navigate } from "react-router-dom";
-import { ArrowLeft, Pencil, X, Plus, Trash2, ChevronDown } from "lucide-react";
+import { ArrowLeft, Pencil, X, Plus, Trash2, ChevronDown, Activity, Hand, Brain, Stethoscope, MessageCircle, User, Heart, Waves } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useEnfantId } from "@/hooks/useEnfantId";
-import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -37,31 +36,95 @@ interface Intervenant {
   specialite: string | null;
 }
 
-const TAG_DOMAIN_COLORS: Record<string, string> = {
-  moteur: "#5A7A9A",
-  motricité: "#5A7A9A",
-  kinésithérapie: "#5A7A9A",
-  psychomotricité: "#8B7DAA",
-  sensoriel: "#6A8875",
-  cognitif: "#A8884D",
-  social: "#8B7DAA",
-  administratif: "#8B8B8B",
+// --- Domain color system (Knowledge File) ---
+const DOMAIN_COLORS: Record<string, string> = {
+  moteur: "#E8736A",
+  motricité: "#E8736A",
+  kinésithérapie: "#E8736A",
+  physique: "#E8736A",
+  cognitif: "#8B74E0",
+  psychomotricité: "#8B74E0",
+  psychomoteur: "#8B74E0",
+  sensoriel: "#44A882",
+  communication: "#44A882",
+  langage: "#44A882",
+  orthophonie: "#44A882",
+  "bien-être": "#E8A44A",
+  émotionnel: "#E8A44A",
+  sommeil: "#E8A44A",
+  alimentation: "#E8A44A",
+  comportement: "#E8A44A",
+  médical: "#8A9BAE",
+  administratif: "#8A9BAE",
+  progrès: "#44A882",
+  difficulté: "#E8A44A",
+  autonomie: "#8B74E0",
+  social: "#8B74E0",
 };
 
-function getTagColor(tag: string): string {
+function getDomainColor(tag: string): string {
   const lower = tag.toLowerCase();
-  for (const [key, color] of Object.entries(TAG_DOMAIN_COLORS)) {
+  for (const [key, color] of Object.entries(DOMAIN_COLORS)) {
     if (lower.includes(key)) return color;
   }
-  return "#8B8B8B";
+  return "#8A9BAE";
 }
 
-function hexToRgba(hex: string, alpha: number): string {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  return `rgba(${r},${g},${b},${alpha})`;
+function getDomainsFromTags(tags: string[]): string[] {
+  const seen = new Set<string>();
+  const colors: string[] = [];
+  for (const tag of tags) {
+    const c = getDomainColor(tag);
+    if (!seen.has(c)) { seen.add(c); colors.push(c); }
+    if (colors.length >= 3) break;
+  }
+  return colors;
 }
+
+// --- Intervenant avatar system ---
+const SPECIALITE_AVATARS: Record<string, { icon: typeof Activity; gradient: string }> = {
+  kiné: { icon: Activity, gradient: "linear-gradient(135deg, #E8736A, #E8845A)" },
+  kinésithérapeute: { icon: Activity, gradient: "linear-gradient(135deg, #E8736A, #E8845A)" },
+  psychomotric: { icon: Brain, gradient: "linear-gradient(135deg, #8B74E0, #5CA8D8)" },
+  ergothérapeute: { icon: Hand, gradient: "linear-gradient(135deg, #44A882, #4E96C8)" },
+  ergo: { icon: Hand, gradient: "linear-gradient(135deg, #44A882, #4E96C8)" },
+  parent: { icon: Heart, gradient: "linear-gradient(135deg, #E8736A, #C85A8A)" },
+  médecin: { icon: Stethoscope, gradient: "linear-gradient(135deg, #8A9BAE, #6B7F94)" },
+  mpr: { icon: Stethoscope, gradient: "linear-gradient(135deg, #8A9BAE, #6B7F94)" },
+  orthophoniste: { icon: MessageCircle, gradient: "linear-gradient(135deg, #44A882, #4E96C8)" },
+  piscine: { icon: Waves, gradient: "linear-gradient(135deg, #44A882, #4E96C8)" },
+};
+
+function getSpecialiteAvatar(specialite: string | null): { icon: typeof Activity; gradient: string } {
+  const s = (specialite || "").toLowerCase();
+  for (const [key, val] of Object.entries(SPECIALITE_AVATARS)) {
+    if (s.includes(key)) return val;
+  }
+  return { icon: User, gradient: "linear-gradient(135deg, #8A9BAE, #6B7F94)" };
+}
+
+// --- Liquid glass card style ---
+const glassCard: React.CSSProperties = {
+  background: "rgba(255, 255, 255, 0.52)",
+  backdropFilter: "blur(16px) saturate(1.6)",
+  WebkitBackdropFilter: "blur(16px) saturate(1.6)",
+  border: "1px solid rgba(255, 255, 255, 0.72)",
+  borderRadius: 16,
+  padding: 20,
+  boxShadow: "0 4px 16px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8)",
+};
+
+const editInputStyle: React.CSSProperties = {
+  width: "100%",
+  fontSize: 15,
+  lineHeight: 1.6,
+  border: "1px solid hsl(4 68% 66%)",
+  borderRadius: 8,
+  padding: "10px 12px",
+  outline: "none",
+  backgroundColor: "rgba(255,255,255,0.7)",
+  resize: "none",
+};
 
 const MemoResult = () => {
   const { id } = useParams<{ id: string }>();
@@ -72,7 +135,6 @@ const MemoResult = () => {
   const [loading, setLoading] = useState(true);
   const [intervenants, setIntervenants] = useState<Intervenant[]>([]);
 
-  // Edit mode state
   const [editing, setEditing] = useState(false);
   const [editDate, setEditDate] = useState<Date>(new Date());
   const [editIntervenantId, setEditIntervenantId] = useState<string | null>(null);
@@ -101,7 +163,6 @@ const MemoResult = () => {
       });
   }, [id, user]);
 
-  // Fetch intervenants
   useEffect(() => {
     if (!enfantId) return;
     supabase
@@ -127,9 +188,7 @@ const MemoResult = () => {
     setEditing(true);
   };
 
-  const cancelEdit = () => {
-    setEditing(false);
-  };
+  const cancelEdit = () => setEditing(false);
 
   const handleSave = async () => {
     if (!memo) return;
@@ -152,7 +211,6 @@ const MemoResult = () => {
     } else if (memo.type === "evenement") {
       updatedFields.content_structured = editResume ? { resume: editResume } : null;
     }
-    // For 'document', content_structured stays as-is
 
     const { error } = await supabase
       .from("memos")
@@ -165,7 +223,6 @@ const MemoResult = () => {
       return;
     }
 
-    // Refresh memo
     const { data: refreshed } = await supabase
       .from("memos")
       .select("id, memo_date, type, content_structured, transcription_raw, intervenant_id, enfant_id, file_url, intervenants(nom, specialite)")
@@ -175,11 +232,7 @@ const MemoResult = () => {
     if (refreshed) setMemo(refreshed as any);
     setEditing(false);
     setSaving(false);
-    toast({
-      title: "Modifications enregistrées",
-      duration: 2000,
-      style: { backgroundColor: "#7C9885", color: "#FFFFFF", border: "none" },
-    });
+    toast({ title: "Modifications enregistrées", duration: 2000 });
   };
 
   const handleDelete = async () => {
@@ -191,34 +244,28 @@ const MemoResult = () => {
       setDeleting(false);
       return;
     }
-    toast({
-      title: "Mémo supprimé",
-      duration: 2000,
-      style: { backgroundColor: "#C4626B", color: "#FFFFFF", border: "none" },
-    });
+    toast({ title: "Mémo supprimé", duration: 2000 });
     navigate("/timeline");
   };
 
   const addTag = () => {
     const t = newTag.trim();
-    if (t && !editTags.includes(t)) {
-      setEditTags([...editTags, t]);
-    }
+    if (t && !editTags.includes(t)) setEditTags([...editTags, t]);
     setNewTag("");
   };
 
   if (authLoading || loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: "#F4F1EA" }}>
-        <div className="animate-pulse" style={{ color: "#8B7D8B" }}>Chargement...</div>
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="animate-pulse text-muted-foreground">Chargement...</div>
       </div>
     );
   }
   if (!user) return <Navigate to="/auth" replace />;
   if (!memo) {
     return (
-      <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: "#F4F1EA" }}>
-        <p style={{ color: "#8B7D8B" }}>Mémo introuvable.</p>
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-muted-foreground">Mémo introuvable.</p>
       </div>
     );
   }
@@ -227,59 +274,30 @@ const MemoResult = () => {
   const details = structured?.details || structured?.points_cles || [];
   const suggestions = structured?.suggestions || [];
   const tags = structured?.tags || [];
+  const domainColors = getDomainsFromTags(tags);
   const intervenantData = memo.intervenants as any;
   const intervenantName = intervenantData?.nom || null;
   const intervenantSpec = intervenantData?.specialite || null;
   const formattedDate = format(new Date(memo.memo_date), "dd MMMM yyyy", { locale: fr });
 
-  const cardStyle = {
-    backgroundColor: "#FFFFFF",
-    border: "1px solid #E8E3DB",
-    borderRadius: 12,
-    padding: 20,
-  };
-
-  const editInputStyle = {
-    width: "100%",
-    fontFamily: "Inter, sans-serif",
-    fontSize: 15,
-    color: "#2A2A2A",
-    lineHeight: 1.6 as number,
-    border: "1px solid #6B8CAE",
-    borderRadius: 8,
-    padding: "10px 12px",
-    outline: "none",
-    backgroundColor: "#FFFFFF",
-    resize: "none" as const,
-  };
-
   return (
-    <div className="flex min-h-screen flex-col" style={{ backgroundColor: "#F4F1EA" }}>
+    <div className="flex min-h-screen flex-col">
       {/* Header */}
-      <header
-        className="sticky top-0 z-10 px-4 py-3 flex items-center justify-between"
-        style={{ backgroundColor: "#F4F1EA" }}
-      >
+      <header className="sticky top-0 z-10 px-4 py-3 flex items-center justify-between">
         {editing ? (
           <>
             <button
               onClick={cancelEdit}
-              style={{ fontFamily: "Inter, sans-serif", fontSize: 14, color: "#8B7D8B", background: "none", border: "none" }}
+              className="text-sm text-muted-foreground bg-transparent border-none"
             >
               Annuler
             </button>
             <button
               onClick={handleSave}
               disabled={saving}
+              className="text-sm font-semibold text-white border-none rounded-lg px-5 py-2"
               style={{
-                fontFamily: "Inter, sans-serif",
-                fontSize: 14,
-                fontWeight: 600,
-                color: "#FFFFFF",
-                backgroundColor: "#6B8CAE",
-                border: "none",
-                borderRadius: 8,
-                padding: "8px 20px",
+                background: "linear-gradient(135deg, #E8736A, #8B74E0)",
                 opacity: saving ? 0.7 : 1,
               }}
             >
@@ -290,26 +308,25 @@ const MemoResult = () => {
           <>
             <button
               onClick={() => navigate("/timeline")}
-              className="flex items-center gap-1"
-              style={{ fontFamily: "Inter, sans-serif", fontSize: 14, color: "#8B7D8B", background: "none", border: "none" }}
+              className="flex items-center gap-1 text-sm text-muted-foreground bg-transparent border-none"
             >
               <ArrowLeft className="h-4 w-4" />
               Retour
             </button>
-            <div className="flex items-center" style={{ gap: 16 }}>
+            <div className="flex items-center gap-4">
               <button
                 onClick={() => setDeleteModalOpen(true)}
-                style={{ background: "none", border: "none" }}
+                className="bg-transparent border-none"
                 aria-label="Supprimer"
               >
-                <Trash2 size={20} color="#C4626B" />
+                <Trash2 size={20} className="text-destructive" />
               </button>
               <button
                 onClick={enterEditMode}
-                style={{ background: "none", border: "none" }}
+                className="bg-transparent border-none"
                 aria-label="Modifier"
               >
-                <Pencil size={20} color="#6B8CAE" />
+                <Pencil size={20} className="text-primary" />
               </button>
             </div>
           </>
@@ -318,52 +335,54 @@ const MemoResult = () => {
 
       <main className="flex-1 px-4 pb-8">
         <div className="mx-auto max-w-[400px] space-y-5">
-          {/* Title & date */}
-          <div className="text-center space-y-1">
-            <h2 style={{ fontFamily: "'Crimson Text', Georgia, serif", fontSize: 24, fontWeight: 600, color: "#2A2A2A" }}>
+          {/* Title & domain dots */}
+          <div className="text-center space-y-2">
+            <h2 className="text-2xl text-foreground">
               {editing ? "Modifier le mémo" : "Mémo enregistré"}
             </h2>
+            {/* Domain dots */}
+            {!editing && domainColors.length > 0 && (
+              <div className="flex items-center justify-center gap-1.5">
+                {domainColors.map((color, i) => (
+                  <div key={i} style={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: color }} />
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Date */}
           {editing ? (
-            <div style={cardStyle}>
+            <div style={glassCard}>
               <MemoDatePicker date={editDate} onDateChange={setEditDate} />
             </div>
           ) : (
-            <p className="text-center" style={{ fontFamily: "Inter, sans-serif", fontSize: 14, color: "#8B7D8B" }}>
+            <p className="text-center text-sm text-muted-foreground">
               {formattedDate}
             </p>
           )}
 
           {/* Intervenant */}
           {editing ? (
-            <div style={cardStyle}>
-              <label style={{ fontFamily: "Inter, sans-serif", fontSize: 14, fontWeight: 500, color: "#2A2A2A", display: "block", marginBottom: 8 }}>
+            <div style={glassCard}>
+              <label className="text-sm font-medium text-foreground block mb-2">
                 Avec quel intervenant ?
               </label>
               {intervenants.length === 0 ? (
-                <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#8B7D8B" }}>
-                  Aucun intervenant enregistré
-                </p>
+                <p className="text-sm text-muted-foreground">Aucun intervenant enregistré</p>
               ) : (
                 <div className="flex flex-wrap gap-2">
                   {intervenants.map((i) => {
                     const selected = editIntervenantId === i.id;
+                    const { gradient } = getSpecialiteAvatar(i.specialite);
                     return (
                       <button
                         key={i.id}
                         onClick={() => setEditIntervenantId(selected ? null : i.id)}
+                        className="text-sm font-medium rounded-lg px-3.5 py-2 transition-all"
                         style={{
-                          fontFamily: "Inter, sans-serif",
-                          fontSize: 13,
-                          fontWeight: 500,
-                          borderRadius: 8,
-                          padding: "8px 14px",
-                          border: `1px solid ${selected ? "#6B8CAE" : "#E8E3DB"}`,
-                          backgroundColor: selected ? "#6B8CAE" : "#FFFFFF",
-                          color: selected ? "#FFFFFF" : "#2A2A2A",
-                          transition: "all 0.15s ease",
+                          border: selected ? "none" : "1px solid rgba(255,255,255,0.72)",
+                          background: selected ? gradient : "rgba(255,255,255,0.5)",
+                          color: selected ? "#FFFFFF" : "hsl(12 8% 11%)",
                         }}
                       >
                         {i.nom}{i.specialite ? ` · ${i.specialite}` : ""}
@@ -374,22 +393,36 @@ const MemoResult = () => {
               )}
             </div>
           ) : intervenantName ? (
-            <p className="text-center" style={{ fontFamily: "Inter, sans-serif", fontSize: 14, color: "#6B5B73" }}>
-              {intervenantName}{intervenantSpec ? ` · ${intervenantSpec}` : ""}
-            </p>
+            <div className="flex items-center justify-center gap-2">
+              {(() => {
+                const { icon: Icon, gradient } = getSpecialiteAvatar(intervenantSpec);
+                return (
+                  <div
+                    className="flex items-center justify-center shrink-0"
+                    style={{ width: 22, height: 22, borderRadius: "50%", background: gradient, overflow: "hidden" }}
+                  >
+                    <Icon size={12} color="#FFFFFF" />
+                  </div>
+                );
+              })()}
+              <p className="text-sm text-foreground">
+                {intervenantName}{intervenantSpec ? ` · ${intervenantSpec}` : ""}
+              </p>
+            </div>
           ) : null}
 
-          {/* Transcription — for vocal, evenement (editable); for note: shown as collapsible in view mode */}
+          {/* Transcription — vocal, evenement */}
           {(memo.type === "vocal" || memo.type === "evenement") && (
             editing ? (
-              <div style={cardStyle}>
-                <label style={{ fontFamily: "Inter, sans-serif", fontSize: 12, fontWeight: 600, color: "#A8A0A8", letterSpacing: "0.08em", textTransform: "uppercase" as const, display: "block", marginBottom: 8 }}>
+              <div style={glassCard}>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-2">
                   {memo.type === "evenement" ? "Titre" : "Transcription"}
                 </label>
                 {memo.type === "evenement" ? (
                   <input
                     value={editTranscription}
                     onChange={(e) => setEditTranscription(e.target.value)}
+                    className="text-foreground"
                     style={{ ...editInputStyle, resize: undefined }}
                   />
                 ) : (
@@ -397,6 +430,7 @@ const MemoResult = () => {
                     value={editTranscription}
                     onChange={(e) => setEditTranscription(e.target.value)}
                     rows={5}
+                    className="text-foreground"
                     style={editInputStyle}
                   />
                 )}
@@ -404,70 +438,73 @@ const MemoResult = () => {
             ) : null
           )}
 
-          {/* Note type: transcription editable in edit mode */}
+          {/* Note type: transcription in edit mode */}
           {memo.type === "note" && editing && (
-            <div style={cardStyle}>
-              <label style={{ fontFamily: "Inter, sans-serif", fontSize: 12, fontWeight: 600, color: "#A8A0A8", letterSpacing: "0.08em", textTransform: "uppercase" as const, display: "block", marginBottom: 8 }}>
+            <div style={glassCard}>
+              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-2">
                 Votre note
               </label>
               <textarea
                 value={editTranscription}
                 onChange={(e) => setEditTranscription(e.target.value)}
                 rows={5}
+                className="text-foreground"
                 style={editInputStyle}
               />
             </div>
           )}
 
-          {/* Resume — vocal, note & evenement */}
+          {/* Resume */}
           {(memo.type === "vocal" || memo.type === "note" || memo.type === "evenement") && (
             editing ? (
-              <div style={cardStyle}>
-                <label style={{ fontFamily: "Inter, sans-serif", fontSize: 12, fontWeight: 600, color: "#A8A0A8", letterSpacing: "0.08em", textTransform: "uppercase" as const, display: "block", marginBottom: 8 }}>
+              <div style={glassCard}>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-2">
                   {memo.type === "evenement" ? "Description" : "Résumé"}
                 </label>
                 <textarea
                   value={editResume}
                   onChange={(e) => setEditResume(e.target.value)}
                   rows={3}
+                  className="text-foreground"
                   style={editInputStyle}
                 />
               </div>
             ) : structured?.resume ? (
-              <div style={cardStyle}>
-                <h3 style={{ fontFamily: "Inter, sans-serif", fontSize: 12, fontWeight: 600, color: "#A8A0A8", letterSpacing: "0.08em", textTransform: "uppercase" as const, marginBottom: 8 }}>
+              <div style={glassCard}>
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
                   Résumé
                 </h3>
-                <p style={{ fontFamily: "Inter, sans-serif", fontSize: 15, color: "#2A2A2A", lineHeight: 1.6 }}>
+                <p className="text-[15px] text-foreground leading-relaxed">
                   {structured.resume}
                 </p>
               </div>
             ) : null
           )}
 
-          {/* Details — vocal & note */}
+          {/* Details */}
           {(memo.type === "vocal" || memo.type === "note") && (
             editing ? (
-              <div style={cardStyle}>
-                <label style={{ fontFamily: "Inter, sans-serif", fontSize: 12, fontWeight: 600, color: "#A8A0A8", letterSpacing: "0.08em", textTransform: "uppercase" as const, display: "block", marginBottom: 8 }}>
+              <div style={glassCard}>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-2">
                   Détails (un par ligne)
                 </label>
                 <textarea
                   value={editDetails}
                   onChange={(e) => setEditDetails(e.target.value)}
                   rows={4}
+                  className="text-foreground"
                   style={editInputStyle}
                 />
               </div>
             ) : details.length > 0 ? (
-              <div style={cardStyle}>
-                <h3 style={{ fontFamily: "Inter, sans-serif", fontSize: 12, fontWeight: 600, color: "#A8A0A8", letterSpacing: "0.08em", textTransform: "uppercase" as const, marginBottom: 8 }}>
+              <div style={glassCard}>
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
                   Détails
                 </h3>
                 <ul className="space-y-2">
                   {details.map((d, i) => (
-                    <li key={i} className="flex gap-2" style={{ fontFamily: "Inter, sans-serif", fontSize: 15, color: "#2A2A2A" }}>
-                      <span style={{ color: "#6B8CAE", marginTop: 2 }}>•</span>
+                    <li key={i} className="flex gap-2 text-[15px] text-foreground">
+                      <span className="text-primary mt-0.5">•</span>
                       <span>{d}</span>
                     </li>
                   ))}
@@ -476,29 +513,30 @@ const MemoResult = () => {
             ) : null
           )}
 
-          {/* Suggestions — vocal & note */}
+          {/* Suggestions */}
           {(memo.type === "vocal" || memo.type === "note") && (
             editing ? (
-              <div style={cardStyle}>
-                <label style={{ fontFamily: "Inter, sans-serif", fontSize: 12, fontWeight: 600, color: "#A8A0A8", letterSpacing: "0.08em", textTransform: "uppercase" as const, display: "block", marginBottom: 8 }}>
+              <div style={glassCard}>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-2">
                   À retenir (un par ligne)
                 </label>
                 <textarea
                   value={editSuggestions}
                   onChange={(e) => setEditSuggestions(e.target.value)}
                   rows={3}
+                  className="text-foreground"
                   style={editInputStyle}
                 />
               </div>
             ) : suggestions.length > 0 ? (
-              <div style={cardStyle}>
-                <h3 style={{ fontFamily: "Inter, sans-serif", fontSize: 12, fontWeight: 600, color: "#A8A0A8", letterSpacing: "0.08em", textTransform: "uppercase" as const, marginBottom: 8 }}>
+              <div style={glassCard}>
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
                   À retenir
                 </h3>
                 <ul className="space-y-2">
                   {suggestions.map((s, i) => (
-                    <li key={i} className="flex gap-2" style={{ fontFamily: "Inter, sans-serif", fontSize: 15, color: "#2A2A2A" }}>
-                      <span style={{ marginTop: 2 }}>→</span>
+                    <li key={i} className="flex gap-2 text-[15px] text-foreground">
+                      <span className="mt-0.5">→</span>
                       <span>{s}</span>
                     </li>
                   ))}
@@ -507,35 +545,31 @@ const MemoResult = () => {
             ) : null
           )}
 
-          {/* Tags — vocal & note */}
+          {/* Tags — edit mode: domain-colored dots + text; view mode: domain dots only */}
           {(memo.type === "vocal" || memo.type === "note") && (
             editing ? (
-              <div style={cardStyle}>
-                <label style={{ fontFamily: "Inter, sans-serif", fontSize: 12, fontWeight: 600, color: "#A8A0A8", letterSpacing: "0.08em", textTransform: "uppercase" as const, display: "block", marginBottom: 8 }}>
+              <div style={glassCard}>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-2">
                   Tags
                 </label>
                 <div className="flex flex-wrap gap-2 mb-3">
                   {editTags.map((tag, i) => {
-                    const color = getTagColor(tag);
+                    const color = getDomainColor(tag);
                     return (
                       <span
                         key={i}
-                        className="flex items-center gap-1"
+                        className="flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium"
                         style={{
-                          borderRadius: 6,
-                          borderLeft: `3px solid ${color}`,
-                          backgroundColor: hexToRgba(color, 0.08),
-                          padding: "4px 10px",
-                          fontFamily: "Inter, sans-serif",
-                          fontSize: 11,
-                          fontWeight: 500,
+                          backgroundColor: `${color}15`,
                           color,
                         }}
                       >
+                        <div style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: color }} />
                         {tag}
                         <button
                           onClick={() => setEditTags(editTags.filter((_, j) => j !== i))}
-                          style={{ background: "none", border: "none", color, padding: 0, marginLeft: 2 }}
+                          className="bg-transparent border-none p-0 ml-0.5"
+                          style={{ color }}
                         >
                           <X size={12} />
                         </button>
@@ -549,76 +583,36 @@ const MemoResult = () => {
                     onChange={(e) => setNewTag(e.target.value)}
                     onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addTag(); } }}
                     placeholder="Nouveau tag..."
+                    className="flex-1 text-sm text-foreground placeholder:text-muted-foreground"
                     style={{
-                      flex: 1,
-                      fontFamily: "Inter, sans-serif",
-                      fontSize: 13,
-                      color: "#2A2A2A",
-                      border: "1px solid #E8E3DB",
+                      border: "1px solid rgba(255,255,255,0.72)",
                       borderRadius: 8,
                       padding: "6px 10px",
                       outline: "none",
+                      background: "rgba(255,255,255,0.5)",
                     }}
                   />
                   <button
                     onClick={addTag}
                     disabled={!newTag.trim()}
-                    className="flex items-center gap-1"
-                    style={{
-                      fontFamily: "Inter, sans-serif",
-                      fontSize: 13,
-                      fontWeight: 500,
-                      color: newTag.trim() ? "#6B8CAE" : "#C4BDB8",
-                      background: "none",
-                      border: "none",
-                    }}
+                    className="flex items-center gap-1 text-sm font-medium bg-transparent border-none"
+                    style={{ color: newTag.trim() ? "#E8736A" : "#8A9BAE" }}
                   >
                     <Plus size={14} />
                     Ajouter
                   </button>
                 </div>
               </div>
-            ) : tags.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
-                {tags.map((tag, i) => {
-                  const color = getTagColor(tag);
-                  return (
-                    <span
-                      key={i}
-                      style={{
-                        borderRadius: 6,
-                        borderLeft: `3px solid ${color}`,
-                        backgroundColor: hexToRgba(color, 0.08),
-                        padding: "4px 10px",
-                        fontFamily: "Inter, sans-serif",
-                        fontSize: 11,
-                        fontWeight: 500,
-                        color,
-                      }}
-                    >
-                      {tag}
-                    </span>
-                  );
-                })}
-              </div>
             ) : null
+            /* View mode tags removed — domain dots shown at top */
           )}
 
-          {/* Collapsible "Note originale" — for note type in view mode */}
+          {/* Collapsible "Note originale" */}
           {memo.type === "note" && !editing && memo.transcription_raw && (
             <div>
               <button
                 onClick={() => setOriginalNoteOpen(!originalNoteOpen)}
-                className="flex items-center gap-1"
-                style={{
-                  fontFamily: "Inter, sans-serif",
-                  fontSize: 13,
-                  color: "#8B7D8B",
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  padding: 0,
-                }}
+                className="flex items-center gap-1 text-sm text-muted-foreground bg-transparent border-none cursor-pointer p-0"
               >
                 <ChevronDown
                   size={16}
@@ -630,15 +624,8 @@ const MemoResult = () => {
                 Note originale
               </button>
               {originalNoteOpen && (
-                <div style={{ marginTop: 8 }}>
-                  <p style={{
-                    fontFamily: "Inter, sans-serif",
-                    fontSize: 14,
-                    color: "#6B5B73",
-                    fontStyle: "italic",
-                    lineHeight: 1.6,
-                    whiteSpace: "pre-wrap" as const,
-                  }}>
+                <div className="mt-2">
+                  <p className="text-sm text-muted-foreground italic leading-relaxed whitespace-pre-wrap">
                     {memo.transcription_raw}
                   </p>
                 </div>
@@ -651,37 +638,21 @@ const MemoResult = () => {
             <div className="text-center pt-4">
               <button
                 onClick={() => setDeleteModalOpen(true)}
-                style={{
-                  fontFamily: "Inter, sans-serif",
-                  fontSize: 14,
-                  fontWeight: 500,
-                  color: "#C4626B",
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                }}
+                className="text-sm font-medium text-destructive bg-transparent border-none cursor-pointer"
               >
                 Supprimer ce mémo
               </button>
             </div>
           )}
 
-          {/* Return button — view mode only */}
+          {/* Return button */}
           {!editing && (
             <button
               onClick={() => navigate("/timeline")}
+              className="w-full h-12 rounded-xl border-none text-base font-semibold text-white cursor-pointer mt-2"
               style={{
-                width: "100%",
-                height: 48,
-                borderRadius: 12,
-                border: "none",
-                fontFamily: "Inter, sans-serif",
-                fontSize: 16,
-                fontWeight: 600,
-                color: "#FFFFFF",
-                backgroundColor: "#6B8CAE",
-                cursor: "pointer",
-                marginTop: 8,
+                background: "linear-gradient(135deg, #E8736A, #8B74E0)",
+                boxShadow: "0 6px 20px rgba(139,116,224,0.3)",
               }}
             >
               Retour à la timeline
@@ -694,35 +665,27 @@ const MemoResult = () => {
       {deleteModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div
-            className="absolute inset-0"
-            style={{ backgroundColor: "rgba(0,0,0,0.4)" }}
+            className="absolute inset-0 bg-black/40"
             onClick={() => setDeleteModalOpen(false)}
           />
           <div
             className="relative z-10 w-[85%] max-w-[340px] text-center"
-            style={{ backgroundColor: "#FFFFFF", borderRadius: 16, padding: 24 }}
+            style={{ ...glassCard, padding: 24 }}
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 style={{ fontFamily: "'Crimson Text', Georgia, serif", fontSize: 20, fontWeight: 600, color: "#2A2A2A", marginBottom: 8 }}>
+            <h3 className="text-xl text-foreground mb-2">
               Supprimer ce mémo ?
             </h3>
-            <p style={{ fontFamily: "Inter, sans-serif", fontSize: 14, color: "#8B7D8B", marginBottom: 24 }}>
+            <p className="text-sm text-muted-foreground mb-6">
               Cette action est irréversible.
             </p>
             <div className="flex flex-col gap-3">
               <button
                 onClick={handleDelete}
                 disabled={deleting}
+                className="w-full h-12 rounded-xl border-none text-base font-semibold text-white cursor-pointer"
                 style={{
-                  width: "100%",
-                  height: 48,
-                  borderRadius: 12,
-                  border: "none",
-                  fontFamily: "Inter, sans-serif",
-                  fontSize: 16,
-                  fontWeight: 600,
-                  color: "#FFFFFF",
-                  backgroundColor: "#C4626B",
+                  backgroundColor: "hsl(4 68% 50%)",
                   opacity: deleting ? 0.7 : 1,
                   cursor: deleting ? "not-allowed" : "pointer",
                 }}
@@ -731,17 +694,10 @@ const MemoResult = () => {
               </button>
               <button
                 onClick={() => setDeleteModalOpen(false)}
+                className="w-full h-12 rounded-xl text-base font-medium text-foreground cursor-pointer"
                 style={{
-                  width: "100%",
-                  height: 48,
-                  borderRadius: 12,
-                  border: "1px solid #E8E3DB",
-                  fontFamily: "Inter, sans-serif",
-                  fontSize: 16,
-                  fontWeight: 500,
-                  color: "#2A2A2A",
-                  backgroundColor: "#FFFFFF",
-                  cursor: "pointer",
+                  border: "1px solid rgba(255,255,255,0.72)",
+                  background: "rgba(255,255,255,0.5)",
                 }}
               >
                 Annuler
