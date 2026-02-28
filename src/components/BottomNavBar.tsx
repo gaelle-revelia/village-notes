@@ -19,30 +19,31 @@ const BottomNavBar = () => {
       className="fixed bottom-0 left-0 right-0 z-30 flex items-center justify-around"
       style={{
         height: 60,
-        backgroundColor: "#FFFFFF",
-        borderTop: "1px solid #F0EBE3",
-        boxShadow: "0 -2px 8px rgba(42,42,42,0.04)",
+        background: "rgba(255, 255, 255, 0.55)",
+        backdropFilter: "blur(20px) saturate(1.5)",
+        WebkitBackdropFilter: "blur(20px) saturate(1.5)",
+        borderTop: "1px solid rgba(255, 255, 255, 0.65)",
+        boxShadow: "0 -2px 12px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)",
         paddingBottom: "env(safe-area-inset-bottom, 0px)",
       }}
     >
       {tabs.map((tab) => {
         const active = location.pathname === tab.path;
-        const color = active ? "#6B8CAE" : "#C4BDB8";
         return (
           <button
             key={tab.path}
             onClick={() => navigate(tab.path)}
-            className="flex flex-col items-center justify-center flex-1 h-full"
-            style={{ background: "none", border: "none" }}
+            className="flex flex-col items-center justify-center flex-1 h-full border-none bg-transparent"
           >
-            <tab.icon size={22} color={color} />
+            <tab.icon
+              size={22}
+              style={{ color: active ? "#E8736A" : "#8A9BAE" }}
+            />
             <span
+              className="text-[10px] mt-0.5"
               style={{
-                fontFamily: "Inter, sans-serif",
-                fontSize: 10,
                 fontWeight: active ? 600 : 400,
-                color,
-                marginTop: 2,
+                color: active ? "#E8736A" : "#8A9BAE",
               }}
             >
               {tab.label}
