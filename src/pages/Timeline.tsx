@@ -345,7 +345,7 @@ const Timeline = () => {
 
                     return (
                       <RevealCard key={memo.id}>
-                      <div className="relative" style={{ marginBottom: 10 }}>
+                      <div className="relative" style={{ marginBottom: 16 }}>
                         {/* Dot — colored by primary domain */}
                         <div
                           className="absolute"
