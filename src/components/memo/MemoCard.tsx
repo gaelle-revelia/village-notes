@@ -42,7 +42,7 @@ const DOMAIN_COLORS: Record<string, string> = {
   social: "#8B74E0",
 };
 
-function getDomainColor(tag: string): string {
+export function getDomainColor(tag: string): string {
   const lower = tag.toLowerCase();
   for (const [key, color] of Object.entries(DOMAIN_COLORS)) {
     if (lower.includes(key)) return color;
@@ -50,7 +50,7 @@ function getDomainColor(tag: string): string {
   return "#8A9BAE";
 }
 
-function getDomainsFromTags(tags: string[]): string[] {
+export function getDomainsFromTags(tags: string[]): string[] {
   const seen = new Set<string>();
   const colors: string[] = [];
   for (const tag of tags) {
@@ -122,88 +122,120 @@ export function MemoCard({ memo }: MemoCardProps) {
   return (
     <div
       onClick={handleClick}
-      className="cursor-pointer transition-shadow space-y-2"
+      className="cursor-pointer transition-shadow"
       style={{
         background: "rgba(255, 255, 255, 0.52)",
         backdropFilter: "blur(16px) saturate(1.6)",
         WebkitBackdropFilter: "blur(16px) saturate(1.6)",
         border: "1px solid rgba(255, 255, 255, 0.72)",
         borderRadius: 16,
-        padding: "16px 20px",
-        boxShadow: "0 4px 16px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8)",
+        padding: "11px 13px",
+        boxShadow: "0 4px 16px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.8)",
       }}
     >
-      {/* Header: domain dots + date + intervenant avatar */}
+      {/* Line 1: card-meta */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
+        {/* LEFT: dots + separator + avatar + prenom */}
+        <div className="flex items-center" style={{ gap: 7 }}>
           {/* Domain dots */}
           <div className="flex items-center gap-1">
             {domainColors.map((color, i) => (
               <div
                 key={i}
                 style={{
-                  width: 6,
-                  height: 6,
+                  width: 7,
+                  height: 7,
                   borderRadius: "50%",
                   backgroundColor: color,
                 }}
               />
             ))}
           </div>
-          <p className="text-xs font-medium text-muted-foreground">
-            {displayDate}
-          </p>
+
+          {/* Separator */}
+          <div
+            style={{
+              width: 1,
+              height: 11,
+              backgroundColor: "rgba(0,0,0,0.1)",
+            }}
+          />
+
+          {/* Intervenant avatar + prenom */}
+          {memo.intervenant && (() => {
+            const { icon: Icon, gradient } = getSpecialiteAvatar(memo.intervenant!.specialite);
+            return (
+              <>
+                <div
+                  className="flex items-center justify-center shrink-0"
+                  style={{
+                    width: 20,
+                    height: 20,
+                    borderRadius: "50%",
+                    background: gradient,
+                    overflow: "hidden",
+                  }}
+                >
+                  {memo.intervenant!.photo_url ? (
+                    <img
+                      src={memo.intervenant!.photo_url}
+                      alt={memo.intervenant!.nom}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <Icon size={10} color="#FFFFFF" />
+                  )}
+                </div>
+                <span
+                  style={{
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontSize: 11,
+                    fontWeight: 500,
+                    color: "#1E1A1A",
+                  }}
+                >
+                  {memo.intervenant!.nom}
+                </span>
+              </>
+            );
+          })()}
+
           {isProcessing && <Loader2 className="h-3.5 w-3.5 text-muted-foreground animate-spin" />}
           {memo.processing_status === "error" && (
             <span className="text-xs font-medium text-destructive">Erreur</span>
           )}
         </div>
 
-        {memo.intervenant && (() => {
-          const { icon: Icon, gradient } = getSpecialiteAvatar(memo.intervenant!.specialite);
-          return (
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs font-medium text-muted-foreground">
-                {memo.intervenant!.nom}
-              </span>
-              <div
-                className="flex items-center justify-center shrink-0"
-                style={{
-                  width: 22,
-                  height: 22,
-                  borderRadius: "50%",
-                  background: gradient,
-                  overflow: "hidden",
-                }}
-                title={memo.intervenant!.nom}
-              >
-                {memo.intervenant!.photo_url ? (
-                  <img
-                    src={memo.intervenant!.photo_url}
-                    alt={memo.intervenant!.nom}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <Icon size={12} color="#FFFFFF" />
-                )}
-              </div>
-            </div>
-          );
-        })()}
+        {/* RIGHT: date */}
+        <span
+          style={{
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: 10,
+            color: "#9A9490",
+          }}
+        >
+          {displayDate}
+        </span>
       </div>
 
-      {/* Summary */}
+      {/* Line 2: resume */}
       {summaryText && (
-        <p className="text-[15px] text-foreground leading-relaxed line-clamp-2">
+        <p
+          className="line-clamp-2 mt-1.5"
+          style={{
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: 12.5,
+            lineHeight: 1.45,
+            color: "#1E1A1A",
+          }}
+        >
           {summaryText}
         </p>
       )}
 
       {isProcessing && !summaryText && (
-        <p className="text-sm text-muted-foreground italic">Traitement en cours...</p>
+        <p className="text-sm text-muted-foreground italic mt-1.5">Traitement en cours...</p>
       )}
-
-      {/* No text tags — domain dots are the visual encoding */}
     </div>
   );
 }
