@@ -1,44 +1,31 @@
 
 
-## Build "Mon Village" Member Management Screen
+## Fix: Liquid Glass Cards Appearing Opaque on Desktop
 
-Replace the placeholder `VillageSettings.tsx` with a full member management screen following the liquid glass design system.
+### Root Cause
 
-### Structure
+The `RevealCard` component wraps each memo card and applies `transform: scale(1)` when visible. In CSS, **any `transform` value other than `none` creates a new stacking context**. This causes `backdrop-filter` on the child card to blur the parent's (transparent) content instead of the body gradient -- resulting in flat white cards.
 
-**VillageSettings.tsx** -- Main page with:
-- Header: back button (ArrowLeft) + "Mon Village" title (Fraunces font)
-- Two filter tabs ("Professionnels" / "Famille") filtering by `type` column (`pro` / `famille`)
-- Active tab styled with Lavande (#8B74E0) background, inactive with transparent liquid glass
-- List of active intervenants fetched from Supabase (`actif = true`, filtered by current `enfant_id`)
-- Each member row: liquid glass card with colored avatar (first letter, gradient based on specialite), nom, specialite, trash icon
-- "Ajouter un membre" button at the bottom
+### Changes (2 files)
 
-**Add Member** -- Dialog modal:
-- Fields: `nom` (text input), `specialite` (text input), `type` (select: "pro" | "famille")
-- On confirm: insert into `intervenants` with `actif: true` and `enfant_id` from `useEnfantId()`
-- On cancel: close without saving
+**1. `src/pages/Timeline.tsx` -- RevealCard component (lines 115-125)**
 
-**Delete Member** -- AlertDialog:
-- Message: "Retirer [nom] du village ?"
-- On confirm: `UPDATE intervenants SET actif = false WHERE id = ...`
-- Member disappears from list, row preserved for memo references
+Change the visible state `transform` from `"scale(1)"` to `"none"`:
 
-### Avatar Color Mapping
+```text
+BEFORE:  transform: visible ? "scale(1)" : "scale(0.97)"
+AFTER:   transform: visible ? "none" : "scale(0.97)"
+```
 
-Map specialite to domain colors from Knowledge File:
-- Kine / moteur keywords -> Corail gradient (#E8736A -> #E8845A)
-- Psychomotricite -> Lavande gradient (#8B74E0 -> #5CA8D8)
-- Ergotherapie -> Menthe gradient (#44A882 -> #4E96C8)
-- Parent / famille -> Corail-Rose gradient (#E8736A -> #C85A8A)
-- Default (Medecin, admin, other) -> Gris gradient (#8A9BAE -> #6B7F94)
+The CSS transition engine interpolates `scale(0.97)` to `none` (equivalent to identity) smoothly, so the reveal animation is preserved. When visible, no stacking context is created, and `backdrop-filter` works correctly.
 
-### Technical Details
+**2. `src/App.css` -- Remove Vite boilerplate**
 
-- Reuse `useEnfantId()` hook for getting current child ID
-- Reuse `useAuth()` for auth guard
-- Use existing UI components: `Dialog`, `AlertDialog`, `Input`, `Select`, `Button`
-- All styling inline or with Tailwind, following liquid glass recipe from Knowledge File
-- No changes to any other page or component
-- Single file change: `src/pages/VillageSettings.tsx`
+Remove or clear the `#root` rule that sets `max-width: 1280px`, `padding: 2rem`, and `text-align: center`. This is leftover scaffolding that constrains layout on desktop and adds unwanted padding/centering.
+
+### What is NOT touched
+
+- No changes to MemoCard, BottomNavBar, or any other component
+- No changes to the design system, colors, or liquid glass recipe
+- No changes to Supabase logic, auth, or routing
 
