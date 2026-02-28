@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Plus, ChevronRight } from "lucide-react";
+import { ArrowLeft, Plus, ChevronRight, Phone, Mail } from "lucide-react";
 import MemberDetailPanel from "@/components/village/MemberDetailPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useEnfantId } from "@/hooks/useEnfantId";
@@ -258,6 +258,25 @@ export default function VillageSettings() {
                   )}
                 </div>
               </div>
+              {/* Quick action icons */}
+              {m.telephone?.trim() && (
+                <a
+                  href={`tel:${m.telephone.trim()}`}
+                  onClick={(e) => e.stopPropagation()}
+                  className="shrink-0 p-1"
+                >
+                  <Phone className="w-[18px] h-[18px] text-[#44A882]" />
+                </a>
+              )}
+              {m.email?.trim() && (
+                <a
+                  href={`mailto:${m.email.trim()}`}
+                  onClick={(e) => e.stopPropagation()}
+                  className="shrink-0 p-1"
+                >
+                  <Mail className="w-[18px] h-[18px] text-[#8B74E0]" />
+                </a>
+              )}
               <ChevronRight className="w-4 h-4 text-[#9A9490] shrink-0" />
             </button>
           ))
