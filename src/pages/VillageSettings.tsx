@@ -346,7 +346,7 @@ export default function VillageSettings() {
         <DialogContent className={`${glassCard} border-none max-w-[360px] max-h-[85vh] overflow-y-auto`}>
           <DialogHeader>
             <DialogTitle className="font-['Fraunces'] text-lg">
-              Nouveau membre
+              {newType === "famille" ? "Nouveau membre — Famille" : "Nouveau membre — Professionnel"}
             </DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-4 py-2">
@@ -360,31 +360,35 @@ export default function VillageSettings() {
                 maxLength={100}
               />
             </div>
-            <div>
-              <Label className="text-xs text-[#9A9490] mb-1">Spécialité</Label>
-              <Input
-                value={newSpecialite}
-                onChange={(e) => setNewSpecialite(e.target.value)}
-                placeholder="Ex: Kinésithérapeute"
-                className="bg-white/40 border-white/60"
-                maxLength={100}
-              />
-            </div>
-            <div>
-              <Label className="text-xs text-[#9A9490] mb-1">Type</Label>
-              <Select
-                value={newType}
-                onValueChange={(v) => setNewType(v as "pro" | "famille")}
-              >
-                <SelectTrigger className="bg-white/40 border-white/60">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="pro">Professionnel</SelectItem>
-                  <SelectItem value="famille">Famille</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            {newType === "famille" ? (
+              <div>
+                <Label className="text-xs text-[#9A9490] mb-1">Relation</Label>
+                <Select
+                  value={newSpecialite}
+                  onValueChange={(v) => setNewSpecialite(v)}
+                >
+                  <SelectTrigger className="bg-white/40 border-white/60">
+                    <SelectValue placeholder="Choisir…" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {["Papa", "Maman", "Grand-parents", "Parrain", "Marraine"].map((r) => (
+                      <SelectItem key={r} value={r}>{r}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            ) : (
+              <div>
+                <Label className="text-xs text-[#9A9490] mb-1">Spécialité</Label>
+                <Input
+                  value={newSpecialite}
+                  onChange={(e) => setNewSpecialite(e.target.value)}
+                  placeholder="Ex: Kinésithérapeute"
+                  className="bg-white/40 border-white/60"
+                  maxLength={100}
+                />
+              </div>
+            )}
             <div>
               <Label className="text-xs text-[#9A9490] mb-1">Téléphone</Label>
               <Input
@@ -407,27 +411,31 @@ export default function VillageSettings() {
                 maxLength={255}
               />
             </div>
-            <div>
-              <Label className="text-xs text-[#9A9490] mb-1">Structure / Cabinet</Label>
-              <Input
-                value={newStructure}
-                onChange={(e) => setNewStructure(e.target.value)}
-                placeholder="Ex: Cabinet rue Yann d'Argent"
-                className="bg-white/40 border-white/60"
-                maxLength={200}
-              />
-            </div>
-            <div>
-              <Label className="text-xs text-[#9A9490] mb-1">Notes</Label>
-              <Textarea
-                value={newNotes}
-                onChange={(e) => setNewNotes(e.target.value)}
-                placeholder="Infos complémentaires…"
-                className="bg-white/40 border-white/60 resize-none"
-                rows={2}
-                maxLength={500}
-              />
-            </div>
+            {newType === "pro" && (
+              <>
+                <div>
+                  <Label className="text-xs text-[#9A9490] mb-1">Structure / Cabinet</Label>
+                  <Input
+                    value={newStructure}
+                    onChange={(e) => setNewStructure(e.target.value)}
+                    placeholder="Ex: Cabinet rue Yann d'Argent"
+                    className="bg-white/40 border-white/60"
+                    maxLength={200}
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs text-[#9A9490] mb-1">Notes</Label>
+                  <Textarea
+                    value={newNotes}
+                    onChange={(e) => setNewNotes(e.target.value)}
+                    placeholder="Infos complémentaires…"
+                    className="bg-white/40 border-white/60 resize-none"
+                    rows={2}
+                    maxLength={500}
+                  />
+                </div>
+              </>
+            )}
           </div>
           <DialogFooter className="gap-2">
             <Button
