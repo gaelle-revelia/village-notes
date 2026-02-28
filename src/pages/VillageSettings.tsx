@@ -67,6 +67,7 @@ export default function VillageSettings() {
   const { enfantId, loading: enfantLoading } = useEnfantId();
 
   const [tab, setTab] = useState<"pro" | "famille">("pro");
+  const [disciplineFilter, setDisciplineFilter] = useState<string | null>(null);
   const [members, setMembers] = useState<Intervenant[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -105,7 +106,20 @@ export default function VillageSettings() {
     if (!enfantLoading && enfantId) fetchMembers();
   }, [enfantId, enfantLoading]);
 
-  const filtered = members.filter((m) => m.type === tab);
+  // Unique specialites for pro sub-filter
+  const proSpecialites = Array.from(
+    new Set(
+      members
+        .filter((m) => m.type === "pro" && m.specialite?.trim())
+        .map((m) => m.specialite!.trim())
+    )
+  ).sort();
+
+  const filtered = members.filter((m) => {
+    if (m.type !== tab) return false;
+    if (tab === "pro" && disciplineFilter) return m.specialite?.trim() === disciplineFilter;
+    return true;
+  });
 
   const resetAddForm = () => {
     setNewNom("");
@@ -206,7 +220,10 @@ export default function VillageSettings() {
         ]).map(({ key, label }) => (
           <button
             key={key}
-            onClick={() => setTab(key)}
+            onClick={() => {
+              setTab(key);
+              if (key === "famille") setDisciplineFilter(null);
+            }}
             className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
               tab === key
                 ? "bg-[#8B74E0] text-white shadow-md"
@@ -217,6 +234,35 @@ export default function VillageSettings() {
           </button>
         ))}
       </div>
+
+      {/* Discipline sub-filter */}
+      {tab === "pro" && proSpecialites.length > 1 && (
+        <div className="flex gap-2 mb-4 flex-wrap">
+          <button
+            onClick={() => setDisciplineFilter(null)}
+            className={`px-3.5 py-1.5 rounded-[20px] text-xs font-medium transition-all ${
+              disciplineFilter === null
+                ? "bg-[#8B74E0] text-white shadow-md"
+                : "bg-[rgba(255,255,255,0.52)] border border-[rgba(255,255,255,0.72)] text-[#1E1A1A]"
+            }`}
+          >
+            Tous
+          </button>
+          {proSpecialites.map((s) => (
+            <button
+              key={s}
+              onClick={() => setDisciplineFilter(s)}
+              className={`px-3.5 py-1.5 rounded-[20px] text-xs font-medium transition-all ${
+                disciplineFilter === s
+                  ? "bg-[#8B74E0] text-white shadow-md"
+                  : "bg-[rgba(255,255,255,0.52)] border border-[rgba(255,255,255,0.72)] text-[#1E1A1A]"
+              }`}
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Member list */}
       <div className="flex flex-col gap-3">
