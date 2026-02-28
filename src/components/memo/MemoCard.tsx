@@ -174,8 +174,8 @@ export function MemoCard({ memo }: MemoCardProps) {
       <div className="flex items-center justify-between">
         {/* LEFT: dots + separator + badge + separator + avatar */}
         <div className="flex items-center" style={{ gap: 7 }}>
-          {/* Domain dots first (skip for étape) */}
-          {memoType !== "evenement" && domainColors.length > 0 && (
+          {/* Domain dots first */}
+          {domainColors.length > 0 && (
             <>
               <div className="flex items-center gap-1">
                 {domainColors.map((color, i) => (
