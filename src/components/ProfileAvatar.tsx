@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useEnfantPrenom } from "@/hooks/useEnfantPrenom";
@@ -35,21 +36,21 @@ export function ProfileAvatar() {
         {user?.email?.[0]?.toUpperCase() || "?"}
       </button>
 
-      {open && (
-        <div className="fixed inset-0 z-50">
+      {open && createPortal(
+        <div className="fixed inset-0 z-50 flex flex-col justify-end">
           <div
             className="absolute inset-0 bg-black/40"
             onClick={() => setOpen(false)}
           />
           <div
-            className="absolute bottom-0 left-0 right-0"
+            className="relative w-full"
             style={{
               background: "rgba(255, 255, 255, 0.85)",
               backdropFilter: "blur(20px) saturate(1.5)",
               WebkitBackdropFilter: "blur(20px) saturate(1.5)",
               borderRadius: "16px 16px 0 0",
               boxShadow: "0 -2px 16px rgba(0,0,0,0.08)",
-              maxHeight: "calc(90vh - env(safe-area-inset-bottom, 0px))",
+              maxHeight: "90dvh",
               overflowY: "auto",
             }}
           >
@@ -98,7 +99,8 @@ export function ProfileAvatar() {
             </div>
             <div className="h-4" />
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
