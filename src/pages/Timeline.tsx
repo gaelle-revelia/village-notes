@@ -117,7 +117,7 @@ function RevealCard({ children }: { children: React.ReactNode }) {
       ref={ref}
       style={{
         opacity: visible ? 1 : 0.35,
-        transform: visible ? "scale(1)" : "scale(0.97)",
+        transform: visible ? "none" : "scale(0.97)",
         transition: "opacity 0.3s ease, transform 0.3s ease",
       }}
     >
