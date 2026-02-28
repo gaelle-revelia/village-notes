@@ -18,13 +18,13 @@ const BottomNavBar = () => {
     <nav
       className="fixed bottom-0 left-0 right-0 z-30 flex items-center justify-around"
       style={{
-        height: 60,
+        minHeight: 60,
+        paddingBottom: "env(safe-area-inset-bottom, 0px)",
         background: "rgba(255, 255, 255, 0.55)",
         backdropFilter: "blur(20px) saturate(1.5)",
         WebkitBackdropFilter: "blur(20px) saturate(1.5)",
         borderTop: "1px solid rgba(255, 255, 255, 0.65)",
         boxShadow: "0 -2px 12px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)",
-        paddingBottom: "env(safe-area-inset-bottom, 0px)",
       }}
     >
       {tabs.map((tab) => {
