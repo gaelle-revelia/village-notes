@@ -1,10 +1,11 @@
-import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Navigate, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Search, ChevronRight, X, Activity, Hand, Brain, Stethoscope, MessageCircle, User, Waves, Heart } from "lucide-react";
+import { Plus, Search, ChevronRight, X } from "lucide-react";
 import BottomNavBar from "@/components/BottomNavBar";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
+import { MemoCard, getDomainsFromTags } from "@/components/memo/MemoCard";
 import {
   Dialog,
   DialogContent,
@@ -26,75 +27,7 @@ interface Memo {
   intervenant?: { nom: string; specialite: string | null; photo_url?: string | null } | null;
 }
 
-// --- Domain color system (Knowledge File) ---
-const DOMAIN_COLORS: Record<string, string> = {
-  moteur: "#E8736A",       // Corail
-  motricité: "#E8736A",
-  kinésithérapie: "#E8736A",
-  physique: "#E8736A",
-  cognitif: "#8B74E0",     // Lavande
-  psychomotricité: "#8B74E0",
-  psychomoteur: "#8B74E0",
-  sensoriel: "#44A882",    // Menthe
-  communication: "#44A882",
-  langage: "#44A882",
-  orthophonie: "#44A882",
-  "bien-être": "#E8A44A",  // Abricot
-  émotionnel: "#E8A44A",
-  sommeil: "#E8A44A",
-  alimentation: "#E8A44A",
-  comportement: "#E8A44A",
-  médical: "#8A9BAE",      // Gris
-  administratif: "#8A9BAE",
-  progrès: "#44A882",
-  difficulté: "#E8A44A",
-  autonomie: "#8B74E0",
-  social: "#8B74E0",
-};
-
-function getDomainColor(tag: string): string {
-  const lower = tag.toLowerCase();
-  for (const [key, color] of Object.entries(DOMAIN_COLORS)) {
-    if (lower.includes(key)) return color;
-  }
-  return "#8A9BAE";
-}
-
-function getDomainsFromTags(tags: string[]): string[] {
-  const seen = new Set<string>();
-  const colors: string[] = [];
-  for (const tag of tags) {
-    const c = getDomainColor(tag);
-    if (!seen.has(c)) {
-      seen.add(c);
-      colors.push(c);
-    }
-    if (colors.length >= 3) break;
-  }
-  return colors;
-}
-
-// --- Intervenant avatar system (Knowledge File) ---
-const SPECIALITE_AVATARS: Record<string, { icon: typeof Activity; gradient: string }> = {
-  kiné: { icon: Activity, gradient: "linear-gradient(135deg, #E8736A, #E8845A)" },
-  kinésithérapeute: { icon: Activity, gradient: "linear-gradient(135deg, #E8736A, #E8845A)" },
-  psychomotric: { icon: Brain, gradient: "linear-gradient(135deg, #8B74E0, #5CA8D8)" },
-  ergothérapeute: { icon: Hand, gradient: "linear-gradient(135deg, #44A882, #4E96C8)" },
-  ergo: { icon: Hand, gradient: "linear-gradient(135deg, #44A882, #4E96C8)" },
-  parent: { icon: Heart, gradient: "linear-gradient(135deg, #E8736A, #C85A8A)" },
-  médecin: { icon: Stethoscope, gradient: "linear-gradient(135deg, #8A9BAE, #6B7F94)" },
-  mpr: { icon: Stethoscope, gradient: "linear-gradient(135deg, #8A9BAE, #6B7F94)" },
-  orthophoniste: { icon: MessageCircle, gradient: "linear-gradient(135deg, #44A882, #4E96C8)" },
-  piscine: { icon: Waves, gradient: "linear-gradient(135deg, #44A882, #4E96C8)" },
-};
-
-function getSpecialiteAvatar(specialite: string | null): { icon: typeof Activity; gradient: string } {
-  const s = (specialite || "").toLowerCase();
-  for (const [key, val] of Object.entries(SPECIALITE_AVATARS)) {
-    if (s.includes(key)) return val;
-  }
-  return { icon: User, gradient: "linear-gradient(135deg, #8A9BAE, #6B7F94)" };
-}
+// Domain helpers imported from MemoCard
 
 // --- Reveal card component using IntersectionObserver ---
 function RevealCard({ children }: { children: React.ReactNode }) {
@@ -332,19 +265,15 @@ const Timeline = () => {
                     style={{
                       left: 16,
                       width: 1.5,
-                      background: "linear-gradient(180deg, #E8736A 0%, #8B74E0 50%, #44A882 100%)",
-                      opacity: 0.25,
+                      background: "linear-gradient(180deg, rgba(232,115,106,0.4) 0%, rgba(139,116,224,0.4) 50%, rgba(68,168,130,0.3) 100%)",
+                      borderRadius: 2,
                     }}
                   />
 
                   {group.memos.map((memo) => {
                     const structured = memo.content_structured as {
-                      resume?: string;
                       tags?: string[];
                     } | null;
-                    const displayDate = memo.memo_date
-                      ? format(new Date(memo.memo_date), "dd MMM", { locale: fr })
-                      : format(new Date(memo.created_at), "dd MMM", { locale: fr });
                     const tags = structured?.tags || [];
                     const domainColors = getDomainsFromTags(tags);
                     const primaryDomainColor = domainColors[0] || "#8A9BAE";
@@ -352,100 +281,25 @@ const Timeline = () => {
                     return (
                       <RevealCard key={memo.id}>
                       <div className="relative" style={{ marginBottom: 16 }}>
-                        {/* Dot — colored by primary domain */}
+                        {/* Dot — hollow ring, colored by primary domain */}
                         <div
                           className="absolute"
                           style={{
                             left: -32,
-                            top: 20,
-                            width: 8,
-                            height: 8,
+                            marginTop: 13,
+                            width: 11,
+                            height: 11,
                             borderRadius: "50%",
-                            backgroundColor: primaryDomainColor,
+                            background: "rgba(255,255,255,0.7)",
+                            backdropFilter: "blur(4px)",
+                            WebkitBackdropFilter: "blur(4px)",
+                            border: `2.5px solid ${primaryDomainColor}`,
+                            boxShadow: `0 0 0 3px ${primaryDomainColor}24`,
+                            zIndex: 1,
                           }}
                         />
 
-                        {/* Card — liquid glass */}
-                        <div
-                          onClick={() => {
-                            if (memo.processing_status === "done") {
-                              navigate(`/memo-result/${memo.id}`);
-                            }
-                          }}
-                          className="cursor-pointer transition-shadow"
-                          style={{
-                            background: "rgba(255, 255, 255, 0.52)",
-                            backdropFilter: "blur(16px) saturate(1.6)",
-                            WebkitBackdropFilter: "blur(16px) saturate(1.6)",
-                            border: "1px solid rgba(255, 255, 255, 0.72)",
-                            borderRadius: 16,
-                            padding: "16px 20px",
-                            boxShadow: "0 4px 16px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8)",
-                          }}
-                        >
-                          {/* Top row: domain dots + date + avatar + intervenant */}
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              {/* Domain dots */}
-                              <div className="flex items-center gap-1">
-                                {domainColors.map((color, i) => (
-                                  <div
-                                    key={i}
-                                    style={{
-                                      width: 6,
-                                      height: 6,
-                                      borderRadius: "50%",
-                                      backgroundColor: color,
-                                    }}
-                                  />
-                                ))}
-                              </div>
-                              <span className="text-xs font-medium text-muted-foreground">
-                                {displayDate}
-                              </span>
-                            </div>
-                            {memo.intervenant && (() => {
-                              const { icon: Icon, gradient } = getSpecialiteAvatar(memo.intervenant!.specialite);
-                              return (
-                                <div className="flex items-center gap-1.5">
-                                  <span className="text-xs font-medium text-muted-foreground">
-                                    {memo.intervenant!.nom}
-                                  </span>
-                                  <div
-                                    className="flex items-center justify-center shrink-0"
-                                    style={{
-                                      width: 22,
-                                      height: 22,
-                                      borderRadius: "50%",
-                                      background: gradient,
-                                      overflow: "hidden",
-                                    }}
-                                    title={memo.intervenant!.nom}
-                                  >
-                                    {memo.intervenant!.photo_url ? (
-                                      <img
-                                        src={memo.intervenant!.photo_url}
-                                        alt={memo.intervenant!.nom}
-                                        className="w-full h-full object-cover"
-                                      />
-                                    ) : (
-                                      <Icon size={12} color="#FFFFFF" />
-                                    )}
-                                  </div>
-                                </div>
-                              );
-                            })()}
-                          </div>
-
-                          {/* Resume — 1 sentence max */}
-                          {(structured?.resume || memo.transcription_raw) && (
-                            <p className="line-clamp-2 mt-2 text-[15px] text-foreground leading-relaxed">
-                              {structured?.resume || memo.transcription_raw}
-                            </p>
-                          )}
-
-                          {/* No text tags — domain dots above are sufficient */}
-                        </div>
+                        <MemoCard memo={memo} />
                       </div>
                       </RevealCard>
                     );
