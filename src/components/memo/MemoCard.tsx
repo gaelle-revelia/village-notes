@@ -172,26 +172,9 @@ export function MemoCard({ memo }: MemoCardProps) {
     >
       {/* Line 1: card-meta */}
       <div className="flex items-center justify-between">
-        {/* LEFT: badge + separator + dots + separator + avatar */}
+        {/* LEFT: dots + separator + badge + separator + avatar */}
         <div className="flex items-center" style={{ gap: 7 }}>
-          {/* Type badge */}
-          <span
-            style={{
-              fontFamily: "'DM Sans', sans-serif",
-              fontSize: 9,
-              fontWeight: 600,
-              textTransform: "uppercase",
-              letterSpacing: "0.05em",
-              color: badge.color,
-            }}
-          >
-            {badge.emoji} {badge.label}
-          </span>
-
-          {/* Separator */}
-          <div style={{ width: 1, height: 11, backgroundColor: "rgba(0,0,0,0.1)" }} />
-
-          {/* Domain dots (skip for étape) */}
+          {/* Domain dots first (skip for étape) */}
           {memoType !== "evenement" && domainColors.length > 0 && (
             <>
               <div className="flex items-center gap-1">
@@ -208,6 +191,23 @@ export function MemoCard({ memo }: MemoCardProps) {
               <div style={{ width: 1, height: 11, backgroundColor: "rgba(0,0,0,0.1)" }} />
             </>
           )}
+
+          {/* Type badge */}
+          <span
+            style={{
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: 9,
+              fontWeight: 600,
+              textTransform: "uppercase",
+              letterSpacing: "0.05em",
+              color: badge.color,
+            }}
+          >
+            {badge.emoji} {badge.label}
+          </span>
+
+          {/* Separator before avatar */}
+          <div style={{ width: 1, height: 11, backgroundColor: "rgba(0,0,0,0.1)" }} />
 
           {/* Intervenant avatar + prenom (skip for étape) */}
           {memoType !== "evenement" && memo.intervenant && (() => {
