@@ -1,98 +1,102 @@
 
 
-## Complete Voice Memo Recording Feature
+## Design System Migration — Global Styles
 
-### Overview
-
-Rebuild the NouveauMemoVocal screen with the exact design system, processing pipeline, freemium gate, and result screen. The existing `process-memo` edge function already handles transcription + structuring via Lovable AI (Gemini) -- we'll refactor it to match the new spec (updated system prompt, new structured output format, `audio-temp` bucket, status updates).
-
-### Important: AI Provider
-
-The spec mentions OpenAI Whisper and GPT-4o, but this project uses **Lovable AI gateway** (pre-configured, no extra API key needed). Gemini handles both audio transcription (multimodal) and text structuring with tool calling. The result is identical -- we just don't need an `OPENAI_API_KEY`.
+This plan updates the two global configuration files (`tailwind.config.ts` and `src/index.css`) plus `index.html` to align with the new design system from the Knowledge File. No page or component files are touched.
 
 ---
 
-### 1. Database: Create `audio-temp` Storage Bucket
+### File 1: `index.html`
 
-Create a new storage bucket `audio-temp` (private) for temporary audio uploads. Add RLS policies so authenticated users can upload/read/delete their own files (path prefix = `user_id/`).
+**Replace** the Google Fonts link (currently loading Crimson Text + Inter) with:
+- **DM Sans** weights 300, 400, 500, 600
+- **Fraunces** weight 600
 
-### 2. Freemium Gate
-
-Before recording starts, query the count of vocal memos this month. If >= 10, show a modal instead of starting the recording. The modal has a "Passer en Premium" button (shows "bientot disponible" toast) and a "Pas maintenant" dismiss button.
-
-### 3. NouveauMemoVocal Screen Redesign
-
-Complete rewrite following the exact design system:
-
-**Header**: Back arrow + "Nouveau memo" (H2, Crimson Text)
-
-**Date field**: "Date de la seance" label, formatted DD MMMM YYYY, tappable date picker. Uses existing `MemoDatePicker` component (minor style tweaks).
-
-**Intervenant selection**: Fetch intervenants by enfant_id. Display as selectable chips (not a dropdown). Single select, optional. Styled per spec (selected: #6B8CAE bg, white text / unselected: white bg, #E8E3DB border, #6B5B73 text). Empty state: muted text, no blocking.
-
-**Recording button**: Large centered button (min-height 64px, border-radius 12px). Default: #6B8CAE bg, "Enregistrer" label. Recording: #E05555 bg, "Arreter", pulse animation. Timer below. Text fallback link below.
-
-**Processing overlay**: Full-screen white overlay (not navigation) showing current step with icon/title/subtitle. Steps: uploading, transcribing, structuring, done, error. On done: navigate to `/memo-result/:id`. On error: show message + "Retour a la timeline" button. Memo row is kept on error.
-
-### 4. Edge Function Refactor: `process-memo`
-
-Update the existing `process-memo` function:
-
-- Accept `audio_path` parameter (for `audio-temp` bucket)
-- Download from `audio-temp` bucket instead of `voice-memos`
-- Update status to `transcribing` then `structuring` then `done`
-- Use the new system prompt from the spec (strict rules about no diagnosis, parent vocabulary only)
-- Update structured output schema: `resume`, `details` (was `points_cles`), `suggestions`, `tags`, `intervenant_detected`
-- Delete audio from `audio-temp` after transcription
-- On any failure: set `processing_status = 'error'`, never delete the memo
-
-### 5. MemoResult Screen
-
-New page at `/memo-result/:id`:
-
-- Fetches the memo by ID from the database
-- Header: back arrow + "Memo enregistre" with vert-nature accent
-- Date + intervenant name in muted text
-- Card sections: Resume, Details (bullet list), A retenir (suggestions, if non-empty), Tags row
-- Tags styled as rectangles with 4px left border colored by domain (Moteur: #6B8CAE, Sensoriel: #7C9885, Cognitif: #C4A162, Social: #9B8DB5, Administratif/default: #A8A0A8)
-- Bottom button: "Retour a la timeline"
-
-### 6. Client-Side Pipeline Flow
-
-1. User taps "Enregistrer" (after freemium check passes)
-2. Request mic permission (handle denial with message)
-3. Record audio (MediaRecorder, webm)
-4. On stop: show processing overlay at "uploading" step
-5. Insert memo row (type='vocal', processing_status='uploading')
-6. Upload blob to `audio-temp/{user_id}/{memo_id}.webm`
-7. Update overlay to "transcribing", invoke `process-memo` edge function
-8. Edge function returns result; update overlay to "structuring" briefly, then navigate to result page
-9. On error: show error overlay, keep memo row
-
-### 7. Routing
-
-Add route `/memo-result/:id` in App.tsx for the new MemoResult page.
+Remove the old `<link>` tags for Crimson Text/Inter fonts.
 
 ---
 
-### Files to Create/Modify
+### File 2: `tailwind.config.ts`
 
-```text
-+--------------------------------------------------+
-| NEW:  src/pages/MemoResult.tsx                   |  Result display page
-| EDIT: src/pages/NouveauMemoVocal.tsx             |  Full redesign
-| EDIT: src/components/memo/RecordingView.tsx      |  Style updates
-| EDIT: src/components/memo/MemoResultView.tsx     |  Adapt to new schema
-| EDIT: supabase/functions/process-memo/index.ts   |  New prompt + schema
-| EDIT: src/App.tsx                                |  Add /memo-result route
-| MIGRATION: Create audio-temp bucket + policies   |  Storage setup
-+--------------------------------------------------+
+**Top-level `fontFamily`** (lines 15-27) — replace both entries:
+- `sans`: `['DM Sans', 'sans-serif']`
+- `serif`: `['Fraunces', 'serif']`
+
+**Extended `fontFamily`** (lines 115-149) — replace all three:
+- `sans`: `['DM Sans', 'sans-serif']`
+- `serif`: `['Fraunces', 'serif']`
+- `mono`: remove `Space Mono`, keep standard system monospace stack
+
+This eliminates Inter, Crimson Text, and Lora from the Tailwind config entirely.
+
+---
+
+### File 3: `src/index.css`
+
+**Google Fonts imports** (lines 1-5) — replace all five `@import` lines with two:
+- `DM+Sans:wght@300;400;500;600`
+- `Fraunces:opsz,wght@9..144,600`
+
+**CSS custom properties `:root`** (lines 11-75) — update to new design system values:
+
+| Variable | New HSL value | Hex reference |
+|---|---|---|
+| `--background` | `0 0% 100%` (transparent — actual bg via body gradient) | -- |
+| `--foreground` | `12 8% 11%` | `#1E1A1A` |
+| `--card` | `0 0% 100%` | white (cards use liquid glass in components) |
+| `--card-foreground` | `12 8% 11%` | `#1E1A1A` |
+| `--popover` | `0 0% 100%` | white |
+| `--popover-foreground` | `12 8% 11%` | `#1E1A1A` |
+| `--primary` | `4 68% 66%` | `#E8736A` (corail) |
+| `--primary-foreground` | `0 0% 100%` | white |
+| `--secondary` | `258 58% 67%` | `#8B74E0` (lavande) |
+| `--secondary-foreground` | `0 0% 100%` | white |
+| `--muted` | `20 6% 96%` | light neutral |
+| `--muted-foreground` | `16 5% 59%` | `#9A9490` |
+| `--accent` | `155 42% 47%` | `#44A882` (menthe) |
+| `--accent-foreground` | `0 0% 100%` | white |
+| `--destructive` | `4 68% 50%` | red |
+| `--destructive-foreground` | `0 0% 100%` | white |
+| `--border` | `0 0% 90%` | neutral light border |
+| `--input` | `0 0% 90%` | same |
+| `--ring` | `258 58% 67%` | lavande |
+
+**Remove old custom tokens** (lines 42-47):
+- `--vert-nature`, `--ocre-doux`, `--rouge-enregistrement`, `--violet-doux`, `--gris-tag`
+
+These are replaced by the new domain color system defined in the Knowledge File (corail, lavande, menthe, abricot, gris) which will be applied at the component level in a later step.
+
+**Remove `--font-sans`, `--font-serif`, `--font-mono`** CSS variables (lines 63-65) — these duplicate Tailwind config and reference old fonts.
+
+**Body rule** (lines 128-130) — add the gradient background:
+```css
+body {
+  @apply text-foreground font-sans;
+  background: linear-gradient(150deg, #F9EDE8 0%, #F0EAF8 45%, #E8EFF8 100%);
+  min-height: 100vh;
+}
 ```
 
-### Design System Applied
+**Heading rule** (lines 132-134) — update from Crimson Text to Fraunces:
+```css
+h1, h2, h3, h4 {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+}
+```
 
-- All colors, typography, spacing, card styles, tag styles, and button styles follow the spec exactly
-- Crimson Text for headings, Inter for body
-- Mobile-first (375px base), 8px spacing grid
-- No gradients anywhere
+**Dark mode block** (lines 78-120) — keep structure but update `--foreground`, `--muted-foreground` to match new palette tones. This is low priority since the app doesn't use dark mode, but we keep it consistent.
+
+---
+
+### What is NOT changed
+
+- No page files (Timeline, MemoResult, Auth, etc.)
+- No component files
+- No routing or backend logic
+- `src/App.css` is untouched (it's Vite boilerplate, harmless)
+
+### Impact
+
+After this change, every element using `font-sans` or `font-serif` Tailwind classes will render in DM Sans / Fraunces. The body gradient will appear globally. Components still using hardcoded hex values will be migrated in a separate step.
 
