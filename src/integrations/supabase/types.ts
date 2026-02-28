@@ -43,28 +43,34 @@ export type Database = {
       }
       intervenants: {
         Row: {
+          actif: boolean
           created_at: string
           enfant_id: string
           id: string
           nom: string
           photo_url: string | null
           specialite: string | null
+          type: string
         }
         Insert: {
+          actif?: boolean
           created_at?: string
           enfant_id: string
           id?: string
           nom: string
           photo_url?: string | null
           specialite?: string | null
+          type?: string
         }
         Update: {
+          actif?: boolean
           created_at?: string
           enfant_id?: string
           id?: string
           nom?: string
           photo_url?: string | null
           specialite?: string | null
+          type?: string
         }
         Relationships: [
           {
