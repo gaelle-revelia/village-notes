@@ -37,13 +37,13 @@ const BottomNavBar = () => {
           >
             <tab.icon
               size={22}
-              style={{ color: active ? "#E8736A" : "#8A9BAE" }}
+              style={{ color: active ? "#8B74E0" : "rgba(154,148,144,0.8)" }}
             />
             <span
               className="text-[10px] mt-0.5"
               style={{
                 fontWeight: active ? 600 : 400,
-                color: active ? "#E8736A" : "#8A9BAE",
+                color: active ? "#8B74E0" : "rgba(154,148,144,0.8)",
               }}
             >
               {tab.label}
