@@ -12,26 +12,12 @@ export default {
   			'2xl': '1400px'
   		}
   	},
-  	fontFamily: {
-  		sans: [
-  			'Inter',
-  			'-apple-system',
-  			'system-ui',
-  			'sans-serif'
-  		],
-  		serif: [
-  			'Crimson Text',
-  			'Georgia',
-  			'serif'
-  		]
-  	},
+	fontFamily: {
+		sans: ['DM Sans', 'sans-serif'],
+		serif: ['Fraunces', 'serif']
+	},
   	extend: {
   		colors: {
-  			'vert-nature': 'hsl(var(--vert-nature))',
-  			'ocre-doux': 'hsl(var(--ocre-doux))',
-  			'rouge-enregistrement': 'hsl(var(--rouge-enregistrement))',
-  			'violet-doux': 'hsl(var(--violet-doux))',
-  			'gris-tag': 'hsl(var(--gris-tag))',
   			border: 'hsl(var(--border))',
   			input: 'hsl(var(--input))',
   			ring: 'hsl(var(--ring))',
@@ -112,41 +98,20 @@ export default {
   			xl: 'var(--shadow-xl)',
   			'2xl': 'var(--shadow-2xl)'
   		},
-  		fontFamily: {
-  			sans: [
-  				'Inter',
-  				'ui-sans-serif',
-  				'system-ui',
-  				'-apple-system',
-  				'BlinkMacSystemFont',
-  				'Segoe UI',
-  				'Roboto',
-  				'Helvetica Neue',
-  				'Arial',
-  				'Noto Sans',
-  				'sans-serif'
-  			],
-  			serif: [
-  				'Lora',
-  				'ui-serif',
-  				'Georgia',
-  				'Cambria',
-  				'Times New Roman',
-  				'Times',
-  				'serif'
-  			],
-  			mono: [
-  				'Space Mono',
-  				'ui-monospace',
-  				'SFMono-Regular',
-  				'Menlo',
-  				'Monaco',
-  				'Consolas',
-  				'Liberation Mono',
-  				'Courier New',
-  				'monospace'
-  			]
-  		}
+		fontFamily: {
+			sans: ['DM Sans', 'sans-serif'],
+			serif: ['Fraunces', 'serif'],
+			mono: [
+				'ui-monospace',
+				'SFMono-Regular',
+				'Menlo',
+				'Monaco',
+				'Consolas',
+				'Liberation Mono',
+				'Courier New',
+				'monospace'
+			]
+		}
   	}
   },
   plugins: [require("tailwindcss-animate")],
