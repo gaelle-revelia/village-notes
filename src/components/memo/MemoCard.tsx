@@ -224,7 +224,7 @@ export function MemoCard({ memo }: MemoCardProps) {
           className="line-clamp-2 mt-1.5"
           style={{
             fontFamily: "'DM Sans', sans-serif",
-            fontSize: 12.5,
+            fontSize: 14,
             lineHeight: 1.45,
             color: "#1E1A1A",
           }}
