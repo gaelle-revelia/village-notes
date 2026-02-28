@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Trash2, Plus } from "lucide-react";
+import { ArrowLeft, Trash2, Plus, Phone, Mail, Building2, StickyNote, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useEnfantId } from "@/hooks/useEnfantId";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -36,6 +37,10 @@ type Intervenant = {
   nom: string;
   specialite: string | null;
   type: string;
+  telephone: string | null;
+  email: string | null;
+  structure: string | null;
+  notes: string | null;
 };
 
 function getAvatarGradient(specialite: string | null, type: string): string {
@@ -53,6 +58,9 @@ function getAvatarGradient(specialite: string | null, type: string): string {
   return "linear-gradient(135deg, #8A9BAE, #6B7F94)";
 }
 
+const glassCard =
+  "bg-[rgba(255,255,255,0.52)] backdrop-blur-[16px] backdrop-saturate-[1.6] border border-[rgba(255,255,255,0.72)] rounded-2xl shadow-[0_4px_16px_rgba(0,0,0,0.07),0_1px_3px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.8)]";
+
 export default function VillageSettings() {
   const navigate = useNavigate();
   const { enfantId, loading: enfantLoading } = useEnfantId();
@@ -66,7 +74,21 @@ export default function VillageSettings() {
   const [newNom, setNewNom] = useState("");
   const [newSpecialite, setNewSpecialite] = useState("");
   const [newType, setNewType] = useState<"pro" | "famille">("pro");
+  const [newTelephone, setNewTelephone] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+  const [newStructure, setNewStructure] = useState("");
+  const [newNotes, setNewNotes] = useState("");
   const [saving, setSaving] = useState(false);
+
+  // Edit dialog
+  const [editTarget, setEditTarget] = useState<Intervenant | null>(null);
+  const [editNom, setEditNom] = useState("");
+  const [editSpecialite, setEditSpecialite] = useState("");
+  const [editTelephone, setEditTelephone] = useState("");
+  const [editEmail, setEditEmail] = useState("");
+  const [editStructure, setEditStructure] = useState("");
+  const [editNotes, setEditNotes] = useState("");
+  const [editSaving, setEditSaving] = useState(false);
 
   // Delete dialog
   const [deleteTarget, setDeleteTarget] = useState<Intervenant | null>(null);
@@ -76,7 +98,7 @@ export default function VillageSettings() {
     setLoading(true);
     const { data } = await supabase
       .from("intervenants")
-      .select("id, nom, specialite, type")
+      .select("id, nom, specialite, type, telephone, email, structure, notes")
       .eq("enfant_id", enfantId)
       .eq("actif", true)
       .order("created_at", { ascending: true });
@@ -90,6 +112,16 @@ export default function VillageSettings() {
 
   const filtered = members.filter((m) => m.type === tab);
 
+  const resetAddForm = () => {
+    setNewNom("");
+    setNewSpecialite("");
+    setNewType("pro");
+    setNewTelephone("");
+    setNewEmail("");
+    setNewStructure("");
+    setNewNotes("");
+  };
+
   const handleAdd = async () => {
     if (!newNom.trim() || !enfantId) return;
     setSaving(true);
@@ -99,12 +131,43 @@ export default function VillageSettings() {
       type: newType,
       enfant_id: enfantId,
       actif: true,
+      telephone: newTelephone.trim() || null,
+      email: newEmail.trim() || null,
+      structure: newStructure.trim() || null,
+      notes: newNotes.trim() || null,
     });
     setSaving(false);
     setAddOpen(false);
-    setNewNom("");
-    setNewSpecialite("");
-    setNewType("pro");
+    resetAddForm();
+    fetchMembers();
+  };
+
+  const openEdit = (m: Intervenant) => {
+    setEditTarget(m);
+    setEditNom(m.nom);
+    setEditSpecialite(m.specialite ?? "");
+    setEditTelephone(m.telephone ?? "");
+    setEditEmail(m.email ?? "");
+    setEditStructure(m.structure ?? "");
+    setEditNotes(m.notes ?? "");
+  };
+
+  const handleEdit = async () => {
+    if (!editTarget || !editNom.trim()) return;
+    setEditSaving(true);
+    await supabase
+      .from("intervenants")
+      .update({
+        nom: editNom.trim(),
+        specialite: editSpecialite.trim() || null,
+        telephone: editTelephone.trim() || null,
+        email: editEmail.trim() || null,
+        structure: editStructure.trim() || null,
+        notes: editNotes.trim() || null,
+      })
+      .eq("id", editTarget.id);
+    setEditSaving(false);
+    setEditTarget(null);
     fetchMembers();
   };
 
@@ -118,8 +181,15 @@ export default function VillageSettings() {
     fetchMembers();
   };
 
-  const glassCard =
-    "bg-[rgba(255,255,255,0.52)] backdrop-blur-[16px] backdrop-saturate-[1.6] border border-[rgba(255,255,255,0.72)] rounded-2xl shadow-[0_4px_16px_rgba(0,0,0,0.07),0_1px_3px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.8)]";
+  const contactLine = (icon: React.ReactNode, value: string | null) => {
+    if (!value) return null;
+    return (
+      <span className="flex items-center gap-1 text-xs text-[#9A9490] truncate">
+        {icon}
+        {value}
+      </span>
+    );
+  };
 
   return (
     <div className="min-h-screen px-4 pt-4 pb-24">
@@ -166,9 +236,10 @@ export default function VillageSettings() {
           </p>
         ) : (
           filtered.map((m) => (
-            <div
+            <button
               key={m.id}
-              className={`${glassCard} flex items-center gap-3 px-4 py-3`}
+              onClick={() => openEdit(m)}
+              className={`${glassCard} flex items-center gap-3 px-4 py-3 w-full text-left`}
             >
               {/* Avatar */}
               <div
@@ -182,20 +253,21 @@ export default function VillageSettings() {
                 <p className="text-sm font-medium text-[#1E1A1A] truncate">
                   {m.nom}
                 </p>
-                {m.specialite && (
-                  <p className="text-xs text-[#9A9490] truncate">
-                    {m.specialite}
-                  </p>
-                )}
+                <div className="flex flex-wrap gap-x-3 gap-y-0.5">
+                  {m.specialite && (
+                    <span className="text-xs text-[#9A9490] truncate">
+                      {m.specialite}
+                    </span>
+                  )}
+                  {m.structure && (
+                    <span className="text-xs text-[#9A9490] truncate">
+                      {m.structure}
+                    </span>
+                  )}
+                </div>
               </div>
-              {/* Delete */}
-              <button
-                onClick={() => setDeleteTarget(m)}
-                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/40 transition"
-              >
-                <Trash2 className="w-4 h-4 text-[#9A9490]" />
-              </button>
-            </div>
+              <ChevronRight className="w-4 h-4 text-[#9A9490] shrink-0" />
+            </button>
           ))
         )}
       </div>
@@ -213,8 +285,8 @@ export default function VillageSettings() {
       </button>
 
       {/* Add Dialog */}
-      <Dialog open={addOpen} onOpenChange={setAddOpen}>
-        <DialogContent className={`${glassCard} border-none max-w-[340px]`}>
+      <Dialog open={addOpen} onOpenChange={(o) => { if (!o) resetAddForm(); setAddOpen(o); }}>
+        <DialogContent className={`${glassCard} border-none max-w-[360px] max-h-[85vh] overflow-y-auto`}>
           <DialogHeader>
             <DialogTitle className="font-['Fraunces'] text-lg">
               Nouveau membre
@@ -222,12 +294,13 @@ export default function VillageSettings() {
           </DialogHeader>
           <div className="flex flex-col gap-4 py-2">
             <div>
-              <Label className="text-xs text-[#9A9490] mb-1">Nom</Label>
+              <Label className="text-xs text-[#9A9490] mb-1">Nom *</Label>
               <Input
                 value={newNom}
                 onChange={(e) => setNewNom(e.target.value)}
                 placeholder="Prénom Nom"
                 className="bg-white/40 border-white/60"
+                maxLength={100}
               />
             </div>
             <div>
@@ -237,6 +310,7 @@ export default function VillageSettings() {
                 onChange={(e) => setNewSpecialite(e.target.value)}
                 placeholder="Ex: Kinésithérapeute"
                 className="bg-white/40 border-white/60"
+                maxLength={100}
               />
             </div>
             <div>
@@ -254,11 +328,54 @@ export default function VillageSettings() {
                 </SelectContent>
               </Select>
             </div>
+            <div>
+              <Label className="text-xs text-[#9A9490] mb-1">Téléphone</Label>
+              <Input
+                value={newTelephone}
+                onChange={(e) => setNewTelephone(e.target.value)}
+                placeholder="06 12 34 56 78"
+                className="bg-white/40 border-white/60"
+                type="tel"
+                maxLength={20}
+              />
+            </div>
+            <div>
+              <Label className="text-xs text-[#9A9490] mb-1">Email</Label>
+              <Input
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+                placeholder="nom@exemple.fr"
+                className="bg-white/40 border-white/60"
+                type="email"
+                maxLength={255}
+              />
+            </div>
+            <div>
+              <Label className="text-xs text-[#9A9490] mb-1">Structure / Cabinet</Label>
+              <Input
+                value={newStructure}
+                onChange={(e) => setNewStructure(e.target.value)}
+                placeholder="Ex: Cabinet rue Yann d'Argent"
+                className="bg-white/40 border-white/60"
+                maxLength={200}
+              />
+            </div>
+            <div>
+              <Label className="text-xs text-[#9A9490] mb-1">Notes</Label>
+              <Textarea
+                value={newNotes}
+                onChange={(e) => setNewNotes(e.target.value)}
+                placeholder="Infos complémentaires…"
+                className="bg-white/40 border-white/60 resize-none"
+                rows={2}
+                maxLength={500}
+              />
+            </div>
           </div>
           <DialogFooter className="gap-2">
             <Button
               variant="ghost"
-              onClick={() => setAddOpen(false)}
+              onClick={() => { resetAddForm(); setAddOpen(false); }}
               className="text-[#9A9490]"
             >
               Annuler
@@ -270,6 +387,102 @@ export default function VillageSettings() {
             >
               {saving ? "…" : "Ajouter"}
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Dialog */}
+      <Dialog open={!!editTarget} onOpenChange={(o) => !o && setEditTarget(null)}>
+        <DialogContent className={`${glassCard} border-none max-w-[360px] max-h-[85vh] overflow-y-auto`}>
+          <DialogHeader>
+            <DialogTitle className="font-['Fraunces'] text-lg">
+              Modifier
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-4 py-2">
+            <div>
+              <Label className="text-xs text-[#9A9490] mb-1">Nom *</Label>
+              <Input
+                value={editNom}
+                onChange={(e) => setEditNom(e.target.value)}
+                className="bg-white/40 border-white/60"
+                maxLength={100}
+              />
+            </div>
+            <div>
+              <Label className="text-xs text-[#9A9490] mb-1">Spécialité</Label>
+              <Input
+                value={editSpecialite}
+                onChange={(e) => setEditSpecialite(e.target.value)}
+                className="bg-white/40 border-white/60"
+                maxLength={100}
+              />
+            </div>
+            <div>
+              <Label className="text-xs text-[#9A9490] mb-1">Téléphone</Label>
+              <Input
+                value={editTelephone}
+                onChange={(e) => setEditTelephone(e.target.value)}
+                className="bg-white/40 border-white/60"
+                type="tel"
+                maxLength={20}
+              />
+            </div>
+            <div>
+              <Label className="text-xs text-[#9A9490] mb-1">Email</Label>
+              <Input
+                value={editEmail}
+                onChange={(e) => setEditEmail(e.target.value)}
+                className="bg-white/40 border-white/60"
+                type="email"
+                maxLength={255}
+              />
+            </div>
+            <div>
+              <Label className="text-xs text-[#9A9490] mb-1">Structure / Cabinet</Label>
+              <Input
+                value={editStructure}
+                onChange={(e) => setEditStructure(e.target.value)}
+                className="bg-white/40 border-white/60"
+                maxLength={200}
+              />
+            </div>
+            <div>
+              <Label className="text-xs text-[#9A9490] mb-1">Notes</Label>
+              <Textarea
+                value={editNotes}
+                onChange={(e) => setEditNotes(e.target.value)}
+                className="bg-white/40 border-white/60 resize-none"
+                rows={2}
+                maxLength={500}
+              />
+            </div>
+          </div>
+          <DialogFooter className="gap-2 sm:justify-between">
+            <Button
+              variant="ghost"
+              onClick={() => editTarget && setDeleteTarget(editTarget)}
+              className="text-[#E8736A] hover:text-[#d4625a] hover:bg-red-50/50 mr-auto"
+            >
+              <Trash2 className="w-4 h-4 mr-1" />
+              Retirer
+            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="ghost"
+                onClick={() => setEditTarget(null)}
+                className="text-[#9A9490]"
+              >
+                Annuler
+              </Button>
+              <Button
+                onClick={handleEdit}
+                disabled={!editNom.trim() || editSaving}
+                className="bg-[#8B74E0] hover:bg-[#7A63CF] text-white"
+              >
+                {editSaving ? "…" : "Enregistrer"}
+              </Button>
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>
