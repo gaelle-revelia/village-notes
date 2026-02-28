@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -96,6 +96,36 @@ function getSpecialiteAvatar(specialite: string | null): { icon: typeof Activity
   return { icon: User, gradient: "linear-gradient(135deg, #8A9BAE, #6B7F94)" };
 }
 
+// --- Reveal card component using IntersectionObserver ---
+function RevealCard({ children }: { children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setVisible(entry.isIntersecting),
+      { threshold: 0.15 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={ref}
+      style={{
+        opacity: visible ? 1 : 0.35,
+        transform: visible ? "scale(1)" : "scale(0.97)",
+        transition: "opacity 0.3s ease, transform 0.3s ease",
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
 const Timeline = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
@@ -103,6 +133,7 @@ const Timeline = () => {
   const [loadingMemos, setLoadingMemos] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [sheetOpen, setSheetOpen] = useState(false);
+  const bottomRef = useRef<HTMLDivElement>(null);
 
   const menuItems = [
     { icon: "🎙️", label: "Note vocale", description: "Enregistrer une séance à la voix", route: "/nouveau-memo-vocal" },
@@ -183,8 +214,23 @@ const Timeline = () => {
       groups.push({ key, label, memos: items });
     }
 
+    // Reverse: oldest group first (top), newest last (bottom)
+    // Within each group, oldest memo first, newest last
+    groups.reverse();
+    for (const g of groups) g.memos.reverse();
+
     return groups;
   }, [filteredMemos]);
+
+  // Scroll to bottom on initial load (most recent memo visible)
+  useEffect(() => {
+    if (!loadingMemos && filteredMemos.length > 0) {
+      // Small delay to let DOM render
+      requestAnimationFrame(() => {
+        bottomRef.current?.scrollIntoView({ behavior: "instant" as ScrollBehavior });
+      });
+    }
+  }, [loadingMemos, filteredMemos.length]);
 
   if (loading) {
     return (
@@ -287,7 +333,8 @@ const Timeline = () => {
                     const primaryDomainColor = domainColors[0] || "#8A9BAE";
 
                     return (
-                      <div key={memo.id} className="relative" style={{ marginBottom: 10 }}>
+                      <RevealCard key={memo.id}>
+                      <div className="relative" style={{ marginBottom: 10 }}>
                         {/* Dot — colored by primary domain */}
                         <div
                           className="absolute"
@@ -383,6 +430,7 @@ const Timeline = () => {
                           {/* No text tags — domain dots above are sufficient */}
                         </div>
                       </div>
+                      </RevealCard>
                     );
                   })}
                 </div>
@@ -390,6 +438,7 @@ const Timeline = () => {
             ))}
           </div>
         )}
+        <div ref={bottomRef} />
       </main>
 
       {/* FAB — gradient corail → lavande */}
