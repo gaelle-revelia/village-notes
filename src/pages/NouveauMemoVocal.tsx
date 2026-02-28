@@ -198,7 +198,7 @@ const NouveauMemoVocal = () => {
 
   if (authLoading || !freemiumChecked) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="flex min-h-screen items-center justify-center">
         <div className="animate-pulse text-muted-foreground">Chargement...</div>
       </div>
     );
@@ -209,8 +209,8 @@ const NouveauMemoVocal = () => {
   if (processingStatus !== "idle") {
     if (processingStatus === "error") {
       return (
-        <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
-          <div className="w-full max-w-[360px] rounded-xl border border-border bg-card p-8 text-center shadow-[0_2px_8px_rgba(42,42,42,0.06)]">
+        <div className="flex min-h-screen flex-col items-center justify-center px-4">
+          <div className="w-full max-w-[360px] rounded-2xl p-8 text-center" style={{ background: "rgba(255,255,255,0.52)", backdropFilter: "blur(16px) saturate(1.6)", WebkitBackdropFilter: "blur(16px) saturate(1.6)", border: "1px solid rgba(255,255,255,0.72)", boxShadow: "0 4px 16px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8)" }}>
             <div className="text-4xl mb-4">⚠️</div>
             <h2 className="font-serif text-xl font-semibold text-card-foreground mb-2">
               Une erreur est survenue
@@ -234,8 +234,8 @@ const NouveauMemoVocal = () => {
     const step = PROCESSING_STEPS[processingStatus];
     if (step) {
       return (
-        <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
-          <div className="w-full max-w-[360px] rounded-xl border border-border bg-card p-8 text-center shadow-[0_2px_8px_rgba(42,42,42,0.06)]">
+        <div className="flex min-h-screen flex-col items-center justify-center px-4">
+          <div className="w-full max-w-[360px] rounded-2xl p-8 text-center" style={{ background: "rgba(255,255,255,0.52)", backdropFilter: "blur(16px) saturate(1.6)", WebkitBackdropFilter: "blur(16px) saturate(1.6)", border: "1px solid rgba(255,255,255,0.72)", boxShadow: "0 4px 16px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8)" }}>
             <div className="text-4xl mb-4 animate-pulse">{step.icon}</div>
             <h2 className="font-serif text-xl font-semibold text-card-foreground mb-2">
               {step.title}
@@ -248,9 +248,9 @@ const NouveauMemoVocal = () => {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="flex min-h-screen flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-10 border-b border-border bg-card px-4 py-3 flex items-center gap-3">
+      <header className="sticky top-0 z-10 px-4 py-3 flex items-center gap-3" style={{ background: "rgba(255,255,255,0.72)", backdropFilter: "blur(20px) saturate(1.5)", WebkitBackdropFilter: "blur(20px) saturate(1.5)", borderBottom: "1px solid rgba(255,255,255,0.6)", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
         <button
           onClick={() => navigate("/timeline")}
           className="text-muted-foreground hover:text-foreground text-sm flex items-center gap-1"
@@ -303,7 +303,7 @@ const NouveauMemoVocal = () => {
             <div className="flex flex-col items-center space-y-4 pt-4">
               {/* Permission denied */}
               {permissionDenied && (
-                <div className="rounded-xl border border-border bg-card p-4 text-center shadow-[0_2px_8px_rgba(42,42,42,0.06)]">
+                <div className="rounded-2xl p-4 text-center" style={{ background: "rgba(255,255,255,0.52)", backdropFilter: "blur(16px) saturate(1.6)", WebkitBackdropFilter: "blur(16px) saturate(1.6)", border: "1px solid rgba(255,255,255,0.72)", boxShadow: "0 4px 16px rgba(0,0,0,0.07)" }}>
                   <p className="text-sm text-foreground mb-2">
                     L'accès au microphone est nécessaire pour enregistrer un mémo.
                   </p>

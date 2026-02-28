@@ -24,7 +24,7 @@ const NouveauDocument = () => {
   const [saving, setSaving] = useState(false);
 
   if (authLoading) {
-    return <div className="flex min-h-screen items-center justify-center bg-background"><div className="animate-pulse text-muted-foreground">Chargement...</div></div>;
+    return <div className="flex min-h-screen items-center justify-center"><div className="animate-pulse text-muted-foreground">Chargement...</div></div>;
   }
   if (!user) return <Navigate to="/auth" replace />;
 
@@ -75,8 +75,8 @@ const NouveauDocument = () => {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <header className="sticky top-0 z-10 border-b bg-card px-4 py-3 flex items-center gap-3">
+    <div className="flex min-h-screen flex-col">
+      <header className="sticky top-0 z-10 px-4 py-3 flex items-center gap-3" style={{ background: "rgba(255,255,255,0.72)", backdropFilter: "blur(20px) saturate(1.5)", WebkitBackdropFilter: "blur(20px) saturate(1.5)", borderBottom: "1px solid rgba(255,255,255,0.6)", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
         <button onClick={() => navigate("/timeline")} className="text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-5 w-5" />
         </button>
