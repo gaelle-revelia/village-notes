@@ -124,13 +124,13 @@ export function MemoCard({ memo }: MemoCardProps) {
       onClick={handleClick}
       className="cursor-pointer transition-shadow"
       style={{
-        background: "rgba(255, 255, 255, 0.52)",
+        background: "rgba(255, 255, 255, 0.38)",
         backdropFilter: "blur(16px) saturate(1.6)",
         WebkitBackdropFilter: "blur(16px) saturate(1.6)",
-        border: "1px solid rgba(255, 255, 255, 0.72)",
+        border: "1px solid rgba(255, 255, 255, 0.85)",
         borderRadius: 16,
         padding: "11px 13px",
-        boxShadow: "0 4px 16px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.8)",
+        boxShadow: "0 4px 24px rgba(139,116,224,0.08), 0 1px 4px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9)",
       }}
     >
       {/* Line 1: card-meta */}
