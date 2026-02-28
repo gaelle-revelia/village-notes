@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, Search, ChevronRight, X, Activity, Hand, Brain, Stethoscope, MessageCircle, User, Waves, Heart } from "lucide-react";
@@ -129,6 +129,7 @@ function RevealCard({ children }: { children: React.ReactNode }) {
 const Timeline = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [memos, setMemos] = useState<Memo[]>([]);
   const [loadingMemos, setLoadingMemos] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -178,7 +179,7 @@ const Timeline = () => {
     };
 
     fetchMemos();
-  }, [user]);
+  }, [user, location.key]);
 
   const filteredMemos = useMemo(() => {
     if (!searchQuery.trim()) return memos;
