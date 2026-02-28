@@ -145,6 +145,16 @@ export default function MemberDetailPanel({
 
         {/* Fields */}
         <div className="flex flex-col gap-4 px-5 flex-1">
+          <FieldBlock label="NOM">
+            <Input
+              value={nom}
+              onChange={(e) => setNom(e.target.value)}
+              placeholder="Prénom Nom"
+              className="bg-white/30 border-white/50 placeholder:italic placeholder:text-[#9A9490] text-sm text-[#1E1A1A]"
+              maxLength={100}
+            />
+          </FieldBlock>
+
           {member.type === "famille" ? (
             <>
               <FieldBlock label="RELATION">
@@ -184,6 +194,16 @@ export default function MemberDetailPanel({
             </>
           ) : (
             <>
+              <FieldBlock label="SPÉCIALITÉ">
+                <Input
+                  value={specialite}
+                  onChange={(e) => setSpecialite(e.target.value)}
+                  placeholder="Ajouter..."
+                  className="bg-white/30 border-white/50 placeholder:italic placeholder:text-[#9A9490] text-sm text-[#1E1A1A]"
+                  maxLength={100}
+                />
+              </FieldBlock>
+
               <FieldBlock label="STRUCTURE / LIEU">
                 <Input
                   value={structure}
