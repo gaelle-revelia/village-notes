@@ -254,7 +254,7 @@ export function MemoCard({ memo }: MemoCardProps) {
             fontFamily: "'DM Sans', sans-serif",
             fontSize: 14,
             lineHeight: 1.45,
-            color: "#1E1A1A",
+            color: memoType === "evenement" ? "#8A6A00" : "#1E1A1A",
             fontWeight: memoType === "evenement" ? 600 : 400,
           }}
         >
