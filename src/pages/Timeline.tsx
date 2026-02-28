@@ -182,9 +182,14 @@ const Timeline = () => {
   }, [user, location.key]);
 
   const filteredMemos = useMemo(() => {
-    if (!searchQuery.trim()) return memos;
+    // Filter out memos with no displayable content
+    const displayable = memos.filter(m => {
+      const structured = m.content_structured as any;
+      return structured?.resume || m.transcription_raw;
+    });
+    if (!searchQuery.trim()) return displayable;
     const q = searchQuery.toLowerCase();
-    return memos.filter(m => {
+    return displayable.filter(m => {
       const structured = m.content_structured as any;
       return (
         m.transcription_raw?.toLowerCase().includes(q) ||
