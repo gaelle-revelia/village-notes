@@ -19,7 +19,7 @@ const Onboarding = () => {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="flex min-h-screen items-center justify-center">
         <div className="animate-pulse text-muted-foreground">Chargement...</div>
       </div>
     );
@@ -91,7 +91,7 @@ const Onboarding = () => {
   };
 
   return (
-    <main className="flex min-h-screen flex-col bg-background px-4 py-6">
+    <main className="flex min-h-screen flex-col px-4 py-6">
       <div className="mx-auto w-full max-w-[400px] flex-1 flex flex-col">
         {step > 1 && step < 4 && (
           <button

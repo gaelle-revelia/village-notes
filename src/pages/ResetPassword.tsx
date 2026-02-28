@@ -44,8 +44,8 @@ const ResetPassword = () => {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="w-full max-w-[400px] space-y-6">
+    <main className="flex min-h-screen items-center justify-center px-4">
+      <div className="w-full max-w-[400px] space-y-6 rounded-2xl p-6" style={{ background: "rgba(255,255,255,0.52)", backdropFilter: "blur(16px) saturate(1.6)", WebkitBackdropFilter: "blur(16px) saturate(1.6)", border: "1px solid rgba(255,255,255,0.72)", boxShadow: "0 4px 16px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8)" }}>
         <h1 className="text-[32px] font-semibold text-card-foreground">Nouveau mot de passe</h1>
 
         <form onSubmit={handleSubmit} className="space-y-4">

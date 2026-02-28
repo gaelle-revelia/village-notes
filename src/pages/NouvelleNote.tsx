@@ -8,6 +8,24 @@ import { supabase } from "@/integrations/supabase/client";
 import { MemoDatePicker } from "@/components/memo/MemoDatePicker";
 import { Button } from "@/components/ui/button";
 
+const glassCard: React.CSSProperties = {
+  background: "rgba(255, 255, 255, 0.52)",
+  backdropFilter: "blur(16px) saturate(1.6)",
+  WebkitBackdropFilter: "blur(16px) saturate(1.6)",
+  border: "1px solid rgba(255, 255, 255, 0.72)",
+  borderRadius: 16,
+  padding: 16,
+  boxShadow: "0 4px 16px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8)",
+};
+
+const glassHeader: React.CSSProperties = {
+  background: "rgba(255,255,255,0.72)",
+  backdropFilter: "blur(20px) saturate(1.5)",
+  WebkitBackdropFilter: "blur(20px) saturate(1.5)",
+  borderBottom: "1px solid rgba(255,255,255,0.6)",
+  boxShadow: "0 2px 12px rgba(0,0,0,0.05)",
+};
+
 interface Intervenant {
   id: string;
   nom: string;
@@ -42,8 +60,8 @@ const NouvelleNote = () => {
 
   if (authLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: "#F4F1EA" }}>
-        <div className="animate-pulse" style={{ color: "#8B7D8B" }}>Chargement...</div>
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="animate-pulse text-muted-foreground">Chargement...</div>
       </div>
     );
   }
@@ -54,7 +72,6 @@ const NouvelleNote = () => {
     setProcessingStatus("structuring");
 
     try {
-      // 1. Insert memo with processing_status='structuring'
       const { data: memo, error: memoError } = await supabase
         .from("memos")
         .insert({
@@ -72,7 +89,6 @@ const NouvelleNote = () => {
 
       if (memoError || !memo) throw new Error("Impossible de créer la note");
 
-      // 2. Call edge function for AI structuring (text mode)
       const { data: fnData, error: fnError } = await supabase.functions.invoke("process-memo", {
         body: {
           memo_id: memo.id,
@@ -84,7 +100,6 @@ const NouvelleNote = () => {
       if (fnError) throw new Error(fnError.message || "Échec du traitement");
       if (fnData?.error) throw new Error(fnData.error);
 
-      // Done → navigate to result
       setProcessingStatus("done");
       navigate(`/memo-result/${memo.id}`);
     } catch (err) {
@@ -98,71 +113,34 @@ const NouvelleNote = () => {
   if (processingStatus !== "idle") {
     if (processingStatus === "error") {
       return (
-        <div className="flex min-h-screen flex-col items-center justify-center px-4" style={{ backgroundColor: "#F4F1EA" }}>
-          <div
-            className="w-full max-w-[360px] text-center"
-            style={{
-              backgroundColor: "#FFFFFF",
-              border: "1px solid #E8E3DB",
-              borderRadius: 12,
-              padding: 32,
-            }}
-          >
+        <div className="flex min-h-screen flex-col items-center justify-center px-4">
+          <div className="w-full max-w-[360px] text-center rounded-2xl p-8" style={glassCard}>
             <div className="text-4xl mb-4">⚠️</div>
-            <h2
-              style={{ fontFamily: "'Crimson Text', Georgia, serif", fontSize: 20, fontWeight: 600, color: "#2A2A2A", marginBottom: 8 }}
-            >
+            <h2 className="font-serif text-xl font-semibold text-foreground mb-2">
               Une erreur est survenue
             </h2>
-            <p style={{ fontFamily: "Inter, sans-serif", fontSize: 14, color: "#8B7D8B", marginBottom: 24 }}>
+            <p className="text-sm text-muted-foreground mb-6">
               Votre note a bien été enregistrée. Nous réessaierons de la traiter automatiquement.
             </p>
             {errorMessage && (
-              <p style={{ fontFamily: "Inter, sans-serif", fontSize: 12, color: "#8B7D8B", marginBottom: 24 }}>
-                {errorMessage}
-              </p>
+              <p className="text-xs text-muted-foreground mb-6">{errorMessage}</p>
             )}
-            <button
-              onClick={() => navigate("/timeline")}
-              style={{
-                width: "100%",
-                height: 48,
-                borderRadius: 12,
-                border: "none",
-                fontFamily: "Inter, sans-serif",
-                fontSize: 15,
-                fontWeight: 600,
-                color: "#FFFFFF",
-                backgroundColor: "#6B8CAE",
-                cursor: "pointer",
-              }}
-            >
+            <Button onClick={() => navigate("/timeline")} className="w-full rounded-xl h-12 text-base">
               Retour à la timeline
-            </button>
+            </Button>
           </div>
         </div>
       );
     }
 
-    // Structuring state
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center px-4" style={{ backgroundColor: "#F4F1EA" }}>
-        <div
-          className="w-full max-w-[360px] text-center"
-          style={{
-            backgroundColor: "#FFFFFF",
-            border: "1px solid #E8E3DB",
-            borderRadius: 12,
-            padding: 32,
-          }}
-        >
+      <div className="flex min-h-screen flex-col items-center justify-center px-4">
+        <div className="w-full max-w-[360px] text-center rounded-2xl p-8" style={glassCard}>
           <div className="text-4xl mb-4 animate-pulse">✨</div>
-          <h2
-            style={{ fontFamily: "'Crimson Text', Georgia, serif", fontSize: 20, fontWeight: 600, color: "#2A2A2A", marginBottom: 8 }}
-          >
+          <h2 className="font-serif text-xl font-semibold text-foreground mb-2">
             Organisation en cours...
           </h2>
-          <p style={{ fontFamily: "Inter, sans-serif", fontSize: 14, color: "#8B7D8B" }}>
+          <p className="text-sm text-muted-foreground">
             On structure vos notes automatiquement.
           </p>
         </div>
@@ -171,16 +149,12 @@ const NouvelleNote = () => {
   }
 
   return (
-    <div className="flex min-h-screen flex-col" style={{ backgroundColor: "#F4F1EA" }}>
+    <div className="flex min-h-screen flex-col">
       {/* Header */}
-      <header
-        className="sticky top-0 z-10 px-4 py-3 flex items-center"
-        style={{ backgroundColor: "#F4F1EA" }}
-      >
+      <header className="sticky top-0 z-10 px-4 py-3 flex items-center" style={glassHeader}>
         <button
           onClick={() => navigate("/timeline")}
-          className="flex items-center gap-1"
-          style={{ fontFamily: "Inter, sans-serif", fontSize: 14, color: "#8B7D8B", background: "none", border: "none" }}
+          className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
           Retour
@@ -189,42 +163,20 @@ const NouvelleNote = () => {
 
       <main className="flex-1 px-4 pb-32">
         <div className="mx-auto max-w-[400px] space-y-6">
-          {/* Title */}
-          <h2
-            className="text-center"
-            style={{ fontFamily: "'Crimson Text', Georgia, serif", fontSize: 24, fontWeight: 600, color: "#2A2A2A" }}
-          >
+          <h2 className="font-serif text-2xl font-semibold text-foreground text-center">
             Nouvelle note
           </h2>
 
-          {/* Date */}
-          <div
-            style={{
-              backgroundColor: "#FFFFFF",
-              border: "1px solid #E8E3DB",
-              borderRadius: 12,
-              padding: 16,
-            }}
-          >
+          <div style={glassCard}>
             <MemoDatePicker date={memoDate} onDateChange={setMemoDate} />
           </div>
 
-          {/* Intervenant chips */}
-          <div
-            style={{
-              backgroundColor: "#FFFFFF",
-              border: "1px solid #E8E3DB",
-              borderRadius: 12,
-              padding: 16,
-            }}
-          >
-            <label style={{ fontFamily: "Inter, sans-serif", fontSize: 14, fontWeight: 500, color: "#2A2A2A", display: "block", marginBottom: 8 }}>
+          <div style={glassCard}>
+            <label className="text-sm font-medium text-foreground block mb-2">
               Avec quel intervenant ?
             </label>
             {intervenants.length === 0 ? (
-              <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#8B7D8B" }}>
-                Aucun intervenant enregistré
-              </p>
+              <p className="text-xs text-muted-foreground">Aucun intervenant enregistré</p>
             ) : (
               <div className="flex flex-wrap gap-2">
                 {intervenants.map((i) => {
@@ -233,16 +185,11 @@ const NouvelleNote = () => {
                     <button
                       key={i.id}
                       onClick={() => setIntervenantId(selected ? null : i.id)}
+                      className="rounded-lg px-3.5 py-2 text-sm font-medium transition-all"
                       style={{
-                        fontFamily: "Inter, sans-serif",
-                        fontSize: 13,
-                        fontWeight: 500,
-                        borderRadius: 8,
-                        padding: "8px 14px",
-                        border: `1px solid ${selected ? "#6B8CAE" : "#E8E3DB"}`,
-                        backgroundColor: selected ? "#6B8CAE" : "#FFFFFF",
-                        color: selected ? "#FFFFFF" : "#2A2A2A",
-                        transition: "all 0.15s ease",
+                        border: selected ? "none" : "1px solid rgba(255,255,255,0.72)",
+                        background: selected ? "linear-gradient(135deg, #E8736A, #8B74E0)" : "rgba(255,255,255,0.5)",
+                        color: selected ? "#FFFFFF" : "hsl(12 8% 11%)",
                       }}
                     >
                       {i.nom}{i.specialite ? ` · ${i.specialite}` : ""}
@@ -253,16 +200,8 @@ const NouvelleNote = () => {
             )}
           </div>
 
-          {/* Textarea */}
-          <div
-            style={{
-              backgroundColor: "#FFFFFF",
-              border: "1px solid #E8E3DB",
-              borderRadius: 12,
-              padding: 16,
-            }}
-          >
-            <label style={{ fontFamily: "Inter, sans-serif", fontSize: 14, fontWeight: 500, color: "#2A2A2A", display: "block", marginBottom: 8 }}>
+          <div style={glassCard}>
+            <label className="text-sm font-medium text-foreground block mb-2">
               Votre note
             </label>
             <textarea
@@ -270,48 +209,24 @@ const NouvelleNote = () => {
               onChange={(e) => setText(e.target.value)}
               placeholder="Décrivez ce que vous avez observé, entendu ou retenu..."
               rows={5}
-              style={{
-                width: "100%",
-                fontFamily: "Inter, sans-serif",
-                fontSize: 15,
-                color: "#2A2A2A",
-                lineHeight: 1.6,
-                border: "none",
-                outline: "none",
-                resize: "none",
-                backgroundColor: "transparent",
-              }}
+              className="w-full text-[15px] text-foreground leading-relaxed placeholder:text-muted-foreground border-none outline-none resize-none bg-transparent"
             />
           </div>
         </div>
       </main>
 
       {/* Fixed save button */}
-      <div
-        className="fixed bottom-0 left-0 right-0 z-20 px-4"
-        style={{
-          paddingBottom: 24,
-          paddingTop: 16,
-          backgroundColor: "#F4F1EA",
-        }}
-      >
+      <div className="fixed bottom-0 left-0 right-0 z-20 px-4 pb-6 pt-4" style={glassHeader}>
         <div className="mx-auto max-w-[400px]">
           <button
             onClick={handleSave}
             disabled={!text.trim() || processingStatus !== "idle"}
+            className="w-full h-[52px] rounded-xl border-none text-base font-semibold text-white cursor-pointer transition-opacity"
             style={{
-              width: "100%",
-              height: 52,
-              borderRadius: 12,
-              border: "none",
-              fontFamily: "Inter, sans-serif",
-              fontSize: 16,
-              fontWeight: 600,
-              color: "#FFFFFF",
-              backgroundColor: !text.trim() ? "#C4BDB8" : "#6B8CAE",
+              background: !text.trim() ? "hsl(var(--muted-foreground))" : "linear-gradient(135deg, #E8736A, #8B74E0)",
+              boxShadow: text.trim() ? "0 6px 20px rgba(139,116,224,0.3)" : "none",
               opacity: processingStatus !== "idle" ? 0.7 : 1,
               cursor: !text.trim() || processingStatus !== "idle" ? "not-allowed" : "pointer",
-              transition: "background-color 0.2s ease",
             }}
           >
             Enregistrer la note

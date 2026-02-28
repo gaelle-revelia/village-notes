@@ -50,7 +50,7 @@ const RecordMemo = () => {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="flex min-h-screen items-center justify-center">
         <div className="animate-pulse text-muted-foreground">Chargement...</div>
       </div>
     );
@@ -149,9 +149,9 @@ const RecordMemo = () => {
   };
 
   return (
-    <main className="flex min-h-screen flex-col bg-background">
+    <main className="flex min-h-screen flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-10 flex items-center border-b bg-card px-4 py-3">
+      <header className="sticky top-0 z-10 flex items-center px-4 py-3" style={{ background: "rgba(255,255,255,0.72)", backdropFilter: "blur(20px) saturate(1.5)", WebkitBackdropFilter: "blur(20px) saturate(1.5)", borderBottom: "1px solid rgba(255,255,255,0.6)", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
         <button
           onClick={handleBack}
           className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
