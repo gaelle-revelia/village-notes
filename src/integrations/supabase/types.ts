@@ -45,31 +45,43 @@ export type Database = {
         Row: {
           actif: boolean
           created_at: string
+          email: string | null
           enfant_id: string
           id: string
           nom: string
+          notes: string | null
           photo_url: string | null
           specialite: string | null
+          structure: string | null
+          telephone: string | null
           type: string
         }
         Insert: {
           actif?: boolean
           created_at?: string
+          email?: string | null
           enfant_id: string
           id?: string
           nom: string
+          notes?: string | null
           photo_url?: string | null
           specialite?: string | null
+          structure?: string | null
+          telephone?: string | null
           type?: string
         }
         Update: {
           actif?: boolean
           created_at?: string
+          email?: string | null
           enfant_id?: string
           id?: string
           nom?: string
+          notes?: string | null
           photo_url?: string | null
           specialite?: string | null
+          structure?: string | null
+          telephone?: string | null
           type?: string
         }
         Relationships: [
