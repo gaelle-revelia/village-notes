@@ -1,31 +1,28 @@
 
 
-## Fix: Liquid Glass Cards Appearing Opaque on Desktop
+## Add contact detail columns to `intervenants`
 
-### Root Cause
+### Migration SQL
 
-The `RevealCard` component wraps each memo card and applies `transform: scale(1)` when visible. In CSS, **any `transform` value other than `none` creates a new stacking context**. This causes `backdrop-filter` on the child card to blur the parent's (transparent) content instead of the body gradient -- resulting in flat white cards.
-
-### Changes (2 files)
-
-**1. `src/pages/Timeline.tsx` -- RevealCard component (lines 115-125)**
-
-Change the visible state `transform` from `"scale(1)"` to `"none"`:
-
-```text
-BEFORE:  transform: visible ? "scale(1)" : "scale(0.97)"
-AFTER:   transform: visible ? "none" : "scale(0.97)"
+```sql
+ALTER TABLE public.intervenants
+  ADD COLUMN telephone text,
+  ADD COLUMN email text,
+  ADD COLUMN structure text,
+  ADD COLUMN notes text;
 ```
 
-The CSS transition engine interpolates `scale(0.97)` to `none` (equivalent to identity) smoothly, so the reveal animation is preserved. When visible, no stacking context is created, and `backdrop-filter` works correctly.
+### Why this is safe
 
-**2. `src/App.css` -- Remove Vite boilerplate**
+- All four columns are nullable with no NOT NULL constraint and no default needed
+- Existing rows get NULL for each new column -- no data modification
+- No impact on existing inserts (onboarding, VillageSettings) since these columns are optional
+- RLS policies are unaffected (they only reference `enfant_id`)
+- No index or trigger changes required
 
-Remove or clear the `#root` rule that sets `max-width: 1280px`, `padding: 2rem`, and `text-align: center`. This is leftover scaffolding that constrains layout on desktop and adds unwanted padding/centering.
+### After migration
 
-### What is NOT touched
-
-- No changes to MemoCard, BottomNavBar, or any other component
-- No changes to the design system, colors, or liquid glass recipe
-- No changes to Supabase logic, auth, or routing
+- The generated types file will automatically include `telephone`, `email`, `structure`, and `notes` in the `intervenants` Row/Insert/Update types
+- The VillageSettings screen can later be updated to display and edit these fields
+- No immediate code changes are required for existing functionality
 
