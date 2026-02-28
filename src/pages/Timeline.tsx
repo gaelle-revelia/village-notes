@@ -270,6 +270,7 @@ const Timeline = () => {
                   />
 
                   {group.memos.map((memo) => {
+                    const memoType = memo.type || "vocal";
                     const structured = memo.content_structured as {
                       tags?: string[];
                     } | null;
@@ -277,27 +278,47 @@ const Timeline = () => {
                     const domainColors = getDomainsFromTags(tags);
                     const primaryDomainColor = domainColors[0] || "#8A9BAE";
 
+                    // Dot style per type
+                    const isEtape = memoType === "evenement";
+                    const isDocument = memoType === "document";
+                    const dotSize = isEtape ? 16 : isDocument ? 13 : 11;
+                    const dotStyle: React.CSSProperties = isEtape
+                      ? {
+                          left: -32 - (dotSize - 11) / 2,
+                          marginTop: 13 - (dotSize - 11) / 2,
+                          width: dotSize, height: dotSize,
+                          borderRadius: "50%",
+                          background: "#E8C84A",
+                          boxShadow: "0 0 0 4px rgba(232,200,74,0.25)",
+                          zIndex: 1,
+                        }
+                      : isDocument
+                      ? {
+                          left: -32 - (dotSize - 11) / 2,
+                          marginTop: 13 - (dotSize - 11) / 2,
+                          width: dotSize, height: dotSize,
+                          borderRadius: "50%",
+                          background: "rgba(255,255,255,0.7)",
+                          border: "2px solid #8A9BAE",
+                          zIndex: 1,
+                        }
+                      : {
+                          left: -32,
+                          marginTop: 13,
+                          width: 11, height: 11,
+                          borderRadius: "50%",
+                          background: "rgba(255,255,255,0.7)",
+                          backdropFilter: "blur(4px)",
+                          WebkitBackdropFilter: "blur(4px)",
+                          border: `2.5px solid ${primaryDomainColor}`,
+                          boxShadow: `0 0 0 3px ${primaryDomainColor}24`,
+                          zIndex: 1,
+                        };
+
                     return (
                       <RevealCard key={memo.id}>
                       <div className="relative" style={{ marginBottom: 16 }}>
-                        {/* Dot — hollow ring, colored by primary domain */}
-                        <div
-                          className="absolute"
-                          style={{
-                            left: -32,
-                            marginTop: 13,
-                            width: 11,
-                            height: 11,
-                            borderRadius: "50%",
-                            background: "rgba(255,255,255,0.7)",
-                            backdropFilter: "blur(4px)",
-                            WebkitBackdropFilter: "blur(4px)",
-                            border: `2.5px solid ${primaryDomainColor}`,
-                            boxShadow: `0 0 0 3px ${primaryDomainColor}24`,
-                            zIndex: 1,
-                          }}
-                        />
-
+                        <div className="absolute" style={dotStyle} />
                         <MemoCard memo={memo} />
                       </div>
                       </RevealCard>

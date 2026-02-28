@@ -86,6 +86,49 @@ function getSpecialiteAvatar(specialite: string | null): { icon: typeof Activity
   return { icon: User, gradient: "linear-gradient(135deg, #8A9BAE, #6B7F94)" };
 }
 
+// --- Type badge config ---
+const TYPE_BADGES: Record<string, { emoji: string; label: string; color: string }> = {
+  vocal: { emoji: "🎙️", label: "Vocal", color: "#8B74E0" },
+  note: { emoji: "✏️", label: "Note", color: "#44A882" },
+  evenement: { emoji: "⭐", label: "Étape", color: "#E8C84A" },
+  document: { emoji: "📄", label: "Document", color: "#8A9BAE" },
+};
+
+// --- Card style per type ---
+function getCardStyle(type?: string) {
+  if (type === "evenement") {
+    return {
+      background: "rgba(255,248,220,0.55)",
+      backdropFilter: "blur(16px) saturate(1.6)",
+      WebkitBackdropFilter: "blur(16px) saturate(1.6)",
+      border: "1px solid rgba(232,200,74,0.35)",
+      borderRadius: 16,
+      padding: "11px 13px",
+      boxShadow: "0 4px 24px rgba(232,200,74,0.12), inset 0 1px 0 rgba(255,255,255,0.9)",
+    };
+  }
+  if (type === "document") {
+    return {
+      background: "rgba(240,243,247,0.55)",
+      backdropFilter: "blur(16px) saturate(1.6)",
+      WebkitBackdropFilter: "blur(16px) saturate(1.6)",
+      border: "1px solid rgba(138,155,174,0.25)",
+      borderRadius: 16,
+      padding: "11px 13px",
+      boxShadow: "0 4px 24px rgba(139,116,224,0.08), 0 1px 4px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9)",
+    };
+  }
+  return {
+    background: "rgba(255, 255, 255, 0.38)",
+    backdropFilter: "blur(16px) saturate(1.6)",
+    WebkitBackdropFilter: "blur(16px) saturate(1.6)",
+    border: "1px solid rgba(255, 255, 255, 0.85)",
+    borderRadius: 16,
+    padding: "11px 13px",
+    boxShadow: "0 4px 24px rgba(139,116,224,0.08), 0 1px 4px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9)",
+  };
+}
+
 export function MemoCard({ memo }: MemoCardProps) {
   const navigate = useNavigate();
   const structured = memo.content_structured as {
@@ -97,16 +140,18 @@ export function MemoCard({ memo }: MemoCardProps) {
   } | null;
 
   const isProcessing = memo.processing_status !== "done" && memo.processing_status !== "error";
+  const memoType = memo.type || "vocal";
+  const badge = TYPE_BADGES[memoType] || TYPE_BADGES.vocal;
 
   const displayDate = memo.memo_date
     ? format(new Date(memo.memo_date), "d MMM yyyy", { locale: fr })
     : format(new Date(memo.created_at), "d MMM yyyy", { locale: fr });
 
   let summaryText = structured?.resume || null;
-  if (!summaryText && memo.type === "evenement") {
+  if (!summaryText && memoType === "evenement") {
     summaryText = memo.transcription_raw || structured?.description || null;
   }
-  if (!summaryText && memo.type === "note") {
+  if (!summaryText && memoType === "note") {
     summaryText = memo.transcription_raw || null;
   }
 
@@ -123,77 +168,66 @@ export function MemoCard({ memo }: MemoCardProps) {
     <div
       onClick={handleClick}
       className="cursor-pointer transition-shadow"
-      style={{
-        background: "rgba(255, 255, 255, 0.38)",
-        backdropFilter: "blur(16px) saturate(1.6)",
-        WebkitBackdropFilter: "blur(16px) saturate(1.6)",
-        border: "1px solid rgba(255, 255, 255, 0.85)",
-        borderRadius: 16,
-        padding: "11px 13px",
-        boxShadow: "0 4px 24px rgba(139,116,224,0.08), 0 1px 4px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9)",
-      }}
+      style={getCardStyle(memoType)}
     >
       {/* Line 1: card-meta */}
       <div className="flex items-center justify-between">
-        {/* LEFT: dots + separator + avatar + prenom */}
+        {/* LEFT: badge + separator + dots + separator + avatar */}
         <div className="flex items-center" style={{ gap: 7 }}>
-          {/* Domain dots */}
-          <div className="flex items-center gap-1">
-            {domainColors.map((color, i) => (
-              <div
-                key={i}
-                style={{
-                  width: 7,
-                  height: 7,
-                  borderRadius: "50%",
-                  backgroundColor: color,
-                }}
-              />
-            ))}
-          </div>
+          {/* Type badge */}
+          <span
+            style={{
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: 9,
+              fontWeight: 600,
+              textTransform: "uppercase",
+              letterSpacing: "0.05em",
+              color: badge.color,
+            }}
+          >
+            {badge.emoji} {badge.label}
+          </span>
 
           {/* Separator */}
-          <div
-            style={{
-              width: 1,
-              height: 11,
-              backgroundColor: "rgba(0,0,0,0.1)",
-            }}
-          />
+          <div style={{ width: 1, height: 11, backgroundColor: "rgba(0,0,0,0.1)" }} />
 
-          {/* Intervenant avatar + prenom */}
-          {memo.intervenant && (() => {
+          {/* Domain dots (skip for étape) */}
+          {memoType !== "evenement" && domainColors.length > 0 && (
+            <>
+              <div className="flex items-center gap-1">
+                {domainColors.map((color, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      width: 7, height: 7, borderRadius: "50%",
+                      backgroundColor: color,
+                    }}
+                  />
+                ))}
+              </div>
+              <div style={{ width: 1, height: 11, backgroundColor: "rgba(0,0,0,0.1)" }} />
+            </>
+          )}
+
+          {/* Intervenant avatar + prenom (skip for étape) */}
+          {memoType !== "evenement" && memo.intervenant && (() => {
             const { icon: Icon, gradient } = getSpecialiteAvatar(memo.intervenant!.specialite);
             return (
               <>
                 <div
                   className="flex items-center justify-center shrink-0"
                   style={{
-                    width: 20,
-                    height: 20,
-                    borderRadius: "50%",
-                    background: gradient,
-                    overflow: "hidden",
+                    width: 20, height: 20, borderRadius: "50%",
+                    background: gradient, overflow: "hidden",
                   }}
                 >
                   {memo.intervenant!.photo_url ? (
-                    <img
-                      src={memo.intervenant!.photo_url}
-                      alt={memo.intervenant!.nom}
-                      className="w-full h-full object-cover"
-                    />
+                    <img src={memo.intervenant!.photo_url} alt={memo.intervenant!.nom} className="w-full h-full object-cover" />
                   ) : (
                     <Icon size={10} color="#FFFFFF" />
                   )}
                 </div>
-                <span
-                  style={{
-                    fontFamily: "'DM Sans', sans-serif",
-                    fontSize: 11,
-                    fontWeight: 500,
-                    color: "#1E1A1A",
-                  }}
-                >
+                <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 500, color: "#1E1A1A" }}>
                   {memo.intervenant!.nom}
                 </span>
               </>
@@ -207,18 +241,12 @@ export function MemoCard({ memo }: MemoCardProps) {
         </div>
 
         {/* RIGHT: date */}
-        <span
-          style={{
-            fontFamily: "'DM Sans', sans-serif",
-            fontSize: 10,
-            color: "#9A9490",
-          }}
-        >
+        <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: "#9A9490" }}>
           {displayDate}
         </span>
       </div>
 
-      {/* Line 2: resume */}
+      {/* Line 2: resume / title */}
       {summaryText && (
         <p
           className="line-clamp-2 mt-1.5"
@@ -227,6 +255,7 @@ export function MemoCard({ memo }: MemoCardProps) {
             fontSize: 14,
             lineHeight: 1.45,
             color: "#1E1A1A",
+            fontWeight: memoType === "evenement" ? 600 : 400,
           }}
         >
           {summaryText}
