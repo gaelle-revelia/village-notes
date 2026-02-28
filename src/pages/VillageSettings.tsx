@@ -62,6 +62,9 @@ function getAvatarGradient(specialite: string | null, type: string): string {
 const glassCard =
   "bg-[rgba(255,255,255,0.52)] backdrop-blur-[16px] backdrop-saturate-[1.6] border border-[rgba(255,255,255,0.72)] rounded-2xl shadow-[0_4px_16px_rgba(0,0,0,0.07),0_1px_3px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.8)]";
 
+const glassDialog =
+  "bg-[rgba(255,255,255,0.92)] backdrop-blur-[20px] backdrop-saturate-[1.5] border border-[rgba(255,255,255,0.72)] rounded-[20px] shadow-[0_8px_32px_rgba(0,0,0,0.12)]";
+
 export default function VillageSettings() {
   const navigate = useNavigate();
   const { enfantId, loading: enfantLoading } = useEnfantId();
@@ -343,7 +346,7 @@ export default function VillageSettings() {
 
       {/* Add Dialog */}
       <Dialog open={addOpen} onOpenChange={(o) => { if (!o) resetAddForm(); setAddOpen(o); }}>
-        <DialogContent className={`${glassCard} border-none max-w-[360px] max-h-[85vh] overflow-y-auto`}>
+        <DialogContent className={`${glassDialog} max-w-[360px] max-h-[85vh] overflow-y-auto`}>
           <DialogHeader>
             <DialogTitle className="font-['Fraunces'] text-lg">
               {newType === "famille" ? "Nouveau membre — Famille" : "Nouveau membre — Professionnel"}
@@ -356,7 +359,7 @@ export default function VillageSettings() {
                 value={newNom}
                 onChange={(e) => setNewNom(e.target.value)}
                 placeholder="Prénom Nom"
-                className="bg-white/40 border-white/60"
+                className="bg-[rgba(255,255,255,0.6)] border-[rgba(255,255,255,0.72)] text-[#1E1A1A]"
                 maxLength={100}
               />
             </div>
@@ -367,7 +370,7 @@ export default function VillageSettings() {
                   value={newSpecialite}
                   onValueChange={(v) => setNewSpecialite(v)}
                 >
-                  <SelectTrigger className="bg-white/40 border-white/60">
+                  <SelectTrigger className="bg-[rgba(255,255,255,0.6)] border-[rgba(255,255,255,0.72)] text-[#1E1A1A]">
                     <SelectValue placeholder="Choisir…" />
                   </SelectTrigger>
                   <SelectContent>
@@ -384,7 +387,7 @@ export default function VillageSettings() {
                   value={newSpecialite}
                   onChange={(e) => setNewSpecialite(e.target.value)}
                   placeholder="Ex: Kinésithérapeute"
-                  className="bg-white/40 border-white/60"
+                  className="bg-[rgba(255,255,255,0.6)] border-[rgba(255,255,255,0.72)] text-[#1E1A1A]"
                   maxLength={100}
                 />
               </div>
@@ -395,7 +398,7 @@ export default function VillageSettings() {
                 value={newTelephone}
                 onChange={(e) => setNewTelephone(e.target.value)}
                 placeholder="06 12 34 56 78"
-                className="bg-white/40 border-white/60"
+                className="bg-[rgba(255,255,255,0.6)] border-[rgba(255,255,255,0.72)] text-[#1E1A1A]"
                 type="tel"
                 maxLength={20}
               />
@@ -406,7 +409,7 @@ export default function VillageSettings() {
                 value={newEmail}
                 onChange={(e) => setNewEmail(e.target.value)}
                 placeholder="nom@exemple.fr"
-                className="bg-white/40 border-white/60"
+                className="bg-[rgba(255,255,255,0.6)] border-[rgba(255,255,255,0.72)] text-[#1E1A1A]"
                 type="email"
                 maxLength={255}
               />
@@ -419,7 +422,7 @@ export default function VillageSettings() {
                     value={newStructure}
                     onChange={(e) => setNewStructure(e.target.value)}
                     placeholder="Ex: Cabinet rue Yann d'Argent"
-                    className="bg-white/40 border-white/60"
+                    className="bg-[rgba(255,255,255,0.6)] border-[rgba(255,255,255,0.72)] text-[#1E1A1A]"
                     maxLength={200}
                   />
                 </div>
@@ -429,7 +432,7 @@ export default function VillageSettings() {
                     value={newNotes}
                     onChange={(e) => setNewNotes(e.target.value)}
                     placeholder="Infos complémentaires…"
-                    className="bg-white/40 border-white/60 resize-none"
+                    className="bg-[rgba(255,255,255,0.6)] border-[rgba(255,255,255,0.72)] text-[#1E1A1A] resize-none"
                     rows={2}
                     maxLength={500}
                   />
@@ -448,7 +451,8 @@ export default function VillageSettings() {
             <Button
               onClick={handleAdd}
               disabled={!newNom.trim() || saving}
-              className="bg-[#8B74E0] hover:bg-[#7A63CF] text-white"
+              className="text-white border-none"
+              style={{ background: "linear-gradient(135deg, #E8736A, #8B74E0)" }}
             >
               {saving ? "…" : "Ajouter"}
             </Button>
@@ -473,7 +477,7 @@ export default function VillageSettings() {
         open={!!deleteTarget}
         onOpenChange={(o) => !o && setDeleteTarget(null)}
       >
-        <AlertDialogContent className={`${glassCard} border-none max-w-[320px]`}>
+        <AlertDialogContent className={`${glassDialog} max-w-[320px]`}>
           <AlertDialogHeader>
             <AlertDialogTitle className="font-['Fraunces'] text-lg">
               Retirer du village ?
@@ -484,7 +488,7 @@ export default function VillageSettings() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="text-[#9A9490]">
+            <AlertDialogCancel className="text-[#9A9490] bg-transparent border-none hover:bg-transparent">
               Annuler
             </AlertDialogCancel>
             <AlertDialogAction
