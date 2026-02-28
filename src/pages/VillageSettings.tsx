@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Trash2, Plus, Phone, Mail, Building2, StickyNote, ChevronRight } from "lucide-react";
+import { ArrowLeft, Plus, ChevronRight } from "lucide-react";
+import MemberDetailPanel from "@/components/village/MemberDetailPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useEnfantId } from "@/hooks/useEnfantId";
 import { Input } from "@/components/ui/input";
@@ -80,14 +81,8 @@ export default function VillageSettings() {
   const [newNotes, setNewNotes] = useState("");
   const [saving, setSaving] = useState(false);
 
-  // Edit dialog
+  // Edit panel
   const [editTarget, setEditTarget] = useState<Intervenant | null>(null);
-  const [editNom, setEditNom] = useState("");
-  const [editSpecialite, setEditSpecialite] = useState("");
-  const [editTelephone, setEditTelephone] = useState("");
-  const [editEmail, setEditEmail] = useState("");
-  const [editStructure, setEditStructure] = useState("");
-  const [editNotes, setEditNotes] = useState("");
   const [editSaving, setEditSaving] = useState(false);
 
   // Delete dialog
@@ -144,26 +139,23 @@ export default function VillageSettings() {
 
   const openEdit = (m: Intervenant) => {
     setEditTarget(m);
-    setEditNom(m.nom);
-    setEditSpecialite(m.specialite ?? "");
-    setEditTelephone(m.telephone ?? "");
-    setEditEmail(m.email ?? "");
-    setEditStructure(m.structure ?? "");
-    setEditNotes(m.notes ?? "");
   };
 
-  const handleEdit = async () => {
-    if (!editTarget || !editNom.trim()) return;
+  const handleEdit = async (fields: {
+    nom: string; specialite: string; telephone: string;
+    email: string; structure: string; notes: string;
+  }) => {
+    if (!editTarget || !fields.nom.trim()) return;
     setEditSaving(true);
     await supabase
       .from("intervenants")
       .update({
-        nom: editNom.trim(),
-        specialite: editSpecialite.trim() || null,
-        telephone: editTelephone.trim() || null,
-        email: editEmail.trim() || null,
-        structure: editStructure.trim() || null,
-        notes: editNotes.trim() || null,
+        nom: fields.nom.trim(),
+        specialite: fields.specialite.trim() || null,
+        telephone: fields.telephone.trim() || null,
+        email: fields.email.trim() || null,
+        structure: fields.structure.trim() || null,
+        notes: fields.notes.trim() || null,
       })
       .eq("id", editTarget.id);
     setEditSaving(false);
@@ -391,101 +383,17 @@ export default function VillageSettings() {
         </DialogContent>
       </Dialog>
 
-      {/* Edit Dialog */}
-      <Dialog open={!!editTarget} onOpenChange={(o) => !o && setEditTarget(null)}>
-        <DialogContent className={`${glassCard} border-none max-w-[360px] max-h-[85vh] overflow-y-auto`}>
-          <DialogHeader>
-            <DialogTitle className="font-['Fraunces'] text-lg">
-              Modifier
-            </DialogTitle>
-          </DialogHeader>
-          <div className="flex flex-col gap-4 py-2">
-            <div>
-              <Label className="text-xs text-[#9A9490] mb-1">Nom *</Label>
-              <Input
-                value={editNom}
-                onChange={(e) => setEditNom(e.target.value)}
-                className="bg-white/40 border-white/60"
-                maxLength={100}
-              />
-            </div>
-            <div>
-              <Label className="text-xs text-[#9A9490] mb-1">Spécialité</Label>
-              <Input
-                value={editSpecialite}
-                onChange={(e) => setEditSpecialite(e.target.value)}
-                className="bg-white/40 border-white/60"
-                maxLength={100}
-              />
-            </div>
-            <div>
-              <Label className="text-xs text-[#9A9490] mb-1">Téléphone</Label>
-              <Input
-                value={editTelephone}
-                onChange={(e) => setEditTelephone(e.target.value)}
-                className="bg-white/40 border-white/60"
-                type="tel"
-                maxLength={20}
-              />
-            </div>
-            <div>
-              <Label className="text-xs text-[#9A9490] mb-1">Email</Label>
-              <Input
-                value={editEmail}
-                onChange={(e) => setEditEmail(e.target.value)}
-                className="bg-white/40 border-white/60"
-                type="email"
-                maxLength={255}
-              />
-            </div>
-            <div>
-              <Label className="text-xs text-[#9A9490] mb-1">Structure / Cabinet</Label>
-              <Input
-                value={editStructure}
-                onChange={(e) => setEditStructure(e.target.value)}
-                className="bg-white/40 border-white/60"
-                maxLength={200}
-              />
-            </div>
-            <div>
-              <Label className="text-xs text-[#9A9490] mb-1">Notes</Label>
-              <Textarea
-                value={editNotes}
-                onChange={(e) => setEditNotes(e.target.value)}
-                className="bg-white/40 border-white/60 resize-none"
-                rows={2}
-                maxLength={500}
-              />
-            </div>
-          </div>
-          <DialogFooter className="gap-2 sm:justify-between">
-            <Button
-              variant="ghost"
-              onClick={() => editTarget && setDeleteTarget(editTarget)}
-              className="text-[#E8736A] hover:text-[#d4625a] hover:bg-red-50/50 mr-auto"
-            >
-              <Trash2 className="w-4 h-4 mr-1" />
-              Retirer
-            </Button>
-            <div className="flex gap-2">
-              <Button
-                variant="ghost"
-                onClick={() => setEditTarget(null)}
-                className="text-[#9A9490]"
-              >
-                Annuler
-              </Button>
-              <Button
-                onClick={handleEdit}
-                disabled={!editNom.trim() || editSaving}
-                className="bg-[#8B74E0] hover:bg-[#7A63CF] text-white"
-              >
-                {editSaving ? "…" : "Enregistrer"}
-              </Button>
-            </div>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Member Detail Panel */}
+      {editTarget && (
+        <MemberDetailPanel
+          member={editTarget}
+          getAvatarGradient={getAvatarGradient}
+          onSave={handleEdit}
+          onClose={() => setEditTarget(null)}
+          onDelete={(m) => setDeleteTarget(m)}
+          saving={editSaving}
+        />
+      )}
 
       {/* Delete AlertDialog */}
       <AlertDialog
