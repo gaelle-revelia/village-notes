@@ -22,17 +22,13 @@ export function ProfileAvatar() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center justify-center shrink-0"
+        className="flex items-center justify-center shrink-0 border-none text-sm font-semibold text-white"
         style={{
-          width: 32,
-          height: 32,
+          width: 34,
+          height: 34,
           borderRadius: "50%",
-          backgroundColor: "#6B8CAE",
-          border: "none",
-          fontFamily: "Inter, sans-serif",
-          fontSize: 13,
-          fontWeight: 600,
-          color: "#FFFFFF",
+          background: "linear-gradient(135deg, #E8736A, #8B74E0)",
+          boxShadow: "0 3px 12px rgba(139,116,224,0.35)",
         }}
         aria-label="Menu profil"
       >
@@ -42,24 +38,25 @@ export function ProfileAvatar() {
       {open && (
         <div className="fixed inset-0 z-50">
           <div
-            className="absolute inset-0"
-            style={{ backgroundColor: "rgba(0,0,0,0.4)" }}
+            className="absolute inset-0 bg-black/40"
             onClick={() => setOpen(false)}
           />
           <div
             className="absolute bottom-0 left-0 right-0"
             style={{
-              backgroundColor: "#FFFFFF",
+              background: "rgba(255, 255, 255, 0.85)",
+              backdropFilter: "blur(20px) saturate(1.5)",
+              WebkitBackdropFilter: "blur(20px) saturate(1.5)",
               borderRadius: "16px 16px 0 0",
-              boxShadow: "0 -2px 16px rgba(42,42,42,0.08)",
+              boxShadow: "0 -2px 16px rgba(0,0,0,0.08)",
             }}
           >
             <div className="flex justify-center pt-3 pb-1">
-              <div style={{ width: 36, height: 4, borderRadius: 2, backgroundColor: "#E8E3DB" }} />
+              <div className="bg-border" style={{ width: 36, height: 4, borderRadius: 2 }} />
             </div>
 
-            <div style={{ padding: 16, borderBottom: "1px solid #E8E3DB" }}>
-              <span style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#8B7D8B" }}>
+            <div className="px-4 py-3 border-b border-border">
+              <span className="text-sm text-muted-foreground">
                 {user?.email || ""}
               </span>
             </div>
@@ -72,17 +69,17 @@ export function ProfileAvatar() {
                   className="flex w-full items-center gap-4 px-4 py-3 text-left hover:bg-muted transition-colors"
                   style={{ minHeight: 44 }}
                 >
-                  <item.icon size={20} style={{ color: "#6B8CAE", flexShrink: 0 }} />
+                  <item.icon size={20} className="text-primary shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold" style={{ fontFamily: "Inter, sans-serif", fontSize: 14, color: "#2A2A2A" }}>{item.label}</p>
-                    <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#8B7D8B" }}>{item.desc}</p>
+                    <p className="text-sm font-semibold text-foreground">{item.label}</p>
+                    <p className="text-sm text-muted-foreground">{item.desc}</p>
                   </div>
-                  <ChevronRight size={18} style={{ color: "#8B7D8B", flexShrink: 0 }} />
+                  <ChevronRight size={18} className="text-muted-foreground shrink-0" />
                 </button>
               ))}
             </nav>
 
-            <div style={{ borderTop: "1px solid #E8E3DB" }}>
+            <div className="border-t border-border">
               <button
                 onClick={async () => {
                   await supabase.auth.signOut();
@@ -91,13 +88,13 @@ export function ProfileAvatar() {
                 className="flex w-full items-center gap-4 px-4 py-3 text-left hover:bg-muted transition-colors"
                 style={{ minHeight: 44 }}
               >
-                <LogOut size={20} style={{ color: "#C4626B", flexShrink: 0 }} />
-                <span style={{ fontFamily: "Inter, sans-serif", fontSize: 14, fontWeight: 600, color: "#C4626B" }}>
+                <LogOut size={20} className="text-destructive shrink-0" />
+                <span className="text-sm font-semibold text-destructive">
                   Se déconnecter
                 </span>
               </button>
             </div>
-            <div style={{ height: 16 }} />
+            <div className="h-4" />
           </div>
         </div>
       )}
