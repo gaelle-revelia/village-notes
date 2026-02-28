@@ -49,6 +49,8 @@ export function ProfileAvatar() {
               WebkitBackdropFilter: "blur(20px) saturate(1.5)",
               borderRadius: "16px 16px 0 0",
               boxShadow: "0 -2px 16px rgba(0,0,0,0.08)",
+              maxHeight: "calc(90vh - env(safe-area-inset-bottom, 0px))",
+              overflowY: "auto",
             }}
           >
             <div className="flex justify-center pt-3 pb-1">
