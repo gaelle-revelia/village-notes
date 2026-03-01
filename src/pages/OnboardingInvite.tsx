@@ -274,13 +274,44 @@ function ScreenPassword({
     }
     setSaving(true);
     setError("");
-    const { error: err } = await supabase.auth.updateUser({ password: pw });
-    if (err) {
-      setError(err.message);
-      setSaving(false);
+
+    // If user already has a session, update password; otherwise sign up
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user) {
+      const { error: err } = await supabase.auth.updateUser({ password: pw });
+      if (err) {
+        setError(err.message);
+        setSaving(false);
+        return;
+      }
     } else {
-      onDone();
+      // New user: sign up with email from invitation
+      const enfantId = localStorage.getItem("invite_enfant_id");
+      const inviteRole = localStorage.getItem("invite_role") || "coparent";
+      const { error: err } = await supabase.auth.signUp({
+        email,
+        password: pw,
+        options: {
+          data: { enfant_id: enfantId, role: inviteRole },
+        },
+      });
+      if (err) {
+        setError(err.message);
+        setSaving(false);
+        return;
+      }
+      // Upsert enfant_membres
+      if (enfantId) {
+        const { data: { user: newUser } } = await supabase.auth.getUser();
+        if (newUser) {
+          await supabase.from("enfant_membres" as any).upsert(
+            { enfant_id: enfantId, user_id: newUser.id, role: inviteRole } as any,
+            { onConflict: "enfant_id,user_id", ignoreDuplicates: true }
+          );
+        }
+      }
     }
+    onDone();
   };
 
   return (
@@ -929,23 +960,38 @@ export default function OnboardingInvite() {
   const [enfantPrenom, setEnfantPrenom] = useState("");
   const [inviterName, setInviterName] = useState("");
   const [role, setRole] = useState("famille");
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [tokenError, setTokenError] = useState("");
   const [loading, setLoading] = useState(true);
 
   // Compute total discovery slides (skip memos for famille)
   const showMemos = role === "coparent" || role === "owner";
   const totalDiscoverySlides = showMemos ? 3 : 2;
 
-  // Restore invite hash from localStorage if missing from URL
+  // Verify invite token from URL query param
   useEffect(() => {
-    const hash = window.location.hash;
-    const hasToken = hash.includes("access_token");
-    if (!hasToken) {
-      const stored = localStorage.getItem("invite_hash");
-      if (stored) {
-        window.location.replace(window.location.pathname + stored);
+    async function verifyToken() {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get("token");
+      if (!token) return;
+
+      const { data, error } = await supabase.functions.invoke("verify-invite-token", {
+        body: { token },
+      });
+
+      if (error || !data?.enfant_id) {
+        setTokenError(data?.error || "Lien d'invitation invalide ou expiré");
+        setLoading(false);
         return;
       }
+
+      localStorage.setItem("invite_enfant_id", data.enfant_id);
+      localStorage.setItem("invite_role", data.role);
+      localStorage.setItem("invite_token", token);
+      setRole(data.role);
+      setInviteEmail(data.email);
     }
+    verifyToken();
   }, []);
 
   // Load context data
@@ -1010,8 +1056,48 @@ export default function OnboardingInvite() {
     localStorage.setItem("onboarding_invite_done", "true");
     localStorage.removeItem("invite_enfant_id");
     localStorage.removeItem("invite_role");
+    localStorage.removeItem("invite_token");
+    localStorage.removeItem("invite_hash");
     navigate("/timeline");
   }, [navigate]);
+
+  if (tokenError) {
+    return (
+      <div
+        className="flex flex-col items-center justify-center min-h-screen px-6"
+        style={{ background: "linear-gradient(150deg, #F9EDE8 0%, #F0EAF8 45%, #E8EFF8 100%)" }}
+      >
+        <div style={{ fontSize: 48, marginBottom: 16 }}>😔</div>
+        <h2
+          style={{
+            fontFamily: "Fraunces, serif",
+            fontWeight: 600,
+            fontSize: 22,
+            color: "#1E1A1A",
+            marginBottom: 8,
+            textAlign: "center",
+          }}
+        >
+          Lien invalide
+        </h2>
+        <p
+          style={{
+            fontFamily: "DM Sans, sans-serif",
+            fontSize: 14,
+            color: "#9A9490",
+            textAlign: "center",
+            maxWidth: 300,
+            marginBottom: 24,
+          }}
+        >
+          {tokenError}
+        </p>
+        <PrimaryButton onClick={() => navigate("/auth")} className="max-w-xs">
+          Se connecter
+        </PrimaryButton>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -1077,7 +1163,7 @@ export default function OnboardingInvite() {
         )}
         {step === 2 && (
           <ScreenPassword
-            email={user?.email || ""}
+            email={inviteEmail || user?.email || ""}
             enfantPrenom={enfantPrenom || "l'enfant"}
             onDone={() => setStep(3)}
             onBack={() => setStep(1)}

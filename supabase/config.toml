@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.invite-member]
 verify_jwt = false
+
+[functions.verify-invite-token]
+verify_jwt = false
