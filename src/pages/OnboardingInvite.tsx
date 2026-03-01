@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Mic, Eye, EyeOff } from "lucide-react";
@@ -1010,6 +1010,10 @@ export default function OnboardingInvite() {
         />
       </div>
     );
+  }
+
+  if (localStorage.getItem('invite_pending') !== 'true') {
+    return <Navigate to="/timeline" replace />;
   }
 
   // Discovery carousel slides data
