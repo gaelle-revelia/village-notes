@@ -9,10 +9,34 @@ export function useAuth() {
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      async (_event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+
+        // Auto-link invited users to enfant_membres
+        if (_event === "SIGNED_IN" && session?.user) {
+          const meta = session.user.user_metadata;
+          const enfantId = meta?.enfant_id;
+          const role = meta?.role;
+          if (enfantId && role) {
+            const { error } = await supabase
+              .from("enfant_membres")
+              .upsert(
+                {
+                  enfant_id: enfantId,
+                  user_id: session.user.id,
+                  role: role,
+                },
+                { onConflict: "enfant_id,user_id", ignoreDuplicates: true }
+              );
+            if (!error) {
+              supabase.auth.updateUser({
+                data: { enfant_id: null, role: null },
+              });
+            }
+          }
+        }
       }
     );
 
