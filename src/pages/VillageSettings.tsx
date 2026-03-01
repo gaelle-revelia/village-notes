@@ -168,7 +168,7 @@ export default function VillageSettings() {
       try {
         const inferredRole = inferRole(newSpecialite);
         const { error } = await supabase.functions.invoke("invite-member", {
-          body: { email: emailVal, role: inferredRole, enfant_id: enfantId },
+          body: { email: emailVal, role: inferredRole, enfant_id: enfantId, redirect_url: window.location.origin },
         });
         if (error) {
           console.error("Invite error:", error);
