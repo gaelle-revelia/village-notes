@@ -6,6 +6,7 @@ import { useEnfantId } from "@/hooks/useEnfantId";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { MemoDatePicker } from "@/components/memo/MemoDatePicker";
+import { IntervenantSearchPicker } from "@/components/memo/IntervenantSearchPicker";
 import { Button } from "@/components/ui/button";
 
 const glassCard: React.CSSProperties = {
@@ -25,13 +26,6 @@ const glassHeader: React.CSSProperties = {
   borderBottom: "1px solid rgba(255,255,255,0.6)",
   boxShadow: "0 2px 12px rgba(0,0,0,0.05)",
 };
-
-interface Intervenant {
-  id: string;
-  nom: string;
-  specialite: string | null;
-}
-
 type ProcessingStatus = "idle" | "structuring" | "done" | "error";
 
 const NouvelleNote = () => {
@@ -42,21 +36,11 @@ const NouvelleNote = () => {
 
   const [memoDate, setMemoDate] = useState<Date>(new Date());
   const [intervenantId, setIntervenantId] = useState<string | null>(null);
-  const [intervenants, setIntervenants] = useState<Intervenant[]>([]);
   const [text, setText] = useState("");
   const [processingStatus, setProcessingStatus] = useState<ProcessingStatus>("idle");
   const [errorMessage, setErrorMessage] = useState("");
 
-  useEffect(() => {
-    if (!enfantId) return;
-    supabase
-      .from("intervenants")
-      .select("id, nom, specialite")
-      .eq("enfant_id", enfantId)
-      .then(({ data }) => {
-        if (data) setIntervenants(data);
-      });
-  }, [enfantId]);
+  // (intervenants fetched by IntervenantSearchPicker)
 
   if (authLoading) {
     return (
@@ -175,29 +159,11 @@ const NouvelleNote = () => {
             <label className="text-sm font-medium text-foreground block mb-2">
               Avec quel intervenant ?
             </label>
-            {intervenants.length === 0 ? (
-              <p className="text-xs text-muted-foreground">Aucun intervenant enregistré</p>
-            ) : (
-              <div className="flex flex-wrap gap-2">
-                {intervenants.map((i) => {
-                  const selected = intervenantId === i.id;
-                  return (
-                    <button
-                      key={i.id}
-                      onClick={() => setIntervenantId(selected ? null : i.id)}
-                      className="rounded-lg px-3.5 py-2 text-sm font-medium transition-all"
-                      style={{
-                        border: selected ? "none" : "1px solid rgba(255,255,255,0.72)",
-                        background: selected ? "linear-gradient(135deg, #E8736A, #8B74E0)" : "rgba(255,255,255,0.5)",
-                        color: selected ? "#FFFFFF" : "hsl(12 8% 11%)",
-                      }}
-                    >
-                      {i.nom}{i.specialite ? ` · ${i.specialite}` : ""}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
+            <IntervenantSearchPicker
+              enfantId={enfantId}
+              value={intervenantId}
+              onChange={setIntervenantId}
+            />
           </div>
 
           <div style={glassCard}>

@@ -6,6 +6,7 @@ import { useEnfantId } from "@/hooks/useEnfantId";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { MemoDatePicker } from "@/components/memo/MemoDatePicker";
+import { IntervenantSearchPicker } from "@/components/memo/IntervenantSearchPicker";
 import { useAudioRecorder } from "@/hooks/useAudioRecorder";
 import {
   Dialog,
@@ -18,12 +19,6 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
 type ProcessingStatus = "idle" | "uploading" | "transcribing" | "structuring" | "done" | "error";
-
-interface Intervenant {
-  id: string;
-  nom: string;
-  specialite: string | null;
-}
 
 function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60).toString().padStart(2, "0");
@@ -57,7 +52,6 @@ const NouveauMemoVocal = () => {
 
   const [memoDate, setMemoDate] = useState<Date>(new Date());
   const [intervenantId, setIntervenantId] = useState<string | null>(null);
-  const [intervenants, setIntervenants] = useState<Intervenant[]>([]);
   const [mode, setMode] = useState<"voice" | "text">("voice");
   const [textInput, setTextInput] = useState("");
   const [processingStatus, setProcessingStatus] = useState<ProcessingStatus>("idle");
@@ -73,17 +67,7 @@ const NouveauMemoVocal = () => {
       });
     });
 
-  // Fetch intervenants
-  useEffect(() => {
-    if (!enfantId) return;
-    supabase
-      .from("intervenants")
-      .select("id, nom, specialite")
-      .eq("enfant_id", enfantId)
-      .then(({ data }) => {
-        if (data) setIntervenants(data);
-      });
-  }, [enfantId]);
+  // (intervenants fetched by IntervenantSearchPicker)
 
   // Check freemium limit
   useEffect(() => {
@@ -270,32 +254,14 @@ const NouveauMemoVocal = () => {
           {/* Date field */}
           <MemoDatePicker date={memoDate} onDateChange={setMemoDate} />
 
-          {/* Intervenant chips */}
+          {/* Intervenant picker */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">Avec quel intervenant ?</label>
-            {intervenants.length === 0 ? (
-              <p className="text-xs text-muted-foreground">Aucun intervenant enregistré.</p>
-            ) : (
-              <div className="flex flex-wrap gap-2">
-                {intervenants.map((i) => {
-                  const selected = intervenantId === i.id;
-                  return (
-                    <button
-                      key={i.id}
-                      onClick={() => setIntervenantId(selected ? null : i.id)}
-                      className="rounded-lg px-3 py-2 text-sm font-medium transition-colors border"
-                      style={{
-                        backgroundColor: selected ? "hsl(var(--primary))" : "hsl(var(--card))",
-                        color: selected ? "hsl(var(--primary-foreground))" : "hsl(var(--foreground))",
-                        borderColor: selected ? "hsl(var(--primary))" : "hsl(var(--border))",
-                      }}
-                    >
-                      {i.nom}{i.specialite ? ` · ${i.specialite}` : ""}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
+            <IntervenantSearchPicker
+              enfantId={enfantId}
+              value={intervenantId}
+              onChange={setIntervenantId}
+            />
           </div>
 
           {/* Voice / Text toggle */}
