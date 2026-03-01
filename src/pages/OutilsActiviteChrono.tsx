@@ -48,6 +48,14 @@ function formatTime(s: number) {
   return `${mm}:${ss}`;
 }
 
+function parseDuration(val: string): number {
+  const parts = val.split(":");
+  if (parts.length === 2) {
+    return (parseInt(parts[0], 10) || 0) * 60 + (parseInt(parts[1], 10) || 0);
+  }
+  return parseInt(val, 10) || 0;
+}
+
 export default function OutilsActiviteChrono() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -61,6 +69,8 @@ export default function OutilsActiviteChrono() {
   const [distance, setDistance] = useState(0);
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
+  const [recapDuration, setRecapDuration] = useState("");
+  const [recapDistance, setRecapDistance] = useState("");
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Fetch activite
@@ -92,15 +102,24 @@ export default function OutilsActiviteChrono() {
   const handleTerminer = () => {
     setRunning(false);
     if (intervalRef.current) clearInterval(intervalRef.current);
+    setRecapDuration(formatTime(seconds));
+    setRecapDistance(String(distance));
     setShowRecap(true);
+  };
+
+  const handleReprendre = () => {
+    setShowRecap(false);
+    setRunning(true);
   };
 
   const handleSave = async () => {
     if (!user || !enfantId || !activite) return;
     setSaving(true);
 
-    const timeStr = formatTime(seconds);
-    const distStr = activite.track_distance && distance > 0 ? ` / ${distance} ${unite}` : "";
+    const finalSeconds = parseDuration(recapDuration);
+    const finalDistance = parseFloat(recapDistance) || 0;
+    const timeStr = formatTime(finalSeconds);
+    const distStr = activite.track_distance && finalDistance > 0 ? ` / ${finalDistance} ${unite}` : "";
     const rawText = `${activite.nom} — ${timeStr}${distStr}`;
 
     try {
@@ -108,8 +127,8 @@ export default function OutilsActiviteChrono() {
         supabase.from("sessions_activite").insert({
           activite_id: activite.id,
           enfant_id: enfantId,
-          duree_secondes: seconds,
-          distance: activite.track_distance ? distance : null,
+          duree_secondes: finalSeconds,
+          distance: activite.track_distance ? finalDistance : null,
           notes: notes || null,
         } as any),
         supabase.from("memos").insert({
@@ -261,37 +280,52 @@ export default function OutilsActiviteChrono() {
         ) : (
           /* Recap */
           <div className="w-full" style={{ maxWidth: 420 }}>
+            <button
+              onClick={handleReprendre}
+              className="mb-4 text-sm font-medium"
+              style={{ color: "#8B74E0", fontFamily: "'DM Sans', sans-serif" }}
+            >
+              ← Reprendre la séance
+            </button>
+
             <div style={{ ...glassCard, padding: "20px" }}>
               <h2
                 className="text-lg font-semibold mb-4"
                 style={{ fontFamily: "'Fraunces', serif", color: "#1E1A1A" }}
               >
-                Résumé de la séance
+                Récap de la séance
               </h2>
 
-              <div className="flex items-center gap-4 mb-4">
-                <div className="text-center">
-                  <p className="text-xs uppercase font-semibold" style={{ color: "#9A9490" }}>
-                    Durée
-                  </p>
-                  <p className="text-xl font-semibold" style={{ color: "#1E1A1A" }}>
-                    {formatTime(seconds)}
-                  </p>
-                </div>
-                {activite.track_distance && distance > 0 && (
-                  <>
-                    <div style={{ width: 1, height: 32, background: "rgba(0,0,0,0.1)" }} />
-                    <div className="text-center">
-                      <p className="text-xs uppercase font-semibold" style={{ color: "#9A9490" }}>
-                        Distance
-                      </p>
-                      <p className="text-xl font-semibold" style={{ color: "#1E1A1A" }}>
-                        {distance} {unite}
-                      </p>
-                    </div>
-                  </>
-                )}
-              </div>
+              {/* Editable duration */}
+              <label className="text-xs font-semibold uppercase tracking-wide mb-1.5 block" style={{ color: "#9A9490" }}>
+                Durée (MM:SS)
+              </label>
+              <input
+                value={recapDuration}
+                onChange={(e) => setRecapDuration(e.target.value)}
+                placeholder="00:00"
+                className="w-full mb-3 px-3 py-2 rounded-xl text-center text-lg font-semibold outline-none"
+                style={{ background: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.6)", fontFamily: "'DM Sans', sans-serif", color: "#1E1A1A" }}
+              />
+
+              {/* Editable distance */}
+              {activite.track_distance && (
+                <>
+                  <label className="text-xs font-semibold uppercase tracking-wide mb-1.5 block" style={{ color: "#9A9490" }}>
+                    Distance ({unite})
+                  </label>
+                  <input
+                    type="number"
+                    value={recapDistance}
+                    onChange={(e) => setRecapDistance(e.target.value)}
+                    placeholder="0"
+                    min={0}
+                    step={0.1}
+                    className="w-full mb-3 px-3 py-2 rounded-xl text-center text-lg font-semibold outline-none"
+                    style={{ background: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.6)", fontFamily: "'DM Sans', sans-serif", color: "#1E1A1A" }}
+                  />
+                </>
+              )}
 
               <label className="text-xs font-semibold uppercase tracking-wide mb-1.5 block" style={{ color: "#9A9490" }}>
                 Note (optionnel)
