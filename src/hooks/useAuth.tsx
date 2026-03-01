@@ -8,45 +8,32 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let isProcessingInvite = false;
-
     const processInviteIfNeeded = async (activeSession: Session | null) => {
-      if (!activeSession?.user || isProcessingInvite) return;
+      if (!activeSession?.user) return;
+      if (localStorage.getItem('invite_pending') === 'true') return;
 
       const meta = activeSession.user.user_metadata;
       const enfantId = meta?.enfant_id;
       const role = meta?.role;
       if (!enfantId || !role) return;
 
-      isProcessingInvite = true;
-
       const { error } = await supabase
         .from("enfant_membres")
         .upsert(
-          {
-            enfant_id: enfantId,
-            user_id: activeSession.user.id,
-            role,
-          },
+          { enfant_id: enfantId, user_id: activeSession.user.id, role },
           { onConflict: "enfant_id,user_id", ignoreDuplicates: true }
         );
 
       if (error) {
         console.error("Invite link error:", error);
-        isProcessingInvite = false;
         return;
       }
 
-      await supabase.auth.updateUser({
-        data: { enfant_id: null, role: null },
-      });
+      await supabase.auth.updateUser({ data: { enfant_id: null, role: null } });
 
       localStorage.setItem("invite_enfant_id", enfantId);
       localStorage.setItem("invite_role", role);
-
-      if (window.location.pathname !== "/onboarding-invite") {
-        window.location.replace("/onboarding-invite");
-      }
+      localStorage.setItem("invite_pending", "true");
     };
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -55,17 +42,16 @@ export function useAuth() {
         setUser(session?.user ?? null);
         setLoading(false);
 
-        if (["SIGNED_IN", "INITIAL_SESSION", "TOKEN_REFRESHED", "USER_UPDATED"].includes(event)) {
+        if (event === "SIGNED_IN") {
           await processInviteIfNeeded(session);
         }
       }
     );
 
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
-      await processInviteIfNeeded(session);
     });
 
     return () => subscription.unsubscribe();

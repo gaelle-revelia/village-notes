@@ -995,6 +995,7 @@ export default function OnboardingInvite() {
 
   const finish = useCallback(() => {
     localStorage.setItem("onboarding_invite_done", "true");
+    localStorage.removeItem("invite_pending");
     localStorage.removeItem("invite_enfant_id");
     localStorage.removeItem("invite_role");
     navigate("/timeline");

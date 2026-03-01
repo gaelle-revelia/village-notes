@@ -38,7 +38,13 @@ const RootRedirect = () => {
     );
   }
 
-  return <Navigate to={user ? "/timeline" : "/auth"} replace />;
+  if (!user) return <Navigate to="/auth" replace />;
+
+  if (localStorage.getItem('invite_pending') === 'true') {
+    return <Navigate to="/onboarding-invite" replace />;
+  }
+
+  return <Navigate to="/timeline" replace />;
 };
 
 const AppRoutes = () => {
