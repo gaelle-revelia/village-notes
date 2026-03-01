@@ -4,7 +4,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useSwipeNavigation } from "./hooks/useSwipeNavigation";
-import { useAuth } from "./hooks/useAuth";
 import Auth from "./pages/Auth";
 import Timeline from "./pages/Timeline";
 import Onboarding from "./pages/Onboarding";
@@ -27,31 +26,11 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const RootRedirect = () => {
-  const { user, loading } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="animate-pulse text-muted-foreground">Chargement...</div>
-      </div>
-    );
-  }
-
-  if (!user) return <Navigate to="/auth" replace />;
-
-  if (localStorage.getItem('invite_pending') === 'true') {
-    return <Navigate to="/onboarding-invite" replace />;
-  }
-
-  return <Navigate to="/timeline" replace />;
-};
-
 const AppRoutes = () => {
   useSwipeNavigation();
   return (
     <Routes>
-      <Route path="/" element={<RootRedirect />} />
+      <Route path="/" element={<Navigate to="/auth" replace />} />
       <Route path="/auth" element={<Auth />} />
       <Route path="/timeline" element={<Timeline />} />
       <Route path="/selena" element={<SelenaScreen />} />

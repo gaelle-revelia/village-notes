@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useNavigate, Navigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Mic, Eye, EyeOff } from "lucide-react";
@@ -995,7 +995,6 @@ export default function OnboardingInvite() {
 
   const finish = useCallback(() => {
     localStorage.setItem("onboarding_invite_done", "true");
-    localStorage.removeItem("invite_pending");
     localStorage.removeItem("invite_enfant_id");
     localStorage.removeItem("invite_role");
     navigate("/timeline");
@@ -1010,10 +1009,6 @@ export default function OnboardingInvite() {
         />
       </div>
     );
-  }
-
-  if (localStorage.getItem('invite_pending') !== 'true') {
-    return <Navigate to={user ? "/timeline" : "/auth"} replace />;
   }
 
   // Discovery carousel slides data

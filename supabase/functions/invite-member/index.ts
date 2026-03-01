@@ -99,11 +99,6 @@ Deno.serve(async (req) => {
         const existingUser = existingUsers?.users?.find((u) => u.email?.toLowerCase() === email.toLowerCase());
 
         if (existingUser) {
-          // Inject metadata so useAuth detects the invite on SIGNED_IN
-          await supabaseAdmin.auth.admin.updateUserById(existingUser.id, {
-            user_metadata: { enfant_id, role: role || "coparent" },
-          });
-
           const { error: linkError } = await supabaseAdmin
             .from("enfant_membres")
             .upsert(
