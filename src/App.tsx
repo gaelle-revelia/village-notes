@@ -14,6 +14,8 @@ import NouvelleNote from "./pages/NouvelleNote";
 import NouveauDocument from "./pages/NouveauDocument";
 import NouvelEvenement from "./pages/NouvelEvenement";
 import MemoResult from "./pages/MemoResult";
+import OutilsActiviteChrono from "./pages/OutilsActiviteChrono";
+import OutilsActiviteManuel from "./pages/OutilsActiviteManuel";
 import ProfileSettings from "./pages/ProfileSettings";
 import VillageSettings from "./pages/VillageSettings";
 import ChildProfile from "./pages/ChildProfile";
@@ -40,8 +42,8 @@ const AppRoutes = () => {
       <Route path="/outils" element={<OutilsScreen />} />
       <Route path="/outils/activites" element={<OutilsActivites />} />
       <Route path="/outils/activites/creer" element={<OutilsActiviteCreer />} />
-      <Route path="/outils/activites/:id/chrono" element={<PlaceholderScreen title="Chrono" />} />
-      <Route path="/outils/activites/:id/manuel" element={<PlaceholderScreen title="Saisie manuelle" />} />
+      <Route path="/outils/activites/:id/chrono" element={<OutilsActiviteChrono />} />
+      <Route path="/outils/activites/:id/manuel" element={<OutilsActiviteManuel />} />
       <Route path="/explorer" element={<ExplorerScreen />} />
       <Route path="/onboarding" element={<Onboarding />} />
       <Route path="/reset-password" element={<ResetPassword />} />

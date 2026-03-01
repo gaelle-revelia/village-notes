@@ -96,6 +96,7 @@ const TYPE_BADGES: Record<string, { emoji: string; label: string; color: string 
   note: { emoji: "✏️", label: "Note", color: "#44A882" },
   evenement: { emoji: "⭐", label: "Étape", color: "#E8C84A" },
   document: { emoji: "📄", label: "Document", color: "#8A9BAE" },
+  activite: { emoji: "🏃", label: "Activité", color: "#8B74E0" },
 };
 
 // --- Card style per type ---
@@ -117,6 +118,17 @@ function getCardStyle(type?: string) {
       backdropFilter: "blur(16px) saturate(1.6)",
       WebkitBackdropFilter: "blur(16px) saturate(1.6)",
       border: "1px solid rgba(138,155,174,0.25)",
+      borderRadius: 16,
+      padding: "11px 13px",
+      boxShadow: "0 4px 24px rgba(139,116,224,0.08), 0 1px 4px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9)",
+    };
+  }
+  if (type === "activite") {
+    return {
+      background: "rgba(232,239,255,0.45)",
+      backdropFilter: "blur(16px) saturate(1.6)",
+      WebkitBackdropFilter: "blur(16px) saturate(1.6)",
+      border: "1px solid rgba(139,116,224,0.2)",
       borderRadius: 16,
       padding: "11px 13px",
       boxShadow: "0 4px 24px rgba(139,116,224,0.08), 0 1px 4px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9)",
@@ -250,8 +262,33 @@ export function MemoCard({ memo }: MemoCardProps) {
         </span>
       </div>
 
-      {/* Line 2: resume / title */}
-      {summaryText && (
+      {/* Line 2: resume / title — activite has special parsing */}
+      {memoType === "activite" && memo.transcription_raw ? (() => {
+        const parts = memo.transcription_raw!.split(" — ");
+        const titre = parts[0];
+        const statsRaw = parts[1] || "";
+        const stats = statsRaw.split(" / ").filter(Boolean);
+        return (
+          <>
+            <p
+              className="mt-1.5"
+              style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, lineHeight: 1.45, color: "#1E1A1A", fontWeight: 500 }}
+            >
+              {titre}
+            </p>
+            {stats.length > 0 && (
+              <div className="flex items-center gap-2 mt-1">
+                {stats.map((s, i) => (
+                  <span key={i} className="flex items-center gap-2">
+                    {i > 0 && <span style={{ width: 1, height: 12, background: "rgba(0,0,0,0.12)", display: "inline-block" }} />}
+                    <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "#9A9490", fontWeight: 500 }}>{s.trim()}</span>
+                  </span>
+                ))}
+              </div>
+            )}
+          </>
+        );
+      })() : summaryText ? (
         <p
           className="line-clamp-2 mt-1.5"
           style={{
@@ -264,7 +301,7 @@ export function MemoCard({ memo }: MemoCardProps) {
         >
           {summaryText}
         </p>
-      )}
+      ) : null}
 
       {isProcessing && !summaryText && (
         <p className="text-sm text-muted-foreground italic mt-1.5">Traitement en cours...</p>
