@@ -253,7 +253,11 @@ const Timeline = () => {
             {grouped.map((group) => (
               <div key={group.key}>
                 {/* Month header */}
-                <div className="sticky top-[100px] z-[5] pt-8 pb-3">
+                <div className="sticky top-[100px] z-[5] pt-8 pb-4 mb-1"
+                  style={{
+                    background: "linear-gradient(150deg, #F9EDE8 0%, #F0EAF8 45%, #E8EFF8 100%)",
+                  }}
+                >
                   <span className="text-[11px] font-bold tracking-[0.12em] text-muted-foreground uppercase">
                     {group.label}
                   </span>
