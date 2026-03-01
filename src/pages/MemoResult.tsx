@@ -269,14 +269,41 @@ const MemoResult = () => {
   const handleDelete = async () => {
     if (!memo) return;
     setDeleting(true);
-    const { error } = await supabase.from("memos").delete().eq("id", memo.id);
-    if (error) {
+
+    try {
+      if (memo.type === "activite" && memo.enfant_id) {
+        // Cascade: delete matching session_activite + memo in parallel
+        const memoDate = memo.memo_date; // format YYYY-MM-DD
+        const [sessionRes, memoRes] = await Promise.all([
+          supabase
+            .from("sessions_activite")
+            .delete()
+            .eq("enfant_id", memo.enfant_id)
+            .gte("created_at", `${memoDate}T00:00:00`)
+            .lt("created_at", `${memoDate}T23:59:59.999`),
+          supabase.from("memos").delete().eq("id", memo.id),
+        ]);
+        if (sessionRes.error) console.error("Delete session error:", sessionRes.error);
+        if (memoRes.error) {
+          toast({ title: "Erreur", description: "Impossible de supprimer.", variant: "destructive" });
+          setDeleting(false);
+          return;
+        }
+      } else {
+        const { error } = await supabase.from("memos").delete().eq("id", memo.id);
+        if (error) {
+          toast({ title: "Erreur", description: "Impossible de supprimer.", variant: "destructive" });
+          setDeleting(false);
+          return;
+        }
+      }
+
+      toast({ title: "Mémo supprimé", duration: 2000 });
+      navigate("/timeline");
+    } catch {
       toast({ title: "Erreur", description: "Impossible de supprimer.", variant: "destructive" });
       setDeleting(false);
-      return;
     }
-    toast({ title: "Mémo supprimé", duration: 2000 });
-    navigate("/timeline");
   };
 
   // --- Field handlers ---
