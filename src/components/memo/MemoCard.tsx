@@ -267,22 +267,33 @@ export function MemoCard({ memo }: MemoCardProps) {
         const parts = memo.transcription_raw!.split(" — ");
         const titre = parts[0];
         const statsRaw = parts[1] || "";
-        const stats = statsRaw.split(" / ").filter(Boolean);
+        const statParts = statsRaw.split(" / ").filter(Boolean);
+        const statItems = statParts.map((s, i) => ({
+          value: s.trim(),
+          label: i === 0 ? "Durée" : "Distance",
+        }));
         return (
           <>
             <p
               className="mt-1.5"
-              style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, lineHeight: 1.45, color: "#1E1A1A", fontWeight: 500 }}
+              style={{ fontFamily: "'Fraunces', serif", fontSize: 16, lineHeight: 1.3, color: "#1E1A1A", fontWeight: 700 }}
             >
               {titre}
             </p>
-            {stats.length > 0 && (
-              <div className="flex items-center gap-2 mt-1">
-                {stats.map((s, i) => (
-                  <span key={i} className="flex items-center gap-2">
-                    {i > 0 && <span style={{ width: 1, height: 12, background: "rgba(0,0,0,0.12)", display: "inline-block" }} />}
-                    <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "#9A9490", fontWeight: 500 }}>{s.trim()}</span>
-                  </span>
+            {statItems.length > 0 && (
+              <div className="flex items-center gap-3 mt-2">
+                {statItems.map((s, i) => (
+                  <div key={i} className="flex items-center gap-3">
+                    {i > 0 && <div style={{ width: 1, height: 28, background: "rgba(139,116,224,0.2)" }} />}
+                    <div className="flex flex-col items-center">
+                      <span style={{ fontFamily: "'Fraunces', serif", fontSize: 20, fontWeight: 700, color: "#1E1A1A", lineHeight: 1.2 }}>
+                        {s.value}
+                      </span>
+                      <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: "#9A9490", fontWeight: 500, marginTop: 1 }}>
+                        {s.label}
+                      </span>
+                    </div>
+                  </div>
                 ))}
               </div>
             )}
