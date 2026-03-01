@@ -40,11 +40,7 @@ const RootRedirect = () => {
 
   if (!user) return <Navigate to="/auth" replace />;
 
-  // Invite pending: localStorage flag OR transient user_metadata (timing fallback)
-  if (
-    localStorage.getItem('invite_pending') === 'true' ||
-    (user.user_metadata?.enfant_id && user.user_metadata?.role)
-  ) {
+  if (localStorage.getItem('invite_pending') === 'true') {
     return <Navigate to="/onboarding-invite" replace />;
   }
 

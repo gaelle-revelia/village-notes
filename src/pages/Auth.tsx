@@ -22,9 +22,15 @@ const Auth = () => {
   }
 
   if (user) {
-    // Prioritize invite onboarding over default timeline redirect
-    if (localStorage.getItem('invite_pending') === 'true') {
-      return <Navigate to="/onboarding-invite" replace />;
+    // Don't redirect to timeline if invite onboarding is pending
+    const meta = user.user_metadata;
+    if (meta?.enfant_id && meta?.role) {
+      // useAuth will handle redirect to /onboarding-invite
+      return (
+        <div className="flex min-h-screen items-center justify-center">
+          <div className="animate-pulse text-muted-foreground">Redirection…</div>
+        </div>
+      );
     }
     return <Navigate to="/timeline" replace />;
   }
