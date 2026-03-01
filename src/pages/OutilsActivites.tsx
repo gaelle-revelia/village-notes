@@ -99,8 +99,8 @@ export default function OutilsActivites() {
               <button
                 key={a.id}
                 onClick={() => setSelected(a)}
-                className="flex items-center gap-3 p-4 text-left transition-transform active:scale-[0.98]"
-                style={glassCard}
+                className="flex items-center gap-3 text-left transition-transform active:scale-[0.98]"
+                style={{ ...glassCard, padding: "10px 14px" }}
               >
                 <div
                   className="flex items-center justify-center rounded-xl shrink-0"
@@ -147,25 +147,35 @@ export default function OutilsActivites() {
       {/* Drawer */}
       <Drawer open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
         <DrawerContent>
-          <div className="px-5 pt-2 pb-6 flex flex-col gap-3">
+          <div className="pt-2 pb-6 flex flex-col gap-3" style={{ maxWidth: 400, margin: "0 auto", padding: "8px 20px 24px" }}>
             <DrawerTitle className="text-base font-serif font-semibold text-foreground text-center">
               {selected?.nom}
             </DrawerTitle>
             <button
               onClick={() => { navigate(`/outils/activites/${selected!.id}/chrono`); setSelected(null); }}
-              className="flex items-center gap-3 p-4 rounded-2xl transition-transform active:scale-[0.97]"
-              style={glassCard}
+              className="flex items-center gap-3 rounded-2xl transition-transform active:scale-[0.97]"
+              style={{ ...glassCard, padding: "12px 14px" }}
             >
-              <Timer size={20} color="#E8736A" />
-              <span className="text-[14px] font-sans font-medium text-foreground">Lancer le chrono</span>
+              <div className="flex items-center justify-center rounded-xl shrink-0" style={{ width: 40, height: 40, background: "rgba(232,115,106,0.15)" }}>
+                <Timer size={20} color="#E8736A" />
+              </div>
+              <div className="flex flex-col text-left">
+                <span className="text-[14px] font-sans font-medium text-foreground">Lancer le chrono</span>
+                <span className="text-[11px] font-sans text-muted-foreground">Démarre un minuteur en temps réel</span>
+              </div>
             </button>
             <button
               onClick={() => { navigate(`/outils/activites/${selected!.id}/manuel`); setSelected(null); }}
-              className="flex items-center gap-3 p-4 rounded-2xl transition-transform active:scale-[0.97]"
-              style={glassCard}
+              className="flex items-center gap-3 rounded-2xl transition-transform active:scale-[0.97]"
+              style={{ ...glassCard, padding: "12px 14px" }}
             >
-              <PenLine size={20} color="#8B74E0" />
-              <span className="text-[14px] font-sans font-medium text-foreground">Ajouter manuellement</span>
+              <div className="flex items-center justify-center rounded-xl shrink-0" style={{ width: 40, height: 40, background: "rgba(139,116,224,0.15)" }}>
+                <PenLine size={20} color="#8B74E0" />
+              </div>
+              <div className="flex flex-col text-left">
+                <span className="text-[14px] font-sans font-medium text-foreground">Ajouter manuellement</span>
+                <span className="text-[11px] font-sans text-muted-foreground">Saisir durée et distance après la séance</span>
+              </div>
             </button>
           </div>
         </DrawerContent>
