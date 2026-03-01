@@ -34,12 +34,11 @@ export function useAuth() {
               await supabase.auth.updateUser({
                 data: { enfant_id: null, role: null },
               });
-              // Redirect to invite onboarding if not already done
-              if (localStorage.getItem("onboarding_invite_done") !== "true") {
-                localStorage.setItem("invite_enfant_id", enfantId);
-                localStorage.setItem("invite_role", role);
-                window.location.href = "/onboarding-invite";
-              }
+              // Redirect to invite onboarding whenever invite metadata is present
+              // (onboarding completion is already enforced by clearing metadata below)
+              localStorage.setItem("invite_enfant_id", enfantId);
+              localStorage.setItem("invite_role", role);
+              window.location.href = "/onboarding-invite";
             }
           }
         }
