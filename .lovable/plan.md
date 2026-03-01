@@ -1,67 +1,55 @@
 
 
-## Bug Fix: Onboarding invite resets to Welcome after signUp
+## Creation des tables "Activites suivies"
 
-### Root Cause
+Migration SQL unique pour creer les deux tables avec RLS.
 
-After `signUp` succeeds in `ScreenPassword`, the `onAuthStateChange("SIGNED_IN")` event fires in `useAuth.tsx`. That hook detects `enfant_id` and `role` in the user metadata (passed via `signUp` options), performs an upsert in `enfant_membres`, then executes `window.location.href = "/onboarding-invite"` -- a **full page reload** that resets `step` back to 1 (Welcome screen).
+### Table `activites`
 
-```text
-signUp({ data: { enfant_id, role } })
-  -> triggers onAuthStateChange("SIGNED_IN") in useAuth
-  -> useAuth sees enfant_id + role in metadata
-  -> upsert enfant_membres (duplicate of what ScreenPassword already does)
-  -> window.location.href = "/onboarding-invite"  // FULL RELOAD -> step = 1
-```
+Stocke les types d'activites suivies pour un enfant (ex: "Marche", "Velo").
 
-### Fix 1: Stop passing enfant_id/role in signUp metadata (OnboardingInvite.tsx)
+| Colonne | Type | Contraintes |
+|---|---|---|
+| id | uuid | PK, gen_random_uuid() |
+| enfant_id | uuid | NOT NULL, FK enfants(id) ON DELETE CASCADE |
+| nom | text | NOT NULL |
+| domaine | text | NOT NULL |
+| track_temps | boolean | DEFAULT true |
+| track_distance | boolean | DEFAULT false |
+| unite_distance | text | DEFAULT 'metres' |
+| actif | boolean | DEFAULT true |
+| created_at | timestamptz | DEFAULT now() |
 
-In `ScreenPassword.submit()`, remove `enfant_id` and `role` from the `signUp` options data. The upsert into `enfant_membres` is already done in ScreenPassword (lines 304-311), so useAuth's auto-link logic is redundant and harmful here.
+### Table `sessions_activite`
 
-**Before:**
-```typescript
-await supabase.auth.signUp({
-  email,
-  password: pw,
-  options: { data: { enfant_id: enfantId, role: inviteRole } },
-});
-```
+Stocke chaque session enregistree pour une activite.
 
-**After:**
-```typescript
-await supabase.auth.signUp({
-  email,
-  password: pw,
-});
-```
+| Colonne | Type | Contraintes |
+|---|---|---|
+| id | uuid | PK, gen_random_uuid() |
+| activite_id | uuid | NOT NULL, FK activites(id) ON DELETE CASCADE |
+| enfant_id | uuid | NOT NULL, FK enfants(id) ON DELETE CASCADE |
+| duree_secondes | integer | nullable |
+| distance | numeric | nullable |
+| notes | text | nullable |
+| created_at | timestamptz | DEFAULT now() |
 
-This prevents `useAuth` from detecting invitation metadata and triggering the page reload. The upsert remains handled locally in ScreenPassword.
+### RLS (4 policies par table)
 
-### Fix 2: Prevent init() from resetting state on user change (OnboardingInvite.tsx)
+Les deux tables utilisent le meme pattern que `intervenants` et `memos` :
 
-The `useEffect` depends on `[user]`. After signUp, `user` changes which re-triggers `init()`. Add a guard: if we're already past step 1, skip re-initialization.
+- **SELECT** : `get_membre_role(enfant_id) IS NOT NULL`
+- **INSERT** : `get_membre_role(enfant_id) IN ('owner', 'coparent')`
+- **UPDATE** : `get_membre_role(enfant_id) IN ('owner', 'coparent')`
+- **DELETE** : `get_membre_role(enfant_id) IN ('owner', 'coparent')`
 
-Add a ref `initDone` that prevents re-running the init logic after the first successful load.
+Le role `famille` aura un acces en lecture seule, coherent avec le controle d'acces existant.
 
-### Fix 3: Invalidate token after signUp (OnboardingInvite.tsx + verify-invite-token)
+### Details techniques
 
-**verify-invite-token:** Add support for an optional `mark_used: true` parameter. When present, update the invitation's `status` to `'used'` using the admin client (the new user can't update due to RLS restricting to `invited_by = auth.uid()`).
+Une seule migration SQL sera executee contenant :
+1. CREATE TABLE activites + ENABLE RLS + 4 policies
+2. CREATE TABLE sessions_activite + ENABLE RLS + 4 policies
 
-**OnboardingInvite.tsx:** After successful signUp + upsert, call `verify-invite-token` with `{ token, mark_used: true }` to invalidate the token.
-
-### Files modified
-
-| File | Change |
-|---|---|
-| `src/pages/OnboardingInvite.tsx` | Remove metadata from signUp, add init guard ref, call token invalidation after signUp |
-| `supabase/functions/verify-invite-token/index.ts` | Add `mark_used` parameter support to set `status = 'used'` |
-
-### Summary of changes in ScreenPassword.submit()
-
-```text
-1. signUp without metadata (fixes the reload)
-2. upsert enfant_membres (already exists)
-3. call verify-invite-token({ token, mark_used: true }) to invalidate token
-4. onDone() -> setStep(3)
-```
+Aucun composant React, aucune edge function, aucune modification de fichier existant.
 
