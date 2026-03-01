@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Mic, Eye, EyeOff } from "lucide-react";
+import useEmblaCarousel from "embla-carousel-react";
 
 // ─── helpers ───────────────────────────────────────────────────────
 const ROLE_LABELS: Record<string, { label: string; desc: string }> = {
@@ -747,6 +748,83 @@ function DiscoverySlide({
   );
 }
 
+type SlideData = {
+  label: string;
+  title: string;
+  description: string;
+  illustration: React.ReactNode;
+};
+
+function DiscoveryCarousel({
+  slides,
+  onFinish,
+}: {
+  slides: SlideData[];
+  onFinish: () => void;
+}) {
+  const [emblaRef, emblaApi] = useEmblaCarousel({ watchDrag: true });
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    const onSelect = () => setCurrentIndex(emblaApi.selectedScrollSnap());
+    emblaApi.on("select", onSelect);
+    onSelect();
+    return () => { emblaApi.off("select", onSelect); };
+  }, [emblaApi]);
+
+  const handleNext = () => {
+    if (!emblaApi) return;
+    if (emblaApi.canScrollNext()) {
+      emblaApi.scrollNext();
+    } else {
+      onFinish();
+    }
+  };
+
+  const currentSlide = slides[currentIndex];
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      {/* Swipable illustrations */}
+      <div className="flex-1 overflow-hidden" ref={emblaRef}>
+        <div className="flex h-full">
+          {slides.map((slide, i) => (
+            <div key={i} className="flex-[0_0_100%] min-w-0 flex flex-col justify-center">
+              {slide.illustration}
+            </div>
+          ))}
+        </div>
+      </div>
+      {/* Fixed bottom card — always shows current slide info */}
+      <GlassCard
+        className="mx-4 mb-6 px-6 py-6 space-y-4"
+        style={{ borderRadius: 24 }}
+      >
+        <p style={{ fontFamily: "DM Sans, sans-serif", fontSize: 10, textTransform: "uppercase", letterSpacing: 1, color: "#8B74E0", opacity: 0.7, fontWeight: 500 }}>
+          {currentSlide?.label}
+        </p>
+        <h3 style={{ fontFamily: "Fraunces, serif", fontWeight: 600, fontSize: 22, color: "#1E1A1A", lineHeight: 1.3 }}>
+          {currentSlide?.title}
+        </h3>
+        <p style={{ fontFamily: "DM Sans, sans-serif", fontSize: 14, color: "#9A9490", lineHeight: 1.55 }}>
+          {currentSlide?.description}
+        </p>
+        <div className="flex items-center justify-between pt-2">
+          <ProgressDots total={slides.length} current={currentIndex} />
+          <button
+            onClick={handleNext}
+            className="px-5 py-2 rounded-xl text-white font-medium"
+            style={{ background: "linear-gradient(135deg, #E8736A, #8B74E0)", fontFamily: "DM Sans, sans-serif", fontSize: 14, boxShadow: "0 4px 14px rgba(139,116,224,0.3)" }}
+          >
+            Suivant
+          </button>
+        </div>
+      </GlassCard>
+    </div>
+  );
+}
+
 function ScreenReady({
   enfantPrenom,
   role,
@@ -933,26 +1011,37 @@ export default function OnboardingInvite() {
     );
   }
 
-  // Map step to discovery slide index
-  const getDiscoverySlideIndex = (currentStep: number) => {
-    // Step 3 = first discovery, step 4 = second, step 5 = third (if memos shown)
-    return currentStep - 3;
-  };
-
-  const nextDiscoveryStep = () => {
-    const currentSlideIndex = getDiscoverySlideIndex(step);
-    if (currentSlideIndex + 1 < totalDiscoverySlides) {
-      // If we're on slide 0 (timeline) and memos should be skipped, jump to village
-      if (step === 3 && !showMemos) {
-        setStep(5); // skip to village
-      } else {
-        setStep(step + 1);
-      }
-    } else {
-      // Go to ready screen
-      setStep(showMemos ? 6 : 5 + 1); // always 6
-    }
-  };
+  // Discovery carousel slides data
+  const discoverySlides = [
+    {
+      label: "01 — La timeline",
+      title: `Le chemin parcouru par ${enfantPrenom || "l'enfant"}`,
+      description: "Chaque séance, chaque observation, chaque étape clé — réunis en un seul endroit, chronologiquement.",
+      illustration: <SlideTimeline enfantPrenom={enfantPrenom || "l'enfant"} />,
+    },
+    ...(showMemos
+      ? [
+          {
+            label: "02 — Les mémos",
+            title: "Capturer l'essentiel en quelques secondes",
+            description: "Après une séance, dictez vos observations à voix haute. L'IA structure et résume automatiquement.",
+            illustration: <SlideMemos />,
+          },
+        ]
+      : []),
+    {
+      label: showMemos ? "03 — Le village" : "02 — Le village",
+      title: `Tous ceux qui accompagnent ${enfantPrenom || "l'enfant"}`,
+      description: "Professionnels, famille, proches — réunis dans un seul espace pour coordonner le suivi.",
+      illustration: (
+        <SlideVillage
+          inviterName={inviterName || "L'équipe"}
+          currentUserEmail={user?.email || "invité"}
+          role={role}
+        />
+      ),
+    },
+  ];
 
   return (
     <>
@@ -982,44 +1071,9 @@ export default function OnboardingInvite() {
           />
         )}
         {step === 3 && (
-          <DiscoverySlide
-            label="01 — La timeline"
-            title={`Le chemin parcouru par ${enfantPrenom || "l'enfant"}`}
-            description="Chaque séance, chaque observation, chaque étape clé — réunis en un seul endroit, chronologiquement."
-            illustration={
-              <SlideTimeline enfantPrenom={enfantPrenom || "l'enfant"} />
-            }
-            slideIndex={0}
-            totalSlides={totalDiscoverySlides}
-            onNext={nextDiscoveryStep}
-          />
-        )}
-        {step === 4 && showMemos && (
-          <DiscoverySlide
-            label="02 — Les mémos"
-            title="Capturer l'essentiel en quelques secondes"
-            description="Après une séance, dictez vos observations à voix haute. L'IA structure et résume automatiquement."
-            illustration={<SlideMemos />}
-            slideIndex={1}
-            totalSlides={totalDiscoverySlides}
-            onNext={nextDiscoveryStep}
-          />
-        )}
-        {step === 5 && (
-          <DiscoverySlide
-            label={showMemos ? "03 — Le village" : "02 — Le village"}
-            title={`Tous ceux qui accompagnent ${enfantPrenom || "l'enfant"}`}
-            description="Professionnels, famille, proches — réunis dans un seul espace pour coordonner le suivi."
-            illustration={
-              <SlideVillage
-                inviterName={inviterName || "L'équipe"}
-                currentUserEmail={user?.email || "invité"}
-                role={role}
-              />
-            }
-            slideIndex={showMemos ? 2 : 1}
-            totalSlides={totalDiscoverySlides}
-            onNext={() => setStep(6)}
+          <DiscoveryCarousel
+            slides={discoverySlides}
+            onFinish={() => setStep(6)}
           />
         )}
         {step === 6 && (
