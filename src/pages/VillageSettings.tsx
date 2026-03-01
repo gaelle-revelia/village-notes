@@ -88,8 +88,12 @@ export default function VillageSettings() {
   const [newStructure, setNewStructure] = useState("");
   const [newNotes, setNewNotes] = useState("");
   const [saving, setSaving] = useState(false);
-  const [inviteRole, setInviteRole] = useState<"coparent" | "famille">("famille");
   const [inviting, setInviting] = useState(false);
+
+  const inferRole = (relation: string): "coparent" | "famille" => {
+    if (relation === "Papa" || relation === "Maman") return "coparent";
+    return "famille";
+  };
 
   // Edit panel
   const [editTarget, setEditTarget] = useState<Intervenant | null>(null);
@@ -138,7 +142,6 @@ export default function VillageSettings() {
     setNewEmail("");
     setNewStructure("");
     setNewNotes("");
-    setInviteRole("famille");
   };
 
   const handleAdd = async () => {
@@ -161,14 +164,15 @@ export default function VillageSettings() {
     if (newType === "famille" && emailVal && user) {
       setInviting(true);
       try {
+        const inferredRole = inferRole(newSpecialite);
         const { error } = await supabase.functions.invoke("invite-member", {
-          body: { email: emailVal, role: inviteRole, enfant_id: enfantId },
+          body: { email: emailVal, role: inferredRole, enfant_id: enfantId },
         });
         if (error) {
           console.error("Invite error:", error);
           toast({ title: "Membre ajouté", description: "Mais l'invitation par email a échoué.", variant: "destructive" });
         } else {
-          toast({ title: "Invitation envoyée ✓", description: `${emailVal} a été invité(e) comme ${inviteRole}.` });
+          toast({ title: "Invitation envoyée ✓", description: `${emailVal} a été invité(e) comme ${inferredRole}.` });
         }
       } catch (err) {
         console.error("Invite error:", err);
@@ -402,7 +406,7 @@ export default function VillageSettings() {
                     <SelectValue placeholder="Choisir…" />
                   </SelectTrigger>
                   <SelectContent>
-                    {["Papa", "Maman", "Grand-parents", "Parrain", "Marraine"].map((r) => (
+                    {["Papa", "Maman", "Grand-parents", "Parrain", "Marraine", "Autre"].map((r) => (
                       <SelectItem key={r} value={r}>{r}</SelectItem>
                     ))}
                   </SelectContent>
@@ -442,29 +446,12 @@ export default function VillageSettings() {
                 maxLength={255}
               />
             </div>
-            {/* Invitation role selector — only for famille with email */}
+            {/* Invitation hint — only for famille with email */}
             {newType === "famille" && newEmail.trim() && (
-              <div>
-                <Label className="text-xs text-[#9A9490] mb-1">
-                  <Send className="inline w-3 h-3 mr-1" />
-                  Inviter avec le rôle
-                </Label>
-                <Select
-                  value={inviteRole}
-                  onValueChange={(v) => setInviteRole(v as "coparent" | "famille")}
-                >
-                  <SelectTrigger className="bg-[rgba(255,255,255,0.6)] border-[rgba(255,255,255,0.72)] text-[#1E1A1A]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="coparent">Co-parent (peut éditer)</SelectItem>
-                    <SelectItem value="famille">Famille (lecture seule)</SelectItem>
-                  </SelectContent>
-                </Select>
-                <p className="text-[10px] text-[#9A9490] mt-1">
-                  Une invitation sera envoyée à {newEmail.trim()}
-                </p>
-              </div>
+              <p className="text-[10px] text-[#9A9490] -mt-2 flex items-center gap-1">
+                <Send className="inline w-3 h-3" />
+                Une invitation sera envoyée à {newEmail.trim()}
+              </p>
             )}
             {newType === "pro" && (
               <>
