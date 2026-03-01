@@ -135,6 +135,7 @@ const MemoResult = () => {
 
   // Swipe navigation between memos
   const [memoIds, setMemoIds] = useState<string[]>([]);
+  const [swipeFade, setSwipeFade] = useState(false);
   const swipeStart = useRef<{ x: number; y: number } | null>(null);
 
   // Per-field editing
@@ -169,6 +170,11 @@ const MemoResult = () => {
   }, [id, user]);
 
   useEffect(() => { fetchMemo(); }, [fetchMemo]);
+
+  // Fade in when memo changes
+  useEffect(() => {
+    setSwipeFade(false);
+  }, [id]);
 
   useEffect(() => {
     if (!enfantId) return;
@@ -212,7 +218,8 @@ const MemoResult = () => {
       if (idx === -1) return;
       const nextIdx = dx < 0 ? idx + 1 : idx - 1;
       if (nextIdx >= 0 && nextIdx < memoIds.length) {
-        navigate(`/memo-result/${memoIds[nextIdx]}`);
+        setSwipeFade(true);
+        setTimeout(() => navigate(`/memo-result/${memoIds[nextIdx]}`), 200);
       }
     };
     document.addEventListener("touchstart", onTouchStart, { passive: true });
@@ -382,7 +389,13 @@ const MemoResult = () => {
   const hasNext = currentIdx >= 0 && currentIdx < memoIds.length - 1;
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div
+      className="flex min-h-screen flex-col"
+      style={{
+        opacity: swipeFade ? 0 : 1,
+        transition: "opacity 0.2s ease-out",
+      }}
+    >
       {/* Swipe arrow indicators */}
       {hasPrev && (
         <div
