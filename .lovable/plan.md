@@ -1,54 +1,67 @@
 
 
-## Persistance du hash d'invitation entre Auth et OnboardingInvite
+## Bug Fix: Onboarding invite resets to Welcome after signUp
 
-### Probleme
+### Root Cause
 
-Quand un utilisateur invite clique sur le lien email, Supabase redirige vers `/auth#access_token=...&type=invite...`. Le composant Auth ne preserve pas ce hash -- si la session est traitee et l'utilisateur redirige, le hash est perdu. OnboardingInvite a besoin de ce hash pour que Supabase initialise correctement la session invitee.
-
-### Modifications
-
-**Fichier 1 : `src/pages/Auth.tsx`**
-
-Ajouter un `useEffect` au montage (avant le rendu conditionnel) qui :
-1. Lit `window.location.hash`
-2. Parse les parametres du hash (`URLSearchParams`)
-3. Si `type` vaut `invite` ou `signup` :
-   - Stocke le hash complet dans `localStorage.setItem("invite_hash", window.location.hash)`
-   - Redirige immediatement vers `/onboarding-invite` avec le hash (`navigate("/onboarding-invite" + window.location.hash, { replace: true })`)
-
-Imports a ajouter : `useEffect` (deja present via useState), `useNavigate` depuis `react-router-dom`.
-
-Le useEffect s'execute avant le check `if (user)` car il est dans le corps du composant, executant la redirection des le montage si le hash est detecte.
-
-**Fichier 2 : `src/pages/OnboardingInvite.tsx`**
-
-Ajouter un `useEffect` au montage (avant le chargement des donnees) qui :
-1. Verifie si `window.location.hash` contient `access_token`
-2. Si non, verifie si `localStorage.getItem("invite_hash")` existe
-3. Si oui, reapplique le hash sur l'URL : `window.location.replace(window.location.pathname + storedHash)`
-   - Cela permet a Supabase de detecter et traiter le token
-   - `window.location.replace` recharge la page avec le hash, ce qui declenche le parsing par le client Supabase
-
-Ce useEffect doit etre place en premier dans le composant (avant les autres useEffect) pour s'executer avant que Supabase tente de lire la session.
-
-### Details techniques
+After `signUp` succeeds in `ScreenPassword`, the `onAuthStateChange("SIGNED_IN")` event fires in `useAuth.tsx`. That hook detects `enfant_id` and `role` in the user metadata (passed via `signUp` options), performs an upsert in `enfant_membres`, then executes `window.location.href = "/onboarding-invite"` -- a **full page reload** that resets `step` back to 1 (Welcome screen).
 
 ```text
-Flux complet :
-Email invite → /auth#access_token=...&type=invite
-  └─ Auth.tsx useEffect detecte type=invite
-     ├─ localStorage.setItem("invite_hash", hash)
-     └─ navigate("/onboarding-invite#access_token=...&type=invite")
-        └─ OnboardingInvite monte
-           └─ Supabase client parse le hash → session creee
-
-Flux fallback (hash perdu pendant redirect) :
-OnboardingInvite monte sans hash
-  └─ useEffect detecte absence de hash dans URL
-     └─ localStorage.getItem("invite_hash") existe
-        └─ window.location.replace(pathname + storedHash)
-           └─ Page recharge → Supabase parse le hash
+signUp({ data: { enfant_id, role } })
+  -> triggers onAuthStateChange("SIGNED_IN") in useAuth
+  -> useAuth sees enfant_id + role in metadata
+  -> upsert enfant_membres (duplicate of what ScreenPassword already does)
+  -> window.location.href = "/onboarding-invite"  // FULL RELOAD -> step = 1
 ```
 
-Aucun autre fichier modifie.
+### Fix 1: Stop passing enfant_id/role in signUp metadata (OnboardingInvite.tsx)
+
+In `ScreenPassword.submit()`, remove `enfant_id` and `role` from the `signUp` options data. The upsert into `enfant_membres` is already done in ScreenPassword (lines 304-311), so useAuth's auto-link logic is redundant and harmful here.
+
+**Before:**
+```typescript
+await supabase.auth.signUp({
+  email,
+  password: pw,
+  options: { data: { enfant_id: enfantId, role: inviteRole } },
+});
+```
+
+**After:**
+```typescript
+await supabase.auth.signUp({
+  email,
+  password: pw,
+});
+```
+
+This prevents `useAuth` from detecting invitation metadata and triggering the page reload. The upsert remains handled locally in ScreenPassword.
+
+### Fix 2: Prevent init() from resetting state on user change (OnboardingInvite.tsx)
+
+The `useEffect` depends on `[user]`. After signUp, `user` changes which re-triggers `init()`. Add a guard: if we're already past step 1, skip re-initialization.
+
+Add a ref `initDone` that prevents re-running the init logic after the first successful load.
+
+### Fix 3: Invalidate token after signUp (OnboardingInvite.tsx + verify-invite-token)
+
+**verify-invite-token:** Add support for an optional `mark_used: true` parameter. When present, update the invitation's `status` to `'used'` using the admin client (the new user can't update due to RLS restricting to `invited_by = auth.uid()`).
+
+**OnboardingInvite.tsx:** After successful signUp + upsert, call `verify-invite-token` with `{ token, mark_used: true }` to invalidate the token.
+
+### Files modified
+
+| File | Change |
+|---|---|
+| `src/pages/OnboardingInvite.tsx` | Remove metadata from signUp, add init guard ref, call token invalidation after signUp |
+| `supabase/functions/verify-invite-token/index.ts` | Add `mark_used` parameter support to set `status = 'used'` |
+
+### Summary of changes in ScreenPassword.submit()
+
+```text
+1. signUp without metadata (fixes the reload)
+2. upsert enfant_membres (already exists)
+3. call verify-invite-token({ token, mark_used: true }) to invalidate token
+4. onDone() -> setStep(3)
+```
+
