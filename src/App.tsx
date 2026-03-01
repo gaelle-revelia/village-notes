@@ -21,6 +21,7 @@ import AppSettings from "./pages/AppSettings";
 import SelenaScreen from "./pages/SelenaScreen";
 import OutilsScreen from "./pages/OutilsScreen";
 import ExplorerScreen from "./pages/ExplorerScreen";
+import OnboardingInvite from "./pages/OnboardingInvite";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -47,6 +48,7 @@ const AppRoutes = () => {
       <Route path="/village" element={<VillageSettings />} />
       <Route path="/enfant" element={<ChildProfile />} />
       <Route path="/parametres" element={<AppSettings />} />
+      <Route path="/onboarding-invite" element={<OnboardingInvite />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
