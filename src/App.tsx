@@ -25,9 +25,31 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const SwipeHandler = () => {
+const AppRoutes = () => {
   useSwipeNavigation();
-  return null;
+  return (
+    <Routes>
+      <Route path="/" element={<Navigate to="/auth" replace />} />
+      <Route path="/auth" element={<Auth />} />
+      <Route path="/timeline" element={<Timeline />} />
+      <Route path="/selena" element={<SelenaScreen />} />
+      <Route path="/outils" element={<OutilsScreen />} />
+      <Route path="/explorer" element={<ExplorerScreen />} />
+      <Route path="/onboarding" element={<Onboarding />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/record" element={<RecordMemo />} />
+      <Route path="/nouveau-memo-vocal" element={<NouveauMemoVocal />} />
+      <Route path="/nouvelle-note" element={<NouvelleNote />} />
+      <Route path="/nouveau-document" element={<NouveauDocument />} />
+      <Route path="/nouvel-evenement" element={<NouvelEvenement />} />
+      <Route path="/memo-result/:id" element={<MemoResult />} />
+      <Route path="/profil" element={<ProfileSettings />} />
+      <Route path="/village" element={<VillageSettings />} />
+      <Route path="/enfant" element={<ChildProfile />} />
+      <Route path="/parametres" element={<AppSettings />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
 };
 
 const App = () => (
@@ -36,28 +58,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <SwipeHandler />
-        <Routes>
-          <Route path="/" element={<Navigate to="/auth" replace />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/timeline" element={<Timeline />} />
-          <Route path="/selena" element={<SelenaScreen />} />
-          <Route path="/outils" element={<OutilsScreen />} />
-          <Route path="/explorer" element={<ExplorerScreen />} />
-          <Route path="/onboarding" element={<Onboarding />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/record" element={<RecordMemo />} />
-          <Route path="/nouveau-memo-vocal" element={<NouveauMemoVocal />} />
-          <Route path="/nouvelle-note" element={<NouvelleNote />} />
-          <Route path="/nouveau-document" element={<NouveauDocument />} />
-          <Route path="/nouvel-evenement" element={<NouvelEvenement />} />
-          <Route path="/memo-result/:id" element={<MemoResult />} />
-          <Route path="/profil" element={<ProfileSettings />} />
-          <Route path="/village" element={<VillageSettings />} />
-          <Route path="/enfant" element={<ChildProfile />} />
-          <Route path="/parametres" element={<AppSettings />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AppRoutes />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
