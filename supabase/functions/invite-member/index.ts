@@ -92,7 +92,38 @@ Deno.serve(async (req) => {
 
     if (authError) {
       console.error("Auth invite error:", authError);
-      // Non-blocking — invitation row exists, user can still be added manually
+
+      // If user already exists, try to send a magic link instead
+      if (authError.message?.includes("already been registered")) {
+        // Look up existing user and link them directly
+        const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers();
+        const existingUser = existingUsers?.users?.find(u => u.email === email);
+
+        if (existingUser) {
+          // Directly create enfant_membres link for this existing user
+          const { error: linkError } = await supabaseAdmin
+            .from("enfant_membres")
+            .upsert(
+              { enfant_id, user_id: existingUser.id, role: role || "coparent", invited_by: userId },
+              { onConflict: "enfant_id,user_id", ignoreDuplicates: true }
+            );
+          if (linkError) {
+            console.error("Link existing user error:", linkError);
+          } else {
+            console.log("Existing user linked directly:", existingUser.id);
+          }
+        }
+
+        // Send magic link so they can access the app
+        const { error: magicError } = await supabaseAdmin.auth.admin.generateLink({
+          type: "magiclink",
+          email,
+          options: { redirectTo: redirect_url || undefined },
+        });
+        if (magicError) {
+          console.error("Magic link error:", magicError);
+        }
+      }
     }
 
     return new Response(JSON.stringify({ success: true }), {
