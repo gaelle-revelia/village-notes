@@ -1013,7 +1013,7 @@ export default function OnboardingInvite() {
   }
 
   if (localStorage.getItem('invite_pending') !== 'true') {
-    return <Navigate to="/timeline" replace />;
+    return <Navigate to={user ? "/timeline" : "/auth"} replace />;
   }
 
   // Discovery carousel slides data
