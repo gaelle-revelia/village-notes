@@ -116,6 +116,7 @@ const Timeline = () => {
   const filteredMemos = useMemo(() => {
     // Filter out memos with no displayable content
     const displayable = memos.filter(m => {
+      if (m.type === 'document' || m.type === 'evenement') return true;
       const structured = m.content_structured as any;
       return structured?.resume || m.transcription_raw;
     });
