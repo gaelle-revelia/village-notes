@@ -301,7 +301,14 @@ const MemoResult = () => {
       newTags = tags.filter(t => !domain.keywords.some(kw => t.toLowerCase().includes(kw)));
     } else {
       // Add primary tag
-      newTags = [...tags, domainKey];
+      const domainLabels: Record<string, string> = {
+        "moteur": "Moteur",
+        "cognitif": "Cognitif",
+        "sensoriel": "Sensoriel",
+        "bien-etre": "Bien-être",
+        "medical": "Médical",
+      };
+      newTags = [...tags, domainLabels[domainKey] || domainKey];
     }
 
     const updatedStructured = { ...(memo.content_structured || {}), tags: newTags };
