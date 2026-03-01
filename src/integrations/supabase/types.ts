@@ -20,6 +20,7 @@ export type Database = {
           created_at: string | null
           domaine: string
           enfant_id: string
+          icone: string | null
           id: string
           nom: string
           track_distance: boolean | null
@@ -31,6 +32,7 @@ export type Database = {
           created_at?: string | null
           domaine: string
           enfant_id: string
+          icone?: string | null
           id?: string
           nom: string
           track_distance?: boolean | null
@@ -42,6 +44,7 @@ export type Database = {
           created_at?: string | null
           domaine?: string
           enfant_id?: string
+          icone?: string | null
           id?: string
           nom?: string
           track_distance?: boolean | null
