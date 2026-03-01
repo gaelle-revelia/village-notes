@@ -39,7 +39,7 @@ const NouveauDocument = () => {
           user_id: user.id,
           enfant_id: enfantId,
           intervenant_id: intervenantId,
-          processing_status: "pending",
+          processing_status: "done",
           type: "document" as any,
           memo_date: memoDate.toISOString().split("T")[0] as any,
         })
