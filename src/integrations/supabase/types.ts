@@ -14,6 +14,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      activites: {
+        Row: {
+          actif: boolean | null
+          created_at: string | null
+          domaine: string
+          enfant_id: string
+          id: string
+          nom: string
+          track_distance: boolean | null
+          track_temps: boolean | null
+          unite_distance: string | null
+        }
+        Insert: {
+          actif?: boolean | null
+          created_at?: string | null
+          domaine: string
+          enfant_id: string
+          id?: string
+          nom: string
+          track_distance?: boolean | null
+          track_temps?: boolean | null
+          unite_distance?: string | null
+        }
+        Update: {
+          actif?: boolean | null
+          created_at?: string | null
+          domaine?: string
+          enfant_id?: string
+          id?: string
+          nom?: string
+          track_distance?: boolean | null
+          track_temps?: boolean | null
+          unite_distance?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activites_enfant_id_fkey"
+            columns: ["enfant_id"]
+            isOneToOne: false
+            referencedRelation: "enfants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       enfant_membres: {
         Row: {
           enfant_id: string
@@ -253,6 +297,51 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      sessions_activite: {
+        Row: {
+          activite_id: string
+          created_at: string | null
+          distance: number | null
+          duree_secondes: number | null
+          enfant_id: string
+          id: string
+          notes: string | null
+        }
+        Insert: {
+          activite_id: string
+          created_at?: string | null
+          distance?: number | null
+          duree_secondes?: number | null
+          enfant_id: string
+          id?: string
+          notes?: string | null
+        }
+        Update: {
+          activite_id?: string
+          created_at?: string | null
+          distance?: number | null
+          duree_secondes?: number | null
+          enfant_id?: string
+          id?: string
+          notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sessions_activite_activite_id_fkey"
+            columns: ["activite_id"]
+            isOneToOne: false
+            referencedRelation: "activites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sessions_activite_enfant_id_fkey"
+            columns: ["enfant_id"]
+            isOneToOne: false
+            referencedRelation: "enfants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       specialties: {
         Row: {
