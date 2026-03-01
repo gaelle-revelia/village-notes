@@ -20,8 +20,11 @@ import ChildProfile from "./pages/ChildProfile";
 import AppSettings from "./pages/AppSettings";
 import SelenaScreen from "./pages/SelenaScreen";
 import OutilsScreen from "./pages/OutilsScreen";
+import OutilsActivites from "./pages/OutilsActivites";
+import OutilsActiviteCreer from "./pages/OutilsActiviteCreer";
 import ExplorerScreen from "./pages/ExplorerScreen";
 import OnboardingInvite from "./pages/OnboardingInvite";
+import PlaceholderScreen from "./components/PlaceholderScreen";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,6 +38,10 @@ const AppRoutes = () => {
       <Route path="/timeline" element={<Timeline />} />
       <Route path="/selena" element={<SelenaScreen />} />
       <Route path="/outils" element={<OutilsScreen />} />
+      <Route path="/outils/activites" element={<OutilsActivites />} />
+      <Route path="/outils/activites/creer" element={<OutilsActiviteCreer />} />
+      <Route path="/outils/activites/:id/chrono" element={<PlaceholderScreen title="Chrono" />} />
+      <Route path="/outils/activites/:id/manuel" element={<PlaceholderScreen title="Saisie manuelle" />} />
       <Route path="/explorer" element={<ExplorerScreen />} />
       <Route path="/onboarding" element={<Onboarding />} />
       <Route path="/reset-password" element={<ResetPassword />} />
