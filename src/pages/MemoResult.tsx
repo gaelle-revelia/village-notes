@@ -615,22 +615,40 @@ const MemoResult = () => {
                         </div>
                       </div>
                     )}
-                    <a
-                      href={signedFileUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <button
+                      onClick={() => {
+                        if (signedFileUrl) {
+                          console.log("[Document] Opening signed URL:", signedFileUrl);
+                          const opened = window.open(signedFileUrl, '_blank', 'noopener,noreferrer');
+                          if (!opened) {
+                            // Fallback: download via fetch + Blob
+                            fetch(signedFileUrl)
+                              .then(res => res.blob())
+                              .then(blob => {
+                                const url = URL.createObjectURL(blob);
+                                const a = document.createElement('a');
+                                a.href = url;
+                                a.download = memo?.file_url?.split('/').pop() || 'document';
+                                document.body.appendChild(a);
+                                a.click();
+                                document.body.removeChild(a);
+                                URL.revokeObjectURL(url);
+                              })
+                              .catch(() => toast({ title: "Impossible d'ouvrir le fichier", variant: "destructive" }));
+                          }
+                        }
+                      }}
                       className="flex items-center justify-center gap-2 mt-3 w-full py-2.5 rounded-xl text-sm font-medium cursor-pointer"
                       style={{
                         fontFamily: "'DM Sans', sans-serif",
                         background: "linear-gradient(135deg, #E8736A, #8B74E0)",
                         color: "white",
-                        textDecoration: "none",
                         border: "none",
                       }}
                     >
                       <ExternalLink size={14} />
                       Ouvrir le fichier
-                    </a>
+                    </button>
                   </div>
                 );
               })() : (
