@@ -281,15 +281,15 @@ export function MemoCard({ memo }: MemoCardProps) {
               {titre}
             </p>
             {statItems.length > 0 && (
-              <div className="flex items-center gap-3 mt-2">
+              <div className="flex items-center gap-2.5 mt-1">
                 {statItems.map((s, i) => (
-                  <div key={i} className="flex items-center gap-3">
-                    {i > 0 && <div style={{ width: 1, height: 28, background: "rgba(139,116,224,0.2)" }} />}
+                  <div key={i} className="flex items-center gap-2.5">
+                    {i > 0 && <div style={{ width: 1, height: 22, background: "rgba(139,116,224,0.2)" }} />}
                     <div className="flex flex-col items-center">
-                      <span style={{ fontFamily: "'Fraunces', serif", fontSize: 20, fontWeight: 700, color: "#1E1A1A", lineHeight: 1.2 }}>
+                      <span style={{ fontFamily: "'Fraunces', serif", fontSize: 16, fontWeight: 700, color: "#1E1A1A", lineHeight: 1.2 }}>
                         {s.value}
                       </span>
-                      <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: "#9A9490", fontWeight: 500, marginTop: 1 }}>
+                      <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: "#9A9490", fontWeight: 500, marginTop: 0 }}>
                         {s.label}
                       </span>
                     </div>
