@@ -3,16 +3,11 @@ import { Navigate, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useEnfantId } from "@/hooks/useEnfantId";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Search, ChevronRight, X } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import BottomNavBar from "@/components/BottomNavBar";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { MemoCard, getDomainsFromTags } from "@/components/memo/MemoCard";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import AddMemoSheet from "@/components/AddMemoSheet";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -61,7 +56,7 @@ function RevealCard({ children }: { children: React.ReactNode }) {
 
 const Timeline = () => {
   const { user, loading } = useAuth();
-  const { role } = useEnfantId();
+  const { role, enfantId } = useEnfantId();
   const navigate = useNavigate();
   const location = useLocation();
   const [memos, setMemos] = useState<Memo[]>([]);
@@ -70,12 +65,6 @@ const Timeline = () => {
   const [sheetOpen, setSheetOpen] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  const menuItems = [
-    { icon: "🎙️", label: "Note vocale", description: "Enregistrer une séance à la voix", route: "/nouveau-memo-vocal" },
-    { icon: "📝", label: "Note écrite", description: "Ajouter une observation ou une pensée", route: "/nouvelle-note" },
-    { icon: "📄", label: "Document", description: "Importer un compte rendu ou une photo", route: "/nouveau-document" },
-    { icon: "📌", label: "Événement", description: "Noter un fait marquant", route: "/nouvel-evenement" },
-  ];
 
   useEffect(() => {
     if (!user) return;
@@ -383,35 +372,7 @@ const Timeline = () => {
         </button>
       )}
 
-      <Dialog open={sheetOpen} onOpenChange={setSheetOpen}>
-        <DialogContent hideClose className="w-[85vw] max-w-md rounded-2xl border-none shadow-xl p-0 gap-0 [&~[data-state]]:bg-black/40">
-          <DialogHeader className="flex flex-row items-center justify-end px-4 pt-3 pb-0">
-            <DialogTitle className="sr-only">Ajouter</DialogTitle>
-            <button
-              onClick={() => setSheetOpen(false)}
-              className="rounded-full p-1 hover:bg-muted transition-colors text-muted-foreground"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </DialogHeader>
-          <nav className="px-2 pb-4 pt-1">
-            {menuItems.map((item) => (
-              <button
-                key={item.route}
-                onClick={() => { setSheetOpen(false); navigate(item.route); }}
-                className="flex w-full items-center gap-4 rounded-xl px-4 py-3 text-left hover:bg-muted transition-colors"
-              >
-                <span className="text-2xl">{item.icon}</span>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-foreground">{item.label}</p>
-                  <p className="text-sm text-muted-foreground">{item.description}</p>
-                </div>
-                <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground" />
-              </button>
-            ))}
-          </nav>
-        </DialogContent>
-      </Dialog>
+      <AddMemoSheet open={sheetOpen} onOpenChange={setSheetOpen} enfantId={enfantId} />
 
       <BottomNavBar />
     </div>
