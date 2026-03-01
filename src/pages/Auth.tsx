@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Navigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { SignupForm } from "@/components/auth/SignupForm";
 import { LoginForm } from "@/components/auth/LoginForm";
@@ -10,8 +10,21 @@ type AuthView = "login" | "signup" | "forgot-password" | "email-confirmation";
 
 const Auth = () => {
   const { user, loading } = useAuth();
+  const navigate = useNavigate();
   const [view, setView] = useState<AuthView>("login");
   const [confirmationEmail, setConfirmationEmail] = useState("");
+
+  // Intercept invite/signup hash and redirect to onboarding-invite
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (!hash || hash.length < 2) return;
+    const params = new URLSearchParams(hash.substring(1));
+    const type = params.get("type");
+    if (type === "invite" || type === "signup") {
+      localStorage.setItem("invite_hash", hash);
+      navigate("/onboarding-invite" + hash, { replace: true });
+    }
+  }, [navigate]);
 
   if (loading) {
     return (

@@ -935,6 +935,19 @@ export default function OnboardingInvite() {
   const showMemos = role === "coparent" || role === "owner";
   const totalDiscoverySlides = showMemos ? 3 : 2;
 
+  // Restore invite hash from localStorage if missing from URL
+  useEffect(() => {
+    const hash = window.location.hash;
+    const hasToken = hash.includes("access_token");
+    if (!hasToken) {
+      const stored = localStorage.getItem("invite_hash");
+      if (stored) {
+        window.location.replace(window.location.pathname + stored);
+        return;
+      }
+    }
+  }, []);
+
   // Load context data
   useEffect(() => {
     async function load() {
