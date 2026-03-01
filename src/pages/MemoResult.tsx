@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate, useParams, Navigate } from "react-router-dom";
-import { ArrowLeft, Trash2, X, Plus, Info, Activity, Hand, Brain, Stethoscope, MessageCircle, User, Heart, Waves, ChevronLeft, ChevronRight, FileText, Download, ExternalLink } from "lucide-react";
+import { ArrowLeft, Trash2, X, Plus, Info, Activity, Hand, Brain, Stethoscope, MessageCircle, User, Heart, Waves, ChevronLeft, ChevronRight, FileText, Download, ExternalLink, Check, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useEnfantId } from "@/hooks/useEnfantId";
@@ -152,6 +152,8 @@ const MemoResult = () => {
   const [deleting, setDeleting] = useState(false);
   const [newTag, setNewTag] = useState("");
   const [signedFileUrl, setSignedFileUrl] = useState<string | null>(null);
+  const [activitySaving, setActivitySaving] = useState<string | null>(null);
+  const [activitySaved, setActivitySaved] = useState<string | null>(null);
   // Temp edit values
   const [tempResume, setTempResume] = useState("");
   const [tempDetails, setTempDetails] = useState("");
@@ -522,6 +524,75 @@ const MemoResult = () => {
 
             const noteText = (structured as any)?.notes as string | undefined;
 
+            // Helper to rebuild transcription_raw
+            const rebuildRaw = (name: string, dur: string, dist: string) =>
+              `${name} — ${dur} / ${dist}`;
+
+            // Save helpers with feedback
+            const saveActivityField = async (field: string, saveFn: () => Promise<void>) => {
+              setActivitySaving(field);
+              try {
+                await saveFn();
+                setActivitySaved(field);
+                setTimeout(() => setActivitySaved(null), 1200);
+              } catch {
+                toast({ title: "Erreur", description: "Impossible de sauvegarder.", variant: "destructive" });
+              }
+              setActivitySaving(null);
+            };
+
+            const saveDuration = async (newDur: string) => {
+              const newRaw = rebuildRaw(activityName, newDur, distanceStr);
+              // Parse MM:SS to seconds
+              const parts = newDur.split(":").map(Number);
+              const secs = parts.length === 2 ? (parts[0] || 0) * 60 + (parts[1] || 0) : null;
+              
+              const updates: PromiseLike<any>[] = [
+                supabase.from("memos").update({ transcription_raw: newRaw }).eq("id", memo.id).then(),
+              ];
+              if (secs !== null && memo.enfant_id) {
+                updates.push(
+                  supabase.from("sessions_activite").update({ duree_secondes: secs })
+                    .eq("enfant_id", memo.enfant_id)
+                    .gte("created_at", `${memo.memo_date}T00:00:00`)
+                    .lt("created_at", `${memo.memo_date}T23:59:59.999`).then()
+                );
+              }
+              await Promise.all(updates);
+              await fetchMemo();
+            };
+
+            const saveDistance = async (newDist: string) => {
+              const newRaw = rebuildRaw(activityName, durationStr, newDist);
+              const distNum = parseFloat(newDist) || null;
+              
+              const updates: PromiseLike<any>[] = [
+                supabase.from("memos").update({ transcription_raw: newRaw }).eq("id", memo.id).then(),
+              ];
+              if (distNum !== null && memo.enfant_id) {
+                updates.push(
+                  supabase.from("sessions_activite").update({ distance: distNum })
+                    .eq("enfant_id", memo.enfant_id)
+                    .gte("created_at", `${memo.memo_date}T00:00:00`)
+                    .lt("created_at", `${memo.memo_date}T23:59:59.999`).then()
+                );
+              }
+              await Promise.all(updates);
+              await fetchMemo();
+            };
+
+            const saveNote = async (newNote: string) => {
+              const updatedStructured = { ...(memo.content_structured || {}), notes: newNote || undefined };
+              await supabase.from("memos").update({ content_structured: updatedStructured }).eq("id", memo.id);
+              await fetchMemo();
+            };
+
+            const feedbackIcon = (field: string) => {
+              if (activitySaving === field) return <Loader2 size={14} className="animate-spin" style={{ color: "#9A9490" }} />;
+              if (activitySaved === field) return <Check size={14} style={{ color: "#44A882" }} />;
+              return null;
+            };
+
             return (
               <>
                 {/* Date */}
@@ -639,16 +710,68 @@ const MemoResult = () => {
                         </span>
                       )}
                     </div>
-                    {/* Domain badge read-only */}
-                    {activeDomain && (
+                    {/* Domain badge — click to edit */}
+                    {editingField === "actDomain" ? null : (
                       <span
-                        className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium"
-                        style={{ backgroundColor: `${activeDomain.color}18`, color: activeDomain.color }}
+                        className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${readOnly ? "" : "cursor-pointer"}`}
+                        onClick={readOnly ? undefined : () => setEditingField("actDomain")}
+                        style={{
+                          backgroundColor: activeDomain ? `${activeDomain.color}18` : "rgba(154,148,144,0.12)",
+                          color: activeDomain?.color || "#9A9490",
+                        }}
                       >
-                        <div style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: activeDomain.color }} />
-                        {activeDomain.label}
+                        {activeDomain && (
+                          <div style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: activeDomain.color }} />
+                        )}
+                        {activeDomain?.label || "Domaine"}
                       </span>
                     )}
+                  </div>
+                )}
+
+                {/* Domain selector — shown when editing */}
+                {editingField === "actDomain" && (
+                  <div style={glassCard}>
+                    <p style={sectionLabel}>DOMAINE</p>
+                    <div className="flex items-start justify-center gap-4">
+                      {DOMAINS.map((domain) => {
+                        const active = isDomainActive(domain.key, actTags);
+                        return (
+                          <button
+                            key={domain.key}
+                            onClick={() => {
+                              handleDomainToggle(domain.key);
+                              setTimeout(() => setEditingField(null), 300);
+                            }}
+                            className="flex flex-col items-center gap-1 bg-transparent border-none p-0 cursor-pointer"
+                          >
+                            <div
+                              style={{
+                                width: 22,
+                                height: 22,
+                                borderRadius: "50%",
+                                backgroundColor: active ? domain.color : "transparent",
+                                border: `2px solid ${domain.color}`,
+                                opacity: active ? 1 : 0.35,
+                                boxShadow: active ? `0 0 0 5px ${domain.color}38` : "none",
+                                transition: "all 0.2s ease",
+                              }}
+                            />
+                            <span
+                              style={{
+                                fontSize: 9,
+                                fontFamily: "'DM Sans', sans-serif",
+                                fontWeight: active ? 600 : 400,
+                                color: active ? domain.color : "#9A9490",
+                                opacity: active ? 1 : 0.5,
+                              }}
+                            >
+                              {domain.label}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 )}
 
@@ -666,7 +789,7 @@ const MemoResult = () => {
                   {activityName}
                 </h1>
 
-                {/* Stats glass card */}
+                {/* Stats glass card — editable */}
                 <div
                   style={{
                     ...glassCard,
@@ -677,30 +800,65 @@ const MemoResult = () => {
                   <div className="flex items-center justify-center gap-0">
                     {/* Duration */}
                     <div className="flex flex-col items-center flex-1">
-                      <span
-                        style={{
-                          fontFamily: "'Fraunces', serif",
-                          fontSize: 28,
-                          fontWeight: 700,
-                          color: "#1E1A1A",
-                          lineHeight: 1.1,
-                        }}
-                      >
-                        {durationStr}
-                      </span>
-                      <span
-                        style={{
-                          fontFamily: "'DM Sans', sans-serif",
-                          fontSize: 10,
-                          fontWeight: 500,
-                          color: "#9A9490",
-                          marginTop: 4,
-                          textTransform: "uppercase",
-                          letterSpacing: "0.05em",
-                        }}
-                      >
-                        Durée
-                      </span>
+                      {editingField === "actDuration" ? (
+                        <input
+                          type="text"
+                          defaultValue={durationStr !== "—" ? durationStr : ""}
+                          placeholder="MM:SS"
+                          autoFocus
+                          onBlur={(e) => {
+                            const val = e.target.value.trim() || "—";
+                            setEditingField(null);
+                            saveActivityField("duration", () => saveDuration(val));
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              (e.target as HTMLInputElement).blur();
+                            }
+                          }}
+                          className="text-center outline-none"
+                          style={{
+                            fontFamily: "'Fraunces', serif",
+                            fontSize: 28,
+                            fontWeight: 700,
+                            color: "#1E1A1A",
+                            width: 90,
+                            background: "rgba(255,255,255,0.5)",
+                            border: "1px solid rgba(139,116,224,0.3)",
+                            borderRadius: 8,
+                            padding: "2px 4px",
+                          }}
+                        />
+                      ) : (
+                        <span
+                          className={readOnly ? "" : "cursor-pointer"}
+                          onClick={readOnly ? undefined : () => setEditingField("actDuration")}
+                          style={{
+                            fontFamily: "'Fraunces', serif",
+                            fontSize: 28,
+                            fontWeight: 700,
+                            color: "#1E1A1A",
+                            lineHeight: 1.1,
+                          }}
+                        >
+                          {durationStr}
+                        </span>
+                      )}
+                      <div className="flex items-center gap-1" style={{ marginTop: 4 }}>
+                        <span
+                          style={{
+                            fontFamily: "'DM Sans', sans-serif",
+                            fontSize: 10,
+                            fontWeight: 500,
+                            color: "#9A9490",
+                            textTransform: "uppercase",
+                            letterSpacing: "0.05em",
+                          }}
+                        >
+                          Durée
+                        </span>
+                        {feedbackIcon("duration")}
+                      </div>
                     </div>
                     {/* Separator */}
                     <div
@@ -713,59 +871,134 @@ const MemoResult = () => {
                     />
                     {/* Distance */}
                     <div className="flex flex-col items-center flex-1">
-                      <span
-                        style={{
-                          fontFamily: "'Fraunces', serif",
-                          fontSize: 28,
-                          fontWeight: 700,
-                          color: "#1E1A1A",
-                          lineHeight: 1.1,
-                        }}
-                      >
-                        {distanceStr}
-                      </span>
-                      <span
-                        style={{
-                          fontFamily: "'DM Sans', sans-serif",
-                          fontSize: 10,
-                          fontWeight: 500,
-                          color: "#9A9490",
-                          marginTop: 4,
-                          textTransform: "uppercase",
-                          letterSpacing: "0.05em",
-                        }}
-                      >
-                        Distance
-                      </span>
+                      {editingField === "actDistance" ? (
+                        <input
+                          type="text"
+                          defaultValue={distanceStr !== "—" ? distanceStr : ""}
+                          placeholder="0"
+                          autoFocus
+                          onBlur={(e) => {
+                            const val = e.target.value.trim() || "—";
+                            setEditingField(null);
+                            saveActivityField("distance", () => saveDistance(val));
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              (e.target as HTMLInputElement).blur();
+                            }
+                          }}
+                          className="text-center outline-none"
+                          style={{
+                            fontFamily: "'Fraunces', serif",
+                            fontSize: 28,
+                            fontWeight: 700,
+                            color: "#1E1A1A",
+                            width: 90,
+                            background: "rgba(255,255,255,0.5)",
+                            border: "1px solid rgba(139,116,224,0.3)",
+                            borderRadius: 8,
+                            padding: "2px 4px",
+                          }}
+                        />
+                      ) : (
+                        <span
+                          className={readOnly ? "" : "cursor-pointer"}
+                          onClick={readOnly ? undefined : () => setEditingField("actDistance")}
+                          style={{
+                            fontFamily: "'Fraunces', serif",
+                            fontSize: 28,
+                            fontWeight: 700,
+                            color: "#1E1A1A",
+                            lineHeight: 1.1,
+                          }}
+                        >
+                          {distanceStr}
+                        </span>
+                      )}
+                      <div className="flex items-center gap-1" style={{ marginTop: 4 }}>
+                        <span
+                          style={{
+                            fontFamily: "'DM Sans', sans-serif",
+                            fontSize: 10,
+                            fontWeight: 500,
+                            color: "#9A9490",
+                            textTransform: "uppercase",
+                            letterSpacing: "0.05em",
+                          }}
+                        >
+                          Distance
+                        </span>
+                        {feedbackIcon("distance")}
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Note glass card */}
+                {/* Note glass card — editable */}
                 <div style={glassCard}>
-                  <p style={sectionLabel}>NOTE</p>
-                  {noteText ? (
-                    <p
+                  <div className="flex items-center justify-between mb-2">
+                    <p style={{ ...sectionLabel, marginBottom: 0 }}>NOTE</p>
+                    {feedbackIcon("note")}
+                  </div>
+                  {editingField === "actNote" ? (
+                    <textarea
+                      defaultValue={noteText || ""}
+                      autoFocus
+                      rows={3}
+                      onBlur={(e) => {
+                        const val = e.target.value.trim();
+                        setEditingField(null);
+                        saveActivityField("note", () => saveNote(val));
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                          e.preventDefault();
+                          (e.target as HTMLTextAreaElement).blur();
+                        }
+                      }}
+                      className="w-full outline-none resize-none"
                       style={{
                         fontFamily: "'DM Sans', sans-serif",
                         fontSize: 15,
                         color: "#1E1A1A",
                         lineHeight: 1.6,
+                        background: "rgba(255,255,255,0.5)",
+                        border: "1px solid rgba(255,255,255,0.72)",
+                        borderRadius: 8,
+                        padding: "10px 12px",
                       }}
-                    >
-                      {noteText}
-                    </p>
+                    />
                   ) : (
-                    <p
-                      style={{
-                        fontFamily: "'DM Sans', sans-serif",
-                        fontSize: 14,
-                        color: "#9A9490",
-                        fontStyle: "italic",
-                      }}
+                    <div
+                      className={readOnly ? "" : "cursor-pointer"}
+                      onClick={readOnly ? undefined : () => setEditingField("actNote")}
                     >
-                      Aucune note pour cette séance
-                    </p>
+                      {noteText ? (
+                        <p
+                          style={{
+                            fontFamily: "'DM Sans', sans-serif",
+                            fontSize: 15,
+                            color: "#1E1A1A",
+                            lineHeight: 1.6,
+                            margin: 0,
+                          }}
+                        >
+                          {noteText}
+                        </p>
+                      ) : (
+                        <p
+                          style={{
+                            fontFamily: "'DM Sans', sans-serif",
+                            fontSize: 14,
+                            color: "#9A9490",
+                            fontStyle: "italic",
+                            margin: 0,
+                          }}
+                        >
+                          Aucune note pour cette séance
+                        </p>
+                      )}
+                    </div>
                   )}
                 </div>
               </>
