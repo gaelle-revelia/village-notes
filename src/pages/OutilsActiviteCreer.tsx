@@ -151,7 +151,7 @@ export default function OutilsActiviteCreer() {
               <span className="text-[13px] font-sans font-medium text-foreground flex-1">{icone}</span>
               <button
                 type="button"
-                onClick={() => setShowIconPicker(true)}
+                onMouseDown={(e) => { e.preventDefault(); setShowIconPicker(true); }}
                 className="text-[13px] font-sans font-semibold"
                 style={{ color: "#8B74E0", background: "none", border: "none" }}
               >
