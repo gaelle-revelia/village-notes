@@ -253,14 +253,26 @@ const Timeline = () => {
             {grouped.map((group) => (
               <div key={group.key}>
                 {/* Month header */}
-                <div className="sticky top-[100px] z-[5] pt-6 pb-2"
+                <div className="sticky top-[100px] z-[5]"
                   style={{
                     background: "linear-gradient(150deg, #F9EDE8 0%, #F0EAF8 45%, #E8EFF8 100%)",
+                    padding: "20px 0 10px 0",
                   }}
                 >
-                  <span className="text-[11px] font-bold tracking-[0.12em] text-muted-foreground uppercase">
-                    {group.label}
-                  </span>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <span style={{
+                      color: "#8B74E0",
+                      opacity: 0.75,
+                      fontSize: 13,
+                      fontWeight: 600,
+                      letterSpacing: "0.06em",
+                      textTransform: "uppercase" as const,
+                      whiteSpace: "nowrap",
+                    }}>
+                      {group.label}
+                    </span>
+                    <div style={{ flex: 1, height: 1, background: "linear-gradient(90deg, rgba(139,116,224,0.25), transparent)" }} />
+                  </div>
                 </div>
 
                 {/* Timeline entries */}
