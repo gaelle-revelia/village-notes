@@ -1,0 +1,1 @@
+ALTER TABLE public.activites ADD COLUMN icone text DEFAULT 'Activity';
