@@ -1,56 +1,57 @@
 
-## Activites suivies -- Implementation
 
-### Verification prealable
-- `PlaceholderScreen` : existe dans `src/components/PlaceholderScreen.tsx`
-- `vaul` (Drawer) : existe dans `src/components/ui/drawer.tsx`
-- `useEnfantId` : existe et retourne `enfantId`, `role`, `loading`
-- Tables `activites` et `sessions_activite` : deja creees avec RLS
+## Selection d'icone intelligente dans OutilsActiviteCreer
 
-### Fichiers a modifier
-
-**1. `src/pages/OutilsScreen.tsx`** -- Grille bento 2x2
-
-Remplacer le placeholder par 4 cartes liquid glass en grille :
-- "Suivi d'activites" (Activity) : actif, navigue vers `/outils/activites`
-- "Synthese magique" (Sparkles) : desactive, badge "Bientot"
-- "Planning" (CalendarDays) : desactive, badge "Bientot"
-- "Export" (Share2) : desactive, badge "Bientot"
-
-Conservation du header glass + BottomNavBar + ProfileAvatar.
-
-**2. `src/App.tsx`** -- 4 nouvelles routes
-
-```text
-/outils/activites           -> OutilsActivites
-/outils/activites/creer     -> OutilsActiviteCreer
-/outils/activites/:id/chrono -> PlaceholderScreen("Chrono")
-/outils/activites/:id/manuel -> PlaceholderScreen("Saisie manuelle")
-```
+### Contrainte technique importante
+Le projet utilise **Lovable AI** (gateway interne) et non l'API Claude directement. Le modele `claude-sonnet-4-20250514` n'est pas disponible. L'implementation utilisera `google/gemini-2.5-flash` via le gateway Lovable AI, avec le meme prompt systeme et le meme comportement attendu.
 
 ### Fichiers a creer
 
-**3. `src/pages/OutilsActivites.tsx`** -- Liste des activites
+**1. `supabase/functions/suggest-icon/index.ts`** -- Edge function
 
-- Header glass avec retour vers `/outils`
-- Fetch activites depuis Supabase (filtrees par enfant_id, actif=true)
-- Carte glass par activite : icone domaine coloree, nom, badges domaine + unites
-- Tap carte -> Drawer (bottom sheet) avec 2 options : Chrono (Timer) / Manuel (PenLine)
-- Bouton dashed "Nouvelle activite" (Plus) -> `/outils/activites/creer`
-- Etat vide avec message encourageant
+- Recoit `{ nom, domaine }` en POST
+- Appelle Lovable AI gateway (`google/gemini-2.5-flash`) avec le prompt systeme fourni
+- Retourne `{ icon: "NomIcone" }` 
+- Gestion CORS, erreurs 429/402, validation que la reponse est dans la liste autorisee
 
-**4. `src/pages/OutilsActiviteCreer.tsx`** -- Formulaire creation
+### Fichiers a modifier
 
-- Header glass avec retour vers `/outils/activites`
-- Champ texte Nom
-- Selecteur domaine : 5 dots colores (Moteur/Cognitif/Sensoriel/Bien-etre/Medical)
-- Toggle group : Temps / Distance / Les deux
-- Si distance active : toggle Metres / Km
-- Bouton gradient "Creer l'activite" -> insert Supabase + retour liste
+**2. `src/pages/OutilsActiviteCreer.tsx`**
 
-### Design system applique
-- Fond transparent (gradient global visible)
-- Fraunces titres, DM Sans corps
-- Couleurs : Corail #E8736A, Lavande #8B74E0, Menthe #44A882, Abricot #E8A44A, Gris #8A9BAE
-- Liquid glass cards (rgba(255,255,255,0.38), blur 16px, border rgba(255,255,255,0.85))
-- Bouton principal : gradient corail-lavande
+Ajouts au state :
+- `icone: string` (defaut `"Activity"`)
+- `suggestingIcon: boolean`
+- `showIconPicker: boolean`
+
+Comportement onBlur du champ nom :
+- Si `nom.trim().length > 0` et domaine selectionne -> appel edge function `suggest-icon`
+- Pendant le chargement : spinner discret sous le champ nom
+- Au retour : afficher apercu avec l'icone Lucide rendue dynamiquement + bouton "Changer"
+
+Apercu icone (sous le champ nom, dans la meme glass card) :
+- Icone Lucide rendue via le pattern `icons[icone]` de lucide-react
+- Carre arrondi colore (couleur domaine) + nom de l'icone + bouton "Changer" a droite
+
+Picker grid (affiche quand `showIconPicker = true`) :
+- Glass card supplementaire avec grille 6 colonnes
+- 33 icones de la liste, chacune en bouton 40x40
+- Tap = selection, ferme le picker
+- Icone active surlignee avec halo domaine
+
+INSERT Supabase :
+- Ajouter `icone` dans l'objet d'insertion
+
+### Liste des icones (constante partagee)
+
+```text
+Footprints, Bike, Baby, Heart, Brain, Ear, Eye, Hand, Stethoscope, Activity,
+Dumbbell, Wind, Music, Smile, Sun, Star, Flower2, Leaf, Waves, Circle,
+ArrowUp, MoveHorizontal, StretchHorizontal, PersonStanding, Accessibility,
+Gamepad2, Puzzle, BookOpen, Paintbrush, Scissors, Timer, Zap, Sparkles
+```
+
+### Design
+- Apercu icone : inline dans la glass card du nom, alignement horizontal
+- Picker : glass card separee, grille responsive, icones en couleur du domaine actif
+- Bouton "Changer" : texte lavande `#8B74E0`, sans fond
+
