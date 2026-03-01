@@ -487,11 +487,9 @@ const Timeline = () => {
                       borderRadius: 20,
                       fontSize: 13,
                       fontWeight: 500,
-                      border: isActive ? "1.5px solid transparent" : `1.5px solid ${pill.border}`,
-                      background: isActive ? pill.bg : (pill.key === "tous" ? "transparent" : pill.bg),
-                      color: isActive ? (pill.key === "tous" ? "#FFFFFF" : pill.color) : pill.color,
-                      ...(isActive && pill.key !== "tous" ? { background: pill.bg, border: `1.5px solid ${pill.color}` } : {}),
-                      ...(isActive && pill.key === "tous" ? { background: "#8B74E0", color: "#FFFFFF" } : {}),
+                      background: isActive ? pill.color : pill.bg,
+                      color: isActive ? "#FFFFFF" : pill.color,
+                      border: isActive ? `1.5px solid ${pill.color}` : `1.5px solid ${pill.border}`,
                       transition: "all 0.2s ease",
                     }}
                   >
