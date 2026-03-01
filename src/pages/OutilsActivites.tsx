@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Plus, Timer, PenLine, Activity, Brain, Stethoscope, Heart, Ear } from "lucide-react";
+import { icons } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useEnfantId } from "@/hooks/useEnfantId";
 import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
@@ -35,6 +36,7 @@ interface Activite {
   id: string;
   nom: string;
   domaine: string;
+  icone: string | null;
   track_temps: boolean | null;
   track_distance: boolean | null;
   unite_distance: string | null;
@@ -51,7 +53,7 @@ export default function OutilsActivites() {
     if (!enfantId) return;
     supabase
       .from("activites")
-      .select("id, nom, domaine, track_temps, track_distance, unite_distance")
+      .select("id, nom, domaine, icone, track_temps, track_distance, unite_distance")
       .eq("enfant_id", enfantId)
       .eq("actif", true)
       .order("created_at", { ascending: false })
@@ -90,7 +92,8 @@ export default function OutilsActivites() {
         ) : (
           activites.map((a) => {
             const d = domain(a.domaine);
-            const Icon = d.icon;
+            const CustomIcon = a.icone ? icons[a.icone as keyof typeof icons] : null;
+            const Icon = CustomIcon ?? d.icon;
             const units: string[] = [];
             if (a.track_temps) units.push("Temps");
             if (a.track_distance) units.push(a.unite_distance === "km" ? "Distance en km" : "Distance en mètres");
