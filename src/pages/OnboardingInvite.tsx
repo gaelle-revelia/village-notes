@@ -968,35 +968,31 @@ export default function OnboardingInvite() {
   const showMemos = role === "coparent" || role === "owner";
   const totalDiscoverySlides = showMemos ? 3 : 2;
 
-  // Verify invite token from URL query param
+  // Verify invite token and load context data
   useEffect(() => {
-    async function verifyToken() {
+    async function init() {
+      // Step 1: Verify token if present
       const params = new URLSearchParams(window.location.search);
       const token = params.get("token");
-      if (!token) return;
+      if (token) {
+        const { data, error } = await supabase.functions.invoke("verify-invite-token", {
+          body: { token },
+        });
 
-      const { data, error } = await supabase.functions.invoke("verify-invite-token", {
-        body: { token },
-      });
+        if (error || !data?.enfant_id) {
+          setTokenError(data?.error || "Lien d'invitation invalide ou expiré");
+          setLoading(false);
+          return;
+        }
 
-      if (error || !data?.enfant_id) {
-        setTokenError(data?.error || "Lien d'invitation invalide ou expiré");
-        setLoading(false);
-        return;
+        localStorage.setItem("invite_enfant_id", data.enfant_id);
+        localStorage.setItem("invite_role", data.role);
+        localStorage.setItem("invite_token", token);
+        setRole(data.role);
+        setInviteEmail(data.email);
       }
 
-      localStorage.setItem("invite_enfant_id", data.enfant_id);
-      localStorage.setItem("invite_role", data.role);
-      localStorage.setItem("invite_token", token);
-      setRole(data.role);
-      setInviteEmail(data.email);
-    }
-    verifyToken();
-  }, []);
-
-  // Load context data
-  useEffect(() => {
-    async function load() {
+      // Step 2: Load context data
       const enfantId =
         user?.user_metadata?.enfant_id ||
         localStorage.getItem("invite_enfant_id");
@@ -1019,7 +1015,7 @@ export default function OnboardingInvite() {
         .single();
       if (enfant) setEnfantPrenom(enfant.prenom);
 
-      // Fetch inviter name — try intervenants famille type, fallback to email
+      // Fetch inviter name
       const { data: membres } = await supabase
         .from("enfant_membres" as any)
         .select("user_id")
@@ -1028,8 +1024,6 @@ export default function OnboardingInvite() {
         .limit(1);
 
       if (membres && (membres as any[]).length > 0) {
-        const ownerId = (membres as any[])[0].user_id;
-        // Try to find the owner's name in intervenants (famille type)
         const { data: intervenant } = await supabase
           .from("intervenants")
           .select("nom")
@@ -1040,7 +1034,6 @@ export default function OnboardingInvite() {
         if (intervenant) {
           setInviterName(intervenant.nom);
         } else {
-          // Fallback: use a generic name
           setInviterName("L'équipe");
         }
       } else {
@@ -1049,7 +1042,7 @@ export default function OnboardingInvite() {
 
       setLoading(false);
     }
-    load();
+    init();
   }, [user]);
 
   const finish = useCallback(() => {
