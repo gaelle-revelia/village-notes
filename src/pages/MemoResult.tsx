@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate, useParams, Navigate } from "react-router-dom";
-import { ArrowLeft, Trash2, X, Plus, Info, Activity, Hand, Brain, Stethoscope, MessageCircle, User, Heart, Waves } from "lucide-react";
+import { ArrowLeft, Trash2, X, Plus, Info, Activity, Hand, Brain, Stethoscope, MessageCircle, User, Heart, Waves, ChevronLeft, ChevronRight } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useEnfantId } from "@/hooks/useEnfantId";
@@ -133,6 +133,10 @@ const MemoResult = () => {
   const [loading, setLoading] = useState(true);
   const [intervenants, setIntervenants] = useState<Intervenant[]>([]);
 
+  // Swipe navigation between memos
+  const [memoIds, setMemoIds] = useState<string[]>([]);
+  const swipeStart = useRef<{ x: number; y: number } | null>(null);
+
   // Per-field editing
   const [editingField, setEditingField] = useState<string | null>(null);
   const [intervenantSearch, setIntervenantSearch] = useState("");
@@ -176,6 +180,48 @@ const MemoResult = () => {
       .order("nom")
       .then(({ data }) => setIntervenants(data || []));
   }, [enfantId]);
+
+  // Fetch ordered memo IDs for swipe navigation
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("memos")
+      .select("id")
+      .eq("user_id", user.id)
+      .order("memo_date", { ascending: true })
+      .order("created_at", { ascending: true })
+      .then(({ data }) => {
+        if (data) setMemoIds(data.map((m) => m.id));
+      });
+  }, [user]);
+
+  // Swipe touch handler for memo navigation
+  useEffect(() => {
+    const onTouchStart = (e: TouchEvent) => {
+      const t = e.touches[0];
+      swipeStart.current = { x: t.clientX, y: t.clientY };
+    };
+    const onTouchEnd = (e: TouchEvent) => {
+      if (!swipeStart.current || !id || memoIds.length === 0) return;
+      const t = e.changedTouches[0];
+      const dx = t.clientX - swipeStart.current.x;
+      const dy = Math.abs(t.clientY - swipeStart.current.y);
+      swipeStart.current = null;
+      if (Math.abs(dx) < 50 || dy > 100) return;
+      const idx = memoIds.indexOf(id);
+      if (idx === -1) return;
+      const nextIdx = dx < 0 ? idx + 1 : idx - 1;
+      if (nextIdx >= 0 && nextIdx < memoIds.length) {
+        navigate(`/memo-result/${memoIds[nextIdx]}`);
+      }
+    };
+    document.addEventListener("touchstart", onTouchStart, { passive: true });
+    document.addEventListener("touchend", onTouchEnd, { passive: true });
+    return () => {
+      document.removeEventListener("touchstart", onTouchStart);
+      document.removeEventListener("touchend", onTouchEnd);
+    };
+  }, [id, memoIds, navigate]);
 
   // --- Auto-save ---
   const autoSave = async (updates: Record<string, any>) => {
@@ -331,8 +377,29 @@ const MemoResult = () => {
     i.nom.toLowerCase().includes(intervenantSearch.toLowerCase())
   );
 
+  const currentIdx = memoIds.indexOf(id!);
+  const hasPrev = currentIdx > 0;
+  const hasNext = currentIdx >= 0 && currentIdx < memoIds.length - 1;
+
   return (
     <div className="flex min-h-screen flex-col">
+      {/* Swipe arrow indicators */}
+      {hasPrev && (
+        <div
+          className="fixed left-2 top-1/2 -translate-y-1/2 z-20 pointer-events-none"
+          style={{ opacity: 0.3 }}
+        >
+          <ChevronLeft size={24} color="#9A9490" />
+        </div>
+      )}
+      {hasNext && (
+        <div
+          className="fixed right-2 top-1/2 -translate-y-1/2 z-20 pointer-events-none"
+          style={{ opacity: 0.3 }}
+        >
+          <ChevronRight size={24} color="#9A9490" />
+        </div>
+      )}
       {/* Header */}
       <header
         className="sticky top-0 z-10 px-4 py-3 flex items-center justify-between"
