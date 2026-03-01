@@ -503,6 +503,275 @@ const MemoResult = () => {
       <main className="flex-1 px-4 pb-8" style={{ paddingTop: 80 }}>
         <div className="mx-auto max-w-[400px] space-y-5">
 
+          {memo.type === "activite" ? (() => {
+            // Parse transcription_raw: "{nom} — {MM:SS} / {distance}"
+            const raw = memo.transcription_raw || "";
+            const dashParts = raw.split("—").map(s => s.trim());
+            const activityName = dashParts[0] || "Activité";
+            let durationStr = "—";
+            let distanceStr = "—";
+            if (dashParts[1]) {
+              const statsParts = dashParts[1].split("/").map(s => s.trim());
+              if (statsParts[0]) durationStr = statsParts[0];
+              if (statsParts[1]) distanceStr = statsParts[1];
+            }
+
+            // Find domain from tags
+            const actTags = structured?.tags || [];
+            const activeDomain = DOMAINS.find(d => isDomainActive(d.key, actTags));
+
+            const noteText = (structured as any)?.notes as string | undefined;
+
+            return (
+              <>
+                {/* Date */}
+                {editingField === "date" ? (
+                  <div className="text-center">
+                    <input
+                      type="date"
+                      defaultValue={memo.memo_date}
+                      onChange={handleDateChange}
+                      onBlur={() => setEditingField(null)}
+                      autoFocus
+                      className="text-sm border rounded-lg px-3 py-2 outline-none"
+                      style={{
+                        fontFamily: "'DM Sans', sans-serif",
+                        fontSize: 14,
+                        color: "#9A9490",
+                        background: "rgba(255,255,255,0.5)",
+                        border: "1px solid rgba(255,255,255,0.72)",
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <p
+                    className={readOnly ? "text-center" : "text-center cursor-pointer"}
+                    onClick={readOnly ? undefined : () => setEditingField("date")}
+                    style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#9A9490" }}
+                  >
+                    {formattedDate}
+                  </p>
+                )}
+
+                {/* Intervenant picker */}
+                {editingField === "intervenant" ? (
+                  <div style={glassCard}>
+                    <input
+                      type="text"
+                      value={intervenantSearch}
+                      onChange={(e) => setIntervenantSearch(e.target.value)}
+                      placeholder="Rechercher un membre..."
+                      autoFocus
+                      className="w-full text-sm outline-none mb-2"
+                      style={{
+                        fontFamily: "'DM Sans', sans-serif",
+                        fontSize: 14,
+                        color: "#1E1A1A",
+                        background: "rgba(255,255,255,0.5)",
+                        border: "1px solid rgba(255,255,255,0.72)",
+                        borderRadius: 8,
+                        padding: "8px 12px",
+                      }}
+                      onBlur={() => {
+                        setTimeout(() => {
+                          if (editingField === "intervenant") setEditingField(null);
+                        }, 200);
+                      }}
+                    />
+                    <div className="max-h-[200px] overflow-y-auto space-y-1">
+                      <button
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => handleIntervenantSelect(null)}
+                        className="w-full text-left text-sm py-2 px-3 rounded-lg bg-transparent border-none cursor-pointer hover:bg-white/40"
+                        style={{ color: "#9A9490", fontStyle: "italic" }}
+                      >
+                        Aucun
+                      </button>
+                      {filteredIntervenants.map((i) => {
+                        const { icon: Icon, gradient } = getSpecialiteAvatar(i.specialite);
+                        return (
+                          <button
+                            key={i.id}
+                            onMouseDown={(e) => e.preventDefault()}
+                            onClick={() => handleIntervenantSelect(i.id)}
+                            className="w-full text-left flex items-center gap-2 text-sm py-2 px-3 rounded-lg bg-transparent border-none cursor-pointer hover:bg-white/40"
+                          >
+                            <div
+                              className="flex items-center justify-center shrink-0"
+                              style={{ width: 24, height: 24, borderRadius: "50%", background: gradient }}
+                            >
+                              <Icon size={12} color="#FFFFFF" />
+                            </div>
+                            <span style={{ color: "#1E1A1A" }}>
+                              {i.nom}{i.specialite ? ` · ${i.specialite}` : ""}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center gap-3">
+                    <div
+                      className={readOnly ? "flex items-center gap-2" : "flex items-center gap-2 cursor-pointer"}
+                      onClick={readOnly ? undefined : () => setEditingField("intervenant")}
+                    >
+                      {intervenantName ? (
+                        <>
+                          {(() => {
+                            const { icon: Icon, gradient } = getSpecialiteAvatar(intervenantSpec);
+                            return (
+                              <div
+                                className="flex items-center justify-center shrink-0"
+                                style={{ width: 28, height: 28, borderRadius: "50%", background: gradient }}
+                              >
+                                <Icon size={14} color="#FFFFFF" />
+                              </div>
+                            );
+                          })()}
+                          <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#1E1A1A" }}>
+                            {intervenantName}
+                          </span>
+                        </>
+                      ) : (
+                        <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#9A9490", fontStyle: "italic" }}>
+                          Associer un membre...
+                        </span>
+                      )}
+                    </div>
+                    {/* Domain badge read-only */}
+                    {activeDomain && (
+                      <span
+                        className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium"
+                        style={{ backgroundColor: `${activeDomain.color}18`, color: activeDomain.color }}
+                      >
+                        <div style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: activeDomain.color }} />
+                        {activeDomain.label}
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                {/* Activity title */}
+                <h1
+                  className="text-center"
+                  style={{
+                    fontFamily: "'Fraunces', serif",
+                    fontSize: 20,
+                    fontWeight: 700,
+                    color: "#1E1A1A",
+                    margin: 0,
+                  }}
+                >
+                  {activityName}
+                </h1>
+
+                {/* Stats glass card */}
+                <div
+                  style={{
+                    ...glassCard,
+                    background: "rgba(232,239,255,0.45)",
+                    border: "1px solid rgba(139,116,224,0.2)",
+                  }}
+                >
+                  <div className="flex items-center justify-center gap-0">
+                    {/* Duration */}
+                    <div className="flex flex-col items-center flex-1">
+                      <span
+                        style={{
+                          fontFamily: "'Fraunces', serif",
+                          fontSize: 28,
+                          fontWeight: 700,
+                          color: "#1E1A1A",
+                          lineHeight: 1.1,
+                        }}
+                      >
+                        {durationStr}
+                      </span>
+                      <span
+                        style={{
+                          fontFamily: "'DM Sans', sans-serif",
+                          fontSize: 10,
+                          fontWeight: 500,
+                          color: "#9A9490",
+                          marginTop: 4,
+                          textTransform: "uppercase",
+                          letterSpacing: "0.05em",
+                        }}
+                      >
+                        Durée
+                      </span>
+                    </div>
+                    {/* Separator */}
+                    <div
+                      style={{
+                        width: 1,
+                        height: 36,
+                        background: "rgba(139,116,224,0.2)",
+                        flexShrink: 0,
+                      }}
+                    />
+                    {/* Distance */}
+                    <div className="flex flex-col items-center flex-1">
+                      <span
+                        style={{
+                          fontFamily: "'Fraunces', serif",
+                          fontSize: 28,
+                          fontWeight: 700,
+                          color: "#1E1A1A",
+                          lineHeight: 1.1,
+                        }}
+                      >
+                        {distanceStr}
+                      </span>
+                      <span
+                        style={{
+                          fontFamily: "'DM Sans', sans-serif",
+                          fontSize: 10,
+                          fontWeight: 500,
+                          color: "#9A9490",
+                          marginTop: 4,
+                          textTransform: "uppercase",
+                          letterSpacing: "0.05em",
+                        }}
+                      >
+                        Distance
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Note glass card */}
+                <div style={glassCard}>
+                  <p style={sectionLabel}>NOTE</p>
+                  {noteText ? (
+                    <p
+                      style={{
+                        fontFamily: "'DM Sans', sans-serif",
+                        fontSize: 15,
+                        color: "#1E1A1A",
+                        lineHeight: 1.6,
+                      }}
+                    >
+                      {noteText}
+                    </p>
+                  ) : (
+                    <p
+                      style={{
+                        fontFamily: "'DM Sans', sans-serif",
+                        fontSize: 14,
+                        color: "#9A9490",
+                        fontStyle: "italic",
+                      }}
+                    >
+                      Aucune note pour cette séance
+                    </p>
+                  )}
+                </div>
+              </>
+            );
+          })() : (
+            <>
           {/* 1. DATE — inline edit */}
           {editingField === "date" ? (
             <div className="text-center">
@@ -663,7 +932,6 @@ const MemoResult = () => {
                           console.log("[Document] Opening signed URL:", signedFileUrl);
                           const opened = window.open(signedFileUrl, '_blank', 'noopener,noreferrer');
                           if (!opened) {
-                            // Fallback: download via fetch + Blob
                             fetch(signedFileUrl)
                               .then(res => res.blob())
                               .then(blob => {
@@ -942,6 +1210,8 @@ const MemoResult = () => {
               </div>
             )}
           </div>
+            </>
+          )}
         </div>
       </main>
 
