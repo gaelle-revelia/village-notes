@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -291,9 +291,6 @@ function ScreenPassword({
       const { error: err } = await supabase.auth.signUp({
         email,
         password: pw,
-        options: {
-          data: { enfant_id: enfantId, role: inviteRole },
-        },
       });
       if (err) {
         setError(err.message);
@@ -309,6 +306,13 @@ function ScreenPassword({
             { onConflict: "enfant_id,user_id", ignoreDuplicates: true }
           );
         }
+      }
+      // Invalidate the invite token
+      const inviteToken = localStorage.getItem("invite_token");
+      if (inviteToken) {
+        await supabase.functions.invoke("verify-invite-token", {
+          body: { token: inviteToken, mark_used: true },
+        });
       }
     }
     onDone();
@@ -968,8 +972,11 @@ export default function OnboardingInvite() {
   const showMemos = role === "coparent" || role === "owner";
   const totalDiscoverySlides = showMemos ? 3 : 2;
 
+  const initDone = useRef(false);
+
   // Verify invite token and load context data
   useEffect(() => {
+    if (initDone.current) return;
     async function init() {
       // Step 1: Verify token if present
       const params = new URLSearchParams(window.location.search);
@@ -1041,6 +1048,7 @@ export default function OnboardingInvite() {
       }
 
       setLoading(false);
+      initDone.current = true;
     }
     init();
   }, [user]);

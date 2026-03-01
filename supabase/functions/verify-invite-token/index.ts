@@ -12,7 +12,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { token } = await req.json();
+    const { token, mark_used } = await req.json();
 
     if (!token) {
       return new Response(JSON.stringify({ error: "Token is required" }), {
@@ -51,6 +51,14 @@ Deno.serve(async (req) => {
         status: 410,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    // If mark_used is true, invalidate the token
+    if (mark_used) {
+      await supabaseAdmin
+        .from("invitations")
+        .update({ status: "used" })
+        .eq("token", token);
     }
 
     return new Response(
