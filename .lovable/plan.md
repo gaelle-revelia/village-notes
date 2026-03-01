@@ -1,115 +1,48 @@
 
 
-## Redesign MemoResult.tsx as inline-editable memo detail page
+# Corriger l'affichage et l'ouverture des documents dans la timeline
 
-### Architecture change
+## Probleme
 
-Replace the current dual-mode (view/edit toggle) pattern with a **per-field inline-edit** pattern. Each field is tapped to enter edit mode individually, and auto-saves on blur/change. Remove the global `editing` state, `enterEditMode`, `cancelEdit`, and `handleSave` functions.
+Un memo de type `document` est cree dans `NouveauDocument.tsx` avec `processing_status: "pending"`, mais aucun traitement IA n'est declenche ensuite (contrairement aux vocaux et notes). Le statut reste bloque a `"pending"`, ce qui cause :
+- Un spinner permanent sur la card ("Traitement en cours...")
+- L'impossibilite de cliquer pour ouvrir le memo
 
-### New auto-save helper
+## Solution
 
-Create a single `autoSave(updates)` async function that:
-- Calls `supabase.from("memos").update(updates).eq("id", memo.id)`
-- On success: refreshes memo state + shows toast "Sauvegarde" (2s, fade)
-- On error: shows destructive toast
+Les documents n'ont pas besoin de traitement IA (pas de transcription, pas de structuration). Deux corrections sont necessaires :
 
-Each field will use its own local editing state (e.g. `editingResume`, `editingDate`) and call `autoSave` on blur or change.
+### 1. NouveauDocument.tsx -- creer le document avec `processing_status: "done"`
 
-### Section-by-section changes
+Modifier la ligne d'insertion pour utiliser `processing_status: "done"` au lieu de `"pending"`, car il n'y a pas d'etape de traitement a attendre.
 
-**1. Header**
-- Remove edit mode header (Annuler/Enregistrer)
-- Left: back arrow only (no "Retour" text)
-- Right: trash icon only, color `#E8736A`, no Pencil button
-- Remove title "Memo enregistre" / "Modifier le memo"
+### 2. MemoCard.tsx -- permettre l'ouverture des documents meme en `pending`
 
-**2. Main padding**
-- Add `paddingTop: 80px` to `<main>` to avoid sticky header collision
+Modifier `handleClick` pour autoriser la navigation vers le detail pour les documents quel que soit leur statut :
 
-**3. Date (inline-edit)**
-- Display: DM Sans 14px, `#9A9490`, centered
-- Tap: reveals native `<input type="date">`, pre-filled
-- On change: auto-save `memo_date`, update display
+```typescript
+const handleClick = () => {
+  if (memo.processing_status === "done" || memoType === "document") {
+    navigate(`/memo-result/${memo.id}`);
+  }
+};
+```
 
-**4. Intervenant (inline-edit)**
-- Display: 32px avatar (gradient + Lucide icon) + prenom + specialite, centered
-- If none: "Associer un membre..." in muted italic
-- Tap: show search input filtering intervenants by nom (actif=true)
-- Results as dropdown, tap to select, auto-saves `intervenant_id`
+Et ajuster `isProcessing` pour ne pas afficher le spinner sur les documents :
 
-**5. Domaines selector (new section)**
-- Label "DOMAINES" (10px uppercase, `#9A9490`)
-- 5 domain dots in a row, 22px, centered, gap 16px
-- Inactive: transparent fill, 2px solid border domain color, opacity 0.35
-- Active: filled domain color, glow shadow
-- Short labels below (9px): Moteur, Cognitif, Sensoriel, Bien-etre, Medical
-- Tap toggles, auto-saves to `content_structured.tags`
-- Info button below: "Comment choisir un domaine?"
-- Info modal: glass popup with 5 domain descriptions, close on tap outside or X
+```typescript
+const isProcessing = memoType !== "document" && memo.processing_status !== "done" && memo.processing_status !== "error";
+```
 
-**6. Resume (inline-edit)**
-- Label "RESUME" (10px uppercase, `#9A9490`)
-- Display: DM Sans 15px, `#1E1A1A`
-- Tap: textarea appears, pre-filled
-- Blur: auto-save to `content_structured.resume`
+### 3. Corriger le document existant en base
 
-**7. Details (inline-edit)**
-- Label "DETAILS" (10px uppercase, `#9A9490`)
-- Display: bullet list
-- Tap: textarea (one per line), blur auto-saves to `content_structured.details`
+Mettre a jour le memo document existant (id `3c07e43b`) pour passer son `processing_status` de `"pending"` a `"done"`.
 
-**8. A retenir (inline-edit)**
-- Label "A RETENIR" (10px uppercase, `#9A9490`)
-- Display: bullet list
-- Tap: textarea (one per line), blur auto-saves to `content_structured.suggestions`
+## Detail technique
 
-**9. Tags (always visible)**
-- Chips with domain-color dot + label + X remove button
-- Remove triggers auto-save
-- "Ajouter un tag..." input always visible, Enter adds + auto-saves
-
-**10. Removed sections**
-- Transcription textarea (vocal/note/evenement) — removed entirely
-- Collapsible "Note originale" — removed entirely
-- "Retour a la timeline" button — removed
-- "Supprimer ce memo" text link — removed (trash in header)
-- Dual-mode editing state and all related state variables
-
-**11. Delete modal**
-- Use AlertDialog component
-- Overlay: `rgba(0,0,0,0.25)`
-- Confirm deletes from database, navigates to `/timeline`
-
-**12. Glass card style update**
-- Padding: `16px 20px` (currently 20px all around)
-
-### Files changed
-
-| File | Change |
-|------|--------|
-| `src/pages/MemoResult.tsx` | Full rewrite of component logic and JSX |
-
-No other files touched.
-
-### State management
-
-Remove: `editing`, `editDate`, `editIntervenantId`, `editTranscription`, `editResume`, `editDetails`, `editSuggestions`, `saving`, `originalNoteOpen`, `cancelEdit`, `enterEditMode`, `handleSave`
-
-Add per-field states:
-- `editingField: string | null` — tracks which field is being edited (date, intervenant, resume, details, suggestions)
-- `intervenantSearch: string` — search query for intervenant picker
-- `showDomaineInfo: boolean` — domaines info modal
-- `deleteModalOpen` — kept as-is
-- `newTag` — kept as-is
-
-### Domain mapping for the selector
-
-The 5 domains map to tag keywords:
-- Moteur: tags containing "moteur", "motricite", "kine", "physique"
-- Cognitif: tags containing "cognitif", "psychomoteur", "psychomotricite"
-- Sensoriel: tags containing "sensoriel", "communication", "langage"
-- Bien-etre: tags containing "bien-etre", "emotionnel", "sommeil", "alimentation"
-- Medical: tags containing "medical", "administratif"
-
-When toggling a domain on, add its primary tag (e.g. "moteur"). When toggling off, remove all tags matching that domain.
+| Fichier | Modification |
+|---|---|
+| `src/pages/NouveauDocument.tsx` | `processing_status: "done"` au lieu de `"pending"` |
+| `src/components/memo/MemoCard.tsx` | Exclure les documents du test `isProcessing` + autoriser le clic |
+| Migration SQL | `UPDATE memos SET processing_status = 'done' WHERE type = 'document' AND processing_status = 'pending'` |
 
