@@ -1,18 +1,25 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { Home, Heart, Wrench, Compass } from "lucide-react";
 import { useEnfantPrenom } from "@/hooks/useEnfantPrenom";
+import { useEnfantId } from "@/hooks/useEnfantId";
 
 const BottomNavBar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const prenom = useEnfantPrenom();
+  const { role } = useEnfantId();
 
-  const tabs = [
+  const allTabs = [
     { icon: Home, label: "Accueil", path: "/timeline" },
     { icon: Heart, label: prenom || "Enfant", path: "/selena" },
     { icon: Wrench, label: "Outils", path: "/outils" },
     { icon: Compass, label: "Explorer", path: "/explorer" },
   ];
+
+  // Hide Outils tab for famille role
+  const tabs = role === "famille"
+    ? allTabs.filter(t => t.path !== "/outils")
+    : allTabs;
 
   return (
     <nav

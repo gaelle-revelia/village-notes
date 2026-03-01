@@ -132,7 +132,7 @@ const sectionLabel: React.CSSProperties = {
 const MemoResult = () => {
   const { id } = useParams<{ id: string }>();
   const { user, loading: authLoading } = useAuth();
-  const { enfantId } = useEnfantId();
+  const { enfantId, role } = useEnfantId();
   const navigate = useNavigate();
 
   const [memo, setMemo] = useState<MemoData | null>(null);
@@ -400,6 +400,7 @@ const MemoResult = () => {
     );
   }
 
+  const readOnly = role === "famille";
   const structured = memo.content_structured;
   const details = structured?.details || structured?.points_cles || [];
   const suggestions = structured?.suggestions || [];
@@ -461,13 +462,15 @@ const MemoResult = () => {
         >
           <ArrowLeft size={22} color="#1E1A1A" />
         </button>
-        <button
-          onClick={() => setDeleteModalOpen(true)}
-          className="bg-transparent border-none cursor-pointer p-1"
-          aria-label="Supprimer"
-        >
-          <Trash2 size={20} color="#E8736A" />
-        </button>
+        {!readOnly && (
+          <button
+            onClick={() => setDeleteModalOpen(true)}
+            className="bg-transparent border-none cursor-pointer p-1"
+            aria-label="Supprimer"
+          >
+            <Trash2 size={20} color="#E8736A" />
+          </button>
+        )}
       </header>
 
       <main className="flex-1 px-4 pb-8" style={{ paddingTop: 80 }}>
@@ -494,8 +497,8 @@ const MemoResult = () => {
             </div>
           ) : (
             <p
-              className="text-center cursor-pointer"
-              onClick={() => setEditingField("date")}
+              className={readOnly ? "text-center" : "text-center cursor-pointer"}
+              onClick={readOnly ? undefined : () => setEditingField("date")}
               style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#9A9490" }}
             >
               {formattedDate}
@@ -562,8 +565,8 @@ const MemoResult = () => {
             </div>
           ) : (
             <div
-              className="flex items-center justify-center gap-2 cursor-pointer"
-              onClick={() => setEditingField("intervenant")}
+              className={readOnly ? "flex items-center justify-center gap-2" : "flex items-center justify-center gap-2 cursor-pointer"}
+              onClick={readOnly ? undefined : () => setEditingField("intervenant")}
             >
               {intervenantName ? (
                 <>
@@ -681,11 +684,11 @@ const MemoResult = () => {
               {DOMAINS.map((domain) => {
                 const active = isDomainActive(domain.key, tags);
                 return (
-                  <button
-                    key={domain.key}
-                    onClick={() => handleDomainToggle(domain.key)}
-                    className="flex flex-col items-center gap-1 bg-transparent border-none cursor-pointer p-0"
-                  >
+                   <button
+                     key={domain.key}
+                     onClick={readOnly ? undefined : () => handleDomainToggle(domain.key)}
+                     className={`flex flex-col items-center gap-1 bg-transparent border-none p-0 ${readOnly ? "" : "cursor-pointer"}`}
+                   >
                     <div
                       style={{
                         width: 22,
@@ -749,8 +752,8 @@ const MemoResult = () => {
               />
             ) : (
               <p
-                className="cursor-pointer"
-                onClick={startEditResume}
+                className={readOnly ? "" : "cursor-pointer"}
+                onClick={readOnly ? undefined : startEditResume}
                 style={{
                   fontFamily: "'DM Sans', sans-serif",
                   fontSize: 15,
@@ -789,8 +792,8 @@ const MemoResult = () => {
               />
             ) : (
               <div
-                className="cursor-pointer"
-                onClick={startEditDetails}
+                className={readOnly ? "" : "cursor-pointer"}
+                onClick={readOnly ? undefined : startEditDetails}
                 style={{ minHeight: 24 }}
               >
                 {details.length > 0 ? (
@@ -834,8 +837,8 @@ const MemoResult = () => {
               />
             ) : (
               <div
-                className="cursor-pointer"
-                onClick={startEditSuggestions}
+                className={readOnly ? "" : "cursor-pointer"}
+                onClick={readOnly ? undefined : startEditSuggestions}
                 style={{ minHeight: 24 }}
               >
                 {suggestions.length > 0 ? (
@@ -868,45 +871,49 @@ const MemoResult = () => {
                   >
                     <div style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: color }} />
                     {tag}
-                    <button
-                      onClick={() => removeTag(i)}
-                      className="bg-transparent border-none p-0 cursor-pointer ml-0.5"
-                      style={{ color }}
-                    >
-                      <X size={12} />
-                    </button>
+                    {!readOnly && (
+                      <button
+                        onClick={() => removeTag(i)}
+                        className="bg-transparent border-none p-0 cursor-pointer ml-0.5"
+                        style={{ color }}
+                      >
+                        <X size={12} />
+                      </button>
+                    )}
                   </span>
                 );
               })}
             </div>
-            <div className="flex gap-2">
-              <input
-                value={newTag}
-                onChange={(e) => setNewTag(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") { e.preventDefault(); addTag(); }
-                }}
-                placeholder="Ajouter un tag..."
-                className="flex-1 text-sm outline-none placeholder:text-[#9A9490]"
-                style={{
-                  fontFamily: "'DM Sans', sans-serif",
-                  fontSize: 13,
-                  color: "#1E1A1A",
-                  border: "1px solid rgba(255,255,255,0.72)",
-                  borderRadius: 8,
-                  padding: "6px 10px",
-                  background: "rgba(255,255,255,0.5)",
-                }}
-              />
-              <button
-                onClick={addTag}
-                disabled={!newTag.trim()}
-                className="flex items-center gap-1 text-sm font-medium bg-transparent border-none cursor-pointer"
-                style={{ color: newTag.trim() ? "#E8736A" : "#9A9490" }}
-              >
-                <Plus size={14} />
-              </button>
-            </div>
+            {!readOnly && (
+              <div className="flex gap-2">
+                <input
+                  value={newTag}
+                  onChange={(e) => setNewTag(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") { e.preventDefault(); addTag(); }
+                  }}
+                  placeholder="Ajouter un tag..."
+                  className="flex-1 text-sm outline-none placeholder:text-[#9A9490]"
+                  style={{
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontSize: 13,
+                    color: "#1E1A1A",
+                    border: "1px solid rgba(255,255,255,0.72)",
+                    borderRadius: 8,
+                    padding: "6px 10px",
+                    background: "rgba(255,255,255,0.5)",
+                  }}
+                />
+                <button
+                  onClick={addTag}
+                  disabled={!newTag.trim()}
+                  className="flex items-center gap-1 text-sm font-medium bg-transparent border-none cursor-pointer"
+                  style={{ color: newTag.trim() ? "#E8736A" : "#9A9490" }}
+                >
+                  <Plus size={14} />
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </main>

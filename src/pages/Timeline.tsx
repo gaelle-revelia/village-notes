@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { Navigate, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useEnfantId } from "@/hooks/useEnfantId";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, Search, ChevronRight, X } from "lucide-react";
 import BottomNavBar from "@/components/BottomNavBar";
@@ -60,6 +61,7 @@ function RevealCard({ children }: { children: React.ReactNode }) {
 
 const Timeline = () => {
   const { user, loading } = useAuth();
+  const { role } = useEnfantId();
   const navigate = useNavigate();
   const location = useLocation();
   const [memos, setMemos] = useState<Memo[]>([]);
@@ -333,25 +335,27 @@ const Timeline = () => {
         <div ref={bottomRef} />
       </main>
 
-      {/* FAB — gradient corail → lavande */}
-      <button
-        onClick={() => setSheetOpen(true)}
-        className="fixed z-20 flex items-center justify-center"
-        style={{
-          bottom: 80,
-          right: 20,
-          height: 46,
-          width: 46,
-          borderRadius: "50%",
-          background: "linear-gradient(135deg, #E8736A, #8B74E0)",
-          color: "#FFFFFF",
-          boxShadow: "0 6px 20px rgba(139,116,224,0.4)",
-          border: "none",
-        }}
-        aria-label="Ajouter"
-      >
-        <Plus className="h-5 w-5" />
-      </button>
+      {/* FAB — gradient corail → lavande — hidden for famille role */}
+      {role !== "famille" && (
+        <button
+          onClick={() => setSheetOpen(true)}
+          className="fixed z-20 flex items-center justify-center"
+          style={{
+            bottom: 80,
+            right: 20,
+            height: 46,
+            width: 46,
+            borderRadius: "50%",
+            background: "linear-gradient(135deg, #E8736A, #8B74E0)",
+            color: "#FFFFFF",
+            boxShadow: "0 6px 20px rgba(139,116,224,0.4)",
+            border: "none",
+          }}
+          aria-label="Ajouter"
+        >
+          <Plus className="h-5 w-5" />
+        </button>
+      )}
 
       <Dialog open={sheetOpen} onOpenChange={setSheetOpen}>
         <DialogContent hideClose className="w-[85vw] max-w-md rounded-2xl border-none shadow-xl p-0 gap-0 [&~[data-state]]:bg-black/40">
