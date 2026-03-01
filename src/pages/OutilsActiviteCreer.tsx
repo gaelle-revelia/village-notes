@@ -83,9 +83,9 @@ export default function OutilsActiviteCreer() {
         <h1 className="text-lg font-serif font-semibold text-foreground">Nouvelle activité</h1>
       </header>
 
-      <main className="flex-1 px-4 pt-5 pb-28 flex flex-col gap-5">
+      <main className="flex-1 px-4 pt-5 pb-28 flex flex-col gap-3" style={{ maxWidth: 480, margin: "0 auto", width: "100%" }}>
         {/* Nom */}
-        <div style={glassCard} className="p-4 flex flex-col gap-2">
+        <div style={{ ...glassCard, padding: "14px 16px" }} className="flex flex-col gap-1.5">
           <label className="text-[11px] font-sans font-semibold uppercase tracking-wider" style={{ color: "#9A9490" }}>
             Nom de l'activité
           </label>
@@ -94,20 +94,21 @@ export default function OutilsActiviteCreer() {
             onChange={(e) => setNom(e.target.value)}
             placeholder="Ex : Marche, Vélo, Natation…"
             className="bg-transparent border-none outline-none text-[15px] font-sans text-foreground placeholder:text-muted-foreground"
+            style={{ padding: "10px 12px" }}
           />
         </div>
 
         {/* Domaine */}
-        <div style={glassCard} className="p-4 flex flex-col gap-3">
+        <div style={{ ...glassCard, padding: "14px 16px" }} className="flex flex-col gap-2.5">
           <label className="text-[11px] font-sans font-semibold uppercase tracking-wider" style={{ color: "#9A9490" }}>
             Domaine
           </label>
-          <div className="flex items-center justify-between px-2">
+          <div className="flex items-center justify-between" style={{ gap: 12 }}>
             {DOMAINS.map((d) => (
               <button
                 key={d.label}
                 onClick={() => setDomaine(d.label)}
-                className="flex flex-col items-center gap-1.5"
+                className="flex flex-col items-center gap-1"
               >
                 <div
                   className="rounded-full transition-all"
@@ -120,7 +121,7 @@ export default function OutilsActiviteCreer() {
                     boxShadow: domaine === d.label ? `0 0 0 5px ${d.color}38` : "none",
                   }}
                 />
-                <span className="text-[9px] font-sans font-medium" style={{ color: domaine === d.label ? d.color : "#9A9490" }}>
+                <span className="text-[11px] font-sans font-medium" style={{ color: domaine === d.label ? d.color : "#9A9490" }}>
                   {d.label}
                 </span>
               </button>
@@ -129,7 +130,7 @@ export default function OutilsActiviteCreer() {
         </div>
 
         {/* Track mode */}
-        <div style={glassCard} className="p-4 flex flex-col gap-3">
+        <div style={{ ...glassCard, padding: "14px 16px" }} className="flex flex-col gap-2.5">
           <label className="text-[11px] font-sans font-semibold uppercase tracking-wider" style={{ color: "#9A9490" }}>
             Ce que tu suis
           </label>
@@ -138,8 +139,9 @@ export default function OutilsActiviteCreer() {
               <button
                 key={o.value}
                 onClick={() => setTrackMode(o.value)}
-                className="flex-1 py-2 rounded-xl text-[13px] font-sans font-medium transition-all"
+                className="flex-1 rounded-xl text-[13px] font-sans font-medium transition-all"
                 style={{
+                  padding: "10px 12px",
                   background: trackMode === o.value ? "linear-gradient(135deg, #E8736A, #8B74E0)" : "rgba(255,255,255,0.5)",
                   color: trackMode === o.value ? "#fff" : "#9A9490",
                   border: trackMode === o.value ? "none" : "1px solid rgba(255,255,255,0.85)",
@@ -153,7 +155,7 @@ export default function OutilsActiviteCreer() {
 
         {/* Unit toggle */}
         {showDistance && (
-          <div style={glassCard} className="p-4 flex flex-col gap-3">
+          <div style={{ ...glassCard, padding: "14px 16px" }} className="flex flex-col gap-2.5">
             <label className="text-[11px] font-sans font-semibold uppercase tracking-wider" style={{ color: "#9A9490" }}>
               Unité de distance
             </label>
@@ -162,8 +164,9 @@ export default function OutilsActiviteCreer() {
                 <button
                   key={val}
                   onClick={() => setUnite(val)}
-                  className="flex-1 py-2 rounded-xl text-[13px] font-sans font-medium transition-all"
+                  className="flex-1 rounded-xl text-[13px] font-sans font-medium transition-all"
                   style={{
+                    padding: "10px 12px",
                     background: unite === val ? "linear-gradient(135deg, #E8736A, #8B74E0)" : "rgba(255,255,255,0.5)",
                     color: unite === val ? "#fff" : "#9A9490",
                     border: unite === val ? "none" : "1px solid rgba(255,255,255,0.85)",
