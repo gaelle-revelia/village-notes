@@ -448,17 +448,22 @@ export default function VillageSettings() {
                 maxLength={255}
               />
             </div>
-            {/* Invite toggle — only for famille with email */}
-            {newType === "famille" && newEmail.trim() && (
-              <label className="flex items-center gap-2.5 cursor-pointer -mt-1">
-                <input
-                  type="checkbox"
-                  checked={sendInvite}
-                  onChange={(e) => setSendInvite(e.target.checked)}
-                  className="w-4 h-4 rounded border-[rgba(255,255,255,0.72)] accent-[#8B74E0]"
-                />
-                <span className="text-xs text-[#1E1A1A]">Envoyer une invitation à rejoindre l'app</span>
-              </label>
+            {/* Invite toggle — for famille */}
+            {newType === "famille" && (
+              <>
+                <label className="flex items-center gap-2.5 cursor-pointer -mt-1">
+                  <input
+                    type="checkbox"
+                    checked={sendInvite}
+                    onChange={(e) => setSendInvite(e.target.checked)}
+                    className="w-4 h-4 rounded border-[rgba(255,255,255,0.72)] accent-[#8B74E0]"
+                  />
+                  <span className="text-xs text-[#1E1A1A]">Envoyer une invitation à rejoindre l'app</span>
+                </label>
+                {sendInvite && !newEmail.trim() && (
+                  <p className="text-[11px] text-[#E8736A] -mt-2">Veuillez renseigner un email pour envoyer l'invitation.</p>
+                )}
+              </>
             )}
             {newType === "pro" && (
               <>
@@ -496,7 +501,7 @@ export default function VillageSettings() {
             </Button>
             <Button
               onClick={handleAdd}
-              disabled={!newNom.trim() || saving}
+              disabled={!newNom.trim() || saving || (sendInvite && !newEmail.trim())}
               className="text-white border-none"
               style={{ background: "linear-gradient(135deg, #E8736A, #8B74E0)" }}
             >
