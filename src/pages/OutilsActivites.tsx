@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Plus, Timer, PenLine, Activity, Brain, Hand, Heart, Stethoscope } from "lucide-react";
+import { ArrowLeft, Plus, Timer, PenLine, Activity, Brain, Stethoscope, Heart, Ear } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useEnfantId } from "@/hooks/useEnfantId";
 import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
@@ -9,7 +9,7 @@ import BottomNavBar from "@/components/BottomNavBar";
 const DOMAIN_CONFIG: Record<string, { color: string; icon: typeof Activity }> = {
   Moteur: { color: "#E8736A", icon: Activity },
   Cognitif: { color: "#8B74E0", icon: Brain },
-  Sensoriel: { color: "#44A882", icon: Hand },
+  Sensoriel: { color: "#44A882", icon: Ear },
   "Bien-être": { color: "#E8A44A", icon: Heart },
   Médical: { color: "#8A9BAE", icon: Stethoscope },
 };
@@ -21,6 +21,14 @@ const glassCard: React.CSSProperties = {
   border: "1px solid rgba(255,255,255,0.85)",
   borderRadius: 16,
   boxShadow: "0 4px 24px rgba(139,116,224,0.08), 0 1px 4px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9)",
+};
+
+const glassHeader: React.CSSProperties = {
+  background: "rgba(255,255,255,0.72)",
+  backdropFilter: "blur(20px) saturate(1.5)",
+  WebkitBackdropFilter: "blur(20px) saturate(1.5)",
+  borderBottom: "1px solid rgba(255,255,255,0.6)",
+  boxShadow: "0 2px 12px rgba(0,0,0,0.05)",
 };
 
 interface Activite {
@@ -58,16 +66,7 @@ export default function OutilsActivites() {
   return (
     <div className="flex min-h-screen flex-col">
       {/* Header */}
-      <header
-        className="sticky top-0 z-10 flex items-center gap-3 px-4 py-3"
-        style={{
-          background: "rgba(255,255,255,0.72)",
-          backdropFilter: "blur(20px) saturate(1.5)",
-          WebkitBackdropFilter: "blur(20px) saturate(1.5)",
-          borderBottom: "1px solid rgba(255,255,255,0.6)",
-          boxShadow: "0 2px 12px rgba(0,0,0,0.05)",
-        }}
-      >
+      <header className="sticky top-0 z-10 flex items-center gap-3 px-4 py-3" style={glassHeader}>
         <button onClick={() => navigate("/outils")} className="flex items-center gap-1 text-sm font-sans" style={{ color: "#8B74E0" }}>
           <ArrowLeft size={18} />
           <span>Retour</span>
@@ -94,13 +93,13 @@ export default function OutilsActivites() {
             const Icon = d.icon;
             const units: string[] = [];
             if (a.track_temps) units.push("Temps");
-            if (a.track_distance) units.push(a.unite_distance === "km" ? "Distance (km)" : "Distance (m)");
+            if (a.track_distance) units.push(a.unite_distance === "km" ? "Distance en km" : "Distance en mètres");
             return (
               <button
                 key={a.id}
                 onClick={() => setSelected(a)}
                 className="flex items-center gap-3 text-left transition-transform active:scale-[0.98]"
-                style={{ ...glassCard, padding: "10px 14px" }}
+                style={{ ...glassCard, padding: "11px 13px" }}
               >
                 <div
                   className="flex items-center justify-center rounded-xl shrink-0"
@@ -109,23 +108,22 @@ export default function OutilsActivites() {
                   <Icon size={20} color={d.color} strokeWidth={2} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[14px] font-sans font-medium text-foreground truncate">{a.nom}</p>
+                  <p className="truncate" style={{ fontFamily: "'Fraunces', serif", fontSize: 16, fontWeight: 600, color: "#1E1A1A" }}>{a.nom}</p>
                   <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                    <span
-                      className="text-[9px] font-sans font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full"
-                      style={{ background: `${d.color}18`, color: d.color }}
-                    >
-                      {a.domaine}
-                    </span>
-                    {units.map((u) => (
-                      <span
-                        key={u}
-                        className="text-[9px] font-sans font-medium uppercase tracking-wider px-2 py-0.5 rounded-full"
-                        style={{ background: "rgba(138,155,174,0.12)", color: "#8A9BAE" }}
-                      >
-                        {u}
+                    <div className="flex items-center" style={{ gap: 5 }}>
+                      <div style={{ width: 7, height: 7, borderRadius: "50%", backgroundColor: d.color }} />
+                      <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 500, color: d.color }}>
+                        {a.domaine}
                       </span>
-                    ))}
+                    </div>
+                    {units.length > 0 && (
+                      <>
+                        <div style={{ width: 1, height: 11, backgroundColor: "rgba(0,0,0,0.1)" }} />
+                        <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 400, color: "#9A9490" }}>
+                          {units.join(" · ")}
+                        </span>
+                      </>
+                    )}
                   </div>
                 </div>
               </button>
