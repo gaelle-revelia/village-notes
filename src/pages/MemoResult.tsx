@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate, useParams, Navigate } from "react-router-dom";
-import { ArrowLeft, Trash2, X, Plus, Info, Activity, Hand, Brain, Stethoscope, MessageCircle, User, Heart, Waves, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, Trash2, X, Plus, Info, Activity, Hand, Brain, Stethoscope, MessageCircle, User, Heart, Waves, ChevronLeft, ChevronRight, FileText, Download, ExternalLink } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useEnfantId } from "@/hooks/useEnfantId";
@@ -145,7 +145,7 @@ const MemoResult = () => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [newTag, setNewTag] = useState("");
-
+  const [signedFileUrl, setSignedFileUrl] = useState<string | null>(null);
   // Temp edit values
   const [tempResume, setTempResume] = useState("");
   const [tempDetails, setTempDetails] = useState("");
@@ -170,6 +170,24 @@ const MemoResult = () => {
   }, [id, user]);
 
   useEffect(() => { fetchMemo(); }, [fetchMemo]);
+
+  // Generate signed URL for document files
+  useEffect(() => {
+    if (!memo || memo.type !== "document" || !memo.file_url) {
+      setSignedFileUrl(null);
+      return;
+    }
+    // Extract storage path from public URL: everything after /voice-memos/
+    const match = memo.file_url.match(/\/voice-memos\/(.+)$/);
+    if (!match) return;
+    const storagePath = match[1];
+    supabase.storage
+      .from("voice-memos")
+      .createSignedUrl(storagePath, 3600) // 1h
+      .then(({ data }) => {
+        if (data?.signedUrl) setSignedFileUrl(data.signedUrl);
+      });
+  }, [memo?.id, memo?.type, memo?.file_url]);
 
   // Fade in when memo changes
   useEffect(() => {
@@ -556,6 +574,72 @@ const MemoResult = () => {
                 <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#9A9490", fontStyle: "italic" }}>
                   Associer un membre...
                 </span>
+              )}
+            </div>
+          )}
+
+          {/* DOCUMENT FILE PREVIEW */}
+          {memo.type === "document" && (
+            <div style={glassCard}>
+              <p style={sectionLabel}>FICHIER</p>
+              {signedFileUrl ? (() => {
+                const ext = (memo.file_url || "").split(".").pop()?.toLowerCase();
+                const isImage = ["png", "jpg", "jpeg", "webp"].includes(ext || "");
+                return (
+                  <div>
+                    {isImage ? (
+                      <img
+                        src={signedFileUrl}
+                        alt="Document"
+                        className="w-full rounded-lg"
+                        style={{ maxHeight: 400, objectFit: "contain", background: "rgba(0,0,0,0.03)" }}
+                      />
+                    ) : (
+                      <div className="flex items-center gap-3 py-3">
+                        <div
+                          className="flex items-center justify-center shrink-0"
+                          style={{
+                            width: 44, height: 44, borderRadius: 12,
+                            background: "rgba(138,155,174,0.12)",
+                          }}
+                        >
+                          <FileText size={22} color="#8A9BAE" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#1E1A1A", fontWeight: 500 }}>
+                            Document PDF
+                          </p>
+                          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: "#9A9490" }}>
+                            Tap pour ouvrir
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                    <a
+                      href={signedFileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-2 mt-3 w-full py-2.5 rounded-xl text-sm font-medium cursor-pointer"
+                      style={{
+                        fontFamily: "'DM Sans', sans-serif",
+                        background: "linear-gradient(135deg, #E8736A, #8B74E0)",
+                        color: "white",
+                        textDecoration: "none",
+                        border: "none",
+                      }}
+                    >
+                      <ExternalLink size={14} />
+                      Ouvrir le fichier
+                    </a>
+                  </div>
+                );
+              })() : (
+                <div className="flex items-center gap-3 py-3">
+                  <FileText size={20} color="#9A9490" />
+                  <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#9A9490", fontStyle: "italic" }}>
+                    Aucun fichier associé
+                  </span>
+                </div>
               )}
             </div>
           )}
