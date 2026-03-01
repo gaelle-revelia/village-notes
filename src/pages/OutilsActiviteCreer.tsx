@@ -22,6 +22,14 @@ const glassCard: React.CSSProperties = {
   boxShadow: "0 4px 24px rgba(139,116,224,0.08), 0 1px 4px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9)",
 };
 
+const glassHeader: React.CSSProperties = {
+  background: "rgba(255,255,255,0.72)",
+  backdropFilter: "blur(20px) saturate(1.5)",
+  WebkitBackdropFilter: "blur(20px) saturate(1.5)",
+  borderBottom: "1px solid rgba(255,255,255,0.6)",
+  boxShadow: "0 2px 12px rgba(0,0,0,0.05)",
+};
+
 type TrackMode = "temps" | "distance" | "les_deux";
 
 export default function OutilsActiviteCreer() {
@@ -66,16 +74,7 @@ export default function OutilsActiviteCreer() {
   return (
     <div className="flex min-h-screen flex-col">
       {/* Header */}
-      <header
-        className="sticky top-0 z-10 flex items-center gap-3 px-4 py-3"
-        style={{
-          background: "rgba(255,255,255,0.72)",
-          backdropFilter: "blur(20px) saturate(1.5)",
-          WebkitBackdropFilter: "blur(20px) saturate(1.5)",
-          borderBottom: "1px solid rgba(255,255,255,0.6)",
-          boxShadow: "0 2px 12px rgba(0,0,0,0.05)",
-        }}
-      >
+      <header className="sticky top-0 z-10 flex items-center gap-3 px-4 py-3" style={glassHeader}>
         <button onClick={() => navigate("/outils/activites")} className="flex items-center gap-1 text-sm font-sans" style={{ color: "#8B74E0" }}>
           <ArrowLeft size={18} />
           <span>Retour</span>
@@ -86,7 +85,7 @@ export default function OutilsActiviteCreer() {
       <main className="flex-1 px-4 pt-5 pb-28 flex flex-col gap-3" style={{ maxWidth: 480, margin: "0 auto", width: "100%" }}>
         {/* Nom */}
         <div style={{ ...glassCard, padding: "14px 16px" }} className="flex flex-col gap-1.5">
-          <label className="text-[11px] font-sans font-semibold uppercase tracking-wider" style={{ color: "#9A9490" }}>
+          <label style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", color: "#9A9490" }}>
             Nom de l'activité
           </label>
           <input
@@ -100,7 +99,7 @@ export default function OutilsActiviteCreer() {
 
         {/* Domaine */}
         <div style={{ ...glassCard, padding: "14px 16px" }} className="flex flex-col gap-2.5">
-          <label className="text-[11px] font-sans font-semibold uppercase tracking-wider" style={{ color: "#9A9490" }}>
+          <label style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", color: "#9A9490" }}>
             Domaine
           </label>
           <div className="flex items-center justify-between" style={{ gap: 12 }}>
@@ -131,7 +130,7 @@ export default function OutilsActiviteCreer() {
 
         {/* Track mode */}
         <div style={{ ...glassCard, padding: "14px 16px" }} className="flex flex-col gap-2.5">
-          <label className="text-[11px] font-sans font-semibold uppercase tracking-wider" style={{ color: "#9A9490" }}>
+          <label style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", color: "#9A9490" }}>
             Ce que tu suis
           </label>
           <div className="flex gap-2">
@@ -156,7 +155,7 @@ export default function OutilsActiviteCreer() {
         {/* Unit toggle */}
         {showDistance && (
           <div style={{ ...glassCard, padding: "14px 16px" }} className="flex flex-col gap-2.5">
-            <label className="text-[11px] font-sans font-semibold uppercase tracking-wider" style={{ color: "#9A9490" }}>
+            <label style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", color: "#9A9490" }}>
               Unité de distance
             </label>
             <div className="flex gap-2">
