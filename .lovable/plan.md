@@ -1,109 +1,58 @@
 
 
-# Auto-link invited users — idempotent implementation
+# Ajout de la politique RLS `membres_select_enfants`
 
-## Overview
+## Objectif
 
-Add logic in `useAuth.tsx` to automatically insert invited users into `enfant_membres` on first sign-in, using `.upsert()` with `ignoreDuplicates: true` for true idempotency.
+Permettre aux membres du Village (table `enfant_membres`) de lire les informations d'un enfant, meme s'ils ne sont pas le createur (`user_id`). Cela est necessaire pour que les utilisateurs invites puissent voir le prenom de l'enfant dans l'onboarding et la timeline.
 
-## Idempotency approach
+## Contexte
 
-Use `.upsert()` instead of `.insert()`:
+Actuellement, la table `enfants` n'a qu'une seule politique RLS (`users_own_enfants`) qui restreint l'acces au createur (`user_id = auth.uid()`). Les membres invites, bien que lies via `enfant_membres`, ne peuvent pas lire les donnees de l'enfant.
 
-```typescript
-await supabase
-  .from("enfant_membres")
-  .upsert(
-    {
-      enfant_id: meta.enfant_id,
-      user_id: session.user.id,
-      role: meta.role,
-    },
-    { onConflict: "enfant_id,user_id", ignoreDuplicates: true }
-  );
+## Migration SQL
+
+```sql
+CREATE POLICY "membres_select_enfants"
+ON public.enfants
+FOR SELECT
+TO authenticated
+USING (get_membre_role(id) IS NOT NULL);
 ```
 
-This maps to `INSERT ... ON CONFLICT (enfant_id, user_id) DO NOTHING` at the Postgres level. No error is thrown if the row already exists, and the existing row is not modified.
+Cette politique utilise la fonction existante `get_membre_role(eid)` qui verifie si l'utilisateur connecte est membre du Village pour cet enfant. Elle s'ajoute a la politique existante `users_own_enfants` — les deux fonctionnent en OR (politiques permissives par defaut... mais ici les deux sont restrictives/`RESTRICTIVE`).
 
-## Implementation in `src/hooks/useAuth.tsx`
+## Point d'attention
 
-Inside the `onAuthStateChange` callback, after setting state:
+Les politiques existantes sur `enfants` utilisent `PERMISSIVE: No` (donc RESTRICTIVE). La nouvelle politique doit etre **permissive** (par defaut) pour fonctionner en OR avec la politique existante. Sinon, les deux seraient evaluees en AND et aucun invite ne pourrait acceder aux donnees.
 
-1. Check if `_event === "SIGNED_IN"` and `session.user.user_metadata` contains both `enfant_id` and `role`
-2. If yes, call `.upsert()` with `ignoreDuplicates: true`
-3. On success, clear the invitation metadata from the user profile via `supabase.auth.updateUser({ data: { enfant_id: null, role: null } })` to prevent re-processing on subsequent logins
-4. If no metadata, do nothing (normal login flow)
+Il faut donc soit :
+- Creer cette nouvelle politique en mode PERMISSIVE (defaut, pas besoin de preciser)
+- Soit convertir `users_own_enfants` en PERMISSIVE egalement
 
-```typescript
-export function useAuth() {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+Puisque `users_own_enfants` est RESTRICTIVE, ajouter une politique PERMISSIVE ne suffira pas — les restrictives s'appliquent en AND apres les permissives. La bonne approche est de **remplacer** la politique existante par deux politiques PERMISSIVE :
 
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
+```sql
+-- Supprimer l'ancienne politique restrictive
+DROP POLICY "users_own_enfants" ON public.enfants;
 
-        // Auto-link invited users to enfant_membres
-        if (_event === "SIGNED_IN" && session?.user) {
-          const meta = session.user.user_metadata;
-          const enfantId = meta?.enfant_id;
-          const role = meta?.role;
-          if (enfantId && role) {
-            const { error } = await supabase
-              .from("enfant_membres")
-              .upsert(
-                {
-                  enfant_id: enfantId,
-                  user_id: session.user.id,
-                  role: role,
-                },
-                { onConflict: "enfant_id,user_id", ignoreDuplicates: true }
-              );
-            if (!error) {
-              // Clear metadata so this doesn't re-trigger
-              supabase.auth.updateUser({
-                data: { enfant_id: null, role: null },
-              });
-            }
-          }
-        }
-      }
-    );
+-- Politique 1 : le proprietaire peut tout faire
+CREATE POLICY "owner_all_enfants"
+ON public.enfants
+FOR ALL
+TO authenticated
+USING (user_id = auth.uid())
+WITH CHECK (user_id = auth.uid());
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const signOut = async () => {
-    await supabase.auth.signOut();
-  };
-
-  return { user, session, loading, signOut };
-}
+-- Politique 2 : les membres peuvent lire
+CREATE POLICY "membres_select_enfants"
+ON public.enfants
+FOR SELECT
+TO authenticated
+USING (get_membre_role(id) IS NOT NULL);
 ```
 
-## Why this is safe
+## Fichiers impactes
 
-- `upsert` with `ignoreDuplicates: true` = Postgres `ON CONFLICT DO NOTHING` -- no error, no overwrite
-- Runs on every `SIGNED_IN` event but only inserts once (UNIQUE constraint on `enfant_id, user_id`)
-- Metadata cleanup after insert prevents unnecessary future upsert calls
-- RLS on `enfant_membres` already allows authenticated INSERT (`WITH CHECK (true)`)
-- No migration needed -- existing table and constraints handle everything
-
-## Files to modify
-
-| File | Change |
-|---|---|
-| `src/hooks/useAuth.tsx` | Add auto-linking logic with `.upsert()` on `SIGNED_IN` event |
-
-No new files. No migration needed.
+Aucun fichier code a modifier. Migration SQL uniquement.
 
