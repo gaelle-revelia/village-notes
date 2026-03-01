@@ -123,7 +123,7 @@ export default function OutilsActiviteChrono() {
     const rawText = `${activite.nom} — ${timeStr}${distStr}`;
 
     try {
-      await Promise.all([
+      const [sessionRes, memoRes] = await Promise.all([
         supabase.from("sessions_activite").insert({
           activite_id: activite.id,
           enfant_id: enfantId,
@@ -141,9 +141,20 @@ export default function OutilsActiviteChrono() {
           content_structured: { resume: rawText, tags: [activite.domaine] },
         } as any),
       ]);
+
+      if (sessionRes.error) console.error("INSERT sessions_activite error:", sessionRes.error);
+      if (memoRes.error) console.error("INSERT memos error:", memoRes.error);
+
+      if (sessionRes.error || memoRes.error) {
+        toast({ title: "Erreur lors de l'enregistrement", description: memoRes.error?.message || sessionRes.error?.message, variant: "destructive" });
+        setSaving(false);
+        return;
+      }
+
       toast({ title: "Séance enregistrée !" });
       navigate("/outils/activites");
-    } catch {
+    } catch (e) {
+      console.error("Save error:", e);
       toast({ title: "Erreur lors de l'enregistrement", variant: "destructive" });
       setSaving(false);
     }
