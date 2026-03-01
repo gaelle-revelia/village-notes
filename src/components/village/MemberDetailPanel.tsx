@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { X, Trash2 } from "lucide-react";
+import { X, Trash2, Send } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -36,6 +36,8 @@ interface MemberDetailPanelProps {
   onClose: () => void;
   onDelete: (member: Intervenant) => void;
   saving: boolean;
+  hasPendingInvite?: boolean;
+  onResendInvite?: () => Promise<void>;
 }
 
 export default function MemberDetailPanel({
@@ -45,6 +47,8 @@ export default function MemberDetailPanel({
   onClose,
   onDelete,
   saving,
+  hasPendingInvite,
+  onResendInvite,
 }: MemberDetailPanelProps) {
   const [visible, setVisible] = useState(false);
   const [nom, setNom] = useState(member.nom);
@@ -53,6 +57,7 @@ export default function MemberDetailPanel({
   const [email, setEmail] = useState(member.email ?? "");
   const [structure, setStructure] = useState(member.structure ?? "");
   const [notes, setNotes] = useState(member.notes ?? "");
+  const [resending, setResending] = useState(false);
 
   const panelRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef(0);
@@ -252,6 +257,20 @@ export default function MemberDetailPanel({
 
         {/* Footer */}
         <div className="px-5 py-5 flex flex-col gap-2 mt-auto">
+          {hasPendingInvite && onResendInvite && (
+            <button
+              onClick={async () => {
+                setResending(true);
+                await onResendInvite();
+                setResending(false);
+              }}
+              disabled={resending}
+              className="w-full py-2 flex items-center justify-center gap-1.5 text-sm text-[#8B74E0] font-medium hover:text-[#7a63d0] disabled:opacity-50"
+            >
+              <Send className="w-3.5 h-3.5" />
+              {resending ? "Envoi…" : "Renvoyer l'invitation"}
+            </button>
+          )}
           <button
             onClick={handleSubmit}
             disabled={!nom.trim() || saving}

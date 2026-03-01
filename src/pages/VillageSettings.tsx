@@ -77,6 +77,7 @@ export default function VillageSettings() {
   const [disciplineFilter, setDisciplineFilter] = useState<string | null>(null);
   const [members, setMembers] = useState<Intervenant[]>([]);
   const [loading, setLoading] = useState(true);
+  const [pendingInvites, setPendingInvites] = useState<Record<string, boolean>>({});
 
   // Add dialog
   const [addOpen, setAddOpen] = useState(false);
@@ -114,6 +115,18 @@ export default function VillageSettings() {
       .order("created_at", { ascending: true });
     setMembers(data ?? []);
     setLoading(false);
+
+    // Fetch pending invitations to match by email
+    const { data: invites } = await supabase
+      .from("invitations")
+      .select("email, status")
+      .eq("enfant_id", enfantId)
+      .eq("status", "pending");
+    const map: Record<string, boolean> = {};
+    (invites ?? []).forEach((inv) => {
+      map[inv.email.toLowerCase()] = true;
+    });
+    setPendingInvites(map);
   };
 
   useEffect(() => {
@@ -520,6 +533,19 @@ export default function VillageSettings() {
           onClose={() => setEditTarget(null)}
           onDelete={(m) => setDeleteTarget(m)}
           saving={editSaving}
+          hasPendingInvite={!!editTarget.email && pendingInvites[editTarget.email.toLowerCase()]}
+          onResendInvite={async () => {
+            if (!editTarget.email || !enfantId || !user) return;
+            const inferredRole = inferRole(editTarget.specialite ?? "");
+            const { error } = await supabase.functions.invoke("invite-member", {
+              body: { email: editTarget.email, role: inferredRole, enfant_id: enfantId, redirect_url: window.location.origin },
+            });
+            if (error) {
+              toast({ title: "Erreur", description: "L'invitation n'a pas pu être renvoyée.", variant: "destructive" });
+            } else {
+              toast({ title: "Invitation renvoyée ✓", description: `Un email a été envoyé à ${editTarget.email}.` });
+            }
+          }}
         />
       )}
 
