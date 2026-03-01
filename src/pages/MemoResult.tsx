@@ -512,11 +512,21 @@ const MemoResult = () => {
             const activityName = dashParts[0] || "Activité";
             let durationStr = "—";
             let distanceStr = "—";
+            let distanceUnit = "m";
             if (dashParts[1]) {
               const statsParts = dashParts[1].split("/").map(s => s.trim());
               if (statsParts[0]) durationStr = statsParts[0];
-              if (statsParts[1]) distanceStr = statsParts[1];
+              if (statsParts[1]) {
+                distanceStr = statsParts[1];
+                // Extract numeric value and unit
+                const distMatch = distanceStr.match(/^([\d.,]+)\s*(.*)$/);
+                if (distMatch) {
+                  distanceUnit = distMatch[2]?.trim() || "m";
+                }
+              }
             }
+            // Pure numeric distance for input
+            const distanceNumeric = distanceStr !== "—" ? distanceStr.replace(/[^\d.,]/g, "") : "";
 
             // Find domain from tags
             const actTags = structured?.tags || [];
@@ -872,34 +882,48 @@ const MemoResult = () => {
                     {/* Distance */}
                     <div className="flex flex-col items-center flex-1">
                       {editingField === "actDistance" ? (
-                        <input
-                          type="text"
-                          defaultValue={distanceStr !== "—" ? distanceStr : ""}
-                          placeholder="0"
-                          autoFocus
-                          onBlur={(e) => {
-                            const val = e.target.value.trim() || "—";
-                            setEditingField(null);
-                            saveActivityField("distance", () => saveDistance(val));
-                          }}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              (e.target as HTMLInputElement).blur();
-                            }
-                          }}
-                          className="text-center outline-none"
-                          style={{
-                            fontFamily: "'Fraunces', serif",
-                            fontSize: 28,
-                            fontWeight: 700,
-                            color: "#1E1A1A",
-                            width: 90,
-                            background: "rgba(255,255,255,0.5)",
-                            border: "1px solid rgba(139,116,224,0.3)",
-                            borderRadius: 8,
-                            padding: "2px 4px",
-                          }}
-                        />
+                        <div className="flex items-baseline gap-1 justify-center">
+                          <input
+                            type="text"
+                            inputMode="decimal"
+                            defaultValue={distanceNumeric}
+                            placeholder="0"
+                            autoFocus
+                            onBlur={(e) => {
+                              const num = e.target.value.trim();
+                              const val = num ? `${num} ${distanceUnit}` : "—";
+                              setEditingField(null);
+                              saveActivityField("distance", () => saveDistance(val));
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                (e.target as HTMLInputElement).blur();
+                              }
+                            }}
+                            className="text-center outline-none"
+                            style={{
+                              fontFamily: "'Fraunces', serif",
+                              fontSize: 28,
+                              fontWeight: 700,
+                              color: "#1E1A1A",
+                              width: 70,
+                              background: "rgba(255,255,255,0.5)",
+                              border: "1px solid rgba(139,116,224,0.3)",
+                              borderRadius: 8,
+                              padding: "2px 4px",
+                            }}
+                          />
+                          <span
+                            style={{
+                              fontFamily: "'DM Sans', sans-serif",
+                              fontSize: 14,
+                              fontWeight: 500,
+                              color: "#9A9490",
+                            }}
+                          >
+                            {distanceUnit}
+                          </span>
+                        </div>
                       ) : (
                         <span
                           className={readOnly ? "" : "cursor-pointer"}
