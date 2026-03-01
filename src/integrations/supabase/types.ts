@@ -14,6 +14,41 @@ export type Database = {
   }
   public: {
     Tables: {
+      enfant_membres: {
+        Row: {
+          enfant_id: string
+          id: string
+          invited_by: string | null
+          joined_at: string | null
+          role: string
+          user_id: string
+        }
+        Insert: {
+          enfant_id: string
+          id?: string
+          invited_by?: string | null
+          joined_at?: string | null
+          role?: string
+          user_id: string
+        }
+        Update: {
+          enfant_id?: string
+          id?: string
+          invited_by?: string | null
+          joined_at?: string | null
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enfant_membres_enfant_id_fkey"
+            columns: ["enfant_id"]
+            isOneToOne: false
+            referencedRelation: "enfants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       enfants: {
         Row: {
           created_at: string
@@ -204,7 +239,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_membre_role: { Args: { eid: string }; Returns: string }
     }
     Enums: {
       [_ in never]: never

@@ -82,7 +82,7 @@ const Timeline = () => {
       const { data } = await supabase
         .from("memos")
         .select("id, created_at, memo_date, type, processing_status, transcription_raw, content_structured, intervenant_id")
-        .eq("user_id", user.id)
+        .not("enfant_id", "is", null)
         .order("memo_date", { ascending: false })
         .order("created_at", { ascending: false })
         .limit(50);
