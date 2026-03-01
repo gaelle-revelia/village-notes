@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Plus, ChevronRight, Phone, Mail, Send } from "lucide-react";
+import { ArrowLeft, Plus, ChevronRight, Phone, Mail } from "lucide-react";
 import MemberDetailPanel from "@/components/village/MemberDetailPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useEnfantId } from "@/hooks/useEnfantId";
@@ -88,6 +88,7 @@ export default function VillageSettings() {
   const [newStructure, setNewStructure] = useState("");
   const [newNotes, setNewNotes] = useState("");
   const [saving, setSaving] = useState(false);
+  const [sendInvite, setSendInvite] = useState(false);
   const [inviting, setInviting] = useState(false);
 
   const inferRole = (relation: string): "coparent" | "famille" => {
@@ -142,6 +143,7 @@ export default function VillageSettings() {
     setNewEmail("");
     setNewStructure("");
     setNewNotes("");
+    setSendInvite(false);
   };
 
   const handleAdd = async () => {
@@ -159,9 +161,9 @@ export default function VillageSettings() {
       notes: newNotes.trim() || null,
     });
 
-    // If famille type with email → send invitation
+    // If famille type with email and invite toggled on → send invitation
     const emailVal = newEmail.trim();
-    if (newType === "famille" && emailVal && user) {
+    if (newType === "famille" && emailVal && sendInvite && user) {
       setInviting(true);
       try {
         const inferredRole = inferRole(newSpecialite);
@@ -446,12 +448,17 @@ export default function VillageSettings() {
                 maxLength={255}
               />
             </div>
-            {/* Invitation hint — only for famille with email */}
+            {/* Invite toggle — only for famille with email */}
             {newType === "famille" && newEmail.trim() && (
-              <p className="text-[10px] text-[#9A9490] -mt-2 flex items-center gap-1">
-                <Send className="inline w-3 h-3" />
-                Une invitation sera envoyée à {newEmail.trim()}
-              </p>
+              <label className="flex items-center gap-2.5 cursor-pointer -mt-1">
+                <input
+                  type="checkbox"
+                  checked={sendInvite}
+                  onChange={(e) => setSendInvite(e.target.checked)}
+                  className="w-4 h-4 rounded border-[rgba(255,255,255,0.72)] accent-[#8B74E0]"
+                />
+                <span className="text-xs text-[#1E1A1A]">Envoyer une invitation à rejoindre l'app</span>
+              </label>
             )}
             {newType === "pro" && (
               <>
