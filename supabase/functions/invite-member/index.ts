@@ -84,7 +84,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Invite user via Supabase Auth
+    // Invite user via Auth email
     const { error: authError } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
       data: { role: role || "coparent", enfant_id },
       redirectTo: redirect_url || undefined,
@@ -93,36 +93,44 @@ Deno.serve(async (req) => {
     if (authError) {
       console.error("Auth invite error:", authError);
 
-      // If user already exists, try to send a magic link instead
+      // Existing account: link membership + send magic link login email
       if (authError.message?.includes("already been registered")) {
-        // Look up existing user and link them directly
         const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers();
-        const existingUser = existingUsers?.users?.find(u => u.email === email);
+        const existingUser = existingUsers?.users?.find((u) => u.email?.toLowerCase() === email.toLowerCase());
 
         if (existingUser) {
-          // Directly create enfant_membres link for this existing user
           const { error: linkError } = await supabaseAdmin
             .from("enfant_membres")
             .upsert(
               { enfant_id, user_id: existingUser.id, role: role || "coparent", invited_by: userId },
               { onConflict: "enfant_id,user_id", ignoreDuplicates: true }
             );
+
           if (linkError) {
             console.error("Link existing user error:", linkError);
-          } else {
-            console.log("Existing user linked directly:", existingUser.id);
           }
         }
 
-        // Send magic link so they can access the app
-        const { error: magicError } = await supabaseAdmin.auth.admin.generateLink({
-          type: "magiclink",
+        const { error: magicError } = await supabaseAdmin.auth.signInWithOtp({
           email,
-          options: { redirectTo: redirect_url || undefined },
+          options: {
+            emailRedirectTo: redirect_url || undefined,
+            shouldCreateUser: false,
+          },
         });
+
         if (magicError) {
-          console.error("Magic link error:", magicError);
+          console.error("Magic link send error:", magicError);
+          return new Response(JSON.stringify({ error: "Failed to send login email" }), {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
         }
+      } else {
+        return new Response(JSON.stringify({ error: "Failed to send invitation email" }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       }
     }
 
