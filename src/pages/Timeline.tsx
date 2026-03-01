@@ -3,13 +3,40 @@ import { Navigate, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useEnfantId } from "@/hooks/useEnfantId";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, SlidersHorizontal } from "lucide-react";
 import BottomNavBar from "@/components/BottomNavBar";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { MemoCard, getDomainsFromTags } from "@/components/memo/MemoCard";
 import AddMemoSheet from "@/components/AddMemoSheet";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
+
+type FilterType = "tous" | "rdv" | "activites" | "documents" | "evenements";
+
+const FILTER_PILLS: { key: FilterType; label: string; color: string; bg: string; border: string }[] = [
+  { key: "tous", label: "Tous", color: "#FFFFFF", bg: "#8B74E0", border: "transparent" },
+  { key: "rdv", label: "Rendez-vous", color: "#5CA8D8", bg: "rgba(92,168,216,0.06)", border: "rgba(92,168,216,0.3)" },
+  { key: "activites", label: "Activités", color: "#E8736A", bg: "rgba(232,115,106,0.06)", border: "rgba(232,115,106,0.3)" },
+  { key: "documents", label: "Documents", color: "#44A882", bg: "rgba(68,168,130,0.06)", border: "rgba(68,168,130,0.3)" },
+  { key: "evenements", label: "Événements", color: "#E8A44A", bg: "rgba(232,164,74,0.06)", border: "rgba(232,164,74,0.3)" },
+];
+
+function memoMatchesFilter(type: string | undefined, filter: FilterType): boolean {
+  const t = type || "vocal";
+  switch (filter) {
+    case "rdv": return t === "vocal" || t === "note";
+    case "activites": return t === "activite";
+    case "documents": return t === "document";
+    case "evenements": return t === "evenement";
+    default: return true;
+  }
+}
 
 interface Memo {
   id: string;
@@ -63,6 +90,8 @@ const Timeline = () => {
   const [loadingMemos, setLoadingMemos] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
+  const [activeFilters, setActiveFilters] = useState<Set<FilterType>>(new Set(["tous"]));
   const bottomRef = useRef<HTMLDivElement>(null);
 
 
@@ -104,6 +133,25 @@ const Timeline = () => {
     fetchMemos();
   }, [user, location.key]);
 
+  const isFilterActive = !activeFilters.has("tous");
+
+  const toggleFilter = (key: FilterType) => {
+    setActiveFilters(prev => {
+      const next = new Set(prev);
+      if (key === "tous") {
+        return new Set<FilterType>(["tous"]);
+      }
+      next.delete("tous");
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      if (next.size === 0) return new Set<FilterType>(["tous"]);
+      return next;
+    });
+  };
+
   const filteredMemos = useMemo(() => {
     // Filter out memos with no displayable content
     const displayable = memos.filter(m => {
@@ -111,9 +159,20 @@ const Timeline = () => {
       const structured = m.content_structured as any;
       return structured?.resume || m.transcription_raw;
     });
-    if (!searchQuery.trim()) return displayable;
+
+    // Apply type filter
+    const typeFiltered = isFilterActive
+      ? displayable.filter(m => {
+          for (const f of activeFilters) {
+            if (memoMatchesFilter(m.type, f)) return true;
+          }
+          return false;
+        })
+      : displayable;
+
+    if (!searchQuery.trim()) return typeFiltered;
     const q = searchQuery.toLowerCase();
-    return displayable.filter(m => {
+    return typeFiltered.filter(m => {
       const structured = m.content_structured as any;
       return (
         m.transcription_raw?.toLowerCase().includes(q) ||
@@ -124,7 +183,7 @@ const Timeline = () => {
         m.type?.toLowerCase().includes(q)
       );
     });
-  }, [memos, searchQuery]);
+  }, [memos, searchQuery, activeFilters, isFilterActive]);
 
   const grouped = useMemo(() => {
     const groups: { key: string; label: string; memos: Memo[] }[] = [];
@@ -194,22 +253,57 @@ const Timeline = () => {
           <ProfileAvatar />
         </div>
         {memos.length > 0 && (
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Rechercher..."
-              className="w-full pl-10 pr-4 py-2.5 outline-none text-sm text-foreground placeholder:text-muted-foreground"
+          <div className="flex items-center gap-2">
+            {/* Filter button */}
+            <button
+              onClick={() => setFilterDrawerOpen(true)}
+              className="relative flex-shrink-0 flex items-center justify-center"
               style={{
-                background: "rgba(255, 255, 255, 0.45)",
+                width: 42,
+                height: 42,
+                borderRadius: 14,
+                background: isFilterActive ? "rgba(139,116,224,0.12)" : "rgba(255, 255, 255, 0.45)",
                 backdropFilter: "blur(12px) saturate(1.4)",
                 WebkitBackdropFilter: "blur(12px) saturate(1.4)",
-                border: "1px solid rgba(255, 255, 255, 0.65)",
-                borderRadius: 14,
+                border: isFilterActive ? "1px solid rgba(139,116,224,0.3)" : "1px solid rgba(255, 255, 255, 0.65)",
                 boxShadow: "0 2px 8px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.7)",
               }}
-            />
+              aria-label="Filtrer"
+            >
+              <SlidersHorizontal className="h-4 w-4" style={{ color: isFilterActive ? "#8B74E0" : "#9A9490" }} />
+              {isFilterActive && (
+                <div
+                  className="absolute"
+                  style={{
+                    top: 8,
+                    right: 8,
+                    width: 7,
+                    height: 7,
+                    borderRadius: "50%",
+                    background: "#8B74E0",
+                  }}
+                />
+              )}
+            </button>
+
+            {/* Search bar */}
+            <div className="relative flex-1">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Rechercher..."
+                className="w-full pl-10 pr-4 py-2.5 outline-none text-sm text-foreground placeholder:text-muted-foreground"
+                style={{
+                  background: "rgba(255, 255, 255, 0.45)",
+                  backdropFilter: "blur(12px) saturate(1.4)",
+                  WebkitBackdropFilter: "blur(12px) saturate(1.4)",
+                  border: "1px solid rgba(255, 255, 255, 0.65)",
+                  borderRadius: 14,
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.7)",
+                }}
+              />
+            </div>
           </div>
         )}
       </header>
@@ -373,6 +467,56 @@ const Timeline = () => {
       )}
 
       <AddMemoSheet open={sheetOpen} onOpenChange={setSheetOpen} enfantId={enfantId} />
+
+      {/* Filter Drawer */}
+      <Drawer open={filterDrawerOpen} onOpenChange={setFilterDrawerOpen}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle className="text-center" style={{ fontFamily: "'Fraunces', serif" }}>Afficher</DrawerTitle>
+          </DrawerHeader>
+          <div className="px-4 pb-4">
+            <div className="flex flex-wrap gap-2">
+              {FILTER_PILLS.map(pill => {
+                const isActive = activeFilters.has(pill.key);
+                return (
+                  <button
+                    key={pill.key}
+                    onClick={() => toggleFilter(pill.key)}
+                    style={{
+                      padding: "8px 16px",
+                      borderRadius: 20,
+                      fontSize: 13,
+                      fontWeight: 500,
+                      border: isActive ? "1.5px solid transparent" : `1.5px solid ${pill.border}`,
+                      background: isActive ? pill.bg : (pill.key === "tous" ? "transparent" : pill.bg),
+                      color: isActive ? (pill.key === "tous" ? "#FFFFFF" : pill.color) : pill.color,
+                      ...(isActive && pill.key !== "tous" ? { background: pill.bg, border: `1.5px solid ${pill.color}` } : {}),
+                      ...(isActive && pill.key === "tous" ? { background: "#8B74E0", color: "#FFFFFF" } : {}),
+                      transition: "all 0.2s ease",
+                    }}
+                  >
+                    {pill.label}
+                  </button>
+                );
+              })}
+            </div>
+            {isFilterActive && (
+              <button
+                onClick={() => setActiveFilters(new Set<FilterType>(["tous"]))}
+                className="w-full mt-4 py-2.5 text-sm font-medium"
+                style={{
+                  color: "#8B74E0",
+                  background: "rgba(139,116,224,0.08)",
+                  borderRadius: 12,
+                  border: "1px solid rgba(139,116,224,0.2)",
+                }}
+              >
+                Réinitialiser
+              </button>
+            )}
+          </div>
+        </DrawerContent>
+      </Drawer>
 
       <BottomNavBar />
     </div>
