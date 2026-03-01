@@ -1,48 +1,58 @@
 
+# Corriger l'ouverture des fichiers documents
 
-# Corriger l'affichage et l'ouverture des documents dans la timeline
+## Probleme identifie
 
-## Probleme
+L'URL signee est correctement generee (la requete POST retourne un status 200 avec un token valide). Le fichier PDF existe bien dans le stockage. Le probleme vient probablement de l'une de ces deux causes :
 
-Un memo de type `document` est cree dans `NouveauDocument.tsx` avec `processing_status: "pending"`, mais aucun traitement IA n'est declenche ensuite (contrairement aux vocaux et notes). Le statut reste bloque a `"pending"`, ce qui cause :
-- Un spinner permanent sur la card ("Traitement en cours...")
-- L'impossibilite de cliquer pour ouvrir le memo
+1. **Iframe sandbox** : Le bouton "Ouvrir le fichier" utilise `target="_blank"` qui peut etre bloque par la sandbox de l'iframe de preview Lovable. Ce n'est pas un bug du code mais une limitation de l'environnement de preview.
 
-## Solution
+2. **URL signee mal construite** : Verifier que le SDK Supabase retourne bien une URL absolue et non un chemin relatif. La reponse brute montre un `signedURL` relatif (`/object/sign/voice-memos/...`), mais le SDK devrait normalement le prefixer avec l'URL du projet.
 
-Les documents n'ont pas besoin de traitement IA (pas de transcription, pas de structuration). Deux corrections sont necessaires :
+## Solution proposee
 
-### 1. NouveauDocument.tsx -- creer le document avec `processing_status: "done"`
+Pour contourner le blocage potentiel de `target="_blank"` dans l'iframe et rendre l'experience plus fiable :
 
-Modifier la ligne d'insertion pour utiliser `processing_status: "done"` au lieu de `"pending"`, car il n'y a pas d'etape de traitement a attendre.
+### 1. Utiliser `window.open()` au lieu de `<a target="_blank">`
 
-### 2. MemoCard.tsx -- permettre l'ouverture des documents meme en `pending`
+Remplacer le lien `<a href={signedFileUrl} target="_blank">` par un `<button>` qui appelle `window.open(signedFileUrl, '_blank')`. Ce pattern fonctionne mieux dans les contextes d'iframe.
 
-Modifier `handleClick` pour autoriser la navigation vers le detail pour les documents quel que soit leur statut :
+### 2. Ajouter un fallback avec `download` via fetch + Blob
 
-```typescript
-const handleClick = () => {
-  if (memo.processing_status === "done" || memoType === "document") {
-    navigate(`/memo-result/${memo.id}`);
-  }
-};
-```
+Si `window.open` est aussi bloque, proposer un telechargement direct en creant un Blob a partir du fichier et en declenchant un download programmatique.
 
-Et ajuster `isProcessing` pour ne pas afficher le spinner sur les documents :
+### 3. Ajouter un log de debug temporaire
 
-```typescript
-const isProcessing = memoType !== "document" && memo.processing_status !== "done" && memo.processing_status !== "error";
-```
-
-### 3. Corriger le document existant en base
-
-Mettre a jour le memo document existant (id `3c07e43b`) pour passer son `processing_status` de `"pending"` a `"done"`.
+Ajouter un `console.log` de l'URL signee generee pour verifier qu'elle est bien absolue et valide.
 
 ## Detail technique
 
 | Fichier | Modification |
 |---|---|
-| `src/pages/NouveauDocument.tsx` | `processing_status: "done"` au lieu de `"pending"` |
-| `src/components/memo/MemoCard.tsx` | Exclure les documents du test `isProcessing` + autoriser le clic |
-| Migration SQL | `UPDATE memos SET processing_status = 'done' WHERE type = 'document' AND processing_status = 'pending'` |
+| `src/pages/MemoResult.tsx` | Remplacer le lien `<a>` par un bouton avec `window.open()` + fallback download via Blob |
 
+### Code cible (section FICHIER dans MemoResult.tsx)
+
+Le bouton "Ouvrir le fichier" sera remplace par :
+
+```typescript
+<button
+  onClick={() => {
+    if (signedFileUrl) {
+      window.open(signedFileUrl, '_blank', 'noopener,noreferrer');
+    }
+  }}
+  className="flex items-center justify-center gap-2 mt-3 w-full py-2.5 rounded-xl text-sm font-medium cursor-pointer"
+  style={{
+    fontFamily: "'DM Sans', sans-serif",
+    background: "linear-gradient(135deg, #E8736A, #8B74E0)",
+    color: "white",
+    border: "none",
+  }}
+>
+  <ExternalLink size={14} />
+  Ouvrir le fichier
+</button>
+```
+
+Ce changement est minimal et ne touche que le bouton d'ouverture dans la section FICHIER.
