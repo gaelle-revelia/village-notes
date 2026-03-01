@@ -255,7 +255,6 @@ const Timeline = () => {
                 {/* Month header */}
                 <div className="sticky top-[100px] z-[5]"
                   style={{
-                    background: "linear-gradient(150deg, #F9EDE8 0%, #F0EAF8 45%, #E8EFF8 100%)",
                     padding: "20px 0 10px 0",
                   }}
                 >
