@@ -118,7 +118,7 @@ const Timeline = () => {
   const filteredMemos = useMemo(() => {
     // Filter out memos with no displayable content
     const displayable = memos.filter(m => {
-      if (m.type === 'document' || m.type === 'evenement') return true;
+      if (m.type === 'document' || m.type === 'evenement' || m.type === 'activite') return true;
       const structured = m.content_structured as any;
       return structured?.resume || m.transcription_raw;
     });
@@ -299,6 +299,7 @@ const Timeline = () => {
                     // Dot style per type
                     const isEtape = memoType === "evenement";
                     const isDocument = memoType === "document";
+                    const isActivite = memoType === "activite";
                     const dotSize = isEtape ? 16 : isDocument ? 13 : 11;
                     const dotStyle: React.CSSProperties = isEtape
                       ? {
@@ -318,6 +319,16 @@ const Timeline = () => {
                           borderRadius: "50%",
                           background: "rgba(255,255,255,0.7)",
                           border: "2px solid #8A9BAE",
+                          zIndex: 1,
+                        }
+                      : isActivite
+                      ? {
+                          left: -32,
+                          marginTop: 13,
+                          width: 11, height: 11,
+                          borderRadius: "50%",
+                          background: "#8B74E0",
+                          boxShadow: "0 0 0 3px rgba(139,116,224,0.24)",
                           zIndex: 1,
                         }
                       : {
