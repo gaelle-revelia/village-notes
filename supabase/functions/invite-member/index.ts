@@ -36,7 +36,7 @@ Deno.serve(async (req) => {
     }
     const userId = user.id;
 
-    const { email, role, enfant_id } = await req.json();
+    const { email, role, enfant_id, redirect_url } = await req.json();
 
     if (!email || !enfant_id) {
       return new Response(JSON.stringify({ error: "email and enfant_id are required" }), {
@@ -87,6 +87,7 @@ Deno.serve(async (req) => {
     // Invite user via Supabase Auth
     const { error: authError } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
       data: { role: role || "coparent", enfant_id },
+      redirectTo: redirect_url || undefined,
     });
 
     if (authError) {
