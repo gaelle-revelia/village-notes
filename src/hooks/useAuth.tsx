@@ -31,9 +31,15 @@ export function useAuth() {
                 { onConflict: "enfant_id,user_id", ignoreDuplicates: true }
               );
             if (!error) {
-              supabase.auth.updateUser({
+              await supabase.auth.updateUser({
                 data: { enfant_id: null, role: null },
               });
+              // Redirect to invite onboarding if not already done
+              if (localStorage.getItem("onboarding_invite_done") !== "true") {
+                localStorage.setItem("invite_enfant_id", enfantId);
+                localStorage.setItem("invite_role", role);
+                window.location.href = "/onboarding-invite";
+              }
             }
           }
         }
