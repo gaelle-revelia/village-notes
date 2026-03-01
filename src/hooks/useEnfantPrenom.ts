@@ -1,23 +1,22 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
+import { useEnfantId } from "@/hooks/useEnfantId";
 
 export function useEnfantPrenom() {
-  const { user } = useAuth();
+  const { enfantId } = useEnfantId();
   const [prenom, setPrenom] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!user) return;
+    if (!enfantId) return;
     supabase
       .from("enfants")
       .select("prenom")
-      .eq("user_id", user.id)
-      .limit(1)
+      .eq("id", enfantId)
       .single()
       .then(({ data }) => {
         if (data) setPrenom(data.prenom);
       });
-  }, [user]);
+  }, [enfantId]);
 
   return prenom;
 }

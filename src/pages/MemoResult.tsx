@@ -169,7 +169,6 @@ const MemoResult = () => {
       .from("memos")
       .select("id, memo_date, type, content_structured, transcription_raw, intervenant_id, enfant_id, file_url, intervenants(nom, specialite)")
       .eq("id", id)
-      .eq("user_id", user.id)
       .single();
     if (data) setMemo(data as any);
     setLoading(false);
@@ -217,7 +216,7 @@ const MemoResult = () => {
     supabase
       .from("memos")
       .select("id")
-      .eq("user_id", user.id)
+      
       .order("memo_date", { ascending: true })
       .order("created_at", { ascending: true })
       .then(({ data }) => {

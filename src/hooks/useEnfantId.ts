@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 export function useEnfantId() {
   const { user } = useAuth();
   const [enfantId, setEnfantId] = useState<string | null>(null);
+  const [role, setRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -13,16 +14,19 @@ export function useEnfantId() {
       return;
     }
     supabase
-      .from("enfants")
-      .select("id")
+      .from("enfant_membres" as any)
+      .select("enfant_id, role")
       .eq("user_id", user.id)
       .limit(1)
       .single()
-      .then(({ data }) => {
-        if (data) setEnfantId(data.id);
+      .then(({ data }: any) => {
+        if (data) {
+          setEnfantId(data.enfant_id);
+          setRole(data.role);
+        }
         setLoading(false);
       });
   }, [user]);
 
-  return { enfantId, loading };
+  return { enfantId, role, loading };
 }

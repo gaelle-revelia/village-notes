@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { useEnfantId } from "@/hooks/useEnfantId";
 import { useToast } from "@/hooks/use-toast";
 import { RecordingView } from "@/components/memo/RecordingView";
 import { ProcessingView } from "@/components/memo/ProcessingView";
@@ -25,7 +26,7 @@ const RecordMemo = () => {
   const navigate = useNavigate();
 
   const [phase, setPhase] = useState<Phase>("pick-intervenant");
-  const [enfantId, setEnfantId] = useState<string | null>(null);
+  const { enfantId } = useEnfantId();
   const [intervenantId, setIntervenantId] = useState<string | null>(null);
   const [processingStep, setProcessingStep] = useState(0);
   const [result, setResult] = useState<{
@@ -33,20 +34,6 @@ const RecordMemo = () => {
     structured: StructuredContent;
   } | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
-
-  // Fetch the user's first enfant
-  useEffect(() => {
-    if (!user) return;
-    supabase
-      .from("enfants")
-      .select("id")
-      .eq("user_id", user.id)
-      .limit(1)
-      .single()
-      .then(({ data }) => {
-        if (data) setEnfantId(data.id);
-      });
-  }, [user]);
 
   if (loading) {
     return (
