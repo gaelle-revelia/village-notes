@@ -1,57 +1,87 @@
 
 
-## Selection d'icone intelligente dans OutilsActiviteCreer
+## Ecrans de session activite et integration timeline
 
-### Contrainte technique importante
-Le projet utilise **Lovable AI** (gateway interne) et non l'API Claude directement. Le modele `claude-sonnet-4-20250514` n'est pas disponible. L'implementation utilisera `google/gemini-2.5-flash` via le gateway Lovable AI, avec le meme prompt systeme et le meme comportement attendu.
+### Vue d'ensemble
 
-### Fichiers a creer
+Trois fichiers a creer, deux fichiers a modifier. L'objectif est de remplacer les ecrans placeholder par de vrais ecrans chrono et saisie manuelle, puis d'ajouter le type `activite` dans la timeline.
 
-**1. `supabase/functions/suggest-icon/index.ts`** -- Edge function
+---
 
-- Recoit `{ nom, domaine }` en POST
-- Appelle Lovable AI gateway (`google/gemini-2.5-flash`) avec le prompt systeme fourni
-- Retourne `{ icon: "NomIcone" }` 
-- Gestion CORS, erreurs 429/402, validation que la reponse est dans la liste autorisee
+### 1. Creer `src/pages/OutilsActiviteChrono.tsx`
 
-### Fichiers a modifier
+Ecran chrono temps reel pour une seance d'activite.
 
-**2. `src/pages/OutilsActiviteCreer.tsx`**
+**Comportement :**
+- Fetch activite par `:id` depuis la table `activites` (colonnes: id, nom, domaine, track_temps, track_distance, unite_distance, icone)
+- Header glass avec ArrowLeft + nom + badge domaine colore
+- Chrono central : `useRef` pour `intervalRef`, `setInterval` chaque seconde, `clearInterval` dans le cleanup du `useEffect`. State `seconds` incremente. Affichage MM:SS en Fraunces 42px dans un cercle glass
+- Boutons Pause/Play (toggle `running`) + "Terminer la seance" (gradient corail-lavande)
+- Si `track_distance === true` : section saisie numerique + raccourcis (+0.5, +1, +2, +5) avec unite dynamique
+- Au clic "Terminer" : `showRecap = true` — affichage inline de la duree, distance, textarea note, bouton "Enregistrer la seance"
+- Enregistrement : 2 inserts paralleles avec `Promise.all` :
+  - `sessions_activite` : activite_id, enfant_id, duree_secondes, distance, notes, created_at
+  - `memos` : type `'activite'`, user_id, enfant_id, memo_date, processing_status `'done'`, transcription_raw avec le format `"{nom} — {MM:SS}{distance ? ' / ' + distance + unite : ''}"`, content_structured avec resume identique et tags contenant le domaine
+- Apres succes : `navigate('/outils/activites')`
 
-Ajouts au state :
-- `icone: string` (defaut `"Activity"`)
-- `suggestingIcon: boolean`
-- `showIconPicker: boolean`
+### 2. Creer `src/pages/OutilsActiviteManuel.tsx`
 
-Comportement onBlur du champ nom :
-- Si `nom.trim().length > 0` et domaine selectionne -> appel edge function `suggest-icon`
-- Pendant le chargement : spinner discret sous le champ nom
-- Au retour : afficher apercu avec l'icone Lucide rendue dynamiquement + bouton "Changer"
+Formulaire de saisie manuelle post-seance.
 
-Apercu icone (sous le champ nom, dans la meme glass card) :
-- Icone Lucide rendue via le pattern `icons[icone]` de lucide-react
-- Carre arrondi colore (couleur domaine) + nom de l'icone + bouton "Changer" a droite
+**Comportement :**
+- Fetch activite par `:id`
+- Header glass avec retour
+- Formulaire centre (max-width 480px), sections glass card :
+  - Duree MM:SS (si track_temps) : input texte avec placeholder "00:00", parse en secondes
+  - Distance numerique (si track_distance) : input number + unite
+  - Date : composant MemoDatePicker, defaut aujourd'hui
+  - Note optionnelle : textarea
+- Bouton "Enregistrer la seance" dans le flux (pas fixed/sticky)
+- Meme double INSERT que le chrono, avec `created_at` = date choisie
 
-Picker grid (affiche quand `showIconPicker = true`) :
-- Glass card supplementaire avec grille 6 colonnes
-- 33 icones de la liste, chacune en bouton 40x40
-- Tap = selection, ferme le picker
-- Icone active surlignee avec halo domaine
+### 3. Modifier `src/App.tsx`
 
-INSERT Supabase :
-- Ajouter `icone` dans l'objet d'insertion
+Remplacer les 2 routes PlaceholderScreen par les vrais composants :
+- Import `OutilsActiviteChrono` et `OutilsActiviteManuel`
+- Route `:id/chrono` → `OutilsActiviteChrono`
+- Route `:id/manuel` → `OutilsActiviteManuel`
 
-### Liste des icones (constante partagee)
+### 4. Modifier `src/components/memo/MemoCard.tsx`
+
+Ajouter le cas `type === 'activite'` :
+
+- Nouveau badge dans `TYPE_BADGES` : `activite: { emoji: "🏃", label: "Activite", color: "#8B74E0" }`
+- Nouveau cas dans `getCardStyle` pour `activite` : `background: rgba(232,239,255,0.45)`, `border: 1px solid rgba(139,116,224,0.2)`
+- Logique de rendu specifique dans le composant :
+  - Le `transcription_raw` contient `"{nom} — {duree} / {distance}"` 
+  - Titre = partie avant " — "
+  - Stats = partie apres " — ", separees par " / ", affichees cote a cote avec separateur vertical
+
+### 5. Modifier `src/pages/Timeline.tsx`
+
+Ajouter le cas `type === 'activite'` dans le calcul du dot style :
+- Dot plein violet `#8B74E0`, taille 11px, `boxShadow: 0 0 0 3px rgba(139,116,224,0.24)`
+
+Le type `activite` sera inclus dans le filtre `displayable` car il aura un `transcription_raw` rempli.
+
+---
+
+### Schema de donnees du memo activite
 
 ```text
-Footprints, Bike, Baby, Heart, Brain, Ear, Eye, Hand, Stethoscope, Activity,
-Dumbbell, Wind, Music, Smile, Sun, Star, Flower2, Leaf, Waves, Circle,
-ArrowUp, MoveHorizontal, StretchHorizontal, PersonStanding, Accessibility,
-Gamepad2, Puzzle, BookOpen, Paintbrush, Scissors, Timer, Zap, Sparkles
+memos INSERT:
+  type: 'activite'
+  user_id: auth user id
+  enfant_id: enfant_id
+  memo_date: date de la seance
+  processing_status: 'done'
+  transcription_raw: "Marche — 05:30 / 2.5 km"
+  content_structured: { resume: "Marche — 05:30 / 2.5 km", tags: ["Moteur"] }
 ```
 
 ### Design
-- Apercu icone : inline dans la glass card du nom, alignement horizontal
-- Picker : glass card separee, grille responsive, icones en couleur du domaine actif
-- Bouton "Changer" : texte lavande `#8B74E0`, sans fond
 
+- Chrono : cercle glass 200x200px, temps Fraunces 42px, boutons ronds 56px
+- Raccourcis distance : chips arrondis avec couleur domaine
+- Recap : glass card avec resume + textarea + CTA
+- Card timeline activite : fond bleu pale, badge violet, parsing du texte pour titre/stats
