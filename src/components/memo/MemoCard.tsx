@@ -23,8 +23,6 @@ const DOMAIN_COLORS: Record<string, string> = {
   kinésithérapie: "#E8736A",
   physique: "#E8736A",
   cognitif: "#8B74E0",
-  psychomotricité: "#8B74E0",
-  psychomoteur: "#8B74E0",
   sensoriel: "#44A882",
   communication: "#44A882",
   langage: "#44A882",
