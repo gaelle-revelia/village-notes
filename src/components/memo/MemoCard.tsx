@@ -139,8 +139,8 @@ export function MemoCard({ memo }: MemoCardProps) {
     description?: string;
   } | null;
 
-  const isProcessing = memo.processing_status !== "done" && memo.processing_status !== "error";
   const memoType = memo.type || "vocal";
+  const isProcessing = memoType !== "document" && memo.processing_status !== "done" && memo.processing_status !== "error";
   const badge = TYPE_BADGES[memoType] || TYPE_BADGES.vocal;
 
   const displayDate = memo.memo_date
@@ -159,7 +159,7 @@ export function MemoCard({ memo }: MemoCardProps) {
   const domainColors = getDomainsFromTags(tags);
 
   const handleClick = () => {
-    if (memo.processing_status === "done") {
+    if (memo.processing_status === "done" || memoType === "document") {
       navigate(`/memo-result/${memo.id}`);
     }
   };
