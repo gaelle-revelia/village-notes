@@ -91,7 +91,13 @@ const Timeline = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sheetOpen, setSheetOpen] = useState(false);
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
-  const [activeFilters, setActiveFilters] = useState<Set<FilterType>>(new Set(["tous"]));
+  const [activeFilters, setActiveFilters] = useState<Set<FilterType>>(() => {
+    try {
+      const saved = sessionStorage.getItem("timeline_filters");
+      if (saved) return new Set(JSON.parse(saved) as FilterType[]);
+    } catch {}
+    return new Set(["tous"]);
+  });
   const bottomRef = useRef<HTMLDivElement>(null);
 
 
@@ -137,17 +143,20 @@ const Timeline = () => {
 
   const toggleFilter = (key: FilterType) => {
     setActiveFilters(prev => {
-      const next = new Set(prev);
+      let next: Set<FilterType>;
       if (key === "tous") {
-        return new Set<FilterType>(["tous"]);
-      }
-      next.delete("tous");
-      if (next.has(key)) {
-        next.delete(key);
+        next = new Set<FilterType>(["tous"]);
       } else {
-        next.add(key);
+        next = new Set(prev);
+        next.delete("tous");
+        if (next.has(key)) {
+          next.delete(key);
+        } else {
+          next.add(key);
+        }
+        if (next.size === 0) next = new Set<FilterType>(["tous"]);
       }
-      if (next.size === 0) return new Set<FilterType>(["tous"]);
+      sessionStorage.setItem("timeline_filters", JSON.stringify([...next]));
       return next;
     });
   };
