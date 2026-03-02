@@ -19,6 +19,8 @@ interface StructuredContent {
   suggestions?: string[];
   a_retenir?: string[];
   tags: string[];
+  mode?: string;
+  details?: string[];
 }
 
 const RecordMemo = () => {
@@ -90,7 +92,7 @@ const RecordMemo = () => {
         {
           body: {
             memo_id: memo.id,
-            mode: isTextMode ? "text" : "voice",
+            mode: isTextMode ? "text_quick" : "voice",
             text_input: textInput || undefined,
           },
         }

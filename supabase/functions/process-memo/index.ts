@@ -72,7 +72,7 @@ serve(async (req) => {
 
     let transcription = "";
 
-    if (mode === "text") {
+    if (mode === "text" || mode === "text_quick") {
       transcription = text_input || "";
     } else {
       // Voice mode: download from audio-temp bucket and transcribe
@@ -201,6 +201,77 @@ serve(async (req) => {
           )
           .join("\n")
       : null;
+
+    // --- text_quick: simplified AI call for quick notes ---
+    if (mode === "text_quick") {
+      const quickResponse = await fetch(
+        "https://ai.gateway.lovable.dev/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${lovableApiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "google/gemini-2.5-flash-lite",
+            messages: [
+              {
+                role: "system",
+                content: `Tu es un assistant qui résume des notes de parents d'enfants en rééducation.
+Réponds UNIQUEMENT avec un objet JSON valide : { "resume": "..." }. Aucun texte autour.
+Le résumé doit être factuel, 5 à 8 mots, format [Contexte] — [fait principal].
+Jamais de diagnostic, commentaire éditorial ou jargon médical.
+${enfant?.prenom ? `Prénom de l'enfant : ${enfant.prenom} (ne jamais modifier l'orthographe)` : ""}
+${intervenant ? `Intervenant : ${intervenant.nom}${intervenant.specialite ? ` — ${intervenant.specialite}` : ""}` : ""}
+${lexiqueFormatted ? `Lexique contextuel :\n${lexiqueFormatted}` : ""}`,
+              },
+              {
+                role: "user",
+                content: `Note du parent : "${transcription}"\n\nGénère le résumé JSON.`,
+              },
+            ],
+          }),
+        }
+      );
+
+      let resume = transcription.substring(0, 60);
+      if (quickResponse.ok) {
+        const quickResult = await quickResponse.json();
+        const rawContent = quickResult.choices?.[0]?.message?.content || "";
+        try {
+          const cleaned = rawContent.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
+          const parsed = JSON.parse(cleaned);
+          if (parsed.resume) resume = parsed.resume;
+        } catch {
+          console.error("text_quick JSON parse failed, using fallback");
+        }
+      } else {
+        console.error("text_quick AI error:", quickResponse.status);
+      }
+
+      const quickStructured = {
+        resume,
+        details: [transcription],
+        a_retenir: null,
+        tags: null,
+        intervenant_detected: null,
+        mode: "text_quick",
+      };
+
+      await supabase.from("memos").update({
+        content_structured: quickStructured,
+        processing_status: "done",
+      }).eq("id", memo_id);
+
+      return new Response(
+        JSON.stringify({
+          transcription,
+          structured: quickStructured,
+          status: "done",
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     // Structure with Gemini using tool calling
     const structureResponse = await fetch(

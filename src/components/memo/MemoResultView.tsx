@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Check } from "lucide-react";
+import { Check, Plus } from "lucide-react";
 
 interface StructuredContent {
   resume: string;
@@ -7,6 +8,8 @@ interface StructuredContent {
   suggestions?: string[];
   a_retenir?: string[];
   tags: string[];
+  mode?: string;
+  details?: string[];
 }
 
 interface MemoResultViewProps {
@@ -35,6 +38,41 @@ function getTagColor(tag: string): string {
 }
 
 export function MemoResultView({ structured, transcription, onDone }: MemoResultViewProps) {
+  const isTextQuick = structured.mode === "text_quick";
+
+  if (isTextQuick) {
+    return (
+      <div className="space-y-6">
+        {/* Resume */}
+        <div className="rounded-xl border bg-card p-4 space-y-2">
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+            Résumé
+          </h3>
+          <p className="text-card-foreground leading-relaxed">{structured.resume}</p>
+        </div>
+
+        {/* Note (details[0]) */}
+        {structured.details && structured.details[0] && (
+          <div className="rounded-xl border bg-card p-4 space-y-2">
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+              Votre note
+            </h3>
+            <p className="text-card-foreground leading-relaxed whitespace-pre-wrap">
+              {structured.details[0]}
+            </p>
+          </div>
+        )}
+
+        {/* Done button */}
+        <Button onClick={onDone} className="w-full rounded-xl h-12 text-base">
+          <Check className="mr-2 h-4 w-4" />
+          C'est bon
+        </Button>
+      </div>
+    );
+  }
+
+  // --- Standard mode (voice / text) ---
   return (
     <div className="space-y-6">
       {/* Tags */}
