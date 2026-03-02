@@ -88,7 +88,6 @@ const Onboarding = () => {
 
       if (error) {
         toast({ title: "Erreur", description: "Impossible de sauvegarder les intervenants.", variant: "destructive" });
-        return;
       }
     }
     setVillageIntervenants(intervenants);
@@ -111,7 +110,6 @@ const Onboarding = () => {
 
       if (error) {
         toast({ title: "Erreur", description: "Impossible de sauvegarder le vocabulaire.", variant: "destructive" });
-        return;
       }
     }
     setStep(4);
@@ -128,7 +126,6 @@ const Onboarding = () => {
 
     if (error) {
       toast({ title: "Erreur", description: "Impossible de sauvegarder le score.", variant: "destructive" });
-      return;
     }
     setStep(5);
   };
