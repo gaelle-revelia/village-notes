@@ -149,9 +149,11 @@ const Vocabulaire = () => {
     );
   }
 
-  const visibleRows = rows.filter((r) => r.source !== "onboarding_prenom");
-  const grouped = groupByMotCorrect(visibleRows);
+  const grouped = groupByMotCorrect(rows);
 
+  const prenomEntries = Array.from(grouped.entries()).filter(
+    ([, { source }]) => source === "onboarding_prenom"
+  );
   const structureEntries = Array.from(grouped.entries()).filter(
     ([, { source }]) => source === "onboarding_structure"
   );
@@ -250,6 +252,19 @@ const Vocabulaire = () => {
           L'IA générera automatiquement des variantes phonétiques pour améliorer la transcription vocale.
         </p>
 
+        {/* Prénom section */}
+        {prenomEntries.length > 0 && (
+          <div className="space-y-2">
+            <h2
+              className="text-sm font-semibold text-muted-foreground uppercase tracking-wide"
+              style={{ fontFamily: "DM Sans" }}
+            >
+              Prénom
+            </h2>
+            {prenomEntries.map(([motCorrect, { entries }]) => renderBlock(motCorrect, entries))}
+          </div>
+        )}
+
         {/* Structure section */}
         {structureEntries.length > 0 && (
           <div className="space-y-2">
@@ -276,7 +291,7 @@ const Vocabulaire = () => {
           </div>
         )}
 
-        {visibleRows.length === 0 && (
+        {rows.length === 0 && (
           <div className="text-center py-12">
             <p className="text-sm text-muted-foreground" style={{ fontFamily: "DM Sans" }}>
               Aucun mot dans votre vocabulaire pour l'instant.
