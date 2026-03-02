@@ -3,22 +3,24 @@ import { Mic } from "lucide-react";
 export function VoiceBanner() {
   return (
     <div
-      className="flex items-start gap-3 rounded-2xl px-4 py-3"
+      className="rounded-2xl px-4 py-3 space-y-2"
       style={{
         background: "rgba(232, 239, 255, 0.45)",
         border: "1px solid rgba(139, 116, 224, 0.2)",
       }}
     >
-      <div
-        className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
-        style={{ background: "linear-gradient(135deg, #8B74E0, #5CA8D8)" }}
+      <p
+        className="text-xs font-semibold text-card-foreground"
+        style={{ fontFamily: "DM Sans" }}
       >
-        <Mic className="h-4 w-4 text-white" />
-      </div>
-      <p className="text-xs leading-relaxed text-muted-foreground" style={{ fontFamily: "DM Sans" }}>
-        Ces mots aident l'app à mieux comprendre vos notes vocales. Plus le
-        vocabulaire est riche, plus la transcription sera fidèle.
+        Ces mots sont automatiquement corrigés dans vos notes vocales.
       </p>
+      <div className="flex items-start gap-2">
+        <span className="text-sm shrink-0">🎙️</span>
+        <p className="text-xs leading-relaxed text-muted-foreground" style={{ fontFamily: "DM Sans" }}>
+          Correction silencieuse. Quand vous parlez, The Village reconnaît ces mots et les retranscrit fidèlement.
+        </p>
+      </div>
     </div>
   );
 }
