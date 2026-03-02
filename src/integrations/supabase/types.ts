@@ -61,6 +61,38 @@ export type Database = {
           },
         ]
       }
+      enfant_lexique: {
+        Row: {
+          created_at: string | null
+          enfant_id: string
+          id: string
+          mot_correct: string
+          mot_transcrit: string
+        }
+        Insert: {
+          created_at?: string | null
+          enfant_id: string
+          id?: string
+          mot_correct: string
+          mot_transcrit: string
+        }
+        Update: {
+          created_at?: string | null
+          enfant_id?: string
+          id?: string
+          mot_correct?: string
+          mot_transcrit?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enfant_lexique_enfant_id_fkey"
+            columns: ["enfant_id"]
+            isOneToOne: false
+            referencedRelation: "enfants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       enfant_membres: {
         Row: {
           enfant_id: string
