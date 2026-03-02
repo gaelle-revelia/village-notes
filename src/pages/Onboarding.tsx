@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -23,8 +23,28 @@ const Onboarding = () => {
     Array<{ nom: string; specialite: string; structure?: string }>
   >([]);
   const [saving, setSaving] = useState(false);
+  const [checkingProfile, setCheckingProfile] = useState(true);
+  const [onboardingDone, setOnboardingDone] = useState(false);
 
-  if (loading) {
+  useEffect(() => {
+    if (!user) {
+      setCheckingProfile(false);
+      return;
+    }
+    supabase
+      .from("profiles")
+      .select("onboarding_completed")
+      .eq("user_id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.onboarding_completed) {
+          setOnboardingDone(true);
+        }
+        setCheckingProfile(false);
+      });
+  }, [user]);
+
+  if (loading || checkingProfile) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="animate-pulse text-muted-foreground">Chargement...</div>
@@ -34,6 +54,10 @@ const Onboarding = () => {
 
   if (!user) {
     return <Navigate to="/auth" replace />;
+  }
+
+  if (onboardingDone) {
+    return <Navigate to="/timeline" replace />;
   }
 
   const handleEnfant = async (data: { prenom: string; dateNaissance: string; diagnostic: string }) => {
@@ -128,6 +152,13 @@ const Onboarding = () => {
     if (error) {
       toast({ title: "Erreur", description: "Impossible de sauvegarder le score.", variant: "destructive" });
     }
+
+    // Mark onboarding as completed
+    await supabase.from("profiles").upsert(
+      { user_id: user.id, onboarding_completed: true },
+      { onConflict: "user_id" }
+    );
+
     setStep(5);
   };
 
