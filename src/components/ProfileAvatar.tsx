@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useEnfantPrenom } from "@/hooks/useEnfantPrenom";
 import { supabase } from "@/integrations/supabase/client";
-import { User, Users, Heart, Settings, ChevronRight, LogOut, X } from "lucide-react";
+import { User, Users, BookOpen, Heart, Settings, ChevronRight, LogOut, X } from "lucide-react";
 
 export function ProfileAvatar() {
   const { user } = useAuth();
@@ -28,6 +28,7 @@ export function ProfileAvatar() {
   const menuRows = [
     { icon: User, label: "Mon profil", desc: "Modifier mes informations", route: "/profil" },
     { icon: Users, label: "Mon village", desc: "Gérer les intervenants", route: "/village" },
+    { icon: BookOpen, label: "Mon vocabulaire", desc: "Mots et lieux reconnus à la voix", route: "/vocabulaire" },
     { icon: Heart, label: `Profil de ${prenom || "mon enfant"}`, desc: "Modifier le profil de mon enfant", route: "/enfant" },
     { icon: Settings, label: "Paramètres", desc: "Notifications, confidentialité", route: "/parametres" },
   ];
