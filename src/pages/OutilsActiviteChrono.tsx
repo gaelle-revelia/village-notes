@@ -137,8 +137,8 @@ export default function OutilsActiviteChrono() {
           enfant_id: enfantId,
           memo_date: new Date().toISOString().slice(0, 10),
           processing_status: "done",
-          transcription_raw: rawText,
-          content_structured: { resume: rawText, tags: [activite.domaine] },
+          transcription_raw: null,
+          content_structured: { resume: rawText, notes: notes || undefined, tags: [activite.domaine] },
         } as any),
       ]);
 
