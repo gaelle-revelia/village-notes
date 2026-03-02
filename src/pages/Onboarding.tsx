@@ -6,8 +6,11 @@ import { useToast } from "@/hooks/use-toast";
 import { ProgressBar } from "@/components/onboarding/ProgressBar";
 import { StepEnfant } from "@/components/onboarding/StepEnfant";
 import { StepVillage } from "@/components/onboarding/StepVillage";
+import { StepVocabulaire } from "@/components/onboarding/StepVocabulaire";
 import { StepNSM } from "@/components/onboarding/StepNSM";
 import { StepReady } from "@/components/onboarding/StepReady";
+
+const TOTAL_STEPS = 5;
 
 const Onboarding = () => {
   const { user, loading } = useAuth();
@@ -15,6 +18,9 @@ const Onboarding = () => {
   const [step, setStep] = useState(1);
   const [enfantId, setEnfantId] = useState<string | null>(null);
   const [prenomEnfant, setPrenomEnfant] = useState("");
+  const [villageIntervenants, setVillageIntervenants] = useState<
+    Array<{ nom: string; specialite: string }>
+  >([]);
   const [saving, setSaving] = useState(false);
 
   if (loading) {
@@ -71,7 +77,30 @@ const Onboarding = () => {
         return;
       }
     }
+    setVillageIntervenants(intervenants);
     setStep(3);
+  };
+
+  const handleVocabulaire = async (
+    entries: Array<{ mot_transcrit: string; mot_correct: string }>
+  ) => {
+    if (entries.length > 0 && enfantId) {
+      setSaving(true);
+      const { error } = await supabase.from("enfant_lexique").insert(
+        entries.map((e) => ({
+          enfant_id: enfantId,
+          mot_transcrit: e.mot_transcrit,
+          mot_correct: e.mot_correct,
+        }))
+      );
+      setSaving(false);
+
+      if (error) {
+        toast({ title: "Erreur", description: "Impossible de sauvegarder le vocabulaire.", variant: "destructive" });
+        return;
+      }
+    }
+    setStep(4);
   };
 
   const handleNSM = async (score: number) => {
@@ -87,13 +116,13 @@ const Onboarding = () => {
       toast({ title: "Erreur", description: "Impossible de sauvegarder le score.", variant: "destructive" });
       return;
     }
-    setStep(4);
+    setStep(5);
   };
 
   return (
     <main className="flex min-h-screen flex-col px-4 py-6">
       <div className="mx-auto w-full max-w-[400px] flex-1 flex flex-col">
-        {step > 1 && step < 4 && (
+        {step > 1 && step < TOTAL_STEPS && (
           <button
             onClick={() => setStep(step - 1)}
             className="mb-4 self-start text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -101,9 +130,9 @@ const Onboarding = () => {
             ← Retour
           </button>
         )}
-        {step < 4 && (
+        {step < TOTAL_STEPS && (
           <div className="mb-8">
-            <ProgressBar currentStep={step} totalSteps={4} />
+            <ProgressBar currentStep={step} totalSteps={TOTAL_STEPS} />
           </div>
         )}
 
@@ -122,8 +151,17 @@ const Onboarding = () => {
               onSkip={() => setStep(3)}
             />
           )}
-          {step === 3 && <StepNSM prenomEnfant={prenomEnfant} onNext={handleNSM} />}
-          {step === 4 && <StepReady prenomEnfant={prenomEnfant} />}
+          {step === 3 && enfantId && (
+            <StepVocabulaire
+              prenomEnfant={prenomEnfant}
+              enfantId={enfantId}
+              intervenants={villageIntervenants}
+              onNext={handleVocabulaire}
+              onSkip={() => setStep(4)}
+            />
+          )}
+          {step === 4 && <StepNSM prenomEnfant={prenomEnfant} onNext={handleNSM} />}
+          {step === 5 && <StepReady prenomEnfant={prenomEnfant} />}
         </div>
       </div>
     </main>
