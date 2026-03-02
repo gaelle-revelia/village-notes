@@ -30,6 +30,7 @@ export function IntervenantSelect({ enfantId, value, onChange }: IntervenantSele
       .from("intervenants")
       .select("id, nom, specialite")
       .eq("enfant_id", enfantId)
+      .eq("actif", true)
       .then(({ data }) => {
         if (data) setIntervenants(data);
       });
