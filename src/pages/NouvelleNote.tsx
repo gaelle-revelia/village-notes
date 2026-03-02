@@ -135,22 +135,15 @@ const NouvelleNote = () => {
   return (
     <div className="flex min-h-screen flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-10 px-4 py-3 flex items-center" style={glassHeader}>
-        <button
-          onClick={() => navigate("/timeline")}
-          className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Retour
+      <header className="sticky top-0 z-10 px-4 py-3 flex items-center gap-3" style={glassHeader}>
+        <button onClick={() => navigate("/timeline")} className="text-muted-foreground hover:text-foreground">
+          <ArrowLeft className="h-5 w-5" />
         </button>
+        <h1 className="text-xl font-semibold text-card-foreground">Nouvelle note</h1>
       </header>
 
       <main className="flex-1 px-4 pb-32">
         <div className="mx-auto max-w-[400px] space-y-6">
-          <h2 className="font-serif text-2xl font-semibold text-foreground text-center">
-            Nouvelle note
-          </h2>
-
           <div style={glassCard}>
             <MemoDatePicker date={memoDate} onDateChange={setMemoDate} />
           </div>
