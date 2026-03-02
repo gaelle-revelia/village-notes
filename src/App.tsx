@@ -26,6 +26,7 @@ import OutilsActivites from "./pages/OutilsActivites";
 import OutilsActiviteCreer from "./pages/OutilsActiviteCreer";
 import ExplorerScreen from "./pages/ExplorerScreen";
 import OnboardingInvite from "./pages/OnboardingInvite";
+import Vocabulaire from "./pages/Vocabulaire";
 import PlaceholderScreen from "./components/PlaceholderScreen";
 import NotFound from "./pages/NotFound";
 
@@ -58,6 +59,7 @@ const AppRoutes = () => {
       <Route path="/enfant" element={<ChildProfile />} />
       <Route path="/parametres" element={<AppSettings />} />
       <Route path="/onboarding-invite" element={<OnboardingInvite />} />
+      <Route path="/vocabulaire" element={<Vocabulaire />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
