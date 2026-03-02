@@ -95,6 +95,27 @@ const Onboarding = () => {
 
     setEnfantId(enfant.id);
     setPrenomEnfant(data.prenom);
+
+    // Generate phonetic variants for the child's first name (non-blocking)
+    try {
+      const { data: lexData } = await supabase.functions.invoke("generate-lexique", {
+        body: { mots: [data.prenom] },
+      });
+      const entries = lexData?.entries;
+      if (Array.isArray(entries) && entries.length > 0) {
+        await supabase.from("enfant_lexique").insert(
+          entries.map((e: { mot_transcrit: string }) => ({
+            enfant_id: enfant.id,
+            mot_transcrit: e.mot_transcrit,
+            mot_correct: data.prenom,
+            source: "onboarding_prenom",
+          }))
+        );
+      }
+    } catch {
+      // Silent failure — continue onboarding
+    }
+
     setStep(2);
   };
 
