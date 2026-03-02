@@ -52,6 +52,8 @@ const RecordMemo = () => {
 
     try {
       // Create memo row
+      const isTextMode = !audioBlob && textInput;
+
       const { data: memo, error: memoError } = await supabase
         .from("memos")
         .insert({
@@ -59,13 +61,13 @@ const RecordMemo = () => {
           enfant_id: enfantId,
           intervenant_id: intervenantId,
           processing_status: "pending",
+          type: isTextMode ? "note" : "vocal",
+          ...(isTextMode ? { transcription_raw: textInput } : {}),
         })
         .select("id")
         .single();
 
       if (memoError || !memo) throw new Error("Failed to create memo");
-
-      const isTextMode = !audioBlob && textInput;
 
       if (!isTextMode && audioBlob) {
         // Upload audio

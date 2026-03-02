@@ -29,6 +29,7 @@ export function IntervenantPicker({ enfantId, onSelect, onSkip, onTextMode }: In
       .from("intervenants")
       .select("id, nom, specialite")
       .eq("enfant_id", enfantId)
+      .eq("actif", true)
       .order("nom")
       .then(({ data }) => {
         setIntervenants(data || []);
