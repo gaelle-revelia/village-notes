@@ -111,8 +111,8 @@ export default function OutilsActiviteManuel() {
           enfant_id: enfantId,
           memo_date: dateStr,
           processing_status: "done",
-          transcription_raw: rawText,
-          content_structured: { resume: rawText, tags: [activite.domaine] },
+          transcription_raw: null,
+          content_structured: { resume: rawText, notes: notes || undefined, tags: [activite.domaine] },
         } as any),
       ]);
 
