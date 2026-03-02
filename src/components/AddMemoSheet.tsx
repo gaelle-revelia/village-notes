@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
-import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
+
 
 const DOMAIN_CONFIG: Record<string, { color: string; icon: typeof Activity }> = {
   Moteur: { color: "#E8736A", icon: Activity },
@@ -207,20 +207,20 @@ export default function AddMemoSheet({ open, onOpenChange, enfantId }: Props) {
         </DialogContent>
       </Dialog>
 
-      {/* Drawer chrono/manuel — exact same pattern as OutilsActivites */}
-      <Drawer open={!!selectedActivite} onOpenChange={(o) => !o && setSelectedActivite(null)}>
-        <DrawerContent>
-          <div className="pt-2 pb-6 flex flex-col gap-3" style={{ maxWidth: 400, margin: "0 auto", padding: "8px 20px 24px" }}>
-            <DrawerTitle className="text-base font-serif font-semibold text-foreground text-center">
+      {/* Dialog chrono/manuel — centered popup like activity selection */}
+      <Dialog open={!!selectedActivite} onOpenChange={(o) => !o && setSelectedActivite(null)}>
+        <DialogContent className="max-w-[340px] rounded-2xl p-0 border-none shadow-lg" hideClose={false}>
+          <div className="pt-5 pb-6 flex flex-col gap-3" style={{ padding: "20px 20px 24px" }}>
+            <DialogTitle className="text-base font-serif font-semibold text-foreground text-center">
               {selectedActivite?.nom}
-            </DrawerTitle>
+            </DialogTitle>
             <button
               onClick={() => { navigate(`/outils/activites/${selectedActivite!.id}/chrono`); setSelectedActivite(null); }}
               className="flex items-center gap-3 rounded-2xl transition-transform active:scale-[0.97]"
               style={{ ...glassCard, padding: "12px 14px" }}
             >
-              <div className="flex items-center justify-center rounded-xl shrink-0" style={{ width: 40, height: 40, background: "rgba(232,115,106,0.15)" }}>
-                <Timer size={20} color="#E8736A" />
+              <div className="flex items-center justify-center w-9 h-9 rounded-xl" style={{ background: "linear-gradient(135deg, #E8736A, #8B74E0)" }}>
+                <Timer className="h-5 w-5 text-white" />
               </div>
               <div className="flex flex-col text-left">
                 <span className="text-[14px] font-sans font-medium text-foreground">Lancer le chrono</span>
@@ -232,8 +232,8 @@ export default function AddMemoSheet({ open, onOpenChange, enfantId }: Props) {
               className="flex items-center gap-3 rounded-2xl transition-transform active:scale-[0.97]"
               style={{ ...glassCard, padding: "12px 14px" }}
             >
-              <div className="flex items-center justify-center rounded-xl shrink-0" style={{ width: 40, height: 40, background: "rgba(139,116,224,0.15)" }}>
-                <PenLine size={20} color="#8B74E0" />
+              <div className="flex items-center justify-center w-9 h-9 rounded-xl" style={{ background: "linear-gradient(135deg, #44A882, #5CA8D8)" }}>
+                <PenLine className="h-5 w-5 text-white" />
               </div>
               <div className="flex flex-col text-left">
                 <span className="text-[14px] font-sans font-medium text-foreground">Ajouter manuellement</span>
@@ -241,8 +241,8 @@ export default function AddMemoSheet({ open, onOpenChange, enfantId }: Props) {
               </div>
             </button>
           </div>
-        </DrawerContent>
-      </Drawer>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
