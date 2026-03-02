@@ -37,6 +37,7 @@ const Vocabulaire = () => {
   const [loading, setLoading] = useState(true);
   const [newWord, setNewWord] = useState("");
   const [addingWord, setAddingWord] = useState(false);
+  const [editingBlock, setEditingBlock] = useState<string | null>(null);
 
   const fetchLexique = useCallback(async () => {
     if (!enfantId) return;
@@ -95,6 +96,7 @@ const Vocabulaire = () => {
     const { error } = await supabase.from("enfant_lexique").delete().in("id", ids);
     if (!error) {
       setRows((prev) => prev.filter((r) => r.mot_correct !== motCorrect));
+      if (editingBlock === motCorrect) setEditingBlock(null);
     }
   };
 
@@ -112,6 +114,30 @@ const Vocabulaire = () => {
     }
   };
 
+  const removeVariant = async (id: string) => {
+    const { error } = await supabase.from("enfant_lexique").delete().eq("id", id);
+    if (!error) {
+      setRows((prev) => prev.filter((r) => r.id !== id));
+    }
+  };
+
+  const addVariant = async (motCorrect: string, motTranscrit: string) => {
+    if (!enfantId) return;
+    const { data, error } = await supabase
+      .from("enfant_lexique")
+      .insert({
+        enfant_id: enfantId,
+        mot_transcrit: motTranscrit,
+        mot_correct: motCorrect,
+        source: "manual",
+      })
+      .select("id, mot_transcrit, mot_correct, source")
+      .single();
+    if (!error && data) {
+      setRows((prev) => [...prev, data as LexiqueRow]);
+    }
+  };
+
   if (enfantLoading || loading) {
     return (
       <div
@@ -123,16 +149,29 @@ const Vocabulaire = () => {
     );
   }
 
-  // Filter: never show onboarding_prenom entries
   const visibleRows = rows.filter((r) => r.source !== "onboarding_prenom");
   const grouped = groupByMotCorrect(visibleRows);
 
-  // Split into sections
   const structureEntries = Array.from(grouped.entries()).filter(
     ([, { source }]) => source === "onboarding_structure"
   );
   const manualEntries = Array.from(grouped.entries()).filter(
     ([, { source }]) => source === "manual"
+  );
+
+  const renderBlock = (motCorrect: string, entries: LexiqueRow[]) => (
+    <VocabBlock
+      key={motCorrect}
+      motCorrect={motCorrect}
+      variantes={entries.map((e) => ({ id: e.id, mot_transcrit: e.mot_transcrit }))}
+      isEditing={editingBlock === motCorrect}
+      onStartEdit={() => setEditingBlock(motCorrect)}
+      onCancelEdit={() => setEditingBlock(null)}
+      onRemoveBlock={() => removeBlock(motCorrect)}
+      onRename={renameBlock}
+      onRemoveVariant={(id) => removeVariant(id)}
+      onAddVariant={(v) => addVariant(motCorrect, v)}
+    />
   );
 
   return (
@@ -160,8 +199,8 @@ const Vocabulaire = () => {
             <ArrowLeft className="h-5 w-5" />
           </button>
           <h1
-            className="text-lg font-semibold text-card-foreground"
-            style={{ fontFamily: "Fraunces" }}
+            className="text-lg font-semibold"
+            style={{ fontFamily: "Fraunces", color: "#1a1512" }}
           >
             Mon vocabulaire
           </h1>
@@ -220,15 +259,7 @@ const Vocabulaire = () => {
             >
               Lieux & structures
             </h2>
-            {structureEntries.map(([motCorrect, { entries }]) => (
-              <VocabBlock
-                key={motCorrect}
-                motCorrect={motCorrect}
-                variantes={entries.map((e) => e.mot_transcrit)}
-                onRemoveBlock={() => removeBlock(motCorrect)}
-                onRename={renameBlock}
-              />
-            ))}
+            {structureEntries.map(([motCorrect, { entries }]) => renderBlock(motCorrect, entries))}
           </div>
         )}
 
@@ -241,19 +272,10 @@ const Vocabulaire = () => {
             >
               Mots ajoutés
             </h2>
-            {manualEntries.map(([motCorrect, { entries }]) => (
-              <VocabBlock
-                key={motCorrect}
-                motCorrect={motCorrect}
-                variantes={entries.map((e) => e.mot_transcrit)}
-                onRemoveBlock={() => removeBlock(motCorrect)}
-                onRename={renameBlock}
-              />
-            ))}
+            {manualEntries.map(([motCorrect, { entries }]) => renderBlock(motCorrect, entries))}
           </div>
         )}
 
-        {/* Empty state */}
         {visibleRows.length === 0 && (
           <div className="text-center py-12">
             <p className="text-sm text-muted-foreground" style={{ fontFamily: "DM Sans" }}>
