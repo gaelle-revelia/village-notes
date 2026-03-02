@@ -283,8 +283,8 @@ const NouveauMemoVocal = () => {
                 onClick={isRecording ? stop : handleStartRecording}
                 className="flex items-center justify-center rounded-full transition-all"
                 style={{
-                  width: "64px",
-                  height: "64px",
+                  width: "80px",
+                  height: "80px",
                   background: isRecording
                     ? "hsl(var(--rouge-enregistrement))"
                     : "linear-gradient(135deg, #E8736A, #8B74E0)",
@@ -294,9 +294,9 @@ const NouveauMemoVocal = () => {
                 }}
               >
                 {isRecording ? (
-                  <Square className="h-7 w-7" fill="currentColor" />
+                  <Square className="h-8 w-8" fill="currentColor" />
                 ) : (
-                  <Mic className="h-7 w-7" />
+                  <Mic className="h-8 w-8" />
                 )}
               </button>
 
