@@ -1,0 +1,1 @@
+ALTER TABLE public.enfant_lexique ADD COLUMN source text NOT NULL DEFAULT 'manual';
