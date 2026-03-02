@@ -93,9 +93,6 @@ export function StepVocabulaire({
     setEntries((prev) => prev.filter((e) => e.mot_correct !== motCorrect));
   };
 
-  const removeVariant = (motCorrect: string, variant: string) => {
-    setEntries((prev) => prev.filter((e) => !(e.mot_correct === motCorrect && e.mot_transcrit === variant)));
-  };
 
   if (loading) {
     return (
@@ -135,7 +132,6 @@ export function StepVocabulaire({
               motCorrect={motCorrect}
               variantes={variantes}
               onRemoveBlock={() => removeBlock(motCorrect)}
-              onRemoveVariant={(v) => removeVariant(motCorrect, v)}
             />
           ))}
         </div>

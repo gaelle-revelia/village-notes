@@ -98,12 +98,17 @@ const Vocabulaire = () => {
     }
   };
 
-  const removeVariant = async (motCorrect: string, variant: string) => {
-    const row = rows.find((r) => r.mot_correct === motCorrect && r.mot_transcrit === variant);
-    if (!row) return;
-    const { error } = await supabase.from("enfant_lexique").delete().eq("id", row.id);
+  const renameBlock = async (oldName: string, newName: string) => {
+    if (!enfantId) return;
+    const ids = rows.filter((r) => r.mot_correct === oldName).map((r) => r.id);
+    const { error } = await supabase
+      .from("enfant_lexique")
+      .update({ mot_correct: newName })
+      .in("id", ids);
     if (!error) {
-      setRows((prev) => prev.filter((r) => r.id !== row.id));
+      setRows((prev) =>
+        prev.map((r) => (r.mot_correct === oldName ? { ...r, mot_correct: newName } : r))
+      );
     }
   };
 
@@ -221,7 +226,7 @@ const Vocabulaire = () => {
                 motCorrect={motCorrect}
                 variantes={entries.map((e) => e.mot_transcrit)}
                 onRemoveBlock={() => removeBlock(motCorrect)}
-                onRemoveVariant={(v) => removeVariant(motCorrect, v)}
+                onRename={renameBlock}
               />
             ))}
           </div>
@@ -242,7 +247,7 @@ const Vocabulaire = () => {
                 motCorrect={motCorrect}
                 variantes={entries.map((e) => e.mot_transcrit)}
                 onRemoveBlock={() => removeBlock(motCorrect)}
-                onRemoveVariant={(v) => removeVariant(motCorrect, v)}
+                onRename={renameBlock}
               />
             ))}
           </div>
