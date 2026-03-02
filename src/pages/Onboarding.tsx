@@ -48,10 +48,23 @@ const Onboarding = () => {
       .select("id")
       .single();
 
+    if (error) {
+      setSaving(false);
+      toast({ title: "Erreur", description: "Impossible de sauvegarder. Réessayez.", variant: "destructive" });
+      return;
+    }
+
+    // Create enfant_membres entry so RLS policies work for subsequent steps
+    const { error: membreError } = await supabase.from("enfant_membres").insert({
+      enfant_id: enfant.id,
+      user_id: user.id,
+      role: "owner",
+    });
+
     setSaving(false);
 
-    if (error) {
-      toast({ title: "Erreur", description: "Impossible de sauvegarder. Réessayez.", variant: "destructive" });
+    if (membreError) {
+      toast({ title: "Erreur", description: "Impossible de finaliser la configuration.", variant: "destructive" });
       return;
     }
 
