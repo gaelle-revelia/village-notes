@@ -27,6 +27,7 @@ interface StructuredContent {
   resume?: string;
   details?: string[];
   suggestions?: string[];
+  a_retenir?: string[];
   tags?: string[];
   intervenant_detected?: string | null;
   points_cles?: string[];
@@ -367,7 +368,8 @@ const MemoResult = () => {
   const saveSuggestions = () => {
     if (!memo) return;
     const items = tempSuggestions.split("\n").filter(l => l.trim());
-    const updatedStructured = { ...(memo.content_structured || {}), suggestions: items };
+    const { suggestions: _removed, ...rest } = (memo.content_structured || {}) as any;
+    const updatedStructured = { ...rest, a_retenir: items };
     autoSave({ content_structured: updatedStructured });
     setEditingField(null);
   };
@@ -407,7 +409,8 @@ const MemoResult = () => {
   };
 
   const startEditSuggestions = () => {
-    setTempSuggestions((memo?.content_structured?.suggestions || []).join("\n"));
+    const items = memo?.content_structured?.a_retenir || memo?.content_structured?.suggestions || [];
+    setTempSuggestions(items.join("\n"));
     setEditingField("suggestions");
     setTimeout(() => suggestionsRef.current?.focus(), 50);
   };
@@ -432,7 +435,7 @@ const MemoResult = () => {
   const readOnly = role === "famille";
   const structured = memo.content_structured;
   const details = structured?.details || structured?.points_cles || [];
-  const suggestions = structured?.suggestions || [];
+  const suggestions = structured?.a_retenir || structured?.suggestions || [];
   const tags = structured?.tags || [];
   const intervenantData = memo.intervenants as any;
   const intervenantName = intervenantData?.nom || null;
