@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -170,6 +171,17 @@ const Onboarding = () => {
               onNext={handleVocabulaire}
               onSkip={() => setStep(4)}
             />
+          )}
+          {step === 3 && !enfantId && (
+            <div className="flex flex-col items-center justify-center gap-4 text-center">
+              <p className="text-muted-foreground">Une erreur est survenue. Veuillez recommencer.</p>
+              <Button
+                onClick={() => { setStep(1); setEnfantId(null); setPrenomEnfant(""); }}
+                className="rounded-xl"
+              >
+                Recommencer
+              </Button>
+            </div>
           )}
           {step === 4 && <StepNSM prenomEnfant={prenomEnfant} onNext={handleNSM} />}
           {step === 5 && <StepReady prenomEnfant={prenomEnfant} />}
