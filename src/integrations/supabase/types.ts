@@ -68,6 +68,7 @@ export type Database = {
           id: string
           mot_correct: string
           mot_transcrit: string
+          source: string
         }
         Insert: {
           created_at?: string | null
@@ -75,6 +76,7 @@ export type Database = {
           id?: string
           mot_correct: string
           mot_transcrit: string
+          source?: string
         }
         Update: {
           created_at?: string | null
@@ -82,6 +84,7 @@ export type Database = {
           id?: string
           mot_correct?: string
           mot_transcrit?: string
+          source?: string
         }
         Relationships: [
           {

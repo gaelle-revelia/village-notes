@@ -120,7 +120,7 @@ const Onboarding = () => {
   };
 
   const handleVocabulaire = async (
-    entries: Array<{ mot_transcrit: string; mot_correct: string }>
+    entries: Array<{ mot_transcrit: string; mot_correct: string; source: string }>
   ) => {
     if (entries.length > 0 && enfantId) {
       setSaving(true);
@@ -129,6 +129,7 @@ const Onboarding = () => {
           enfant_id: enfantId,
           mot_transcrit: e.mot_transcrit,
           mot_correct: e.mot_correct,
+          source: e.source || "manual",
         }))
       );
       setSaving(false);

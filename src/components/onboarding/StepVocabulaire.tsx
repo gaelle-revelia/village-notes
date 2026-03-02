@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { X, Plus, Loader2 } from "lucide-react";
+import { Plus, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { VoiceBanner } from "@/components/vocabulaire/VoiceBanner";
+import { VocabBlock } from "@/components/vocabulaire/VocabBlock";
 
 interface LexiqueEntry {
   mot_transcrit: string;
   mot_correct: string;
+  source: string;
 }
 
 interface StepVocabulaireProps {
@@ -15,6 +18,22 @@ interface StepVocabulaireProps {
   intervenants: Array<{ nom: string; specialite?: string; structure?: string }>;
   onNext: (entries: LexiqueEntry[]) => void;
   onSkip: () => void;
+}
+
+/** Group entries by mot_correct */
+function groupByMotCorrect(entries: LexiqueEntry[]) {
+  const map = new Map<string, { source: string; variantes: string[] }>();
+  for (const e of entries) {
+    const existing = map.get(e.mot_correct);
+    if (existing) {
+      if (!existing.variantes.includes(e.mot_transcrit)) {
+        existing.variantes.push(e.mot_transcrit);
+      }
+    } else {
+      map.set(e.mot_correct, { source: e.source, variantes: [e.mot_transcrit] });
+    }
+  }
+  return map;
 }
 
 export function StepVocabulaire({
@@ -26,9 +45,8 @@ export function StepVocabulaire({
 }: StepVocabulaireProps) {
   const [entries, setEntries] = useState<LexiqueEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
-  const [newTranscrit, setNewTranscrit] = useState("");
-  const [newCorrect, setNewCorrect] = useState("");
+  const [newWord, setNewWord] = useState("");
+  const [addingWord, setAddingWord] = useState(false);
 
   useEffect(() => {
     const generate = async () => {
@@ -41,34 +59,42 @@ export function StepVocabulaire({
           setEntries(data.entries);
         }
       } catch {
-        // silent — show empty state
+        // silent
       } finally {
         setLoading(false);
       }
     };
-
     generate();
   }, [prenomEnfant, intervenants]);
 
-  const removeEntry = (index: number) => {
-    setEntries((prev) => prev.filter((_, i) => i !== index));
+  const addManualWord = async () => {
+    const word = newWord.trim();
+    if (!word) return;
+    setAddingWord(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-lexique", {
+        body: { mots: [word] },
+      });
+      if (!error && data?.entries?.length > 0) {
+        setEntries((prev) => [...prev, ...data.entries]);
+      } else {
+        // Fallback: add entry without AI variantes
+        setEntries((prev) => [...prev, { mot_transcrit: word, mot_correct: word, source: "manual" }]);
+      }
+    } catch {
+      setEntries((prev) => [...prev, { mot_transcrit: word, mot_correct: word, source: "manual" }]);
+    } finally {
+      setNewWord("");
+      setAddingWord(false);
+    }
   };
 
-  const updateEntry = (index: number, field: keyof LexiqueEntry, value: string) => {
-    setEntries((prev) =>
-      prev.map((e, i) => (i === index ? { ...e, [field]: value } : e))
-    );
+  const removeBlock = (motCorrect: string) => {
+    setEntries((prev) => prev.filter((e) => e.mot_correct !== motCorrect));
   };
 
-  const addEntry = () => {
-    if (!newTranscrit.trim() || !newCorrect.trim()) return;
-    setEntries((prev) => [
-      ...prev,
-      { mot_transcrit: newTranscrit.trim(), mot_correct: newCorrect.trim() },
-    ]);
-    setNewTranscrit("");
-    setNewCorrect("");
-    setShowForm(false);
+  const removeVariant = (motCorrect: string, variant: string) => {
+    setEntries((prev) => prev.filter((e) => !(e.mot_correct === motCorrect && e.mot_transcrit === variant)));
   };
 
   if (loading) {
@@ -80,115 +106,78 @@ export function StepVocabulaire({
     );
   }
 
+  // Filter: only show structure + manual entries; prenom entries are hidden
+  const visibleEntries = entries.filter((e) => e.source !== "onboarding_prenom");
+  const grouped = groupByMotCorrect(visibleEntries);
+
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <h1 className="text-[32px] font-semibold text-card-foreground leading-tight">
+        <h1
+          className="text-[32px] font-semibold text-card-foreground leading-tight"
+          style={{ fontFamily: "Fraunces" }}
+        >
           Des mots qui vous appartiennent
         </h1>
-        <p className="text-muted-foreground text-sm leading-relaxed">
-          Nous avons repéré des mots spécifiques à votre quotidien. Vérifiez-les et
-          ajoutez ceux que nous aurions manqués — vos notes vocales n'en seront que
-          plus fidèles.
+        <p className="text-muted-foreground text-sm leading-relaxed" style={{ fontFamily: "DM Sans" }}>
+          Nous avons repéré des noms de lieux et structures liés à votre parcours.
+          Vérifiez-les et ajoutez vos propres mots — vos notes vocales n'en seront que plus fidèles.
         </p>
       </div>
 
-      {entries.length > 0 && (
+      <VoiceBanner />
+
+      {grouped.size > 0 && (
         <div className="space-y-2">
-          {entries.map((entry, i) => (
-            <div
-              key={i}
-              className="flex items-center gap-2 rounded-xl border bg-card px-4 py-3"
-            >
-              <Input
-                value={entry.mot_transcrit}
-                onChange={(e) => updateEntry(i, "mot_transcrit", e.target.value)}
-                className="flex-1 rounded-lg border-0 bg-transparent px-0 text-sm text-muted-foreground focus-visible:ring-0"
-                placeholder="Variante"
-              />
-              <span className="text-muted-foreground text-xs shrink-0">→</span>
-              <Input
-                value={entry.mot_correct}
-                onChange={(e) => updateEntry(i, "mot_correct", e.target.value)}
-                className="flex-1 rounded-lg border-0 bg-transparent px-0 text-sm font-medium text-card-foreground focus-visible:ring-0"
-                placeholder="Correct"
-              />
-              <button
-                onClick={() => removeEntry(i)}
-                className="text-muted-foreground hover:text-destructive p-1 shrink-0"
-                aria-label="Supprimer"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
+          {Array.from(grouped.entries()).map(([motCorrect, { variantes }]) => (
+            <VocabBlock
+              key={motCorrect}
+              motCorrect={motCorrect}
+              variantes={variantes}
+              onRemoveBlock={() => removeBlock(motCorrect)}
+              onRemoveVariant={(v) => removeVariant(motCorrect, v)}
+            />
           ))}
         </div>
       )}
 
-      {entries.length === 0 && !showForm && (
+      {grouped.size === 0 && (
         <p className="text-center text-sm text-muted-foreground py-4">
-          Aucun mot détecté. Ajoutez vos propres correspondances ci-dessous.
+          Aucun mot détecté. Ajoutez vos propres mots ci-dessous.
         </p>
       )}
 
-      {showForm ? (
-        <div className="space-y-3 rounded-xl border bg-card p-4">
-          <div className="flex gap-2">
-            <Input
-              value={newTranscrit}
-              onChange={(e) => setNewTranscrit(e.target.value)}
-              placeholder="Ce que vous dites"
-              className="flex-1 rounded-lg"
-              autoFocus
-            />
-            <Input
-              value={newCorrect}
-              onChange={(e) => setNewCorrect(e.target.value)}
-              placeholder="Ce qu'il faut écrire"
-              className="flex-1 rounded-lg"
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  addEntry();
-                }
-              }}
-            />
-          </div>
-          <div className="flex gap-2">
-            <Button
-              onClick={addEntry}
-              disabled={!newTranscrit.trim() || !newCorrect.trim()}
-              className="flex-1 rounded-xl"
-            >
-              Ajouter
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowForm(false);
-                setNewTranscrit("");
-                setNewCorrect("");
-              }}
-              className="rounded-xl"
-            >
-              Annuler
-            </Button>
-          </div>
-        </div>
-      ) : (
-        <button
-          onClick={() => setShowForm(true)}
-          className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border py-3 text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+      {/* Add word input */}
+      <div className="flex gap-2">
+        <Input
+          value={newWord}
+          onChange={(e) => setNewWord(e.target.value)}
+          placeholder="Ajouter un mot (ex: Motilo)"
+          className="flex-1 rounded-xl"
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              addManualWord();
+            }
+          }}
+          disabled={addingWord}
+        />
+        <Button
+          onClick={addManualWord}
+          disabled={!newWord.trim() || addingWord}
+          size="icon"
+          className="rounded-xl shrink-0"
+          style={{ background: "linear-gradient(135deg, #E8736A, #8B74E0)" }}
         >
-          <Plus className="h-4 w-4" />
-          Ajouter un mot
-        </button>
-      )}
+          <Plus className="h-4 w-4 text-white" />
+        </Button>
+      </div>
 
       <div className="space-y-3 pt-2">
         <Button
           onClick={() => onNext(entries)}
           className="w-full rounded-xl h-12 text-base"
+          style={{ background: "linear-gradient(135deg, #E8736A, #8B74E0)" }}
         >
           Continuer
         </Button>

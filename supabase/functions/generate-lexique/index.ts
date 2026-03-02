@@ -14,7 +14,6 @@ serve(async (req) => {
   }
 
   try {
-    // Auth check
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -23,19 +22,29 @@ serve(async (req) => {
       });
     }
 
-    const { prenom_enfant, intervenants = [] } = await req.json();
+    const body = await req.json();
+    const { prenom_enfant, intervenants = [], mots } = body;
 
-    if (!prenom_enfant) {
-      return new Response(JSON.stringify({ error: "prenom_enfant required" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    // Validation: at least one mode must be provided
+    if (!prenom_enfant && (!mots || !Array.isArray(mots) || mots.length === 0)) {
+      return new Response(
+        JSON.stringify({ error: "prenom_enfant or mots[] required" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
-    const userPrompt = `Voici le prénom d'un enfant et une liste d'intervenants avec leur structure. Pour chaque terme propre (prénom, nom, structure/lieu), génère 2 à 3 variantes phonétiques probables telles qu'un moteur de transcription vocale française pourrait les produire incorrectement. Inclus les variantes avec et sans accents, les erreurs de découpage syllabique, les homophonies courantes. Données : prénom enfant = ${prenom_enfant}, intervenants = ${JSON.stringify(intervenants)}. Format de réponse : [{ "mot_transcrit": "variante incorrecte", "mot_correct": "terme exact" }]`;
+    let userPrompt: string;
+
+    if (mots && Array.isArray(mots) && mots.length > 0) {
+      // Manual mode
+      userPrompt = `Voici une liste de mots ou noms propres utilisés dans le contexte médico-thérapeutique d'un enfant. Pour chaque terme, génère 2 à 3 variantes phonétiques probables telles qu'un moteur de transcription vocale française pourrait les produire incorrectement. Inclus les variantes avec et sans accents, les erreurs de découpage syllabique, les homophonies courantes. Mots : ${JSON.stringify(mots)}. Format de réponse : [{ "mot_transcrit": "variante incorrecte", "mot_correct": "terme exact", "source": "manual" }]`;
+    } else {
+      // Onboarding mode
+      userPrompt = `Voici le prénom d'un enfant et une liste d'intervenants avec leur structure. Pour chaque terme propre (prénom, nom, structure/lieu), génère 2 à 3 variantes phonétiques probables telles qu'un moteur de transcription vocale française pourrait les produire incorrectement. Inclus les variantes avec et sans accents, les erreurs de découpage syllabique, les homophonies courantes. Données : prénom enfant = ${prenom_enfant}, intervenants = ${JSON.stringify(intervenants)}. Format de réponse : [{ "mot_transcrit": "variante incorrecte", "mot_correct": "terme exact", "source": "onboarding_prenom" ou "onboarding_structure" selon que le terme vient du prénom de l'enfant ou d'un intervenant/structure }]`;
+    }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -76,7 +85,7 @@ serve(async (req) => {
     const data = await response.json();
     const raw = (data.choices?.[0]?.message?.content ?? "[]").trim();
 
-    let entries = [];
+    let entries: Array<{ mot_transcrit: string; mot_correct: string; source?: string }> = [];
     try {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed)) {
@@ -85,6 +94,13 @@ serve(async (req) => {
     } catch {
       console.error("Failed to parse AI response:", raw);
     }
+
+    // Ensure source field is always set
+    const defaultSource = mots ? "manual" : "onboarding_prenom";
+    entries = entries.map((e) => ({
+      ...e,
+      source: e.source || defaultSource,
+    }));
 
     return new Response(JSON.stringify({ entries }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
