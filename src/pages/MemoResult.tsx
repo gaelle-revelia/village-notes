@@ -516,8 +516,8 @@ const MemoResult = () => {
         <div className="mx-auto max-w-[400px] space-y-5">
 
           {memo.type === "activite" ? (() => {
-            // Parse transcription_raw: "{nom} — {MM:SS} / {distance}"
-            const raw = memo.transcription_raw || "";
+            // Parse from content_structured.resume (new) or transcription_raw (legacy)
+            const raw = structured?.resume || memo.transcription_raw || "";
             const dashParts = raw.split("—").map((s) => s.trim());
             const activityName = dashParts[0] || "Activité";
             let durationStr = "—";
@@ -544,8 +544,8 @@ const MemoResult = () => {
 
             const noteText = (structured as any)?.notes as string | undefined;
 
-            // Helper to rebuild transcription_raw
-            const rebuildRaw = (name: string, dur: string, dist: string) =>
+            // Helper to rebuild content_structured.resume
+            const rebuildResume = (name: string, dur: string, dist: string) =>
             `${name} — ${dur} / ${dist}`;
 
             // Save helpers with feedback
@@ -562,13 +562,14 @@ const MemoResult = () => {
             };
 
             const saveDuration = async (newDur: string) => {
-              const newRaw = rebuildRaw(activityName, newDur, distanceStr);
+              const newResume = rebuildResume(activityName, newDur, distanceStr);
               // Parse MM:SS to seconds
               const parts = newDur.split(":").map(Number);
               const secs = parts.length === 2 ? (parts[0] || 0) * 60 + (parts[1] || 0) : null;
 
+              const updatedStructured = { ...(memo.content_structured || {}), resume: newResume };
               const updates: PromiseLike<any>[] = [
-              supabase.from("memos").update({ transcription_raw: newRaw }).eq("id", memo.id).then()];
+              supabase.from("memos").update({ content_structured: updatedStructured }).eq("id", memo.id).then()];
 
               if (secs !== null && memo.enfant_id) {
                 updates.push(
@@ -583,11 +584,12 @@ const MemoResult = () => {
             };
 
             const saveDistance = async (newDist: string) => {
-              const newRaw = rebuildRaw(activityName, durationStr, newDist);
+              const newResume = rebuildResume(activityName, durationStr, newDist);
               const distNum = parseFloat(newDist) || null;
 
+              const updatedStructured = { ...(memo.content_structured || {}), resume: newResume };
               const updates: PromiseLike<any>[] = [
-              supabase.from("memos").update({ transcription_raw: newRaw }).eq("id", memo.id).then()];
+              supabase.from("memos").update({ content_structured: updatedStructured }).eq("id", memo.id).then()];
 
               if (distNum !== null && memo.enfant_id) {
                 updates.push(
