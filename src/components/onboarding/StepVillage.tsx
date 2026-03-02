@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 interface Intervenant {
   nom: string;
   specialite: string;
+  structure?: string;
 }
 
 interface StepVillageProps {
@@ -21,6 +22,7 @@ export function StepVillage({ prenomEnfant, onNext, onSkip }: StepVillageProps) 
   const [nom, setNom] = useState("");
   const [specialite, setSpecialite] = useState("");
   const [showForm, setShowForm] = useState(false);
+  const [structure, setStructure] = useState("");
   const [showAutreInput, setShowAutreInput] = useState(false);
   const [autreValue, setAutreValue] = useState("");
   const [defaultSpecialties, setDefaultSpecialties] = useState<string[]>([]);
@@ -83,9 +85,10 @@ export function StepVillage({ prenomEnfant, onNext, onSkip }: StepVillageProps) 
 
   const addIntervenant = () => {
     if (!nom.trim()) return;
-    setIntervenants([...intervenants, { nom: nom.trim(), specialite }]);
+    setIntervenants([...intervenants, { nom: nom.trim(), specialite, structure: structure.trim() || undefined }]);
     setNom("");
     setSpecialite("");
+    setStructure("");
     setShowForm(false);
   };
 
@@ -113,6 +116,9 @@ export function StepVillage({ prenomEnfant, onNext, onSkip }: StepVillageProps) 
                 <p className="font-medium text-card-foreground">{int.nom}</p>
                 {int.specialite && (
                   <p className="text-sm text-muted-foreground">{int.specialite}</p>
+                )}
+                {int.structure && (
+                  <p className="text-xs text-muted-foreground">{int.structure}</p>
                 )}
               </div>
               <button
@@ -194,6 +200,17 @@ export function StepVillage({ prenomEnfant, onNext, onSkip }: StepVillageProps) 
               </div>
             )}
           </div>
+          <div className="space-y-2">
+            <Label htmlFor="int-structure">Cabinet ou centre (optionnel)</Label>
+            <Input
+              id="int-structure"
+              value={structure}
+              onChange={(e) => setStructure(e.target.value)}
+              className="rounded-lg"
+              maxLength={150}
+              placeholder="Ex : CAMPS de Brest, Cabinet Quimper..."
+            />
+          </div>
           <div className="flex gap-2 pt-2">
             <Button
               onClick={addIntervenant}
@@ -204,7 +221,7 @@ export function StepVillage({ prenomEnfant, onNext, onSkip }: StepVillageProps) 
             </Button>
             <Button
               variant="outline"
-              onClick={() => { setShowForm(false); setNom(""); setSpecialite(""); }}
+              onClick={() => { setShowForm(false); setNom(""); setSpecialite(""); setStructure(""); }}
               className="rounded-xl"
             >
               Annuler

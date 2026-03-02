@@ -19,7 +19,7 @@ const Onboarding = () => {
   const [enfantId, setEnfantId] = useState<string | null>(null);
   const [prenomEnfant, setPrenomEnfant] = useState("");
   const [villageIntervenants, setVillageIntervenants] = useState<
-    Array<{ nom: string; specialite: string }>
+    Array<{ nom: string; specialite: string; structure?: string }>
   >([]);
   const [saving, setSaving] = useState(false);
 
@@ -73,7 +73,7 @@ const Onboarding = () => {
     setStep(2);
   };
 
-  const handleVillage = async (intervenants: { nom: string; specialite: string }[]) => {
+  const handleVillage = async (intervenants: { nom: string; specialite: string; structure?: string }[]) => {
     if (intervenants.length > 0 && enfantId) {
       setSaving(true);
       const { error } = await supabase.from("intervenants").insert(
@@ -81,6 +81,7 @@ const Onboarding = () => {
           enfant_id: enfantId,
           nom: i.nom,
           specialite: i.specialite || null,
+          structure: i.structure || null,
         }))
       );
       setSaving(false);
