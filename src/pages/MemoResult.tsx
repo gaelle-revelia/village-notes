@@ -15,12 +15,12 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+  AlertDialogTitle } from
+"@/components/ui/alert-dialog";
 import {
   Dialog,
-  DialogContent,
-} from "@/components/ui/dialog";
+  DialogContent } from
+"@/components/ui/dialog";
 
 // --- Types ---
 interface StructuredContent {
@@ -43,7 +43,7 @@ interface MemoData {
   intervenant_id: string | null;
   enfant_id: string | null;
   file_url: string | null;
-  intervenants?: { nom: string; specialite: string | null } | null;
+  intervenants?: {nom: string;specialite: string | null;} | null;
 }
 
 interface Intervenant {
@@ -54,37 +54,37 @@ interface Intervenant {
 
 // --- Domain system ---
 const DOMAINS = [
-  { key: "moteur", label: "Moteur", color: "#E8736A", keywords: ["moteur", "motricite", "motricité", "kine", "kiné", "physique", "kinésithérapie"] },
-  { key: "cognitif", label: "Cognitif", color: "#8B74E0", keywords: ["cognitif", "psychomoteur", "psychomotricite", "psychomotricité"] },
-  { key: "sensoriel", label: "Sensoriel", color: "#44A882", keywords: ["sensoriel", "communication", "langage", "orthophonie"] },
-  { key: "bien-etre", label: "Bien-être", color: "#E8A44A", keywords: ["bien-etre", "bien-être", "emotionnel", "émotionnel", "sommeil", "alimentation"] },
-  { key: "medical", label: "Médical", color: "#8A9BAE", keywords: ["medical", "médical", "administratif"] },
-];
+{ key: "moteur", label: "Moteur", color: "#E8736A", keywords: ["moteur", "motricite", "motricité", "kine", "kiné", "physique", "kinésithérapie"] },
+{ key: "cognitif", label: "Cognitif", color: "#8B74E0", keywords: ["cognitif", "psychomoteur", "psychomotricite", "psychomotricité"] },
+{ key: "sensoriel", label: "Sensoriel", color: "#44A882", keywords: ["sensoriel", "communication", "langage", "orthophonie"] },
+{ key: "bien-etre", label: "Bien-être", color: "#E8A44A", keywords: ["bien-etre", "bien-être", "emotionnel", "émotionnel", "sommeil", "alimentation"] },
+{ key: "medical", label: "Médical", color: "#8A9BAE", keywords: ["medical", "médical", "administratif"] }];
+
 
 const DOMAIN_INFO = [
-  { label: "Moteur & physique", color: "#E8736A", desc: "Tout ce qui touche au corps : tonus, posture, motricité, déplacements" },
-  { label: "Cognitif & psychomoteur", color: "#8B74E0", desc: "Compréhension, attention, mémoire, coordination gestes-pensée" },
-  { label: "Sensoriel & communication", color: "#44A882", desc: "Réactions aux sons, au toucher, au regard, langage et expression" },
-  { label: "Bien-être & émotionnel", color: "#E8A44A", desc: "Humeur, fatigue, sommeil, appétit, confort au quotidien" },
-  { label: "Médical & administratif", color: "#8A9BAE", desc: "Rendez-vous médicaux, bilans, MDPH, matériel" },
-];
+{ label: "Moteur & physique", color: "#E8736A", desc: "Tout ce qui touche au corps : tonus, posture, motricité, déplacements" },
+{ label: "Cognitif & psychomoteur", color: "#8B74E0", desc: "Compréhension, attention, mémoire, coordination gestes-pensée" },
+{ label: "Sensoriel & communication", color: "#44A882", desc: "Réactions aux sons, au toucher, au regard, langage et expression" },
+{ label: "Bien-être & émotionnel", color: "#E8A44A", desc: "Humeur, fatigue, sommeil, appétit, confort au quotidien" },
+{ label: "Médical & administratif", color: "#8A9BAE", desc: "Rendez-vous médicaux, bilans, MDPH, matériel" }];
+
 
 function isDomainActive(domainKey: string, tags: string[]): boolean {
-  const domain = DOMAINS.find(d => d.key === domainKey);
+  const domain = DOMAINS.find((d) => d.key === domainKey);
   if (!domain) return false;
-  return tags.some(t => domain.keywords.some(kw => t.toLowerCase().includes(kw)));
+  return tags.some((t) => domain.keywords.some((kw) => t.toLowerCase().includes(kw)));
 }
 
 function getDomainColor(tag: string): string {
   const lower = tag.toLowerCase();
   for (const d of DOMAINS) {
-    if (d.keywords.some(kw => lower.includes(kw))) return d.color;
+    if (d.keywords.some((kw) => lower.includes(kw))) return d.color;
   }
   return "#8A9BAE";
 }
 
 // --- Intervenant avatar system ---
-const SPECIALITE_AVATARS: Record<string, { icon: typeof Activity; gradient: string }> = {
+const SPECIALITE_AVATARS: Record<string, {icon: typeof Activity;gradient: string;}> = {
   kiné: { icon: Activity, gradient: "linear-gradient(135deg, #E8736A, #E8845A)" },
   kinésithérapeute: { icon: Activity, gradient: "linear-gradient(135deg, #E8736A, #E8845A)" },
   psychomotric: { icon: Brain, gradient: "linear-gradient(135deg, #8B74E0, #5CA8D8)" },
@@ -100,10 +100,10 @@ const SPECIALITE_AVATARS: Record<string, { icon: typeof Activity; gradient: stri
   médecin: { icon: Stethoscope, gradient: "linear-gradient(135deg, #8A9BAE, #6B7F94)" },
   mpr: { icon: Stethoscope, gradient: "linear-gradient(135deg, #8A9BAE, #6B7F94)" },
   orthophoniste: { icon: MessageCircle, gradient: "linear-gradient(135deg, #44A882, #4E96C8)" },
-  piscine: { icon: Waves, gradient: "linear-gradient(135deg, #44A882, #4E96C8)" },
+  piscine: { icon: Waves, gradient: "linear-gradient(135deg, #44A882, #4E96C8)" }
 };
 
-function getSpecialiteAvatar(specialite: string | null): { icon: typeof Activity; gradient: string } {
+function getSpecialiteAvatar(specialite: string | null): {icon: typeof Activity;gradient: string;} {
   const s = (specialite || "").toLowerCase();
   for (const [key, val] of Object.entries(SPECIALITE_AVATARS)) {
     if (s.includes(key)) return val;
@@ -119,7 +119,7 @@ const glassCard: React.CSSProperties = {
   border: "1px solid rgba(255, 255, 255, 0.72)",
   borderRadius: 16,
   padding: "16px 20px",
-  boxShadow: "0 4px 16px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8)",
+  boxShadow: "0 4px 16px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8)"
 };
 
 const sectionLabel: React.CSSProperties = {
@@ -128,11 +128,11 @@ const sectionLabel: React.CSSProperties = {
   textTransform: "uppercase" as const,
   letterSpacing: "0.08em",
   color: "#9A9490",
-  marginBottom: 8,
+  marginBottom: 8
 };
 
 const MemoResult = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams<{id: string;}>();
   const { user, loading: authLoading } = useAuth();
   const { enfantId, role } = useEnfantId();
   const navigate = useNavigate();
@@ -144,7 +144,7 @@ const MemoResult = () => {
   // Swipe navigation between memos
   const [memoIds, setMemoIds] = useState<string[]>([]);
   const [swipeFade, setSwipeFade] = useState(false);
-  const swipeStart = useRef<{ x: number; y: number } | null>(null);
+  const swipeStart = useRef<{x: number;y: number;} | null>(null);
 
   // Per-field editing
   const [editingField, setEditingField] = useState<string | null>(null);
@@ -173,16 +173,16 @@ const MemoResult = () => {
   // --- Data fetching ---
   const fetchMemo = useCallback(async () => {
     if (!id || !user) return;
-    const { data } = await supabase
-      .from("memos")
-      .select("id, memo_date, type, content_structured, transcription_raw, intervenant_id, enfant_id, file_url, intervenants(nom, specialite)")
-      .eq("id", id)
-      .single();
+    const { data } = await supabase.
+    from("memos").
+    select("id, memo_date, type, content_structured, transcription_raw, intervenant_id, enfant_id, file_url, intervenants(nom, specialite)").
+    eq("id", id).
+    single();
     if (data) setMemo(data as any);
     setLoading(false);
   }, [id, user]);
 
-  useEffect(() => { fetchMemo(); }, [fetchMemo]);
+  useEffect(() => {fetchMemo();}, [fetchMemo]);
 
   // Generate signed URL for document files
   useEffect(() => {
@@ -194,12 +194,12 @@ const MemoResult = () => {
     const match = memo.file_url.match(/\/voice-memos\/(.+)$/);
     if (!match) return;
     const storagePath = match[1];
-    supabase.storage
-      .from("voice-memos")
-      .createSignedUrl(storagePath, 3600) // 1h
-      .then(({ data }) => {
-        if (data?.signedUrl) setSignedFileUrl(data.signedUrl);
-      });
+    supabase.storage.
+    from("voice-memos").
+    createSignedUrl(storagePath, 3600) // 1h
+    .then(({ data }) => {
+      if (data?.signedUrl) setSignedFileUrl(data.signedUrl);
+    });
   }, [memo?.id, memo?.type, memo?.file_url]);
 
   // Fade in when memo changes
@@ -209,27 +209,27 @@ const MemoResult = () => {
 
   useEffect(() => {
     if (!enfantId) return;
-    supabase
-      .from("intervenants")
-      .select("id, nom, specialite")
-      .eq("enfant_id", enfantId)
-      .eq("actif", true)
-      .order("nom")
-      .then(({ data }) => setIntervenants(data || []));
+    supabase.
+    from("intervenants").
+    select("id, nom, specialite").
+    eq("enfant_id", enfantId).
+    eq("actif", true).
+    order("nom").
+    then(({ data }) => setIntervenants(data || []));
   }, [enfantId]);
 
   // Fetch ordered memo IDs for swipe navigation
   useEffect(() => {
     if (!user) return;
-    supabase
-      .from("memos")
-      .select("id")
-      
-      .order("memo_date", { ascending: true })
-      .order("created_at", { ascending: true })
-      .then(({ data }) => {
-        if (data) setMemoIds(data.map((m) => m.id));
-      });
+    supabase.
+    from("memos").
+    select("id").
+
+    order("memo_date", { ascending: true }).
+    order("created_at", { ascending: true }).
+    then(({ data }) => {
+      if (data) setMemoIds(data.map((m) => m.id));
+    });
   }, [user]);
 
   // Swipe touch handler for memo navigation
@@ -283,14 +283,14 @@ const MemoResult = () => {
         // Cascade: delete matching session_activite + memo in parallel
         const memoDate = memo.memo_date; // format YYYY-MM-DD
         const [sessionRes, memoRes] = await Promise.all([
-          supabase
-            .from("sessions_activite")
-            .delete()
-            .eq("enfant_id", memo.enfant_id)
-            .gte("created_at", `${memoDate}T00:00:00`)
-            .lt("created_at", `${memoDate}T23:59:59.999`),
-          supabase.from("memos").delete().eq("id", memo.id),
-        ]);
+        supabase.
+        from("sessions_activite").
+        delete().
+        eq("enfant_id", memo.enfant_id).
+        gte("created_at", `${memoDate}T00:00:00`).
+        lt("created_at", `${memoDate}T23:59:59.999`),
+        supabase.from("memos").delete().eq("id", memo.id)]
+        );
         if (sessionRes.error) console.error("Delete session error:", sessionRes.error);
         if (memoRes.error) {
           toast({ title: "Erreur", description: "Impossible de supprimer.", variant: "destructive" });
@@ -332,13 +332,13 @@ const MemoResult = () => {
   const handleDomainToggle = (domainKey: string) => {
     if (!memo) return;
     const tags = [...(memo.content_structured?.tags || [])];
-    const domain = DOMAINS.find(d => d.key === domainKey)!;
+    const domain = DOMAINS.find((d) => d.key === domainKey)!;
     const active = isDomainActive(domainKey, tags);
 
     let newTags: string[];
     if (active) {
       // Remove all tags matching this domain
-      newTags = tags.filter(t => !domain.keywords.some(kw => t.toLowerCase().includes(kw)));
+      newTags = tags.filter((t) => !domain.keywords.some((kw) => t.toLowerCase().includes(kw)));
     } else {
       // Add primary tag
       const domainLabels: Record<string, string> = {
@@ -346,7 +346,7 @@ const MemoResult = () => {
         "cognitif": "Cognitif",
         "sensoriel": "Sensoriel",
         "bien-etre": "Bien-être",
-        "medical": "Médical",
+        "medical": "Médical"
       };
       newTags = [...tags, domainLabels[domainKey] || domainKey];
     }
@@ -365,7 +365,7 @@ const MemoResult = () => {
   const saveDetails = () => {
     if (!memo) return;
     const isQuick = memo.content_structured?.mode === "text_quick";
-    const items = isQuick ? [tempDetails] : tempDetails.split("\n").filter(l => l.trim());
+    const items = isQuick ? [tempDetails] : tempDetails.split("\n").filter((l) => l.trim());
     const updatedStructured = { ...(memo.content_structured || {}), details: items };
     autoSave({ content_structured: updatedStructured });
     setEditingField(null);
@@ -373,7 +373,7 @@ const MemoResult = () => {
 
   const saveSuggestions = () => {
     if (!memo) return;
-    const items = tempSuggestions.split("\n").filter(l => l.trim());
+    const items = tempSuggestions.split("\n").filter((l) => l.trim());
     const { suggestions: _removed, ...rest } = (memo.content_structured || {}) as any;
     const updatedStructured = { ...rest, a_retenir: items };
     autoSave({ content_structured: updatedStructured });
@@ -426,16 +426,16 @@ const MemoResult = () => {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="animate-pulse text-muted-foreground">Chargement...</div>
-      </div>
-    );
+      </div>);
+
   }
   if (!user) return <Navigate to="/auth" replace />;
   if (!memo) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <p className="text-muted-foreground">Mémo introuvable.</p>
-      </div>
-    );
+      </div>);
+
   }
 
   const readOnly = role === "famille";
@@ -450,8 +450,8 @@ const MemoResult = () => {
   const formattedDate = format(new Date(memo.memo_date), "dd MMMM yyyy", { locale: fr });
 
   // Intervenant search filtering
-  const filteredIntervenants = intervenants.filter(i =>
-    i.nom.toLowerCase().includes(intervenantSearch.toLowerCase())
+  const filteredIntervenants = intervenants.filter((i) =>
+  i.nom.toLowerCase().includes(intervenantSearch.toLowerCase())
   );
 
   const currentIdx = memoIds.indexOf(id!);
@@ -463,26 +463,26 @@ const MemoResult = () => {
       className="flex min-h-screen flex-col"
       style={{
         opacity: swipeFade ? 0 : 1,
-        transition: "opacity 0.2s ease-out",
-      }}
-    >
+        transition: "opacity 0.2s ease-out"
+      }}>
+      
       {/* Swipe arrow indicators */}
-      {hasPrev && (
-        <div
-          className="fixed left-2 top-1/2 -translate-y-1/2 z-20 pointer-events-none"
-          style={{ opacity: 0.3 }}
-        >
+      {hasPrev &&
+      <div
+        className="fixed left-2 top-1/2 -translate-y-1/2 z-20 pointer-events-none"
+        style={{ opacity: 0.3 }}>
+        
           <ChevronLeft size={24} color="#9A9490" />
         </div>
-      )}
-      {hasNext && (
-        <div
-          className="fixed right-2 top-1/2 -translate-y-1/2 z-20 pointer-events-none"
-          style={{ opacity: 0.3 }}
-        >
+      }
+      {hasNext &&
+      <div
+        className="fixed right-2 top-1/2 -translate-y-1/2 z-20 pointer-events-none"
+        style={{ opacity: 0.3 }}>
+        
           <ChevronRight size={24} color="#9A9490" />
         </div>
-      )}
+      }
       {/* Header */}
       <header
         className="sticky top-0 z-10 px-4 py-3 flex items-center justify-between"
@@ -491,25 +491,25 @@ const MemoResult = () => {
           backdropFilter: "blur(20px) saturate(1.5)",
           WebkitBackdropFilter: "blur(20px) saturate(1.5)",
           borderBottom: "1px solid rgba(255,255,255,0.6)",
-          boxShadow: "0 2px 12px rgba(0,0,0,0.05)",
-        }}
-      >
+          boxShadow: "0 2px 12px rgba(0,0,0,0.05)"
+        }}>
+        
         <button
           onClick={() => navigate("/timeline")}
           className="bg-transparent border-none cursor-pointer p-1"
-          aria-label="Retour"
-        >
+          aria-label="Retour">
+          
           <ArrowLeft size={22} color="#1E1A1A" />
         </button>
-        {!readOnly && (
-          <button
-            onClick={() => setDeleteModalOpen(true)}
-            className="bg-transparent border-none cursor-pointer p-1"
-            aria-label="Supprimer"
-          >
+        {!readOnly &&
+        <button
+          onClick={() => setDeleteModalOpen(true)}
+          className="bg-transparent border-none cursor-pointer p-1"
+          aria-label="Supprimer">
+          
             <Trash2 size={20} color="#E8736A" />
           </button>
-        )}
+        }
       </header>
 
       <main className="flex-1 px-4 pb-8" style={{ paddingTop: 80 }}>
@@ -518,13 +518,13 @@ const MemoResult = () => {
           {memo.type === "activite" ? (() => {
             // Parse transcription_raw: "{nom} — {MM:SS} / {distance}"
             const raw = memo.transcription_raw || "";
-            const dashParts = raw.split("—").map(s => s.trim());
+            const dashParts = raw.split("—").map((s) => s.trim());
             const activityName = dashParts[0] || "Activité";
             let durationStr = "—";
             let distanceStr = "—";
             let distanceUnit = "m";
             if (dashParts[1]) {
-              const statsParts = dashParts[1].split("/").map(s => s.trim());
+              const statsParts = dashParts[1].split("/").map((s) => s.trim());
               if (statsParts[0]) durationStr = statsParts[0];
               if (statsParts[1]) {
                 distanceStr = statsParts[1];
@@ -540,13 +540,13 @@ const MemoResult = () => {
 
             // Find domain from tags
             const actTags = structured?.tags || [];
-            const activeDomain = DOMAINS.find(d => isDomainActive(d.key, actTags));
+            const activeDomain = DOMAINS.find((d) => isDomainActive(d.key, actTags));
 
             const noteText = (structured as any)?.notes as string | undefined;
 
             // Helper to rebuild transcription_raw
             const rebuildRaw = (name: string, dur: string, dist: string) =>
-              `${name} — ${dur} / ${dist}`;
+            `${name} — ${dur} / ${dist}`;
 
             // Save helpers with feedback
             const saveActivityField = async (field: string, saveFn: () => Promise<void>) => {
@@ -566,16 +566,16 @@ const MemoResult = () => {
               // Parse MM:SS to seconds
               const parts = newDur.split(":").map(Number);
               const secs = parts.length === 2 ? (parts[0] || 0) * 60 + (parts[1] || 0) : null;
-              
+
               const updates: PromiseLike<any>[] = [
-                supabase.from("memos").update({ transcription_raw: newRaw }).eq("id", memo.id).then(),
-              ];
+              supabase.from("memos").update({ transcription_raw: newRaw }).eq("id", memo.id).then()];
+
               if (secs !== null && memo.enfant_id) {
                 updates.push(
-                  supabase.from("sessions_activite").update({ duree_secondes: secs })
-                    .eq("enfant_id", memo.enfant_id)
-                    .gte("created_at", `${memo.memo_date}T00:00:00`)
-                    .lt("created_at", `${memo.memo_date}T23:59:59.999`).then()
+                  supabase.from("sessions_activite").update({ duree_secondes: secs }).
+                  eq("enfant_id", memo.enfant_id).
+                  gte("created_at", `${memo.memo_date}T00:00:00`).
+                  lt("created_at", `${memo.memo_date}T23:59:59.999`).then()
                 );
               }
               await Promise.all(updates);
@@ -585,16 +585,16 @@ const MemoResult = () => {
             const saveDistance = async (newDist: string) => {
               const newRaw = rebuildRaw(activityName, durationStr, newDist);
               const distNum = parseFloat(newDist) || null;
-              
+
               const updates: PromiseLike<any>[] = [
-                supabase.from("memos").update({ transcription_raw: newRaw }).eq("id", memo.id).then(),
-              ];
+              supabase.from("memos").update({ transcription_raw: newRaw }).eq("id", memo.id).then()];
+
               if (distNum !== null && memo.enfant_id) {
                 updates.push(
-                  supabase.from("sessions_activite").update({ distance: distNum })
-                    .eq("enfant_id", memo.enfant_id)
-                    .gte("created_at", `${memo.memo_date}T00:00:00`)
-                    .lt("created_at", `${memo.memo_date}T23:59:59.999`).then()
+                  supabase.from("sessions_activite").update({ distance: distNum }).
+                  eq("enfant_id", memo.enfant_id).
+                  gte("created_at", `${memo.memo_date}T00:00:00`).
+                  lt("created_at", `${memo.memo_date}T23:59:59.999`).then()
                 );
               }
               await Promise.all(updates);
@@ -616,184 +616,184 @@ const MemoResult = () => {
             return (
               <>
                 {/* Date */}
-                {editingField === "date" ? (
-                  <div className="text-center">
+                {editingField === "date" ?
+                <div className="text-center">
                     <input
-                      type="date"
-                      defaultValue={memo.memo_date}
-                      onChange={handleDateChange}
-                      onBlur={() => setEditingField(null)}
-                      autoFocus
-                      className="text-sm border rounded-lg px-3 py-2 outline-none"
-                      style={{
-                        fontFamily: "'DM Sans', sans-serif",
-                        fontSize: 14,
-                        color: "#9A9490",
-                        background: "rgba(255,255,255,0.5)",
-                        border: "1px solid rgba(255,255,255,0.72)",
-                      }}
-                    />
-                  </div>
-                ) : (
-                  <p
-                    className={readOnly ? "text-center" : "text-center cursor-pointer"}
-                    onClick={readOnly ? undefined : () => setEditingField("date")}
-                    style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#9A9490" }}
-                  >
+                    type="date"
+                    defaultValue={memo.memo_date}
+                    onChange={handleDateChange}
+                    onBlur={() => setEditingField(null)}
+                    autoFocus
+                    className="text-sm border rounded-lg px-3 py-2 outline-none"
+                    style={{
+                      fontFamily: "'DM Sans', sans-serif",
+                      fontSize: 14,
+                      color: "#9A9490",
+                      background: "rgba(255,255,255,0.5)",
+                      border: "1px solid rgba(255,255,255,0.72)"
+                    }} />
+                  
+                  </div> :
+
+                <p
+                  className={readOnly ? "text-center" : "text-center cursor-pointer"}
+                  onClick={readOnly ? undefined : () => setEditingField("date")}
+                  style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#9A9490" }}>
+                  
                     {formattedDate}
                   </p>
-                )}
+                }
 
                 {/* Intervenant picker */}
-                {editingField === "intervenant" ? (
-                  <div style={glassCard}>
+                {editingField === "intervenant" ?
+                <div style={glassCard}>
                     <input
-                      type="text"
-                      value={intervenantSearch}
-                      onChange={(e) => setIntervenantSearch(e.target.value)}
-                      placeholder="Rechercher un membre..."
-                      autoFocus
-                      className="w-full text-sm outline-none mb-2"
-                      style={{
-                        fontFamily: "'DM Sans', sans-serif",
-                        fontSize: 14,
-                        color: "#1E1A1A",
-                        background: "rgba(255,255,255,0.5)",
-                        border: "1px solid rgba(255,255,255,0.72)",
-                        borderRadius: 8,
-                        padding: "8px 12px",
-                      }}
-                      onBlur={() => {
-                        setTimeout(() => {
-                          if (editingField === "intervenant") setEditingField(null);
-                        }, 200);
-                      }}
-                    />
+                    type="text"
+                    value={intervenantSearch}
+                    onChange={(e) => setIntervenantSearch(e.target.value)}
+                    placeholder="Rechercher un membre..."
+                    autoFocus
+                    className="w-full text-sm outline-none mb-2"
+                    style={{
+                      fontFamily: "'DM Sans', sans-serif",
+                      fontSize: 14,
+                      color: "#1E1A1A",
+                      background: "rgba(255,255,255,0.5)",
+                      border: "1px solid rgba(255,255,255,0.72)",
+                      borderRadius: 8,
+                      padding: "8px 12px"
+                    }}
+                    onBlur={() => {
+                      setTimeout(() => {
+                        if (editingField === "intervenant") setEditingField(null);
+                      }, 200);
+                    }} />
+                  
                     <div className="max-h-[200px] overflow-y-auto space-y-1">
                       <button
-                        onMouseDown={(e) => e.preventDefault()}
-                        onClick={() => handleIntervenantSelect(null)}
-                        className="w-full text-left text-sm py-2 px-3 rounded-lg bg-transparent border-none cursor-pointer hover:bg-white/40"
-                        style={{ color: "#9A9490", fontStyle: "italic" }}
-                      >
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => handleIntervenantSelect(null)}
+                      className="w-full text-left text-sm py-2 px-3 rounded-lg bg-transparent border-none cursor-pointer hover:bg-white/40"
+                      style={{ color: "#9A9490", fontStyle: "italic" }}>
+                      
                         Aucun
                       </button>
                       {filteredIntervenants.map((i) => {
-                        const { icon: Icon, gradient } = getSpecialiteAvatar(i.specialite);
-                        return (
-                          <button
-                            key={i.id}
-                            onMouseDown={(e) => e.preventDefault()}
-                            onClick={() => handleIntervenantSelect(i.id)}
-                            className="w-full text-left flex items-center gap-2 text-sm py-2 px-3 rounded-lg bg-transparent border-none cursor-pointer hover:bg-white/40"
-                          >
+                      const { icon: Icon, gradient } = getSpecialiteAvatar(i.specialite);
+                      return (
+                        <button
+                          key={i.id}
+                          onMouseDown={(e) => e.preventDefault()}
+                          onClick={() => handleIntervenantSelect(i.id)}
+                          className="w-full text-left flex items-center gap-2 text-sm py-2 px-3 rounded-lg bg-transparent border-none cursor-pointer hover:bg-white/40">
+                          
                             <div
-                              className="flex items-center justify-center shrink-0"
-                              style={{ width: 24, height: 24, borderRadius: "50%", background: gradient }}
-                            >
+                            className="flex items-center justify-center shrink-0"
+                            style={{ width: 24, height: 24, borderRadius: "50%", background: gradient }}>
+                            
                               <Icon size={12} color="#FFFFFF" />
                             </div>
                             <span style={{ color: "#1E1A1A" }}>
                               {i.nom}{i.specialite ? ` · ${i.specialite}` : ""}
                             </span>
-                          </button>
-                        );
-                      })}
+                          </button>);
+
+                    })}
                     </div>
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-center gap-3">
+                  </div> :
+
+                <div className="flex items-center justify-center gap-3">
                     <div
-                      className={readOnly ? "flex items-center gap-2" : "flex items-center gap-2 cursor-pointer"}
-                      onClick={readOnly ? undefined : () => setEditingField("intervenant")}
-                    >
-                      {intervenantName ? (
-                        <>
+                    className={readOnly ? "flex items-center gap-2" : "flex items-center gap-2 cursor-pointer"}
+                    onClick={readOnly ? undefined : () => setEditingField("intervenant")}>
+                    
+                      {intervenantName ?
+                    <>
                           {(() => {
-                            const { icon: Icon, gradient } = getSpecialiteAvatar(intervenantSpec);
-                            return (
-                              <div
-                                className="flex items-center justify-center shrink-0"
-                                style={{ width: 28, height: 28, borderRadius: "50%", background: gradient }}
-                              >
+                        const { icon: Icon, gradient } = getSpecialiteAvatar(intervenantSpec);
+                        return (
+                          <div
+                            className="flex items-center justify-center shrink-0"
+                            style={{ width: 28, height: 28, borderRadius: "50%", background: gradient }}>
+                            
                                 <Icon size={14} color="#FFFFFF" />
-                              </div>
-                            );
-                          })()}
+                              </div>);
+
+                      })()}
                           <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#1E1A1A" }}>
                             {intervenantName}
                           </span>
-                        </>
-                      ) : (
-                        <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#9A9490", fontStyle: "italic" }}>
+                        </> :
+
+                    <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#9A9490", fontStyle: "italic" }}>
                           Associer un membre...
                         </span>
-                      )}
+                    }
                     </div>
                     {/* Domain badge — click to edit */}
-                    {editingField === "actDomain" ? null : (
-                      <span
-                        className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${readOnly ? "" : "cursor-pointer"}`}
-                        onClick={readOnly ? undefined : () => setEditingField("actDomain")}
-                        style={{
-                          backgroundColor: activeDomain ? `${activeDomain.color}18` : "rgba(154,148,144,0.12)",
-                          color: activeDomain?.color || "#9A9490",
-                        }}
-                      >
-                        {activeDomain && (
-                          <div style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: activeDomain.color }} />
-                        )}
+                    {editingField === "actDomain" ? null :
+                  <span
+                    className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${readOnly ? "" : "cursor-pointer"}`}
+                    onClick={readOnly ? undefined : () => setEditingField("actDomain")}
+                    style={{
+                      backgroundColor: activeDomain ? `${activeDomain.color}18` : "rgba(154,148,144,0.12)",
+                      color: activeDomain?.color || "#9A9490"
+                    }}>
+                    
+                        {activeDomain &&
+                    <div style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: activeDomain.color }} />
+                    }
                         {activeDomain?.label || "Domaine"}
                       </span>
-                    )}
+                  }
                   </div>
-                )}
+                }
 
                 {/* Domain selector — shown when editing */}
-                {editingField === "actDomain" && (
-                  <div style={glassCard}>
+                {editingField === "actDomain" &&
+                <div style={glassCard}>
                     <p style={sectionLabel}>DOMAINE</p>
                     <div className="flex items-start justify-center gap-4">
                       {DOMAINS.map((domain) => {
-                        const active = isDomainActive(domain.key, actTags);
-                        return (
-                          <button
-                            key={domain.key}
-                            onClick={() => {
-                              handleDomainToggle(domain.key);
-                              setTimeout(() => setEditingField(null), 300);
-                            }}
-                            className="flex flex-col items-center gap-1 bg-transparent border-none p-0 cursor-pointer"
-                          >
+                      const active = isDomainActive(domain.key, actTags);
+                      return (
+                        <button
+                          key={domain.key}
+                          onClick={() => {
+                            handleDomainToggle(domain.key);
+                            setTimeout(() => setEditingField(null), 300);
+                          }}
+                          className="flex flex-col items-center gap-1 bg-transparent border-none p-0 cursor-pointer">
+                          
                             <div
-                              style={{
-                                width: 22,
-                                height: 22,
-                                borderRadius: "50%",
-                                backgroundColor: active ? domain.color : "transparent",
-                                border: `2px solid ${domain.color}`,
-                                opacity: active ? 1 : 0.35,
-                                boxShadow: active ? `0 0 0 5px ${domain.color}38` : "none",
-                                transition: "all 0.2s ease",
-                              }}
-                            />
+                            style={{
+                              width: 22,
+                              height: 22,
+                              borderRadius: "50%",
+                              backgroundColor: active ? domain.color : "transparent",
+                              border: `2px solid ${domain.color}`,
+                              opacity: active ? 1 : 0.35,
+                              boxShadow: active ? `0 0 0 5px ${domain.color}38` : "none",
+                              transition: "all 0.2s ease"
+                            }} />
+                          
                             <span
-                              style={{
-                                fontSize: 9,
-                                fontFamily: "'DM Sans', sans-serif",
-                                fontWeight: active ? 600 : 400,
-                                color: active ? domain.color : "#9A9490",
-                                opacity: active ? 1 : 0.5,
-                              }}
-                            >
+                            style={{
+                              fontSize: 9,
+                              fontFamily: "'DM Sans', sans-serif",
+                              fontWeight: active ? 600 : 400,
+                              color: active ? domain.color : "#9A9490",
+                              opacity: active ? 1 : 0.5
+                            }}>
+                            
                               {domain.label}
                             </span>
-                          </button>
-                        );
-                      })}
+                          </button>);
+
+                    })}
                     </div>
                   </div>
-                )}
+                }
 
                 {/* Activity title */}
                 <h1
@@ -803,9 +803,9 @@ const MemoResult = () => {
                     fontSize: 20,
                     fontWeight: 700,
                     color: "#1E1A1A",
-                    margin: 0,
-                  }}
-                >
+                    margin: 0
+                  }}>
+                  
                   {activityName}
                 </h1>
 
@@ -814,22 +814,96 @@ const MemoResult = () => {
                   style={{
                     ...glassCard,
                     background: "rgba(232,239,255,0.45)",
-                    border: "1px solid rgba(139,116,224,0.2)",
-                  }}
-                >
+                    border: "1px solid rgba(139,116,224,0.2)"
+                  }}>
+                  
                   <div className="flex items-center justify-center gap-0">
                     {/* Duration */}
                     <div className="flex flex-col items-center flex-1">
-                      {editingField === "actDuration" ? (
-                        <input
+                      {editingField === "actDuration" ?
+                      <input
+                        type="text"
+                        defaultValue={durationStr !== "—" ? durationStr : ""}
+                        placeholder="MM:SS"
+                        autoFocus
+                        onBlur={(e) => {
+                          const val = e.target.value.trim() || "—";
+                          setEditingField(null);
+                          saveActivityField("duration", () => saveDuration(val));
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            (e.target as HTMLInputElement).blur();
+                          }
+                        }}
+                        className="text-center outline-none"
+                        style={{
+                          fontFamily: "'Fraunces', serif",
+                          fontSize: 28,
+                          fontWeight: 700,
+                          color: "#1E1A1A",
+                          width: 90,
+                          background: "rgba(255,255,255,0.5)",
+                          border: "1px solid rgba(139,116,224,0.3)",
+                          borderRadius: 8,
+                          padding: "2px 4px"
+                        }} /> :
+
+
+                      <span
+                        className={readOnly ? "" : "cursor-pointer"}
+                        onClick={readOnly ? undefined : () => setEditingField("actDuration")}
+                        style={{
+                          fontFamily: "'Fraunces', serif",
+                          fontSize: 28,
+                          fontWeight: 700,
+                          color: "#1E1A1A",
+                          lineHeight: 1.1
+                        }}>
+                        
+                          {durationStr}
+                        </span>
+                      }
+                      <div className="flex items-center gap-1" style={{ marginTop: 4 }}>
+                        <span
+                          style={{
+                            fontFamily: "'DM Sans', sans-serif",
+                            fontSize: 10,
+                            fontWeight: 500,
+                            color: "#9A9490",
+                            textTransform: "uppercase",
+                            letterSpacing: "0.05em"
+                          }}>
+                          
+                          Durée
+                        </span>
+                        {feedbackIcon("duration")}
+                      </div>
+                    </div>
+                    {/* Separator */}
+                    <div
+                      style={{
+                        width: 1,
+                        height: 36,
+                        background: "rgba(139,116,224,0.2)",
+                        flexShrink: 0
+                      }} />
+                    
+                    {/* Distance */}
+                    <div className="flex flex-col items-center flex-1">
+                      {editingField === "actDistance" ?
+                      <div className="flex items-baseline gap-1 justify-center">
+                          <input
                           type="text"
-                          defaultValue={durationStr !== "—" ? durationStr : ""}
-                          placeholder="MM:SS"
+                          inputMode="decimal"
+                          defaultValue={distanceNumeric}
+                          placeholder="0"
                           autoFocus
                           onBlur={(e) => {
-                            const val = e.target.value.trim() || "—";
+                            const num = e.target.value.trim();
+                            const val = num ? `${num} ${distanceUnit}` : "—";
                             setEditingField(null);
-                            saveActivityField("duration", () => saveDuration(val));
+                            saveActivityField("distance", () => saveDistance(val));
                           }}
                           onKeyDown={(e) => {
                             if (e.key === "Enter") {
@@ -842,113 +916,39 @@ const MemoResult = () => {
                             fontSize: 28,
                             fontWeight: 700,
                             color: "#1E1A1A",
-                            width: 90,
+                            width: 70,
                             background: "rgba(255,255,255,0.5)",
                             border: "1px solid rgba(139,116,224,0.3)",
                             borderRadius: 8,
-                            padding: "2px 4px",
-                          }}
-                        />
-                      ) : (
-                        <span
-                          className={readOnly ? "" : "cursor-pointer"}
-                          onClick={readOnly ? undefined : () => setEditingField("actDuration")}
-                          style={{
-                            fontFamily: "'Fraunces', serif",
-                            fontSize: 28,
-                            fontWeight: 700,
-                            color: "#1E1A1A",
-                            lineHeight: 1.1,
-                          }}
-                        >
-                          {durationStr}
-                        </span>
-                      )}
-                      <div className="flex items-center gap-1" style={{ marginTop: 4 }}>
-                        <span
+                            padding: "2px 4px"
+                          }} />
+                        
+                          <span
                           style={{
                             fontFamily: "'DM Sans', sans-serif",
-                            fontSize: 10,
+                            fontSize: 14,
                             fontWeight: 500,
-                            color: "#9A9490",
-                            textTransform: "uppercase",
-                            letterSpacing: "0.05em",
-                          }}
-                        >
-                          Durée
-                        </span>
-                        {feedbackIcon("duration")}
-                      </div>
-                    </div>
-                    {/* Separator */}
-                    <div
-                      style={{
-                        width: 1,
-                        height: 36,
-                        background: "rgba(139,116,224,0.2)",
-                        flexShrink: 0,
-                      }}
-                    />
-                    {/* Distance */}
-                    <div className="flex flex-col items-center flex-1">
-                      {editingField === "actDistance" ? (
-                        <div className="flex items-baseline gap-1 justify-center">
-                          <input
-                            type="text"
-                            inputMode="decimal"
-                            defaultValue={distanceNumeric}
-                            placeholder="0"
-                            autoFocus
-                            onBlur={(e) => {
-                              const num = e.target.value.trim();
-                              const val = num ? `${num} ${distanceUnit}` : "—";
-                              setEditingField(null);
-                              saveActivityField("distance", () => saveDistance(val));
-                            }}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") {
-                                (e.target as HTMLInputElement).blur();
-                              }
-                            }}
-                            className="text-center outline-none"
-                            style={{
-                              fontFamily: "'Fraunces', serif",
-                              fontSize: 28,
-                              fontWeight: 700,
-                              color: "#1E1A1A",
-                              width: 70,
-                              background: "rgba(255,255,255,0.5)",
-                              border: "1px solid rgba(139,116,224,0.3)",
-                              borderRadius: 8,
-                              padding: "2px 4px",
-                            }}
-                          />
-                          <span
-                            style={{
-                              fontFamily: "'DM Sans', sans-serif",
-                              fontSize: 14,
-                              fontWeight: 500,
-                              color: "#9A9490",
-                            }}
-                          >
+                            color: "#9A9490"
+                          }}>
+                          
                             {distanceUnit}
                           </span>
-                        </div>
-                      ) : (
-                        <span
-                          className={readOnly ? "" : "cursor-pointer"}
-                          onClick={readOnly ? undefined : () => setEditingField("actDistance")}
-                          style={{
-                            fontFamily: "'Fraunces', serif",
-                            fontSize: 28,
-                            fontWeight: 700,
-                            color: "#1E1A1A",
-                            lineHeight: 1.1,
-                          }}
-                        >
+                        </div> :
+
+                      <span
+                        className={readOnly ? "" : "cursor-pointer"}
+                        onClick={readOnly ? undefined : () => setEditingField("actDistance")}
+                        style={{
+                          fontFamily: "'Fraunces', serif",
+                          fontSize: 28,
+                          fontWeight: 700,
+                          color: "#1E1A1A",
+                          lineHeight: 1.1
+                        }}>
+                        
                           {distanceStr}
                         </span>
-                      )}
+                      }
                       <div className="flex items-center gap-1" style={{ marginTop: 4 }}>
                         <span
                           style={{
@@ -957,9 +957,9 @@ const MemoResult = () => {
                             fontWeight: 500,
                             color: "#9A9490",
                             textTransform: "uppercase",
-                            letterSpacing: "0.05em",
-                          }}
-                        >
+                            letterSpacing: "0.05em"
+                          }}>
+                          
                           Distance
                         </span>
                         {feedbackIcon("distance")}
@@ -974,73 +974,73 @@ const MemoResult = () => {
                     <p style={{ ...sectionLabel, marginBottom: 0 }}>NOTE</p>
                     {feedbackIcon("note")}
                   </div>
-                  {editingField === "actNote" ? (
-                    <textarea
-                      defaultValue={noteText || ""}
-                      autoFocus
-                      rows={3}
-                      onBlur={(e) => {
-                        const val = e.target.value.trim();
-                        setEditingField(null);
-                        saveActivityField("note", () => saveNote(val));
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && !e.shiftKey) {
-                          e.preventDefault();
-                          (e.target as HTMLTextAreaElement).blur();
-                        }
-                      }}
-                      className="w-full outline-none resize-none"
+                  {editingField === "actNote" ?
+                  <textarea
+                    defaultValue={noteText || ""}
+                    autoFocus
+                    rows={3}
+                    onBlur={(e) => {
+                      const val = e.target.value.trim();
+                      setEditingField(null);
+                      saveActivityField("note", () => saveNote(val));
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        (e.target as HTMLTextAreaElement).blur();
+                      }
+                    }}
+                    className="w-full outline-none resize-none"
+                    style={{
+                      fontFamily: "'DM Sans', sans-serif",
+                      fontSize: 15,
+                      color: "#1E1A1A",
+                      lineHeight: 1.6,
+                      background: "rgba(255,255,255,0.5)",
+                      border: "1px solid rgba(255,255,255,0.72)",
+                      borderRadius: 8,
+                      padding: "10px 12px"
+                    }} /> :
+
+
+                  <div
+                    className={readOnly ? "" : "cursor-pointer"}
+                    onClick={readOnly ? undefined : () => setEditingField("actNote")}>
+                    
+                      {noteText ?
+                    <p
                       style={{
                         fontFamily: "'DM Sans', sans-serif",
                         fontSize: 15,
                         color: "#1E1A1A",
                         lineHeight: 1.6,
-                        background: "rgba(255,255,255,0.5)",
-                        border: "1px solid rgba(255,255,255,0.72)",
-                        borderRadius: 8,
-                        padding: "10px 12px",
-                      }}
-                    />
-                  ) : (
-                    <div
-                      className={readOnly ? "" : "cursor-pointer"}
-                      onClick={readOnly ? undefined : () => setEditingField("actNote")}
-                    >
-                      {noteText ? (
-                        <p
-                          style={{
-                            fontFamily: "'DM Sans', sans-serif",
-                            fontSize: 15,
-                            color: "#1E1A1A",
-                            lineHeight: 1.6,
-                            margin: 0,
-                          }}
-                        >
+                        margin: 0
+                      }}>
+                      
                           {noteText}
-                        </p>
-                      ) : (
-                        <p
-                          style={{
-                            fontFamily: "'DM Sans', sans-serif",
-                            fontSize: 14,
-                            color: "#9A9490",
-                            fontStyle: "italic",
-                            margin: 0,
-                          }}
-                        >
+                        </p> :
+
+                    <p
+                      style={{
+                        fontFamily: "'DM Sans', sans-serif",
+                        fontSize: 14,
+                        color: "#9A9490",
+                        fontStyle: "italic",
+                        margin: 0
+                      }}>
+                      
                           Aucune note pour cette séance
                         </p>
-                      )}
+                    }
                     </div>
-                  )}
+                  }
                 </div>
-              </>
-            );
-          })() : (
-            <>
+              </>);
+
+          })() :
+          <>
           {/* 1. DATE — inline edit */}
-          {editingField === "date" ? (
+          {editingField === "date" ?
             <div className="text-center">
               <input
                 type="date"
@@ -1054,22 +1054,22 @@ const MemoResult = () => {
                   fontSize: 14,
                   color: "#9A9490",
                   background: "rgba(255,255,255,0.5)",
-                  border: "1px solid rgba(255,255,255,0.72)",
-                }}
-              />
-            </div>
-          ) : (
+                  border: "1px solid rgba(255,255,255,0.72)"
+                }} />
+              
+            </div> :
+
             <p
               className={readOnly ? "text-center" : "text-center cursor-pointer"}
               onClick={readOnly ? undefined : () => setEditingField("date")}
-              style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#9A9490" }}
-            >
+              style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#9A9490" }}>
+              
               {formattedDate}
             </p>
-          )}
+            }
 
           {/* 2. INTERVENANT — inline edit */}
-          {editingField === "intervenant" ? (
+          {editingField === "intervenant" ?
             <div style={glassCard}>
               <input
                 type="text"
@@ -1085,22 +1085,22 @@ const MemoResult = () => {
                   background: "rgba(255,255,255,0.5)",
                   border: "1px solid rgba(255,255,255,0.72)",
                   borderRadius: 8,
-                  padding: "8px 12px",
+                  padding: "8px 12px"
                 }}
                 onBlur={() => {
                   // Delay to allow click on result
                   setTimeout(() => {
                     if (editingField === "intervenant") setEditingField(null);
                   }, 200);
-                }}
-              />
+                }} />
+              
               <div className="max-h-[200px] overflow-y-auto space-y-1">
                 <button
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => handleIntervenantSelect(null)}
                   className="w-full text-left text-sm py-2 px-3 rounded-lg bg-transparent border-none cursor-pointer hover:bg-white/40"
-                  style={{ color: "#9A9490", fontStyle: "italic" }}
-                >
+                  style={{ color: "#9A9490", fontStyle: "italic" }}>
+                  
                   Aucun
                 </button>
                 {filteredIntervenants.map((i) => {
@@ -1110,54 +1110,54 @@ const MemoResult = () => {
                       key={i.id}
                       onMouseDown={(e) => e.preventDefault()}
                       onClick={() => handleIntervenantSelect(i.id)}
-                      className="w-full text-left flex items-center gap-2 text-sm py-2 px-3 rounded-lg bg-transparent border-none cursor-pointer hover:bg-white/40"
-                    >
+                      className="w-full text-left flex items-center gap-2 text-sm py-2 px-3 rounded-lg bg-transparent border-none cursor-pointer hover:bg-white/40">
+                      
                       <div
                         className="flex items-center justify-center shrink-0"
-                        style={{ width: 24, height: 24, borderRadius: "50%", background: gradient }}
-                      >
+                        style={{ width: 24, height: 24, borderRadius: "50%", background: gradient }}>
+                        
                         <Icon size={12} color="#FFFFFF" />
                       </div>
                       <span style={{ color: "#1E1A1A" }}>
                         {i.nom}{i.specialite ? ` · ${i.specialite}` : ""}
                       </span>
-                    </button>
-                  );
+                    </button>);
+
                 })}
               </div>
-            </div>
-          ) : (
+            </div> :
+
             <div
               className={readOnly ? "flex items-center justify-center gap-2" : "flex items-center justify-center gap-2 cursor-pointer"}
-              onClick={readOnly ? undefined : () => setEditingField("intervenant")}
-            >
-              {intervenantName ? (
-                <>
+              onClick={readOnly ? undefined : () => setEditingField("intervenant")}>
+              
+              {intervenantName ?
+              <>
                   {(() => {
-                    const { icon: Icon, gradient } = getSpecialiteAvatar(intervenantSpec);
-                    return (
-                      <div
-                        className="flex items-center justify-center shrink-0"
-                        style={{ width: 32, height: 32, borderRadius: "50%", background: gradient }}
-                      >
+                  const { icon: Icon, gradient } = getSpecialiteAvatar(intervenantSpec);
+                  return (
+                    <div
+                      className="flex items-center justify-center shrink-0"
+                      style={{ width: 32, height: 32, borderRadius: "50%", background: gradient }}>
+                      
                         <Icon size={16} color="#FFFFFF" />
-                      </div>
-                    );
-                  })()}
+                      </div>);
+
+                })()}
                   <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#1E1A1A" }}>
                     {intervenantName}{intervenantSpec ? ` · ${intervenantSpec}` : ""}
                   </span>
-                </>
-              ) : (
-                <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#9A9490", fontStyle: "italic" }}>
+                </> :
+
+              <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#9A9490", fontStyle: "italic" }}>
                   Associer un membre...
                 </span>
-              )}
+              }
             </div>
-          )}
+            }
 
           {/* DOCUMENT FILE PREVIEW */}
-          {memo.type === "document" && (
+          {memo.type === "document" &&
             <div style={glassCard}>
               <p style={sectionLabel}>FICHIER</p>
               {signedFileUrl ? (() => {
@@ -1165,22 +1165,22 @@ const MemoResult = () => {
                 const isImage = ["png", "jpg", "jpeg", "webp"].includes(ext || "");
                 return (
                   <div>
-                    {isImage ? (
-                      <img
-                        src={signedFileUrl}
-                        alt="Document"
-                        className="w-full rounded-lg"
-                        style={{ maxHeight: 400, objectFit: "contain", background: "rgba(0,0,0,0.03)" }}
-                      />
-                    ) : (
-                      <div className="flex items-center gap-3 py-3">
+                    {isImage ?
+                    <img
+                      src={signedFileUrl}
+                      alt="Document"
+                      className="w-full rounded-lg"
+                      style={{ maxHeight: 400, objectFit: "contain", background: "rgba(0,0,0,0.03)" }} /> :
+
+
+                    <div className="flex items-center gap-3 py-3">
                         <div
-                          className="flex items-center justify-center shrink-0"
-                          style={{
-                            width: 44, height: 44, borderRadius: 12,
-                            background: "rgba(138,155,174,0.12)",
-                          }}
-                        >
+                        className="flex items-center justify-center shrink-0"
+                        style={{
+                          width: 44, height: 44, borderRadius: 12,
+                          background: "rgba(138,155,174,0.12)"
+                        }}>
+                        
                           <FileText size={22} color="#8A9BAE" />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -1192,26 +1192,26 @@ const MemoResult = () => {
                           </p>
                         </div>
                       </div>
-                    )}
+                    }
                     <button
                       onClick={() => {
                         if (signedFileUrl) {
                           console.log("[Document] Opening signed URL:", signedFileUrl);
                           const opened = window.open(signedFileUrl, '_blank', 'noopener,noreferrer');
                           if (!opened) {
-                            fetch(signedFileUrl)
-                              .then(res => res.blob())
-                              .then(blob => {
-                                const url = URL.createObjectURL(blob);
-                                const a = document.createElement('a');
-                                a.href = url;
-                                a.download = memo?.file_url?.split('/').pop() || 'document';
-                                document.body.appendChild(a);
-                                a.click();
-                                document.body.removeChild(a);
-                                URL.revokeObjectURL(url);
-                              })
-                              .catch(() => toast({ title: "Impossible d'ouvrir le fichier", variant: "destructive" }));
+                            fetch(signedFileUrl).
+                            then((res) => res.blob()).
+                            then((blob) => {
+                              const url = URL.createObjectURL(blob);
+                              const a = document.createElement('a');
+                              a.href = url;
+                              a.download = memo?.file_url?.split('/').pop() || 'document';
+                              document.body.appendChild(a);
+                              a.click();
+                              document.body.removeChild(a);
+                              URL.revokeObjectURL(url);
+                            }).
+                            catch(() => toast({ title: "Impossible d'ouvrir le fichier", variant: "destructive" }));
                           }
                         }
                       }}
@@ -1220,91 +1220,91 @@ const MemoResult = () => {
                         fontFamily: "'DM Sans', sans-serif",
                         background: "linear-gradient(135deg, #E8736A, #8B74E0)",
                         color: "white",
-                        border: "none",
-                      }}
-                    >
+                        border: "none"
+                      }}>
+                      
                       <ExternalLink size={14} />
                       Ouvrir le fichier
                     </button>
-                  </div>
-                );
-              })() : (
-                <div className="flex items-center gap-3 py-3">
+                  </div>);
+
+              })() :
+              <div className="flex items-center gap-3 py-3">
                   <FileText size={20} color="#9A9490" />
                   <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#9A9490", fontStyle: "italic" }}>
                     Aucun fichier associé
                   </span>
                 </div>
-              )}
+              }
             </div>
-          )}
+            }
 
           {/* 3. DOMAINES SELECTOR */}
-          {isTextQuick && tags.length === 0 && !showDomaines ? (
+          {isTextQuick && tags.length === 0 && !showDomaines ?
             <button
               onClick={() => setShowDomaines(true)}
               className="flex items-center gap-1.5 bg-transparent border-none cursor-pointer p-0 mx-auto"
-              style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#8B74E0", fontWeight: 500 }}
-            >
+              style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#8B74E0", fontWeight: 500 }}>
+              
               <Plus size={14} />
               Ajouter des domaines
-            </button>
-          ) : (
-          <div style={glassCard}>
+            </button> :
+
+            <div style={glassCard}>
             <p style={sectionLabel}>DOMAINES</p>
             <div className="flex items-start justify-center gap-4">
               {DOMAINS.map((domain) => {
-                const active = isDomainActive(domain.key, tags);
-                return (
-                   <button
-                     key={domain.key}
-                     onClick={readOnly ? undefined : () => handleDomainToggle(domain.key)}
-                     className={`flex flex-col items-center gap-1 bg-transparent border-none p-0 ${readOnly ? "" : "cursor-pointer"}`}
-                   >
+                  const active = isDomainActive(domain.key, tags);
+                  return (
+                    <button
+                      key={domain.key}
+                      onClick={readOnly ? undefined : () => handleDomainToggle(domain.key)}
+                      className={`flex flex-col items-center gap-1 bg-transparent border-none p-0 ${readOnly ? "" : "cursor-pointer"}`}>
+                      
                     <div
-                      style={{
-                        width: 22,
-                        height: 22,
-                        borderRadius: "50%",
-                        backgroundColor: active ? domain.color : "transparent",
-                        border: `2px solid ${domain.color}`,
-                        opacity: active ? 1 : 0.35,
-                        boxShadow: active ? `0 0 0 5px ${domain.color}38` : "none",
-                        transition: "all 0.2s ease",
-                      }}
-                    />
+                        style={{
+                          width: 22,
+                          height: 22,
+                          borderRadius: "50%",
+                          backgroundColor: active ? domain.color : "transparent",
+                          border: `2px solid ${domain.color}`,
+                          opacity: active ? 1 : 0.35,
+                          boxShadow: active ? `0 0 0 5px ${domain.color}38` : "none",
+                          transition: "all 0.2s ease"
+                        }} />
+                      
                     <span
-                      style={{
-                        fontSize: 9,
-                        fontFamily: "'DM Sans', sans-serif",
-                        fontWeight: active ? 600 : 400,
-                        color: active ? domain.color : "#9A9490",
-                        opacity: active ? 1 : 0.5,
-                      }}
-                    >
+                        style={{
+                          fontSize: 9,
+                          fontFamily: "'DM Sans', sans-serif",
+                          fontWeight: active ? 600 : 400,
+                          color: active ? domain.color : "#9A9490",
+                          opacity: active ? 1 : 0.5
+                        }}>
+                        
                       {domain.label}
                     </span>
-                  </button>
-                );
-              })}
+                  </button>);
+
+                })}
             </div>
             {/* Info button */}
             <button
-              onClick={() => setShowDomaineInfo(true)}
-              className="flex items-center gap-1 mx-auto mt-3 bg-transparent border-none cursor-pointer p-0"
-            >
+                onClick={() => setShowDomaineInfo(true)}
+                className="flex items-center gap-1 mx-auto mt-3 bg-transparent border-none cursor-pointer p-0">
+                
               <Info size={14} color="#8B74E0" />
               <span style={{ fontSize: 11, color: "#9A9490", fontFamily: "'DM Sans', sans-serif" }}>
                 Comment choisir un domaine ?
               </span>
             </button>
           </div>
-          )}
+            }
 
           {/* 4. RÉSUMÉ — inline edit */}
           <div style={glassCard}>
-            <p style={sectionLabel}>RÉSUMÉ</p>
-            {editingField === "resume" ? (
+            <p style={sectionLabel}>TITRE</p>
+            {editingField === "resume" ?
               <textarea
                 ref={resumeRef}
                 value={tempResume}
@@ -1320,10 +1320,10 @@ const MemoResult = () => {
                   background: "rgba(255,255,255,0.5)",
                   border: "1px solid rgba(255,255,255,0.72)",
                   borderRadius: 8,
-                  padding: "10px 12px",
-                }}
-              />
-            ) : (
+                  padding: "10px 12px"
+                }} /> :
+
+
               <p
                 className={readOnly ? "" : "cursor-pointer"}
                 onClick={readOnly ? undefined : startEditResume}
@@ -1332,18 +1332,18 @@ const MemoResult = () => {
                   fontSize: 15,
                   color: "#1E1A1A",
                   lineHeight: 1.6,
-                  minHeight: 24,
-                }}
-              >
+                  minHeight: 24
+                }}>
+                
                 {structured?.resume || <span style={{ color: "#9A9490", fontStyle: "italic" }}>Ajouter un résumé...</span>}
               </p>
-            )}
+              }
           </div>
 
           {/* 5. DÉTAILS — inline edit */}
           <div style={glassCard}>
             <p style={sectionLabel}>{isTextQuick ? "VOTRE NOTE" : "DÉTAILS"}</p>
-            {editingField === "details" ? (
+            {editingField === "details" ?
               <textarea
                 ref={detailsRef}
                 value={tempDetails}
@@ -1360,10 +1360,10 @@ const MemoResult = () => {
                   background: "rgba(255,255,255,0.5)",
                   border: "1px solid rgba(255,255,255,0.72)",
                   borderRadius: 8,
-                  padding: "10px 12px",
-                }}
-              />
-            ) : (
+                  padding: "10px 12px"
+                }} /> :
+
+
               <div
                 className={readOnly ? "" : "cursor-pointer"}
                 onClick={readOnly ? undefined : () => {
@@ -1375,34 +1375,34 @@ const MemoResult = () => {
                   setEditingField("details");
                   setTimeout(() => detailsRef.current?.focus(), 50);
                 }}
-                style={{ minHeight: 24 }}
-              >
-                {details.length > 0 ? (
-                  isTextQuick ? (
-                    <p style={{ fontSize: 15, color: "#1E1A1A", fontFamily: "'DM Sans', sans-serif", lineHeight: 1.6, whiteSpace: "pre-wrap" }}>
+                style={{ minHeight: 24 }}>
+                
+                {details.length > 0 ?
+                isTextQuick ?
+                <p style={{ fontSize: 15, color: "#1E1A1A", fontFamily: "'DM Sans', sans-serif", lineHeight: 1.6, whiteSpace: "pre-wrap" }}>
                       {details[0]}
-                    </p>
-                  ) : (
-                    <ul className="space-y-1.5" style={{ margin: 0, paddingLeft: 0, listStyle: "none" }}>
-                      {details.map((d, i) => (
-                        <li key={i} className="flex gap-2" style={{ fontSize: 15, color: "#1E1A1A", fontFamily: "'DM Sans', sans-serif" }}>
+                    </p> :
+
+                <ul className="space-y-1.5" style={{ margin: 0, paddingLeft: 0, listStyle: "none" }}>
+                      {details.map((d, i) =>
+                  <li key={i} className="flex gap-2" style={{ fontSize: 15, color: "#1E1A1A", fontFamily: "'DM Sans', sans-serif" }}>
                           <span style={{ color: "#8B74E0", marginTop: 2 }}>•</span>
                           <span>{d}</span>
                         </li>
-                      ))}
-                    </ul>
-                  )
-                ) : (
-                  <span style={{ color: "#9A9490", fontStyle: "italic", fontSize: 15 }}>
+                  )}
+                    </ul> :
+
+
+                <span style={{ color: "#9A9490", fontStyle: "italic", fontSize: 15 }}>
                     {isTextQuick ? "Ajouter votre note..." : "Ajouter des détails..."}
                   </span>
-                )}
+                }
               </div>
-            )}
+              }
           </div>
 
           {/* 6. À RETENIR — inline edit */}
-          {isTextQuick && suggestions.length === 0 && editingField !== "suggestions" ? (
+          {isTextQuick && suggestions.length === 0 && editingField !== "suggestions" ?
             <button
               onClick={() => {
                 setTempSuggestions("");
@@ -1410,15 +1410,15 @@ const MemoResult = () => {
                 setTimeout(() => suggestionsRef.current?.focus(), 50);
               }}
               className="flex items-center gap-1.5 bg-transparent border-none cursor-pointer p-0 mx-auto"
-              style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#8B74E0", fontWeight: 500 }}
-            >
+              style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#8B74E0", fontWeight: 500 }}>
+              
               <Plus size={14} />
               Ajouter des points à retenir
-            </button>
-          ) : (
-          <div style={glassCard}>
+            </button> :
+
+            <div style={glassCard}>
             <p style={sectionLabel}>À RETENIR</p>
-            {editingField === "suggestions" ? (
+            {editingField === "suggestions" ?
               <textarea
                 ref={suggestionsRef}
                 value={tempSuggestions}
@@ -1435,76 +1435,76 @@ const MemoResult = () => {
                   background: "rgba(255,255,255,0.5)",
                   border: "1px solid rgba(255,255,255,0.72)",
                   borderRadius: 8,
-                  padding: "10px 12px",
-                }}
-              />
-            ) : (
+                  padding: "10px 12px"
+                }} /> :
+
+
               <div
                 className={readOnly ? "" : "cursor-pointer"}
                 onClick={readOnly ? undefined : startEditSuggestions}
-                style={{ minHeight: 24 }}
-              >
-                {suggestions.length > 0 ? (
-                  <ul className="space-y-1.5" style={{ margin: 0, paddingLeft: 0, listStyle: "none" }}>
-                    {suggestions.map((s, i) => (
-                      <li key={i} className="flex gap-2" style={{ fontSize: 15, color: "#1E1A1A", fontFamily: "'DM Sans', sans-serif" }}>
+                style={{ minHeight: 24 }}>
+                
+                {suggestions.length > 0 ?
+                <ul className="space-y-1.5" style={{ margin: 0, paddingLeft: 0, listStyle: "none" }}>
+                    {suggestions.map((s, i) =>
+                  <li key={i} className="flex gap-2" style={{ fontSize: 15, color: "#1E1A1A", fontFamily: "'DM Sans', sans-serif" }}>
                         <span style={{ marginTop: 2 }}>→</span>
                         <span>{s}</span>
                       </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <span style={{ color: "#9A9490", fontStyle: "italic", fontSize: 15 }}>Ajouter des notes...</span>
-                )}
+                  )}
+                  </ul> :
+
+                <span style={{ color: "#9A9490", fontStyle: "italic", fontSize: 15 }}>Ajouter des notes...</span>
+                }
               </div>
-            )}
+              }
           </div>
-          )}
+            }
 
           {/* 7. TAGS */}
-          {isTextQuick && tags.length === 0 && !showTags ? (
+          {isTextQuick && tags.length === 0 && !showTags ?
             <button
               onClick={() => setShowTags(true)}
               className="flex items-center gap-1.5 bg-transparent border-none cursor-pointer p-0 mx-auto"
-              style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#8B74E0", fontWeight: 500 }}
-            >
+              style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#8B74E0", fontWeight: 500 }}>
+              
               <Plus size={14} />
               Ajouter des tags
-            </button>
-          ) : (
-          <div style={glassCard}>
+            </button> :
+
+            <div style={glassCard}>
             <p style={sectionLabel}>TAGS</p>
             <div className="flex flex-wrap gap-2 mb-3">
               {tags.map((tag, i) => {
-                const color = getDomainColor(tag);
-                return (
-                  <span
-                    key={i}
-                    className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium"
-                    style={{ backgroundColor: `${color}15`, color }}
-                  >
+                  const color = getDomainColor(tag);
+                  return (
+                    <span
+                      key={i}
+                      className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium"
+                      style={{ backgroundColor: `${color}15`, color }}>
+                      
                     <div style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: color }} />
                     {tag}
-                    {!readOnly && (
+                    {!readOnly &&
                       <button
                         onClick={() => removeTag(i)}
                         className="bg-transparent border-none p-0 cursor-pointer ml-0.5"
-                        style={{ color }}
-                      >
+                        style={{ color }}>
+                        
                         <X size={12} />
                       </button>
-                    )}
-                  </span>
-                );
-              })}
+                      }
+                  </span>);
+
+                })}
             </div>
-            {!readOnly && (
+            {!readOnly &&
               <div className="flex gap-2">
                 <input
                   value={newTag}
                   onChange={(e) => setNewTag(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter") { e.preventDefault(); addTag(); }
+                    if (e.key === "Enter") {e.preventDefault();addTag();}
                   }}
                   placeholder="Ajouter un tag..."
                   className="flex-1 text-sm outline-none placeholder:text-[#9A9490]"
@@ -1515,23 +1515,23 @@ const MemoResult = () => {
                     border: "1px solid rgba(255,255,255,0.72)",
                     borderRadius: 8,
                     padding: "6px 10px",
-                    background: "rgba(255,255,255,0.5)",
-                  }}
-                />
+                    background: "rgba(255,255,255,0.5)"
+                  }} />
+                
                 <button
                   onClick={addTag}
                   disabled={!newTag.trim()}
                   className="flex items-center gap-1 text-sm font-medium bg-transparent border-none cursor-pointer"
-                  style={{ color: newTag.trim() ? "#E8736A" : "#9A9490" }}
-                >
+                  style={{ color: newTag.trim() ? "#E8736A" : "#9A9490" }}>
+                  
                   <Plus size={14} />
                 </button>
               </div>
-            )}
+              }
           </div>
-          )}
+            }
             </>
-          )}
+          }
         </div>
       </main>
 
@@ -1549,8 +1549,8 @@ const MemoResult = () => {
             <AlertDialogAction
               onClick={handleDelete}
               disabled={deleting}
-              style={{ backgroundColor: "#E8736A" }}
-            >
+              style={{ backgroundColor: "#E8736A" }}>
+              
               {deleting ? "Suppression..." : "Supprimer"}
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -1567,15 +1567,15 @@ const MemoResult = () => {
             backdropFilter: "blur(20px)",
             WebkitBackdropFilter: "blur(20px)",
             borderRadius: 20,
-            padding: "24px 20px",
-          }}
-        >
+            padding: "24px 20px"
+          }}>
+          
           <h3 style={{ fontFamily: "'Fraunces', serif", fontSize: 16, fontWeight: 600, color: "#1E1A1A", marginBottom: 16 }}>
             Les domaines de Selena
           </h3>
           <div className="space-y-4">
-            {DOMAIN_INFO.map((d, i) => (
-              <div key={i} className="flex items-start gap-3">
+            {DOMAIN_INFO.map((d, i) =>
+            <div key={i} className="flex items-start gap-3">
                 <div style={{ width: 18, height: 18, borderRadius: "50%", backgroundColor: d.color, flexShrink: 0, marginTop: 2 }} />
                 <div>
                   <p style={{ fontSize: 13, fontWeight: 600, color: "#1E1A1A", fontFamily: "'DM Sans', sans-serif" }}>
@@ -1586,7 +1586,7 @@ const MemoResult = () => {
                   </p>
                 </div>
               </div>
-            ))}
+            )}
           </div>
           <p style={{ fontSize: 11, color: "#9A9490", fontStyle: "italic", marginTop: 12, fontFamily: "'DM Sans', sans-serif" }}>
             Un mémo peut toucher plusieurs domaines à la fois.
@@ -1597,15 +1597,15 @@ const MemoResult = () => {
             style={{
               background: "rgba(255,255,255,0.5)",
               border: "1px solid rgba(255,255,255,0.72)",
-              color: "#1E1A1A",
-            }}
-          >
+              color: "#1E1A1A"
+            }}>
+            
             Compris
           </button>
         </DialogContent>
       </Dialog>
-    </div>
-  );
+    </div>);
+
 };
 
 export default MemoResult;
