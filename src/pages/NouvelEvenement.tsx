@@ -31,11 +31,15 @@ const NouvelEvenement = () => {
     if (!title.trim()) return;
     setSaving(true);
     try {
+      const structured: Record<string, any> = { resume: title.trim() };
+      if (description.trim()) {
+        structured.details = [description.trim()];
+      }
       const { error } = await supabase.from("memos").insert({
         user_id: user.id,
         enfant_id: enfantId,
-        transcription_raw: title.trim(),
-        content_structured: description.trim() ? { description: description.trim() } : null,
+        transcription_raw: null,
+        content_structured: structured,
         processing_status: "done",
         type: "evenement" as any,
         memo_date: memoDate.toISOString().split("T")[0] as any,
