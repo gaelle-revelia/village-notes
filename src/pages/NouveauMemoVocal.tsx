@@ -281,23 +281,22 @@ const NouveauMemoVocal = () => {
               {/* Recording button */}
               <button
                 onClick={isRecording ? stop : handleStartRecording}
-                className="flex items-center justify-center gap-2 w-full rounded-xl px-6 text-base font-medium transition-all"
+                className="flex items-center justify-center rounded-full transition-all"
                 style={{
-                  minHeight: "64px",
-                  backgroundColor: isRecording
+                  width: "64px",
+                  height: "64px",
+                  background: isRecording
                     ? "hsl(var(--rouge-enregistrement))"
-                    : "hsl(var(--primary))",
-                  color: "hsl(var(--primary-foreground))",
+                    : "linear-gradient(135deg, #E8736A, #8B74E0)",
+                  color: "white",
+                  boxShadow: "0 6px 20px rgba(139, 116, 224, 0.4)",
                   animation: isRecording ? "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite" : "none",
                 }}
               >
                 {isRecording ? (
-                  <>
-                    <Square className="h-5 w-5" fill="currentColor" />
-                    Arrêter
-                  </>
+                  <Square className="h-7 w-7" fill="currentColor" />
                 ) : (
-                  <>🎙 Enregistrer</>
+                  <Mic className="h-7 w-7" />
                 )}
               </button>
 
