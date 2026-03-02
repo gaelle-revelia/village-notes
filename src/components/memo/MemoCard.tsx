@@ -263,8 +263,9 @@ export function MemoCard({ memo }: MemoCardProps) {
       </div>
 
       {/* Line 2: resume / title — activite has special parsing */}
-      {memoType === "activite" && memo.transcription_raw ? (() => {
-        const parts = memo.transcription_raw!.split(" — ");
+      {memoType === "activite" && (structured?.resume || memo.transcription_raw) ? (() => {
+        const rawStr = structured?.resume || memo.transcription_raw || "";
+        const parts = rawStr.split(" — ");
         const titre = parts[0];
         const statsRaw = parts[1] || "";
         const statParts = statsRaw.split(" / ").filter(Boolean);
