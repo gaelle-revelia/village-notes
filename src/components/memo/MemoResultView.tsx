@@ -5,6 +5,7 @@ interface StructuredContent {
   resume: string;
   points_cles: string[];
   suggestions?: string[];
+  a_retenir?: string[];
   tags: string[];
 }
 
@@ -75,14 +76,14 @@ export function MemoResultView({ structured, transcription, onDone }: MemoResult
         </div>
       )}
 
-      {/* Suggestions */}
-      {structured.suggestions && structured.suggestions.length > 0 && (
+      {/* Suggestions / À retenir */}
+      {((structured.a_retenir && structured.a_retenir.length > 0) || (structured.suggestions && structured.suggestions.length > 0)) && (
         <div className="rounded-xl border bg-card p-4 space-y-2">
           <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
             Pistes évoquées
           </h3>
           <ul className="space-y-2">
-            {structured.suggestions.map((s, i) => (
+            {(structured.a_retenir || structured.suggestions || []).map((s, i) => (
               <li key={i} className="flex gap-2 text-card-foreground">
                 <span className="text-accent-foreground mt-0.5">→</span>
                 <span>{s}</span>

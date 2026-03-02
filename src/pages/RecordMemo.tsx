@@ -17,6 +17,7 @@ interface StructuredContent {
   resume: string;
   points_cles: string[];
   suggestions?: string[];
+  a_retenir?: string[];
   tags: string[];
 }
 

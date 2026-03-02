@@ -2,48 +2,22 @@
 
 # Pipeline de structuration avec lexique contextuel + migration a_retenir
 
-## 1. `supabase/functions/process-memo/index.ts`
+## ✅ COMPLÉTÉ
 
-### A. Ajout fetch lexique (apres le fetch intervenant, avant l'appel structuration)
-- Requete `enfant_lexique` par `enfant_id`
-- Formatage en paires "variantes -> mot_correct" groupees
+### 1. `supabase/functions/process-memo/index.ts`
+- Fetch `enfant_lexique` + formatage variantes → mot_correct
+- Nouveau system prompt (règles absolues, prénom, contexte, lexique contextuel)
+- Tool params: `resume` (5-8 mots), `details` (max 5), `a_retenir` (max 3), `tags` (max 4), `intervenant_detected` (nullable)
 
-### B. Nouveau system prompt
-- Regles absolues (jamais diagnostic, jamais commentaire editorial)
-- Section prenom enfant avec regle stricte d'orthographe
-- Contexte enfant + intervenant
-- Lexique de correction contextuelle avec instructions de desambiguisation
+### 2. `src/pages/MemoResult.tsx`
+- Interface: ajout `a_retenir?: string[]`
+- Lecture: `structured?.a_retenir || structured?.suggestions || []`
+- Écriture: `saveSuggestions` écrit `a_retenir` et `delete updatedStructured.suggestions`
+- `startEditSuggestions`: lit `a_retenir || suggestions`
 
-### C. Parametres tool function mis a jour
-- `resume` : titre factuel 5-8 mots
-- `details` : maxItems 5, observations factuelles
-- `a_retenir` remplace `suggestions` : maxItems 3, nullable
-- `tags` : maxItems 4
-- `intervenant_detected` : type [string, null]
+### 3. `src/components/memo/MemoResultView.tsx`
+- Interface: ajout `a_retenir?: string[]`
+- Rendu: `structured.a_retenir || structured.suggestions`
 
-## 2. `src/pages/MemoResult.tsx`
-
-### Interface
-- Ajouter `a_retenir?: string[]` a `StructuredContent`
-
-### Lecture (fallback retrocompatible)
-- `const suggestions = structured?.a_retenir || structured?.suggestions || []`
-
-### Ecriture (cleanup migration)
-- `saveSuggestions` ecrit dans `a_retenir` et supprime `suggestions` du JSON :
-```
-const updatedStructured = { ...(memo.content_structured || {}), a_retenir: items };
-delete updatedStructured.suggestions;
-autoSave({ content_structured: updatedStructured });
-```
-
-## 3. `src/components/memo/MemoResultView.tsx`
-
-- Ajouter `a_retenir?: string[]` a l'interface
-- Lire `structured.a_retenir || structured.suggestions` pour le rendu
-
-## Fichiers non modifies
-- Transcription audio, auth, CORS, audio download/delete, processing_status flow
-- generate-lexique, suggest-icon, invite-member
-- useAuth, BottomNavBar, StepEnfant
-
+### 4. `src/pages/RecordMemo.tsx`
+- Interface: ajout `a_retenir?: string[]`
