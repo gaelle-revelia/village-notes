@@ -6,7 +6,7 @@ import { useEnfantId } from "@/hooks/useEnfantId";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { MemoDatePicker } from "@/components/memo/MemoDatePicker";
-import { IntervenantSelect } from "@/components/memo/IntervenantSelect";
+import { IntervenantSearchPicker } from "@/components/memo/IntervenantSearchPicker";
 import { Button } from "@/components/ui/button";
 
 const ACCEPTED = "application/pdf,image/png,image/jpeg,image/webp";
@@ -86,7 +86,7 @@ const NouveauDocument = () => {
       <main className="flex-1 px-4 py-6">
         <div className="mx-auto max-w-[400px] space-y-6">
           <MemoDatePicker date={memoDate} onDateChange={setMemoDate} />
-          <IntervenantSelect enfantId={enfantId} value={intervenantId} onChange={setIntervenantId} />
+          <IntervenantSearchPicker enfantId={enfantId} value={intervenantId} onChange={(id) => setIntervenantId(id)} />
 
           <input ref={fileRef} type="file" accept={ACCEPTED} className="hidden" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
 
