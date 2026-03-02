@@ -39,7 +39,7 @@ interface Activite {
   unite_distance: string | null;
 }
 
-type View = "main" | "notes" | "activites";
+type View = "main" | "notes" | "activites" | "chrono-choice";
 
 interface Props {
   open: boolean;
@@ -82,7 +82,7 @@ export default function AddMemoSheet({ open, onOpenChange, enfantId }: Props) {
 
   const domain = (d: string) => DOMAIN_CONFIG[d] ?? DOMAIN_CONFIG["Médical"];
 
-  const translateX = view === "main" ? "0%" : view === "notes" ? "-33.333%" : "-66.666%";
+  const translateX = view === "main" ? "0%" : view === "notes" ? "-25%" : view === "activites" ? "-50%" : "-75%";
 
   return (
     <>
@@ -107,13 +107,13 @@ export default function AddMemoSheet({ open, onOpenChange, enfantId }: Props) {
             <div
               style={{
                 display: "flex",
-                width: "300%",
+                width: "400%",
                 transform: `translateX(${translateX})`,
                 transition: "transform 0.3s ease",
               }}
             >
               {/* === Main panel === */}
-              <nav className="w-full px-2 pb-4 pt-1" style={{ flex: "0 0 33.333%" }}>
+              <nav className="w-full px-2 pb-4 pt-1" style={{ flex: "0 0 25%" }}>
                 <MenuItem
                   icon={<NotebookPen className="h-5 w-5" />}
                   label="Note de rendez-vous"
@@ -137,7 +137,7 @@ export default function AddMemoSheet({ open, onOpenChange, enfantId }: Props) {
               </nav>
 
               {/* === Notes sub-menu === */}
-              <nav className="w-full px-2 pb-4 pt-1" style={{ flex: "0 0 33.333%" }}>
+              <nav className="w-full px-2 pb-4 pt-1" style={{ flex: "0 0 25%" }}>
                 <BackHeader label="Note de rendez-vous" onBack={() => setView("main")} />
                 <MenuItem
                   icon={<Mic className="h-5 w-5" />}
@@ -152,7 +152,7 @@ export default function AddMemoSheet({ open, onOpenChange, enfantId }: Props) {
               </nav>
 
               {/* === Activites sub-menu === */}
-              <div className="w-full px-2 pb-4 pt-1" style={{ flex: "0 0 33.333%" }}>
+              <div className="w-full px-2 pb-4 pt-1" style={{ flex: "0 0 25%" }}>
                 <BackHeader label="Activité" onBack={() => setView("main")} />
                 {loadingActivites ? (
                   <div className="flex items-center justify-center py-6">
@@ -178,8 +178,8 @@ export default function AddMemoSheet({ open, onOpenChange, enfantId }: Props) {
                       <button
                         key={a.id}
                         onClick={() => {
-                          onOpenChange(false);
                           setSelectedActivite(a);
+                          setView("chrono-choice");
                         }}
                         className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left hover:bg-muted transition-colors"
                       >
@@ -202,44 +202,40 @@ export default function AddMemoSheet({ open, onOpenChange, enfantId }: Props) {
                   })
                 )}
               </div>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
 
-      {/* Dialog chrono/manuel — centered popup like activity selection */}
-      <Dialog open={!!selectedActivite} onOpenChange={(o) => !o && setSelectedActivite(null)}>
-        <DialogContent className="max-w-[340px] rounded-2xl p-0 border-none shadow-lg" hideClose={false}>
-          <div className="pt-5 pb-6 flex flex-col gap-3" style={{ padding: "20px 20px 24px" }}>
-            <DialogTitle className="text-base font-serif font-semibold text-foreground text-center">
-              {selectedActivite?.nom}
-            </DialogTitle>
-            <button
-              onClick={() => { navigate(`/outils/activites/${selectedActivite!.id}/chrono`); setSelectedActivite(null); }}
-              className="flex items-center gap-3 rounded-2xl transition-transform active:scale-[0.97]"
-              style={{ ...glassCard, padding: "12px 14px" }}
-            >
-              <div className="flex items-center justify-center w-9 h-9 rounded-xl" style={{ background: "linear-gradient(135deg, #E8736A, #8B74E0)" }}>
-                <Timer className="h-5 w-5 text-white" />
+              {/* === Chrono/Manuel choice === */}
+              <div className="w-full px-2 pb-4 pt-1" style={{ flex: "0 0 25%" }}>
+                <BackHeader label={selectedActivite?.nom || "Activité"} onBack={() => setView("activites")} />
+                <div className="flex flex-col gap-3 mt-1">
+                  <button
+                    onClick={() => { navigate(`/outils/activites/${selectedActivite!.id}/chrono`); onOpenChange(false); setSelectedActivite(null); }}
+                    className="flex items-center gap-3 rounded-2xl transition-transform active:scale-[0.97]"
+                    style={{ ...glassCard, padding: "12px 14px" }}
+                  >
+                    <div className="flex items-center justify-center w-9 h-9 rounded-xl" style={{ background: "linear-gradient(135deg, #E8736A, #8B74E0)" }}>
+                      <Timer className="h-5 w-5 text-white" />
+                    </div>
+                    <div className="flex flex-col text-left">
+                      <span className="text-[14px] font-sans font-medium text-foreground">Lancer le chrono</span>
+                      <span className="text-[11px] font-sans text-muted-foreground">Démarre un minuteur en temps réel</span>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => { navigate(`/outils/activites/${selectedActivite!.id}/manuel`); onOpenChange(false); setSelectedActivite(null); }}
+                    className="flex items-center gap-3 rounded-2xl transition-transform active:scale-[0.97]"
+                    style={{ ...glassCard, padding: "12px 14px" }}
+                  >
+                    <div className="flex items-center justify-center w-9 h-9 rounded-xl" style={{ background: "linear-gradient(135deg, #44A882, #5CA8D8)" }}>
+                      <PenLine className="h-5 w-5 text-white" />
+                    </div>
+                    <div className="flex flex-col text-left">
+                      <span className="text-[14px] font-sans font-medium text-foreground">Ajouter manuellement</span>
+                      <span className="text-[11px] font-sans text-muted-foreground">Saisir durée et distance après la séance</span>
+                    </div>
+                  </button>
+                </div>
               </div>
-              <div className="flex flex-col text-left">
-                <span className="text-[14px] font-sans font-medium text-foreground">Lancer le chrono</span>
-                <span className="text-[11px] font-sans text-muted-foreground">Démarre un minuteur en temps réel</span>
-              </div>
-            </button>
-            <button
-              onClick={() => { navigate(`/outils/activites/${selectedActivite!.id}/manuel`); setSelectedActivite(null); }}
-              className="flex items-center gap-3 rounded-2xl transition-transform active:scale-[0.97]"
-              style={{ ...glassCard, padding: "12px 14px" }}
-            >
-              <div className="flex items-center justify-center w-9 h-9 rounded-xl" style={{ background: "linear-gradient(135deg, #44A882, #5CA8D8)" }}>
-                <PenLine className="h-5 w-5 text-white" />
-              </div>
-              <div className="flex flex-col text-left">
-                <span className="text-[14px] font-sans font-medium text-foreground">Ajouter manuellement</span>
-                <span className="text-[11px] font-sans text-muted-foreground">Saisir durée et distance après la séance</span>
-              </div>
-            </button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
