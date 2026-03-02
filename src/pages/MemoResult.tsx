@@ -31,6 +31,7 @@ interface StructuredContent {
   tags?: string[];
   intervenant_detected?: string | null;
   points_cles?: string[];
+  mode?: string;
 }
 
 interface MemoData {
@@ -155,6 +156,10 @@ const MemoResult = () => {
   const [signedFileUrl, setSignedFileUrl] = useState<string | null>(null);
   const [activitySaving, setActivitySaving] = useState<string | null>(null);
   const [activitySaved, setActivitySaved] = useState<string | null>(null);
+  // text_quick collapsible sections
+  const [showDomaines, setShowDomaines] = useState(false);
+  const [showARetenir, setShowARetenir] = useState(false);
+  const [showTags, setShowTags] = useState(false);
   // Temp edit values
   const [tempResume, setTempResume] = useState("");
   const [tempDetails, setTempDetails] = useState("");
@@ -359,7 +364,8 @@ const MemoResult = () => {
 
   const saveDetails = () => {
     if (!memo) return;
-    const items = tempDetails.split("\n").filter(l => l.trim());
+    const isQuick = memo.content_structured?.mode === "text_quick";
+    const items = isQuick ? [tempDetails] : tempDetails.split("\n").filter(l => l.trim());
     const updatedStructured = { ...(memo.content_structured || {}), details: items };
     autoSave({ content_structured: updatedStructured });
     setEditingField(null);
@@ -434,6 +440,7 @@ const MemoResult = () => {
 
   const readOnly = role === "famille";
   const structured = memo.content_structured;
+  const isTextQuick = structured?.mode === "text_quick";
   const details = structured?.details || structured?.points_cles || [];
   const suggestions = structured?.a_retenir || structured?.suggestions || [];
   const tags = structured?.tags || [];
@@ -1233,6 +1240,16 @@ const MemoResult = () => {
           )}
 
           {/* 3. DOMAINES SELECTOR */}
+          {isTextQuick && tags.length === 0 && !showDomaines ? (
+            <button
+              onClick={() => setShowDomaines(true)}
+              className="flex items-center gap-1.5 bg-transparent border-none cursor-pointer p-0 mx-auto"
+              style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#8B74E0", fontWeight: 500 }}
+            >
+              <Plus size={14} />
+              Ajouter des domaines
+            </button>
+          ) : (
           <div style={glassCard}>
             <p style={sectionLabel}>DOMAINES</p>
             <div className="flex items-start justify-center gap-4">
@@ -1282,6 +1299,7 @@ const MemoResult = () => {
               </span>
             </button>
           </div>
+          )}
 
           {/* 4. RÉSUMÉ — inline edit */}
           <div style={glassCard}>
@@ -1324,7 +1342,7 @@ const MemoResult = () => {
 
           {/* 5. DÉTAILS — inline edit */}
           <div style={glassCard}>
-            <p style={sectionLabel}>DÉTAILS</p>
+            <p style={sectionLabel}>{isTextQuick ? "VOTRE NOTE" : "DÉTAILS"}</p>
             {editingField === "details" ? (
               <textarea
                 ref={detailsRef}
@@ -1332,7 +1350,7 @@ const MemoResult = () => {
                 onChange={(e) => setTempDetails(e.target.value)}
                 onBlur={saveDetails}
                 rows={4}
-                placeholder="Un élément par ligne..."
+                placeholder={isTextQuick ? "Modifier votre note..." : "Un élément par ligne..."}
                 className="w-full outline-none resize-none placeholder:text-[#9A9490]"
                 style={{
                   fontFamily: "'DM Sans', sans-serif",
@@ -1348,26 +1366,56 @@ const MemoResult = () => {
             ) : (
               <div
                 className={readOnly ? "" : "cursor-pointer"}
-                onClick={readOnly ? undefined : startEditDetails}
+                onClick={readOnly ? undefined : () => {
+                  if (isTextQuick) {
+                    setTempDetails(details[0] || "");
+                  } else {
+                    setTempDetails(details.join("\n"));
+                  }
+                  setEditingField("details");
+                  setTimeout(() => detailsRef.current?.focus(), 50);
+                }}
                 style={{ minHeight: 24 }}
               >
                 {details.length > 0 ? (
-                  <ul className="space-y-1.5" style={{ margin: 0, paddingLeft: 0, listStyle: "none" }}>
-                    {details.map((d, i) => (
-                      <li key={i} className="flex gap-2" style={{ fontSize: 15, color: "#1E1A1A", fontFamily: "'DM Sans', sans-serif" }}>
-                        <span style={{ color: "#8B74E0", marginTop: 2 }}>•</span>
-                        <span>{d}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  isTextQuick ? (
+                    <p style={{ fontSize: 15, color: "#1E1A1A", fontFamily: "'DM Sans', sans-serif", lineHeight: 1.6, whiteSpace: "pre-wrap" }}>
+                      {details[0]}
+                    </p>
+                  ) : (
+                    <ul className="space-y-1.5" style={{ margin: 0, paddingLeft: 0, listStyle: "none" }}>
+                      {details.map((d, i) => (
+                        <li key={i} className="flex gap-2" style={{ fontSize: 15, color: "#1E1A1A", fontFamily: "'DM Sans', sans-serif" }}>
+                          <span style={{ color: "#8B74E0", marginTop: 2 }}>•</span>
+                          <span>{d}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )
                 ) : (
-                  <span style={{ color: "#9A9490", fontStyle: "italic", fontSize: 15 }}>Ajouter des détails...</span>
+                  <span style={{ color: "#9A9490", fontStyle: "italic", fontSize: 15 }}>
+                    {isTextQuick ? "Ajouter votre note..." : "Ajouter des détails..."}
+                  </span>
                 )}
               </div>
             )}
           </div>
 
           {/* 6. À RETENIR — inline edit */}
+          {isTextQuick && suggestions.length === 0 && editingField !== "suggestions" ? (
+            <button
+              onClick={() => {
+                setTempSuggestions("");
+                setEditingField("suggestions");
+                setTimeout(() => suggestionsRef.current?.focus(), 50);
+              }}
+              className="flex items-center gap-1.5 bg-transparent border-none cursor-pointer p-0 mx-auto"
+              style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#8B74E0", fontWeight: 500 }}
+            >
+              <Plus size={14} />
+              Ajouter des points à retenir
+            </button>
+          ) : (
           <div style={glassCard}>
             <p style={sectionLabel}>À RETENIR</p>
             {editingField === "suggestions" ? (
@@ -1411,8 +1459,19 @@ const MemoResult = () => {
               </div>
             )}
           </div>
+          )}
 
-          {/* 7. TAGS — always visible */}
+          {/* 7. TAGS */}
+          {isTextQuick && tags.length === 0 && !showTags ? (
+            <button
+              onClick={() => setShowTags(true)}
+              className="flex items-center gap-1.5 bg-transparent border-none cursor-pointer p-0 mx-auto"
+              style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#8B74E0", fontWeight: 500 }}
+            >
+              <Plus size={14} />
+              Ajouter des tags
+            </button>
+          ) : (
           <div style={glassCard}>
             <p style={sectionLabel}>TAGS</p>
             <div className="flex flex-wrap gap-2 mb-3">
@@ -1470,6 +1529,7 @@ const MemoResult = () => {
               </div>
             )}
           </div>
+          )}
             </>
           )}
         </div>
