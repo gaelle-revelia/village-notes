@@ -130,8 +130,14 @@ export function StepVocabulaire({
             <VocabBlock
               key={motCorrect}
               motCorrect={motCorrect}
-              variantes={variantes}
+              variantes={variantes.map((v, i) => ({ id: `temp-${motCorrect}-${i}`, mot_transcrit: v }))}
+              isEditing={false}
+              onStartEdit={() => {}}
+              onCancelEdit={() => {}}
+              onRename={async () => {}}
               onRemoveBlock={() => removeBlock(motCorrect)}
+              onRemoveVariant={() => {}}
+              onAddVariant={() => {}}
             />
           ))}
         </div>
