@@ -1,75 +1,110 @@
 
 
-## Refonte du menu FAB "+" de la Timeline
+# Lexique partagé — Table + Edge Function
 
-### Objectif
-Extraire le menu du bouton "+" dans un composant dedie `AddMemoSheet.tsx`, avec une nouvelle structure hierarchique : sous-menu inline pour "Note de rendez-vous", entree "Activite" avec liste dynamique et drawer chrono/manuel.
+## Objectif
+Creer l'infrastructure backend pour le systeme de lexique partage : une table `enfant_lexique` pour stocker les correspondances phonetiques, et une edge function `generate-lexique` qui utilise l'IA pour generer ces variantes.
 
-### Architecture
+---
 
-Le menu actuel est inline dans `Timeline.tsx` (Dialog + menuItems). On va :
-1. Creer `src/components/AddMemoSheet.tsx` — composant autonome recevant `open`, `onOpenChange`, `enfantId`
-2. Simplifier `Timeline.tsx` pour utiliser ce composant
+## PART A — Migration SQL
 
-### Structure du menu
+Creer la table `enfant_lexique` avec :
+- `id` (uuid, PK)
+- `enfant_id` (uuid, FK vers enfants, ON DELETE CASCADE)
+- `mot_transcrit` (text, NOT NULL)
+- `mot_correct` (text, NOT NULL)
+- `created_at` (timestamptz, default now())
 
-```text
-+------------------------------------------+
-|                                      [X]  |
-|  NotebookPen  Note de rendez-vous    >    |  <- tap = expand inline
-|  FileText     Document               >    |  <- tap = navigate
-|  Pin          Evenement              >    |  <- tap = navigate
-|  Activity     Activite              >    |  <- tap = expand inline
-+------------------------------------------+
+Activer RLS et ajouter 4 politiques (SELECT, INSERT, UPDATE, DELETE) basees sur l'appartenance via `enfant_membres`.
 
-Sous-menu "Note de rendez-vous" (slide inline) :
-+------------------------------------------+
-|  <  Note de rendez-vous                   |
-|  Mic       Note vocale               >    |
-|  PenLine   Note ecrite              >    |
-+------------------------------------------+
+Ajouter un index sur `enfant_id`.
 
-Sous-menu "Activite" (slide inline) :
-+------------------------------------------+
-|  <  Activite                              |
-|  [icon]  Natation    Moteur          >    |
-|  [icon]  Marche      Moteur          >    |
-|  ...                                      |
-+------------------------------------------+
-  -> Tap sur une activite -> Drawer Chrono/Manuel (meme que OutilsActivites)
+## PART B — Edge Function `generate-lexique`
+
+Creer `supabase/functions/generate-lexique/index.ts` :
+- CORS headers (meme pattern que `suggest-icon`)
+- Auth check via Bearer token
+- Appel Lovable AI gateway avec `google/gemini-3-flash-preview`
+- System prompt pour generation de variantes phonetiques
+- User prompt avec prenom + intervenants injectes
+- Parse JSON, retour `{ entries: [...] }`, fallback `{ entries: [] }` si erreur de parse
+- Gestion erreurs 429/402
+
+Ajouter `[functions.generate-lexique]` dans `supabase/config.toml` avec `verify_jwt = false`.
+
+---
+
+## Details techniques
+
+### Migration SQL
+
+```sql
+CREATE TABLE public.enfant_lexique (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  enfant_id uuid NOT NULL REFERENCES public.enfants(id) ON DELETE CASCADE,
+  mot_transcrit text NOT NULL,
+  mot_correct text NOT NULL,
+  created_at timestamptz DEFAULT now()
+);
+
+CREATE INDEX idx_enfant_lexique_enfant_id ON public.enfant_lexique(enfant_id);
+
+ALTER TABLE public.enfant_lexique ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "members can read enfant lexique"
+  ON public.enfant_lexique FOR SELECT
+  USING (EXISTS (
+    SELECT 1 FROM public.enfant_membres
+    WHERE enfant_membres.enfant_id = enfant_lexique.enfant_id
+    AND enfant_membres.user_id = auth.uid()
+  ));
+
+CREATE POLICY "members can insert enfant lexique"
+  ON public.enfant_lexique FOR INSERT
+  WITH CHECK (EXISTS (
+    SELECT 1 FROM public.enfant_membres
+    WHERE enfant_membres.enfant_id = enfant_lexique.enfant_id
+    AND enfant_membres.user_id = auth.uid()
+  ));
+
+CREATE POLICY "members can update enfant lexique"
+  ON public.enfant_lexique FOR UPDATE
+  USING (EXISTS (
+    SELECT 1 FROM public.enfant_membres
+    WHERE enfant_membres.enfant_id = enfant_lexique.enfant_id
+    AND enfant_membres.user_id = auth.uid()
+  ));
+
+CREATE POLICY "members can delete enfant lexique"
+  ON public.enfant_lexique FOR DELETE
+  USING (EXISTS (
+    SELECT 1 FROM public.enfant_membres
+    WHERE enfant_membres.enfant_id = enfant_lexique.enfant_id
+    AND enfant_membres.user_id = auth.uid()
+  ));
 ```
 
-### Plan technique
+### Edge Function `generate-lexique`
 
-**1. Creer `src/components/AddMemoSheet.tsx`**
+Pattern identique a `suggest-icon` :
+- CORS headers standard
+- Validation du body (`prenom_enfant` requis, `intervenants` tableau)
+- Appel AI gateway avec les prompts specifies
+- Extraction du contenu, `JSON.parse` avec try/catch
+- Retour `{ entries: [] }` en cas d'echec de parsing (pas de throw)
+- Gestion 429 (rate limit) et 402 (payment required) avec messages explicites
 
-- Props : `open: boolean`, `onOpenChange: (v: boolean) => void`, `enfantId: string | null`
-- State interne : `view` = `"main"` | `"notes"` | `"activites"` | `null`
-- State : `activites: Activite[]`, `selectedActivite: Activite | null`
-- `useEffect` : fetch activites quand `view === "activites"` et `enfantId` existe
-- Icones Lucide uniquement : `NotebookPen`, `Mic`, `PenLine`, `FileText`, `Pin`, `Activity`, `Timer`, `ChevronRight`, `ChevronLeft`, `X`
-- Meme Dialog glass que l'actuel
-- Animation slide entre vues : transition CSS `transform` + `opacity` (300ms)
-- Quand tap sur une activite : fermer le Dialog, ouvrir le Drawer chrono/manuel (meme pattern exact que `OutilsActivites.tsx` lignes 149-183)
-- Style glass identique au reste de l'app, aucun emoji
-
-**2. Modifier `Timeline.tsx`**
-
-- Supprimer `menuItems`, le bloc `<Dialog>` entier, et les imports `Dialog*`, `ChevronRight`, `X`
-- Importer `AddMemoSheet` et le rendre avec `open={sheetOpen}`, `onOpenChange={setSheetOpen}`, `enfantId` depuis `useEnfantId()`
-- Le FAB reste inchange
-
-### Details d'implementation
-
-- Le sous-menu "Note de rendez-vous" affiche 2 items : Note vocale (`/nouveau-memo-vocal`) et Note ecrite (`/nouvelle-note`)
-- Le sous-menu "Activite" fetch `activites` WHERE `enfant_id = enfantId AND actif = true`, affiche chaque activite avec son icone Lucide dynamique et son domaine colore (meme rendu que `OutilsActivites.tsx`)
-- Le Drawer chrono/manuel est integre dans `AddMemoSheet.tsx` (pas de navigation vers OutilsActivites) — il reutilise exactement le meme markup : DrawerContent avec 2 boutons (Lancer le chrono → `/outils/activites/{id}/chrono`, Ajouter manuellement → `/outils/activites/{id}/manuel`)
-- Transition entre vues : les 3 panneaux (main, notes, activites) sont rendus cote a cote dans un conteneur overflow-hidden, avec `translateX` anime selon la vue active
-
-### Fichiers modifies
+### Fichiers modifies/crees
 
 | Fichier | Action |
 |---|---|
-| `src/components/AddMemoSheet.tsx` | Creer (nouveau composant) |
-| `src/pages/Timeline.tsx` | Simplifier : retirer Dialog inline, utiliser AddMemoSheet |
+| Migration SQL | Nouvelle migration |
+| `supabase/functions/generate-lexique/index.ts` | Creation |
+| `supabase/config.toml` | Ajout section `[functions.generate-lexique]` |
+
+### Ce qui n'est PAS touche
+- `process-memo` edge function
+- Tables existantes et leurs RLS
+- Logique d'authentification
 
