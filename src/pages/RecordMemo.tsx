@@ -143,15 +143,11 @@ const RecordMemo = () => {
   return (
     <main className="flex min-h-screen flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-10 flex items-center px-4 py-3" style={{ background: "rgba(255,255,255,0.72)", backdropFilter: "blur(20px) saturate(1.5)", WebkitBackdropFilter: "blur(20px) saturate(1.5)", borderBottom: "1px solid rgba(255,255,255,0.6)", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
-        <button
-          onClick={handleBack}
-          className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Retour
+      <header className="sticky top-0 z-10 flex items-center gap-3 px-4 py-3" style={{ background: "rgba(255,255,255,0.72)", backdropFilter: "blur(20px) saturate(1.5)", WebkitBackdropFilter: "blur(20px) saturate(1.5)", borderBottom: "1px solid rgba(255,255,255,0.6)", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
+        <button onClick={handleBack} className="p-1">
+          <ArrowLeft className="h-5 w-5 text-foreground" />
         </button>
-        <h1 className="flex-1 text-center text-lg font-semibold text-card-foreground pr-12">
+        <h1 className="text-lg font-semibold text-foreground" style={{ fontFamily: "'Fraunces', serif" }}>
           {phase === "pick-intervenant"
             ? "Nouveau mémo"
             : phase === "recording"
