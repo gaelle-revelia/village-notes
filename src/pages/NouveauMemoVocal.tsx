@@ -235,22 +235,14 @@ const NouveauMemoVocal = () => {
     <div className="flex min-h-screen flex-col">
       {/* Header */}
       <header className="sticky top-0 z-10 px-4 py-3 flex items-center gap-3" style={{ background: "rgba(255,255,255,0.72)", backdropFilter: "blur(20px) saturate(1.5)", WebkitBackdropFilter: "blur(20px) saturate(1.5)", borderBottom: "1px solid rgba(255,255,255,0.6)", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
-        <button
-          onClick={() => navigate("/timeline")}
-          className="text-muted-foreground hover:text-foreground text-sm flex items-center gap-1"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Retour
+        <button onClick={() => navigate("/timeline")} className="text-muted-foreground hover:text-foreground">
+          <ArrowLeft className="h-5 w-5" />
         </button>
+        <h1 className="text-xl font-semibold text-card-foreground">Nouveau mémo</h1>
       </header>
 
       <main className="flex-1 px-4 py-6">
         <div className="mx-auto max-w-[400px] space-y-6">
-          {/* Title */}
-          <h2 className="font-serif text-2xl font-semibold text-card-foreground text-center">
-            Nouveau mémo
-          </h2>
-
           {/* Date field */}
           <MemoDatePicker date={memoDate} onDateChange={setMemoDate} />
 
