@@ -75,7 +75,7 @@ const RecordMemo = () => {
         // Upload audio
         const storagePath = `${user.id}/${memo.id}.webm`;
         const { error: uploadError } = await supabase.storage
-          .from("voice-memos")
+          .from("audio-temp")
           .upload(storagePath, audioBlob, {
             contentType: "audio/webm",
             upsert: true,
