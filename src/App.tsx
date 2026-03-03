@@ -8,7 +8,7 @@ import Auth from "./pages/Auth";
 import Timeline from "./pages/Timeline";
 import Onboarding from "./pages/Onboarding";
 import ResetPassword from "./pages/ResetPassword";
-import RecordMemo from "./pages/RecordMemo";
+
 import NouveauMemoVocal from "./pages/NouveauMemoVocal";
 import NouvelleNote from "./pages/NouvelleNote";
 import NouveauDocument from "./pages/NouveauDocument";
@@ -48,7 +48,7 @@ const AppRoutes = () => {
       <Route path="/explorer" element={<ExplorerScreen />} />
       <Route path="/onboarding" element={<Onboarding />} />
       <Route path="/reset-password" element={<ResetPassword />} />
-      <Route path="/record" element={<RecordMemo />} />
+      <Route path="/record" element={<Navigate to="/nouveau-memo-vocal" replace />} />
       <Route path="/nouveau-memo-vocal" element={<NouveauMemoVocal />} />
       <Route path="/nouvelle-note" element={<NouvelleNote />} />
       <Route path="/nouveau-document" element={<NouveauDocument />} />
