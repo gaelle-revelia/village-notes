@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Mic, Copy, Share2, Pencil, RefreshCw, Sparkles, Settings, Stethoscope, BookOpen, Users, Mail } from "lucide-react";
+import { ArrowLeft, Mic, Copy, Share2, Pencil, RefreshCw, Sparkles, Settings, Stethoscope, BookOpen, Users, Briefcase, Mail } from "lucide-react";
 import BottomNavBar from "@/components/BottomNavBar";
 import { useEnfantPrenom } from "@/hooks/useEnfantPrenom";
 import { useEnfantId } from "@/hooks/useEnfantId";
@@ -24,25 +24,14 @@ const AiBubble = ({ text, italic }: { text: string; italic?: boolean }) => (
   <div className="flex items-end gap-3 mb-5">
     <div
       className="flex-shrink-0 flex items-center justify-center"
-      style={{
-        width: 40, height: 40, borderRadius: "50%",
-        background: "linear-gradient(135deg, #E8736A, #8B74E0)",
-        boxShadow: "0 0 16px rgba(139,116,224,0.4)",
-      }}
+      style={{ width: 40, height: 40, borderRadius: "50%", background: "linear-gradient(135deg, #E8736A, #8B74E0)", boxShadow: "0 0 16px rgba(139,116,224,0.4)" }}
     >
       <Sparkles size={18} color="#fff" />
     </div>
     <div className="flex-1 min-w-0">
-      <span className="block mb-1 font-sans font-medium" style={{ color: "#8B74E0", fontSize: 11 }}>
-        The Village
-      </span>
-      <div
-        className="px-4 py-3 inline-block"
-        style={{ ...glassCard, background: "rgba(255,255,255,0.55)", border: "1px solid rgba(255,255,255,0.85)", maxWidth: "75%" }}
-      >
-        <p className={`text-[14px] font-sans leading-snug ${italic ? "italic" : ""}`} style={{ color: italic ? "#9A9490" : "#1E1A1A" }}>
-          {text}
-        </p>
+      <span className="block mb-1 font-sans font-medium" style={{ color: "#8B74E0", fontSize: 11 }}>The Village</span>
+      <div className="px-4 py-3 inline-block" style={{ ...glassCard, background: "rgba(255,255,255,0.55)", border: "1px solid rgba(255,255,255,0.85)", maxWidth: "75%" }}>
+        <p className={`text-[14px] font-sans leading-snug ${italic ? "italic" : ""}`} style={{ color: italic ? "#9A9490" : "#1E1A1A" }}>{text}</p>
       </div>
     </div>
   </div>
@@ -64,7 +53,55 @@ const SectionSeparator = ({ text }: { text: string }) => (
   </div>
 );
 
-// --- Thematic block card ---
+const MicOrb = ({ disabled }: { disabled?: boolean }) => (
+  <div className="flex flex-col items-center gap-2 mb-5">
+    <div
+      className="flex items-center justify-center"
+      style={{ width: 72, height: 72, borderRadius: "50%", background: "linear-gradient(135deg, #E8736A, #8B74E0)", boxShadow: "0 0 24px rgba(139,116,224,0.4)", cursor: "not-allowed", opacity: disabled ? 0.4 : 1 }}
+    >
+      <Mic size={30} color="#fff" />
+    </div>
+    <span className="text-[12px] font-sans" style={{ color: "#9A9490" }}>Appuie pour parler</span>
+  </div>
+);
+
+const OrSeparator = () => (
+  <div className="flex justify-center my-4">
+    <span className="text-[13px] font-sans" style={{ color: "#9A9490" }}>ou</span>
+  </div>
+);
+
+interface ChipGroupProps {
+  chips: string[];
+  selected: string[];
+  multi?: boolean;
+  disabled?: boolean;
+  onToggle: (chip: string) => void;
+}
+
+const ChipGroup = ({ chips, selected, multi, disabled, onToggle }: ChipGroupProps) => (
+  <div className="flex flex-wrap justify-center gap-2 my-4">
+    {chips.map((c) => {
+      const active = selected.includes(c);
+      return (
+        <button
+          key={c}
+          disabled={disabled}
+          onClick={() => !disabled && onToggle(c)}
+          className="w-fit px-3.5 py-2 text-[12px] font-sans transition-all text-left"
+          style={{
+            ...(active ? { background: "#8B74E0", color: "#fff", borderRadius: 999, border: "none" } : { ...glassCard, borderRadius: 999 }),
+            opacity: disabled ? 0.5 : 1,
+            cursor: disabled ? "default" : "pointer",
+          }}
+        >
+          {c}
+        </button>
+      );
+    })}
+  </div>
+);
+
 interface ThematicBlockProps {
   icon: React.ReactNode;
   title: string;
@@ -78,24 +115,24 @@ const ThematicBlock = ({ icon, title, badge, body }: ThematicBlockProps) => (
       {icon}
       <h3 className="text-[16px] font-serif font-semibold" style={{ color: "#1E1A1A" }}>{title}</h3>
     </div>
-    <span
-      className="inline-block px-2.5 py-0.5 text-[11px] font-sans font-medium mb-3"
-      style={{ background: "rgba(139,116,224,0.12)", color: "#8B74E0", borderRadius: 999 }}
-    >
+    <span className="inline-block px-2.5 py-0.5 text-[11px] font-sans font-medium mb-3" style={{ background: "rgba(139,116,224,0.12)", color: "#8B74E0", borderRadius: 999 }}>
       {badge}
     </span>
     <p className="text-[14px] font-sans leading-relaxed mb-3" style={{ color: "#1E1A1A" }}>{body}</p>
-    <button
-      className="w-full py-2.5 text-[13px] font-sans font-medium"
-      style={{ border: "1.5px dashed #8B74E0", color: "#8B74E0", borderRadius: 12, background: "transparent" }}
-    >
+    <button className="w-full py-2.5 text-[13px] font-sans font-medium" style={{ border: "1.5px dashed #8B74E0", color: "#8B74E0", borderRadius: 12, background: "transparent" }}>
       ✏️ Préciser ce bloc
     </button>
   </div>
 );
 
-// --- Main ---
-const CHIPS = ["Renouvellement MDPH", "Première demande", "Changement de situation"];
+// --- Questions config ---
+const Q1_CHIPS = ["Première demande", "Renouvellement", "Évolution de situation"];
+const Q2_CHIPS = ["AEEH / complément AEEH", "PCH", "SESSAD", "Carte mobilité", "Autre"];
+const Q3_CHIPS = ["Nouveau diagnostic", "Nouveaux soins", "Changement situation pro", "Nouveau matériel", "Scolarisation à venir"];
+const Q4_CHIPS = ["En emploi", "Arrêt lié au handicap", "Sans emploi", "Freelance / indépendant"];
+const Q5_CHIPS = ["Entrée à l'école", "Mise en place SESSAD", "Nouveau matériel", "Plus d'autonomie"];
+
+type Phase = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
 const OutilsSyntheseMdph = () => {
   const navigate = useNavigate();
@@ -106,87 +143,88 @@ const OutilsSyntheseMdph = () => {
   const displayName = prenom ?? "votre enfant";
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  type Phase = "context" | "result";
-  const [phase, setPhase] = useState<Phase>("context");
-  const [selectedChip, setSelectedChip] = useState<string | null>(null);
-  const [freeText, setFreeText] = useState("");
+  const [phase, setPhase] = useState<Phase>(1);
   const [memoCount, setMemoCount] = useState<number | null>(null);
   const [parentPrenom, setParentPrenom] = useState<string | null>(null);
   const [emailValue, setEmailValue] = useState("");
 
-  // Fetch memo count
+  // Q1 single-select
+  const [q1, setQ1] = useState<string | null>(null);
+  // Q2 multi-select
+  const [q2, setQ2] = useState<string[]>([]);
+  // Q3 multi-select + textarea
+  const [q3Chips, setQ3Chips] = useState<string[]>([]);
+  const [q3Text, setQ3Text] = useState("");
+  // Q4 single-select + textarea
+  const [q4, setQ4] = useState<string | null>(null);
+  const [q4Text, setQ4Text] = useState("");
+  // Q5 multi-select + textarea
+  const [q5Chips, setQ5Chips] = useState<string[]>([]);
+  const [q5Text, setQ5Text] = useState("");
+  // Q6 textarea only
+  const [q6Text, setQ6Text] = useState("");
+
   useEffect(() => {
     if (!enfantId) return;
-    supabase
-      .from("memos")
-      .select("id", { count: "exact", head: true })
-      .eq("enfant_id", enfantId)
-      .then(({ count }) => setMemoCount(count ?? 0));
+    supabase.from("memos").select("id", { count: "exact", head: true }).eq("enfant_id", enfantId).then(({ count }) => setMemoCount(count ?? 0));
   }, [enfantId]);
 
-  // Fetch parent name
   useEffect(() => {
     if (!user) return;
-    supabase
-      .from("profiles")
-      .select("prenom")
-      .eq("user_id", user.id)
-      .single()
-      .then(({ data }) => { if (data?.prenom) setParentPrenom(data.prenom); });
+    supabase.from("profiles").select("prenom").eq("user_id", user.id).single().then(({ data }) => { if (data?.prenom) setParentPrenom(data.prenom); });
   }, [user]);
 
-  // Auto-scroll
   useEffect(() => {
     setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
   }, [phase]);
 
-  const contextDisabled = phase !== "context";
-  const contextText = selectedChip || freeText.trim() || "Aucun contexte ajouté";
+  const toggleSingle = (val: string, current: string | null, setter: (v: string | null) => void) => {
+    setter(current === val ? null : val);
+  };
 
-  const handleGenerate = () => setPhase("result");
+  const toggleMulti = (val: string, current: string[], setter: (v: string[]) => void) => {
+    setter(current.includes(val) ? current.filter((c) => c !== val) : [...current, val]);
+  };
+
+  // Answer text helpers
+  const q3Answer = () => {
+    const parts = [...q3Chips];
+    if (q3Text.trim()) parts.push(q3Text.trim());
+    return parts.join(" · ") || "Aucun changement";
+  };
+  const q4Answer = () => q4 || q4Text.trim() || "Non précisé";
+  const q5Answer = () => {
+    const parts = [...q5Chips];
+    if (q5Text.trim()) parts.push(q5Text.trim());
+    return parts.join(" · ") || "Non précisé";
+  };
+  const q6Answer = () => q6Text.trim() || "Rien à ajouter";
+
+  // CTA enabled states
+  const cta1Enabled = !!q1;
+  const cta2Enabled = q2.length > 0;
+  const cta3Enabled = q3Chips.length > 0 || q3Text.trim().length > 0;
+  const cta4Enabled = !!q4 || q4Text.trim().length > 0;
+  const cta5Enabled = q5Chips.length > 0 || q5Text.trim().length > 0;
 
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText("Contenu du dossier MDPH copié");
       toast({ title: "Copié dans le presse-papier ✅" });
-    } catch {
-      toast({ title: "Impossible de copier", variant: "destructive" });
-    }
+    } catch { toast({ title: "Impossible de copier", variant: "destructive" }); }
   };
 
-  // --- Sticky bottom ---
-  const renderStickyBottom = () => {
-    if (phase === "result") {
+  // --- CTA ---
+  const renderCta = () => {
+    if (phase === 7) {
       return (
-        <div
-          className="fixed bottom-16 left-0 right-0 z-10 px-4 py-3"
-          style={{
-            background: "rgba(255,255,255,0.72)",
-            backdropFilter: "blur(20px) saturate(1.5)",
-            WebkitBackdropFilter: "blur(20px) saturate(1.5)",
-            borderTop: "1px solid rgba(255,255,255,0.6)",
-            boxShadow: "0 -2px 12px rgba(0,0,0,0.05)",
-          }}
-        >
+        <div className="fixed bottom-16 left-0 right-0 z-10 px-4 py-3" style={{ background: "rgba(255,255,255,0.72)", backdropFilter: "blur(20px) saturate(1.5)", WebkitBackdropFilter: "blur(20px) saturate(1.5)", borderTop: "1px solid rgba(255,255,255,0.6)", boxShadow: "0 -2px 12px rgba(0,0,0,0.05)" }}>
           <div className="flex items-center gap-2">
             <div className="flex-1 relative">
               <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "#9A9490" }} />
-              <Input
-                type="email"
-                placeholder="ton@email.com"
-                value={emailValue}
-                onChange={(e) => setEmailValue(e.target.value)}
-                className="pl-9 text-[13px] font-sans border-none"
-                style={{ ...glassCard, borderRadius: 999, height: 44 }}
-              />
+              <Input type="email" placeholder="ton@email.com" value={emailValue} onChange={(e) => setEmailValue(e.target.value)} className="pl-9 text-[13px] font-sans border-none" style={{ ...glassCard, borderRadius: 999, height: 44 }} />
             </div>
-            <button
-              className="px-5 py-2.5 text-[13px] font-sans font-semibold flex-shrink-0"
-              style={{
-                background: "linear-gradient(135deg, #E8736A, #8B74E0)",
-                color: "#fff", borderRadius: 999, border: "none",
-              }}
-            >
+            <button className="px-5 py-2.5 text-[13px] font-sans font-semibold flex-shrink-0" style={{ background: "linear-gradient(135deg, #E8736A, #8B74E0)", color: "#fff", borderRadius: 999, border: "none" }}>
               Envoyer →
             </button>
           </div>
@@ -194,41 +232,38 @@ const OutilsSyntheseMdph = () => {
       );
     }
 
+    const configs: Record<number, { label: string; enabled: boolean; next: Phase }> = {
+      1: { label: "Continuer →", enabled: cta1Enabled, next: 2 },
+      2: { label: "Continuer →", enabled: cta2Enabled, next: 3 },
+      3: { label: "Continuer →", enabled: cta3Enabled, next: 4 },
+      4: { label: "Continuer →", enabled: cta4Enabled, next: 5 },
+      5: { label: "Continuer →", enabled: cta5Enabled, next: 6 },
+      6: { label: "Générer le dossier →", enabled: true, next: 7 },
+    };
+
+    const cfg = configs[phase];
+    if (!cfg) return null;
+
     return (
-      <div
-        className="fixed bottom-16 left-0 right-0 z-10 px-4 py-3"
-        style={{
-          background: "rgba(255,255,255,0.72)",
-          backdropFilter: "blur(20px) saturate(1.5)",
-          WebkitBackdropFilter: "blur(20px) saturate(1.5)",
-        }}
-      >
+      <div className="fixed bottom-16 left-0 right-0 z-10 px-4 py-3" style={{ background: "rgba(255,255,255,0.72)", backdropFilter: "blur(20px) saturate(1.5)", WebkitBackdropFilter: "blur(20px) saturate(1.5)" }}>
         <button
-          onClick={handleGenerate}
-          className="w-full py-3.5 text-[15px] font-sans font-semibold"
-          style={{
-            background: "linear-gradient(135deg, #E8736A, #8B74E0)",
-            color: "#fff", borderRadius: 14, border: "none",
-          }}
+          onClick={() => cfg.enabled && setPhase(cfg.next)}
+          disabled={!cfg.enabled}
+          className="w-full py-3.5 text-[15px] font-sans font-semibold transition-opacity"
+          style={{ background: "linear-gradient(135deg, #E8736A, #8B74E0)", color: "#fff", borderRadius: 14, border: "none", opacity: cfg.enabled ? 1 : 0.45 }}
         >
-          Générer le dossier →
+          {cfg.label}
         </button>
       </div>
     );
   };
 
+  const past = (p: Phase) => phase > p;
+  const current = (p: Phase) => phase === p;
+
   return (
     <div className="flex min-h-screen flex-col">
-      <header
-        className="sticky top-0 z-10 px-4 py-3 flex items-center gap-3"
-        style={{
-          background: "rgba(255,255,255,0.72)",
-          backdropFilter: "blur(20px) saturate(1.5)",
-          WebkitBackdropFilter: "blur(20px) saturate(1.5)",
-          borderBottom: "1px solid rgba(255,255,255,0.6)",
-          boxShadow: "0 2px 12px rgba(0,0,0,0.05)",
-        }}
-      >
+      <header className="sticky top-0 z-10 px-4 py-3 flex items-center gap-3" style={{ background: "rgba(255,255,255,0.72)", backdropFilter: "blur(20px) saturate(1.5)", WebkitBackdropFilter: "blur(20px) saturate(1.5)", borderBottom: "1px solid rgba(255,255,255,0.6)", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
         <button onClick={() => navigate("/outils/synthese")} className="flex items-center justify-center" aria-label="Retour">
           <ArrowLeft size={20} style={{ color: "#1E1A1A" }} />
         </button>
@@ -236,77 +271,80 @@ const OutilsSyntheseMdph = () => {
       </header>
 
       <main className="flex-1 px-4 pt-5 pb-32">
-        {/* BLOCK 1 — always visible */}
+        {/* BLOCK 1 — Q1 */}
         <UserBubble text="📋 Dossier MDPH" />
         <SectionSeparator text={`Dossier MDPH — ${displayName}`} />
+        <AiBubble text="Pour préparer ton dossier, j'ai besoin de quelques infos que je n'ai pas dans tes mémos." />
+        <AiBubble text="C'est quel type de demande ?" />
+        <ChipGroup chips={Q1_CHIPS} selected={q1 ? [q1] : []} disabled={past(1)} onToggle={(c) => toggleSingle(c, q1, setQ1)} />
 
-        <AiBubble text={`J'ai analysé ${memoCount ?? "…"} mémos de ${displayName}. J'ai déjà beaucoup de contexte.`} />
-        <AiBubble text="Avant de générer, dis-moi ce que tu veux mettre en avant — ou ce que je ne sais pas encore." />
-        <AiBubble text="Par exemple : un renouvellement en cours, une hospitalisation récente, un changement d'école, une demande spécifique d'aide..." italic />
-
-        {/* Mic orb */}
-        <div className="flex flex-col items-center gap-2 mb-5">
-          <div
-            className="flex items-center justify-center"
-            style={{
-              width: 72, height: 72, borderRadius: "50%",
-              background: "linear-gradient(135deg, #E8736A, #8B74E0)",
-              boxShadow: "0 0 24px rgba(139,116,224,0.4)",
-              cursor: "not-allowed",
-              opacity: contextDisabled ? 0.4 : 1,
-            }}
-          >
-            <Mic size={30} color="#fff" />
-          </div>
-          <span className="text-[12px] font-sans" style={{ color: "#9A9490" }}>Appuie pour parler</span>
-        </div>
-
-        {/* Chips */}
-        <div className="flex flex-wrap justify-center gap-2">
-          {CHIPS.map((c) => (
-            <button
-              key={c}
-              disabled={contextDisabled}
-              onClick={() => {
-                if (contextDisabled) return;
-                setSelectedChip(selectedChip === c ? null : c);
-                setFreeText("");
-              }}
-              className="w-fit px-3.5 py-2 text-[12px] font-sans transition-all text-left"
-              style={{
-                ...(selectedChip === c
-                  ? { background: "#8B74E0", color: "#fff", borderRadius: 999, border: "none" }
-                  : { ...glassCard, borderRadius: 999 }),
-                opacity: contextDisabled ? 0.5 : 1,
-                cursor: contextDisabled ? "default" : "pointer",
-              }}
-            >
-              {c}
-            </button>
-          ))}
-        </div>
-
-        {/* "ou" separator */}
-        <div className="flex justify-center my-4">
-          <span className="text-[13px] font-sans" style={{ color: "#9A9490" }}>ou</span>
-        </div>
-
-        {/* Textarea */}
-        <div className="mb-5 flex justify-end">
-          <Textarea
-            placeholder="Écris ici si tu préfères..."
-            value={freeText}
-            disabled={contextDisabled}
-            onChange={(e) => { setFreeText(e.target.value); if (e.target.value.trim()) setSelectedChip(null); }}
-            className="text-[14px] font-sans border-none italic placeholder:italic"
-            style={{ ...glassCard, borderRadius: 14, minHeight: 80, maxWidth: "80%" }}
-          />
-        </div>
-
-        {/* BLOCK 2 — result */}
-        {phase === "result" && (
+        {/* BLOCK 2 — Q2 */}
+        {phase >= 2 && (
           <>
-            <UserBubble text={contextText} />
+            <UserBubble text={q1!} />
+            <AiBubble text="Qu'est-ce que tu souhaites obtenir ?" />
+            <ChipGroup chips={Q2_CHIPS} selected={q2} multi disabled={past(2)} onToggle={(c) => toggleMulti(c, q2, setQ2)} />
+          </>
+        )}
+
+        {/* BLOCK 3 — Q3 */}
+        {phase >= 3 && (
+          <>
+            <UserBubble text={q2.join(" · ")} />
+            <AiBubble text="Qu'est-ce qui a changé depuis ton dernier dossier ?" />
+            <ChipGroup chips={Q3_CHIPS} selected={q3Chips} multi disabled={past(3)} onToggle={(c) => toggleMulti(c, q3Chips, setQ3Chips)} />
+            <OrSeparator />
+            <div className="mb-2 flex justify-end">
+              <Textarea placeholder="Précise si besoin..." value={q3Text} disabled={past(3)} onChange={(e) => setQ3Text(e.target.value)} className="text-[14px] font-sans border-none italic placeholder:italic" style={{ ...glassCard, borderRadius: 14, minHeight: 70, maxWidth: "80%" }} />
+            </div>
+            <MicOrb disabled={past(3)} />
+          </>
+        )}
+
+        {/* BLOCK 4 — Q4 */}
+        {phase >= 4 && (
+          <>
+            <UserBubble text={q3Answer()} />
+            <AiBubble text="Ta situation professionnelle actuelle ?" />
+            <ChipGroup chips={Q4_CHIPS} selected={q4 ? [q4] : []} disabled={past(4)} onToggle={(c) => toggleSingle(c, q4, setQ4)} />
+            <OrSeparator />
+            <div className="mb-5 flex justify-end">
+              <Textarea placeholder="Précise si besoin..." value={q4Text} disabled={past(4)} onChange={(e) => { setQ4Text(e.target.value); if (e.target.value.trim()) setQ4(null); }} className="text-[14px] font-sans border-none italic placeholder:italic" style={{ ...glassCard, borderRadius: 14, minHeight: 70, maxWidth: "80%" }} />
+            </div>
+          </>
+        )}
+
+        {/* BLOCK 5 — Q5 */}
+        {phase >= 5 && (
+          <>
+            <UserBubble text={q4Answer()} />
+            <AiBubble text={`Quel est ton projet pour ${displayName} dans les 2-3 prochaines années ?`} />
+            <ChipGroup chips={Q5_CHIPS} selected={q5Chips} multi disabled={past(5)} onToggle={(c) => toggleMulti(c, q5Chips, setQ5Chips)} />
+            <OrSeparator />
+            <div className="mb-2 flex justify-end">
+              <Textarea placeholder="Décris ton projet..." value={q5Text} disabled={past(5)} onChange={(e) => setQ5Text(e.target.value)} className="text-[14px] font-sans border-none italic placeholder:italic" style={{ ...glassCard, borderRadius: 14, minHeight: 70, maxWidth: "80%" }} />
+            </div>
+            <MicOrb disabled={past(5)} />
+          </>
+        )}
+
+        {/* BLOCK 6 — Q6 */}
+        {phase >= 6 && (
+          <>
+            <UserBubble text={q5Answer()} />
+            <AiBubble text="Y a-t-il quelque chose d'important que je ne vois pas dans tes mémos ?" />
+            <MicOrb disabled={past(6)} />
+            <OrSeparator />
+            <div className="mb-5 flex justify-end">
+              <Textarea placeholder="Ajoute ce que tu veux mettre en avant..." value={q6Text} disabled={past(6)} onChange={(e) => setQ6Text(e.target.value)} className="text-[14px] font-sans border-none italic placeholder:italic" style={{ ...glassCard, borderRadius: 14, minHeight: 70, maxWidth: "80%" }} />
+            </div>
+          </>
+        )}
+
+        {/* BLOCK 7 — Result */}
+        {phase === 7 && (
+          <>
+            <UserBubble text={q6Answer()} />
             <SectionSeparator text="Dossier MDPH" />
 
             <ThematicBlock
@@ -323,15 +361,15 @@ const OutilsSyntheseMdph = () => {
             />
             <ThematicBlock
               icon={<BookOpen size={18} style={{ color: "#8B74E0" }} />}
-              title="Scolarité et apprentissages"
+              title="Scolarité et projet de vie"
               badge="Accompagnement spécialisé"
               body={`${displayName} est scolarisé(e) en milieu ordinaire avec un(e) AESH à temps plein. Les adaptations pédagogiques incluent un emploi du temps aménagé, des supports visuels et un tiers-temps pour les évaluations. Les apprentissages fondamentaux progressent mais restent en décalage significatif.`}
             />
             <ThematicBlock
-              icon={<Users size={18} style={{ color: "#8B74E0" }} />}
-              title="Vie sociale et familiale"
-              badge="Impact significatif"
-              body={`Le handicap de ${displayName} a un impact majeur sur l'organisation familiale. Les parents doivent adapter leur emploi du temps professionnel et les activités de loisirs restent limitées. Les interactions sociales avec les pairs nécessitent un accompagnement constant.`}
+              icon={<Briefcase size={18} style={{ color: "#8B74E0" }} />}
+              title="Situation professionnelle"
+              badge="Arrêt d'activité lié au handicap"
+              body={`Le handicap de ${displayName} a un impact majeur sur l'organisation familiale. ${parentPrenom ?? "Le parent"} a dû adapter sa situation professionnelle pour assurer l'accompagnement quotidien. Les activités de loisirs restent limitées et les interactions sociales avec les pairs nécessitent un accompagnement constant.`}
             />
 
             <p className="text-center text-[10px] font-sans mb-6" style={{ color: "#9A9490" }}>
@@ -343,7 +381,7 @@ const OutilsSyntheseMdph = () => {
         <div ref={bottomRef} />
       </main>
 
-      {renderStickyBottom()}
+      {renderCta()}
       <BottomNavBar />
     </div>
   );
