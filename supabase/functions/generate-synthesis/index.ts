@@ -269,6 +269,7 @@ Un guide pratique, humain et accessible. Pas un dossier médical, pas un bilan t
 7. Si réponse vide ou moins de 5 mots sur une section : générer avec ce qui est disponible et ajouter "[À compléter par le parent]"
 8. Si aucune réponse sur aucune section : content = "[Le parent n'a pas encore renseigné cette section.]"
 9. Ne jamais fusionner deux informations distinctes en une seule phrase pour les rendre plus fluides. Si le parent a mentionné 'les livres' et que les mémos parlent de 'sensorialité', ce sont deux réalités séparées qui doivent rester séparées. La fluidité du texte ne justifie jamais la fusion de faits distincts.
+10. Ne jamais présenter une information comme la cause ou la conséquence d'une autre sauf si le parent l'a explicitement dit. Les liens entre les faits sont autorisés quand ils sont des observations naturelles ('elle aime les livres et la musique'). Ils sont interdits quand ils deviennent des inférences ('parce que', 'ce qui explique', 'grâce à', 'c'est pourquoi') non formulées par le parent.
 
 ## TON ET STYLE
 - Chaleureux, concret, pratique
