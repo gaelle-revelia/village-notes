@@ -144,6 +144,8 @@ const OutilsSynthesePickMeUp = () => {
   // Phase model
   type Phase = "emotion" | "period" | "result";
   const [phase, setPhase] = useState<Phase>("emotion");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedContent, setGeneratedContent] = useState<string | null>(null);
 
   // Block 1 state
   const [selectedEmotion, setSelectedEmotion] = useState<string | null>(null);
@@ -227,14 +229,46 @@ const OutilsSynthesePickMeUp = () => {
     }
   }, [phase, selectedPeriod, dateStart, dateEnd, fetchCounts]);
 
-  const mockedContent = `Ces derniers mois, ${displayName} a fait des pas incroyables. Là où certains gestes semblaient impossibles, ils sont devenus naturels. Les professionnels qui l'accompagnent remarquent une vraie ouverture, une curiosité nouvelle. Ce n'est pas un hasard — c'est le fruit de ta présence, de ta patience, de chaque rendez-vous honoré, de chaque exercice répété à la maison. ${displayName} avance, et c'est aussi grâce à toi.`;
+  const displayContent = generatedContent ?? `Ces derniers mois, ${displayName} a fait des pas incroyables. Là où certains gestes semblaient impossibles, ils sont devenus naturels. Les professionnels qui l'accompagnent remarquent une vraie ouverture, une curiosité nouvelle. Ce n'est pas un hasard — c'est le fruit de ta présence, de ta patience, de chaque rendez-vous honoré, de chaque exercice répété à la maison. ${displayName} avance, et c'est aussi grâce à toi.`;
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(mockedContent);
+      await navigator.clipboard.writeText(displayContent);
       toast({ title: "Copié dans le presse-papier ✅" });
     } catch {
       toast({ title: "Impossible de copier", variant: "destructive" });
+    }
+  };
+
+  const handleGenerate = async () => {
+    if (!enfantId || !user) return;
+    setIsGenerating(true);
+    try {
+      const range = selectedPeriod
+        ? computeDateRange(selectedPeriod)
+        : { start: dateStart!, end: dateEnd! };
+      const { data, error } = await supabase.functions.invoke("generate-synthesis", {
+        body: {
+          type: "pick_me_up",
+          enfant_id: enfantId,
+          parent_context: {
+            etat_emotionnel: emotionText,
+            periode_debut: format(range.start, "yyyy-MM-dd"),
+            periode_fin: format(range.end, "yyyy-MM-dd"),
+          },
+        },
+      });
+      if (error) throw error;
+      const blocks = data?.blocks;
+      if (blocks?.[0]?.content) {
+        setGeneratedContent(blocks[0].content);
+      }
+      setPhase("result");
+    } catch (e) {
+      console.error("generate-synthesis error:", e);
+      toast({ title: "Une erreur est survenue — réessaie.", variant: "destructive" });
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -276,11 +310,11 @@ const OutilsSynthesePickMeUp = () => {
     }
 
     const isEmotion = phase === "emotion";
-    const enabled = isEmotion ? hasEmotion : hasPeriod;
-    const label = isEmotion ? "Continuer →" : "Analyser →";
+    const enabled = isEmotion ? hasEmotion : (hasPeriod && !isGenerating);
+    const label = isEmotion ? "Continuer →" : isGenerating ? "Génération en cours..." : "Analyser →";
     const onTap = () => {
-      if (isEmotion) setPhase("period");else
-      setPhase("result");
+      if (isEmotion) setPhase("period");
+      else handleGenerate();
     };
 
     return (
@@ -532,7 +566,7 @@ const OutilsSynthesePickMeUp = () => {
 
             <div className="px-5 py-4 mb-6" style={{ ...glassCard }}>
               <p className="text-[14px] font-sans leading-relaxed" style={{ color: "#1E1A1A" }}>
-                {mockedContent}
+                {displayContent}
               </p>
             </div>
 

@@ -147,6 +147,8 @@ const OutilsSyntheseMdph = () => {
   const [memoCount, setMemoCount] = useState<number | null>(null);
   const [parentPrenom, setParentPrenom] = useState<string | null>(null);
   const [emailValue, setEmailValue] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedBlocks, setGeneratedBlocks] = useState<any[] | null>(null);
 
   // Q1 single-select
   const [q1, setQ1] = useState<string | null>(null);
@@ -214,6 +216,37 @@ const OutilsSyntheseMdph = () => {
     } catch { toast({ title: "Impossible de copier", variant: "destructive" }); }
   };
 
+  const handleGenerateMdph = async () => {
+    if (!enfantId || !user) return;
+    setIsGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-synthesis", {
+        body: {
+          type: "mdph",
+          enfant_id: enfantId,
+          parent_context: {
+            vocal_mdph: q6Text.trim() || null,
+            type_demande: q1,
+            objectifs: q2,
+            changements: q3Answer(),
+            situation_pro: q4Answer(),
+            projet: q5Answer(),
+          },
+        },
+      });
+      if (error) throw error;
+      if (data?.blocks) {
+        setGeneratedBlocks(data.blocks);
+      }
+      setPhase(7);
+    } catch (e) {
+      console.error("generate-synthesis error:", e);
+      toast({ title: "Une erreur est survenue — réessaie.", variant: "destructive" });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   // --- CTA ---
   const renderCta = () => {
     if (phase === 7) {
@@ -232,13 +265,13 @@ const OutilsSyntheseMdph = () => {
       );
     }
 
-    const configs: Record<number, { label: string; enabled: boolean; next: Phase }> = {
+    const configs: Record<number, { label: string; enabled: boolean; next: Phase; action?: () => void }> = {
       1: { label: "Continuer →", enabled: cta1Enabled, next: 2 },
       2: { label: "Continuer →", enabled: cta2Enabled, next: 3 },
       3: { label: "Continuer →", enabled: cta3Enabled, next: 4 },
       4: { label: "Continuer →", enabled: cta4Enabled, next: 5 },
       5: { label: "Continuer →", enabled: cta5Enabled, next: 6 },
-      6: { label: "Générer le dossier →", enabled: true, next: 7 },
+      6: { label: isGenerating ? "Génération en cours..." : "Générer le dossier →", enabled: !isGenerating, action: handleGenerateMdph, next: 7 },
     };
 
     const cfg = configs[phase];
@@ -247,9 +280,9 @@ const OutilsSyntheseMdph = () => {
     return (
       <div className="fixed bottom-16 left-0 right-0 z-10 px-4 py-3" style={{ background: "rgba(255,255,255,0.72)", backdropFilter: "blur(20px) saturate(1.5)", WebkitBackdropFilter: "blur(20px) saturate(1.5)" }}>
         <button
-          onClick={() => cfg.enabled && setPhase(cfg.next)}
+          onClick={() => cfg.enabled && (cfg.action ? cfg.action() : setPhase(cfg.next))}
           disabled={!cfg.enabled}
-          className="w-full py-3.5 text-[15px] font-sans font-semibold transition-opacity"
+          className={`w-full py-3.5 text-[15px] font-sans font-semibold transition-opacity ${isGenerating ? "animate-pulse" : ""}`}
           style={{ background: "linear-gradient(135deg, #E8736A, #8B74E0)", color: "#fff", borderRadius: 14, border: "none", opacity: cfg.enabled ? 1 : 0.45 }}
         >
           {cfg.label}
@@ -347,30 +380,31 @@ const OutilsSyntheseMdph = () => {
             <UserBubble text={q6Answer()} />
             <SectionSeparator text="Dossier MDPH" />
 
-            <ThematicBlock
-              icon={<Settings size={18} style={{ color: "#8B74E0" }} />}
-              title="Autonomie au quotidien"
-              badge="Dépendance totale"
-              body={`${displayName} nécessite une aide humaine constante pour tous les actes de la vie quotidienne : toilette, habillage, alimentation, déplacements. L'enfant ne peut rester seul(e) et requiert une surveillance permanente en raison de troubles du comportement et d'un déficit de perception du danger.`}
-            />
-            <ThematicBlock
-              icon={<Stethoscope size={18} style={{ color: "#8B74E0" }} />}
-              title="Soins et suivi médical"
-              badge="Suivi pluridisciplinaire intensif"
-              body={`Le parcours de soins de ${displayName} comprend des séances hebdomadaires de kinésithérapie, ergothérapie et orthophonie, complétées par un suivi neuropédiatrique trimestriel. Les progrès sont réguliers mais nécessitent un maintien intensif de la prise en charge.`}
-            />
-            <ThematicBlock
-              icon={<BookOpen size={18} style={{ color: "#8B74E0" }} />}
-              title="Scolarité et projet de vie"
-              badge="Accompagnement spécialisé"
-              body={`${displayName} est scolarisé(e) en milieu ordinaire avec un(e) AESH à temps plein. Les adaptations pédagogiques incluent un emploi du temps aménagé, des supports visuels et un tiers-temps pour les évaluations. Les apprentissages fondamentaux progressent mais restent en décalage significatif.`}
-            />
-            <ThematicBlock
-              icon={<Briefcase size={18} style={{ color: "#8B74E0" }} />}
-              title="Situation professionnelle"
-              badge="Arrêt d'activité lié au handicap"
-              body={`Le handicap de ${displayName} a un impact majeur sur l'organisation familiale. ${parentPrenom ?? "Le parent"} a dû adapter sa situation professionnelle pour assurer l'accompagnement quotidien. Les activités de loisirs restent limitées et les interactions sociales avec les pairs nécessitent un accompagnement constant.`}
-            />
+            {generatedBlocks ? generatedBlocks.map((block: any, i: number) => {
+              const iconMap: Record<string, React.ReactNode> = {
+                Settings: <Settings size={18} style={{ color: "#8B74E0" }} />,
+                Stethoscope: <Stethoscope size={18} style={{ color: "#8B74E0" }} />,
+                BookOpen: <BookOpen size={18} style={{ color: "#8B74E0" }} />,
+                Heart: <Briefcase size={18} style={{ color: "#8B74E0" }} />,
+                Briefcase: <Briefcase size={18} style={{ color: "#8B74E0" }} />,
+              };
+              return (
+                <ThematicBlock
+                  key={block.id || i}
+                  icon={iconMap[block.icon] || <Settings size={18} style={{ color: "#8B74E0" }} />}
+                  title={block.title}
+                  badge={block.badge || ""}
+                  body={block.content}
+                />
+              );
+            }) : (
+              <>
+                <ThematicBlock icon={<Settings size={18} style={{ color: "#8B74E0" }} />} title="Autonomie au quotidien" badge="Dépendance totale" body={`${displayName} nécessite une aide humaine constante pour tous les actes de la vie quotidienne.`} />
+                <ThematicBlock icon={<Stethoscope size={18} style={{ color: "#8B74E0" }} />} title="Soins et suivi médical" badge="Suivi pluridisciplinaire intensif" body={`Le parcours de soins de ${displayName} comprend des séances hebdomadaires.`} />
+                <ThematicBlock icon={<BookOpen size={18} style={{ color: "#8B74E0" }} />} title="Scolarité et projet de vie" badge="Accompagnement spécialisé" body={`${displayName} est scolarisé(e) en milieu ordinaire avec accompagnement.`} />
+                <ThematicBlock icon={<Briefcase size={18} style={{ color: "#8B74E0" }} />} title="Situation professionnelle" badge="Arrêt d'activité lié au handicap" body={`Le handicap de ${displayName} a un impact majeur sur l'organisation familiale.`} />
+              </>
+            )}
 
             <p className="text-center text-[10px] font-sans mb-6" style={{ color: "#9A9490" }}>
               Synthèse des observations de {parentPrenom ?? "Parent"} pour {displayName} · The Village · Mars 2026
