@@ -263,6 +263,9 @@ const OutilsSyntheseTransmission = () => {
         <SectionProgress current={idx + 1} />
         <SectionTag number={s.number} title={q(s.title)} />
         <AiBubble text={q(s.question)} />
+        <p className="text-center font-sans text-[12px] italic mb-2" style={{ color: "#9CA3AF", maxWidth: 280, margin: "0 auto 8px" }}>
+          Parle librement — pas besoin de structurer.{"\n"}The Village s'occupe du reste.
+        </p>
         <WiredMicOrb disabled={isPast} onTranscription={(text) => !isPast && updateAnswer(idx, (answers[idx] ? answers[idx] + " " : "") + text)} />
         <OrSeparator />
         <div className="mb-2 flex justify-end">
