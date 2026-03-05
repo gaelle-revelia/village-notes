@@ -418,7 +418,7 @@ const OutilsSynthesePickMeUp = () => {
             <AiBubble text="Sur quelle période tu veux qu'on regarde ?" />
 
             {/* Period chips */}
-            <div className="grid grid-cols-2 gap-2 mb-4 px-2 justify-items-center">
+            <div className="flex flex-wrap justify-center gap-2">
               {PERIODS.map((p) =>
             <button
               key={p}
