@@ -104,6 +104,15 @@ const SECTIONS = [
   { number: "06", title: "Ses thérapies en cours", question: "Quelles thérapies suit-elle en ce moment et à quelle fréquence ?" },
 ];
 
+const SECTION_HELPERS = [
+  "Parle-moi d'elle comme tu le ferais à quelqu'un qui ne l'a jamais rencontrée. Pas de jargon — juste elle.",
+  "Pas besoin d'être précis médicalement. Comment tu l'expliques, toi, dans ta langue ?",
+  "Tu la connais mieux que personne. Qu'est-ce que tu as appris à repérer avec le temps ?",
+  "Décris ce que tu fais au quotidien — les gestes, les habitudes, ce qui marche pour elle.",
+  "Comment tu aimerais que les gens s'approchent d'elle ? Ce que tu aurais voulu savoir, toi, au début ?",
+  "Cite juste les noms et la fréquence — le reste, The Village s'en occupe.",
+];
+
 const RESULT_CARDS = [
   { icon: <User size={18} style={{ color: "#8B74E0" }} />, title: "Qui est Selena ?", body: "Selena est une petite fille de 4 ans pleine de vie, avec un sourire communicatif. Elle s'exprime principalement par les gestes et les regards. Elle adore la musique, les jeux d'eau et les câlins. Elle est très sensible aux voix douces et aux environnements calmes." },
   { icon: <Brain size={18} style={{ color: "#8B74E0" }} />, title: "Son histoire et son handicap", body: "Selena présente un retard global de développement avec une composante motrice importante. Elle se déplace en poussette adaptée et commence à explorer la station assise avec support. Son parcours de soins est suivi depuis l'âge de 8 mois." },
@@ -263,9 +272,7 @@ const OutilsSyntheseTransmission = () => {
         <SectionProgress current={idx + 1} />
         <SectionTag number={s.number} title={q(s.title)} />
         <AiBubble text={q(s.question)} />
-        <p className="text-center font-sans text-[12px] italic mb-2" style={{ color: "#9CA3AF", maxWidth: 280, margin: "0 auto 8px" }}>
-          Parle librement — pas besoin de structurer.{"\n"}The Village s'occupe du reste.
-        </p>
+        <AiBubble text={q(SECTION_HELPERS[idx])} italic />
         <WiredMicOrb disabled={isPast} onTranscription={(text) => !isPast && updateAnswer(idx, (answers[idx] ? answers[idx] + " " : "") + text)} />
         <OrSeparator />
         <div className="mb-2 flex justify-end">
