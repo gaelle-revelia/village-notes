@@ -29,14 +29,7 @@ const CAS_USAGE = [
   subtitle: "Arriver préparé à ta prochaine consultation",
   route: "/outils/synthese/rdv"
 },
-{
-  key: "transmission",
-  emoji: "📖",
-  title: "Transmission",
-  subtitle: "Fais connaître {prenom}",
-  route: "/outils/synthese/transmission"
-}] as
-const;
+] as const;
 
 const glassCard: React.CSSProperties = {
   background: "rgba(255,255,255,0.38)",
@@ -196,11 +189,6 @@ const OutilsSynthese = () => {
         {/* Option cards — indented under the bubble */}
         <div className="flex flex-col gap-2.5 ml-12">
           {CAS_USAGE.map((cas) => {
-            const subtitle =
-              cas.key === "transmission"
-                ? cas.subtitle.replace("{prenom}", displayName)
-                : cas.subtitle;
-
             return (
               <button
                 key={cas.key}
@@ -220,7 +208,7 @@ const OutilsSynthese = () => {
                     className="block text-[13px] font-sans leading-snug mt-0.5"
                     style={{ color: "#9A9490" }}
                   >
-                    {subtitle}
+                    {cas.subtitle}
                   </span>
                 </div>
                 <ChevronRight size={18} style={{ color: "#9A9490" }} className="flex-shrink-0" />
