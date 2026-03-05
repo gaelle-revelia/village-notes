@@ -11,7 +11,7 @@ const CAS_USAGE = [
 {
   key: "pick_me_up",
   emoji: "✨",
-  title: "Pick-me-up",
+  title: "Un remontant",
   subtitle: "Rappelle-moi ce qui s'est passé",
   route: "/outils/synthese/pick-me-up"
 },
