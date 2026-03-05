@@ -24,12 +24,7 @@ const glassCard: React.CSSProperties = {
     "0 4px 24px rgba(139,116,224,0.08), 0 1px 4px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9)",
 };
 
-const EMOTIONS = [
-  "Je suis épuisée",
-  "Je suis découragée",
-  "Je doute que ça avance",
-  "J'ai besoin de me rappeler pourquoi je fais tout ça",
-];
+// EMOTIONS defined inside component to use displayName
 
 const PERIODS = [
   "Ce mois-ci",
@@ -99,6 +94,13 @@ const OutilsSynthesePickMeUp = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const displayName = prenom ?? "votre enfant";
+
+  const EMOTIONS = [
+    "Je suis épuisé(e)",
+    "Je doute que ça avance",
+    `Voir où en est ${displayName}`,
+    "Faire un point étape",
+  ];
 
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [selectedEmotion, setSelectedEmotion] = useState<string | null>(null);
@@ -174,7 +176,8 @@ const OutilsSynthesePickMeUp = () => {
       {/* STEP 1 */}
       {step === 1 && (
         <main className="flex-1 px-4 pt-5 pb-28">
-          <AiBubble text="Comment tu te sens en ce moment ? (Ta réponse m'aide à trouver le bon angle)" />
+          <AiBubble text="Dis-moi comment tu te sens en ce moment." />
+          <AiBubble text="Pas besoin d'être précis(e) — quelques mots, ce qui vient." />
 
           {/* Section separator */}
           <div className="flex items-center gap-3 my-5">
@@ -214,11 +217,11 @@ const OutilsSynthesePickMeUp = () => {
                   setSelectedEmotion(selectedEmotion === e ? null : e);
                   setFreeText("");
                 }}
-                className="px-3 py-2.5 text-[13px] font-sans transition-all text-left"
+                className="w-fit px-3.5 py-2 text-[12px] font-sans transition-all text-left"
                 style={{
                   ...(selectedEmotion === e
-                    ? { background: "#8B74E0", color: "#fff", borderRadius: 14, border: "none" }
-                    : { ...glassCard, borderRadius: 14 }),
+                    ? { background: "#8B74E0", color: "#fff", borderRadius: 999, border: "none" }
+                    : { ...glassCard, borderRadius: 999 }),
                 }}
               >
                 {e}
@@ -232,7 +235,7 @@ const OutilsSynthesePickMeUp = () => {
           </div>
 
           {/* Textarea */}
-          <div className="mb-5">
+          <div className="mb-5 flex justify-end">
             <Textarea
               placeholder="Écris ici si tu préfères..."
               value={freeText}
@@ -241,7 +244,7 @@ const OutilsSynthesePickMeUp = () => {
                 if (e.target.value.trim()) setSelectedEmotion(null);
               }}
               className="text-[14px] font-sans border-none italic placeholder:italic"
-              style={{ ...glassCard, borderRadius: 14, minHeight: 80 }}
+              style={{ ...glassCard, borderRadius: 14, minHeight: 80, maxWidth: "75%" }}
             />
           </div>
 
@@ -270,7 +273,7 @@ const OutilsSynthesePickMeUp = () => {
                 cursor: hasEmotion ? "pointer" : "not-allowed",
               }}
             >
-              Choisir la période →
+              Continuer →
             </button>
           </div>
         </main>
