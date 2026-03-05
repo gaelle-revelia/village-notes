@@ -5,6 +5,7 @@ interface UseVocalRecordingReturn {
   isRecording: boolean;
   isTranscribing: boolean;
   error: string | null;
+  elapsedSeconds: number;
   startRecording: () => Promise<void>;
   stopRecording: () => Promise<string | null>;
 }
@@ -13,10 +14,12 @@ export function useVocalRecording(): UseVocalRecordingReturn {
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const startRecording = useCallback(async () => {
     setError(null);
@@ -37,6 +40,8 @@ export function useVocalRecording(): UseVocalRecordingReturn {
       };
 
       recorder.start(1000);
+      setElapsedSeconds(0);
+      timerRef.current = setInterval(() => setElapsedSeconds((s) => s + 1), 1000);
       setIsRecording(true);
     } catch {
       setError("Microphone non disponible — utilise la saisie texte.");
@@ -55,6 +60,7 @@ export function useVocalRecording(): UseVocalRecordingReturn {
       }
 
       recorder.onstop = async () => {
+        if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
         setIsRecording(false);
         streamRef.current?.getTracks().forEach((t) => t.stop());
 
@@ -103,6 +109,7 @@ export function useVocalRecording(): UseVocalRecordingReturn {
 
   useEffect(() => {
     return () => {
+      if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
       if (mediaRecorderRef.current?.state === "recording") {
         mediaRecorderRef.current.stop();
       }
@@ -110,5 +117,5 @@ export function useVocalRecording(): UseVocalRecordingReturn {
     };
   }, []);
 
-  return { isRecording, isTranscribing, error, startRecording, stopRecording };
+  return { isRecording, isTranscribing, error, elapsedSeconds, startRecording, stopRecording };
 }

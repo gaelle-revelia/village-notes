@@ -8,7 +8,13 @@ interface WiredMicOrbProps {
 }
 
 export default function WiredMicOrb({ onTranscription, disabled }: WiredMicOrbProps) {
-  const { isRecording, isTranscribing, error, startRecording, stopRecording } = useVocalRecording();
+  const { isRecording, isTranscribing, error, elapsedSeconds, startRecording, stopRecording } = useVocalRecording();
+
+  const formatTime = (s: number) => {
+    const m = Math.floor(s / 60).toString().padStart(2, "0");
+    const sec = (s % 60).toString().padStart(2, "0");
+    return `${m}:${sec}`;
+  };
 
   const handleTap = useCallback(async () => {
     if (disabled || isTranscribing) return;
@@ -49,7 +55,7 @@ export default function WiredMicOrb({ onTranscription, disabled }: WiredMicOrbPr
         )}
       </button>
       <span className="text-[12px] font-sans" style={{ color: "#9A9490" }}>
-        {isRecording ? "En écoute..." : isTranscribing ? "Transcription..." : "Appuie pour parler"}
+        {isRecording ? formatTime(elapsedSeconds) : isTranscribing ? "Transcription..." : "Appuie pour parler"}
       </span>
       {error && (
         <span className="text-[12px] font-sans text-center max-w-[240px]" style={{ color: "#E8736A" }}>
