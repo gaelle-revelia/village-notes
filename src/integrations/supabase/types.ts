@@ -140,6 +140,7 @@ export type Database = {
           mdph_derniere_demande: string | null
           mdph_type_demande: string | null
           prenom: string
+          sexe: string | null
           user_id: string
         }
         Insert: {
@@ -150,6 +151,7 @@ export type Database = {
           mdph_derniere_demande?: string | null
           mdph_type_demande?: string | null
           prenom: string
+          sexe?: string | null
           user_id: string
         }
         Update: {
@@ -160,6 +162,7 @@ export type Database = {
           mdph_derniere_demande?: string | null
           mdph_type_demande?: string | null
           prenom?: string
+          sexe?: string | null
           user_id?: string
         }
         Relationships: []

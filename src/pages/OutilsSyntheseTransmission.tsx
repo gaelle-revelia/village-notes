@@ -96,30 +96,30 @@ const ResultCard = ({ icon, title, body }: ResultCardProps) => (
 );
 
 const SECTIONS = [
-  { number: "01", title: "Qui est Selena ?", question: "Décris-moi Selena en quelques mots — sa personnalité, comment elle communique, ce qu'elle aime." },
-  { number: "02", title: "Son histoire et son handicap", question: "Comment expliques-tu simplement son handicap à quelqu'un qui ne connaît pas Selena ?" },
-  { number: "03", title: "Fatigue — signes à repérer", question: "Comment reconnaît-on que Selena est fatiguée ? Qu'est-ce qu'il faut faire dans ce cas ?" },
-  { number: "04", title: "Comment la positionner", question: "Quelles sont les positions importantes pour Selena et ce qu'il faut savoir pour bien l'installer ?" },
-  { number: "05", title: "Interaction avec les autres", question: "Comment les autres enfants et adultes doivent-ils interagir avec elle ? Quelles précautions ?" },
-  { number: "06", title: "Ses thérapies en cours", question: "Quelles thérapies suit-elle en ce moment et à quelle fréquence ?" },
+  { number: "01", title: "Qui est {prenom} ?", question: "Décris-moi {prenom} en quelques mots — {pronom_tonique} personnalité, comment {pronom_sujet} communique, ce {pronom_rel} aime." },
+  { number: "02", title: "{pronom_poss_maj} histoire et {pronom_poss} handicap", question: "Comment expliques-tu simplement {pronom_poss} handicap à quelqu'un qui ne connaît pas {prenom} ?" },
+  { number: "03", title: "Fatigue — signes à repérer", question: "Comment reconnaît-on que {prenom} est fatigué{accord} ? Qu'est-ce qu'il faut faire dans ce cas ?" },
+  { number: "04", title: "Comment {pronom_cod} positionner", question: "Quelles sont les positions importantes pour {prenom} et ce qu'il faut savoir pour bien {pronom_install} ?" },
+  { number: "05", title: "Interaction avec les autres", question: "Comment les autres enfants et adultes doivent-ils interagir avec {pronom_cod_tonique} ? Quelles précautions ?" },
+  { number: "06", title: "{pronom_poss_maj} thérapies en cours", question: "Quelles thérapies suit-{pronom_sujet} en ce moment et à quelle fréquence ?" },
 ];
 
 const SECTION_HELPERS = [
-  "Parle-moi d'elle comme tu le ferais à quelqu'un qui ne l'a jamais rencontrée. Pas de jargon — juste elle.",
+  "Parle-moi {pronom_prep} comme tu le ferais à quelqu'un qui ne {pronom_cod2} jamais rencontré{accord}. Pas de jargon — juste {pronom_cod_tonique}.",
   "Pas besoin d'être précis médicalement. Comment tu l'expliques, toi, dans ta langue ?",
-  "Tu la connais mieux que personne. Qu'est-ce que tu as appris à repérer avec le temps ?",
-  "Décris ce que tu fais au quotidien — les gestes, les habitudes, ce qui marche pour elle.",
-  "Comment tu aimerais que les gens s'approchent d'elle ? Ce que tu aurais voulu savoir, toi, au début ?",
+  "Tu {pronom_cod} connais mieux que personne. Qu'est-ce que tu as appris à repérer avec le temps ?",
+  "Décris ce que tu fais au quotidien — les gestes, les habitudes, ce qui marche pour {pronom_cod_tonique}.",
+  "Comment tu aimerais que les gens s'approchent {pronom_prep} ? Ce que tu aurais voulu savoir, toi, au début ?",
   "Cite juste les noms et la fréquence — le reste, The Village s'en occupe.",
 ];
 
 const RESULT_CARDS = [
-  { icon: <User size={18} style={{ color: "#8B74E0" }} />, title: "Qui est Selena ?", body: "Selena est une petite fille de 4 ans pleine de vie, avec un sourire communicatif. Elle s'exprime principalement par les gestes et les regards. Elle adore la musique, les jeux d'eau et les câlins. Elle est très sensible aux voix douces et aux environnements calmes." },
-  { icon: <Brain size={18} style={{ color: "#8B74E0" }} />, title: "Son histoire et son handicap", body: "Selena présente un retard global de développement avec une composante motrice importante. Elle se déplace en poussette adaptée et commence à explorer la station assise avec support. Son parcours de soins est suivi depuis l'âge de 8 mois." },
-  { icon: <Moon size={18} style={{ color: "#8B74E0" }} />, title: "Fatigue — signes à repérer", body: "Quand Selena est fatiguée, elle détourne le regard, devient plus raide dans son corps et peut pleurer sans raison apparente. Il faut alors la mettre dans un endroit calme, réduire les stimulations et lui proposer un temps de repos allongée sur le côté gauche." },
-  { icon: <PersonStanding size={18} style={{ color: "#8B74E0" }} />, title: "Comment la positionner", body: "Selena doit être installée dans sa coque moulée pour les temps d'activité. En dehors, elle peut être assise dans son siège adapté avec les sangles bien ajustées. Attention à toujours soutenir sa tête lors des transferts. Ne jamais la laisser sur le ventre sans surveillance." },
-  { icon: <Users size={18} style={{ color: "#8B74E0" }} />, title: "Interaction avec les autres", body: "Se placer à sa hauteur et lui parler doucement en la regardant. Éviter les gestes brusques. Les autres enfants peuvent jouer avec elle en lui présentant des objets un par un. Elle aime qu'on lui chante des comptines et qu'on lui tienne la main." },
-  { icon: <Pill size={18} style={{ color: "#8B74E0" }} />, title: "Ses thérapies en cours", body: "Kinésithérapie 3×/semaine (motricité, verticalisation). Ergothérapie 1×/semaine (préhension, installation). Orthophonie 2×/semaine (communication alternative). Psychomotricité 1×/semaine (schéma corporel, stimulations sensorielles)." },
+  { icon: <User size={18} style={{ color: "#8B74E0" }} />, title: "Qui est {prenom} ?", body: "" },
+  { icon: <Brain size={18} style={{ color: "#8B74E0" }} />, title: "{pronom_poss_maj} histoire et {pronom_poss} handicap", body: "" },
+  { icon: <Moon size={18} style={{ color: "#8B74E0" }} />, title: "Fatigue — signes à repérer", body: "" },
+  { icon: <PersonStanding size={18} style={{ color: "#8B74E0" }} />, title: "Comment {pronom_cod} positionner", body: "" },
+  { icon: <Users size={18} style={{ color: "#8B74E0" }} />, title: "Interaction avec les autres", body: "" },
+  { icon: <Pill size={18} style={{ color: "#8B74E0" }} />, title: "{pronom_poss_maj} thérapies en cours", body: "" },
 ];
 
 const DESTINATAIRES = [
@@ -149,11 +149,17 @@ const OutilsSyntheseTransmission = () => {
   const [parentPrenom, setParentPrenom] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedBlocks, setGeneratedBlocks] = useState<any[] | null>(null);
+  const [sexe, setSexe] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
     supabase.from("profiles").select("prenom").eq("user_id", user.id).single().then(({ data }) => { if (data?.prenom) setParentPrenom(data.prenom); });
   }, [user]);
+
+  useEffect(() => {
+    if (!enfantId) return;
+    supabase.from("enfants").select("sexe").eq("id", enfantId).single().then(({ data }: any) => { if (data?.sexe) setSexe(data.sexe); });
+  }, [enfantId]);
 
   useEffect(() => {
     setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
@@ -197,8 +203,23 @@ const OutilsSyntheseTransmission = () => {
 
   const past = (p: Phase) => phase > p;
 
-  // Replace "Selena" with dynamic name in questions
-  const q = (text: string) => text.replace(/Selena/g, displayName);
+  // Replace placeholders with dynamic name and gendered pronouns
+  const isFem = sexe !== "M"; // default feminine when unknown
+  const q = (text: string) => {
+    return text
+      .replace(/\{prenom\}/g, displayName)
+      .replace(/\{pronom_sujet\}/g, isFem ? "elle" : "il")
+      .replace(/\{pronom_tonique\}/g, isFem ? "sa" : "sa")
+      .replace(/\{pronom_poss\}/g, isFem ? "son" : "son")
+      .replace(/\{pronom_poss_maj\}/g, isFem ? "Son" : "Son")
+      .replace(/\{pronom_cod\}/g, isFem ? "la" : "le")
+      .replace(/\{pronom_cod2\}/g, isFem ? "l'a" : "l'a")
+      .replace(/\{pronom_cod_tonique\}/g, isFem ? "elle" : "lui")
+      .replace(/\{pronom_rel\}/g, isFem ? "qu'elle" : "qu'il")
+      .replace(/\{pronom_prep\}/g, isFem ? "d'elle" : "de lui")
+      .replace(/\{pronom_install\}/g, isFem ? "l'installer" : "l'installer")
+      .replace(/\{accord\}/g, isFem ? "e" : "");
+  };
 
   const renderCta = () => {
     if (phase === 0) {
