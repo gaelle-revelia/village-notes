@@ -62,11 +62,19 @@ serve(async (req) => {
     // 4. FETCH CHILD PROFILE
     const { data: enfant } = await supabase
       .from("enfants")
-      .select("prenom, diagnostic_label")
+      .select("prenom, diagnostic_label, sexe")
       .eq("id", enfant_id)
       .single();
 
     const prenom = enfant?.prenom ?? "l'enfant";
+    const sexe = enfant?.sexe ?? null;
+    const isFem = sexe !== "M"; // default feminine when unknown
+    const pronom_sujet = isFem ? "elle" : "il";
+    const pronom_cod = isFem ? "la" : "le";
+    const pronom_cod_tonique = isFem ? "elle" : "lui";
+    const pronom_poss = isFem ? "son" : "son";
+    const pronom_poss_maj = isFem ? "Son" : "Son";
+    const accord = isFem ? "e" : "";
 
     // 5. FETCH INTERVENANTS
     const { data: intervenants } = await supabase
@@ -166,6 +174,7 @@ Retourne UNIQUEMENT ce JSON, sans markdown, sans commentaire, sans texte avant o
 {"blocks":[{"id":"narrative","title":"Ce qui s'est passé","icon":"Sparkles","content":"..."}]}`;
 
       userMessage = `Prenom de l'enfant: ${prenom}
+Sexe: ${isFem ? "fille" : "garçon"} (utilise les pronoms ${pronom_sujet}/${pronom_cod}/${pronom_cod_tonique})
 Diagnostic: ${enfant?.diagnostic_label ?? "non renseigné"}
 État émotionnel du parent: ${parent_context.etat_emotionnel ?? "non renseigné"}
 Période: du ${parent_context.periode_debut} au ${parent_context.periode_fin}
@@ -226,6 +235,7 @@ Retourne UNIQUEMENT ce JSON, sans markdown, sans commentaire, sans texte avant o
 {"blocks":[{"id":"autonomie","title":"Autonomie au quotidien","icon":"Settings","badge":"...","content":"..."},{"id":"soins","title":"Soins et suivi médical","icon":"Stethoscope","badge":"...","content":"..."},{"id":"scolarite","title":"Scolarité et projet de vie","icon":"BookOpen","badge":"...","content":"..."},{"id":"famille","title":"Situation familiale et professionnelle","icon":"Heart","badge":"...","content":"..."}]}`;
 
       userMessage = `Prenom de l'enfant: ${prenom}
+Sexe: ${isFem ? "fille" : "garçon"} (utilise les pronoms ${pronom_sujet}/${pronom_cod}/${pronom_cod_tonique})
 Diagnostic: ${enfant?.diagnostic_label ?? "non renseigné"}
 Intervenants actifs: ${JSON.stringify(intervenants)}
 Nombre de mémos: ${memos.length}
@@ -250,7 +260,7 @@ Un guide pratique, humain et accessible. Pas un dossier médical, pas un bilan t
 ## RÈGLES ABSOLUES — NE JAMAIS ENFREINDRE
 1. Zéro jargon médical sans explication immédiate entre parenthèses
    ✗ "hypotonie axiale"
-   ✓ "les muscles du tronc sont moins toniques que chez un enfant ordinaire, ce qui signifie qu'elle ne peut pas se tenir assise seule"
+   ✓ "les muscles du tronc sont moins toniques que chez un enfant ordinaire, ce qui signifie qu'${pronom_sujet} ne peut pas se tenir assis${accord} seul${accord}"
 2. Jamais de pronostic, jamais de projection médicale
 3. Jamais d'extrapolation au-delà des données fournies
 4. Jamais d'invention
@@ -288,9 +298,10 @@ AUTRE / INCONNU : appliquer profil FAMILLE
 
 ## FORMAT DE SORTIE — JSON STRICT
 Retourne UNIQUEMENT ce JSON, sans markdown, sans commentaire, sans texte avant ou après :
-{"blocks":[{"id":"s1","title":"Qui est ${prenom} ?","icon":"User","content":"..."},{"id":"s2","title":"Son histoire et son handicap","icon":"Brain","content":"..."},{"id":"s3","title":"Fatigue — signes à repérer","icon":"Moon","content":"..."},{"id":"s4","title":"Comment la positionner","icon":"PersonStanding","content":"..."},{"id":"s5","title":"Interaction avec les autres","icon":"Users","content":"..."},{"id":"s6","title":"Ses thérapies en cours","icon":"Activity","content":"..."}]}`;
+{"blocks":[{"id":"s1","title":"Qui est ${prenom} ?","icon":"User","content":"..."},{"id":"s2","title":"${pronom_poss_maj} histoire et ${pronom_poss} handicap","icon":"Brain","content":"..."},{"id":"s3","title":"Fatigue — signes à repérer","icon":"Moon","content":"..."},{"id":"s4","title":"Comment ${pronom_cod} positionner","icon":"PersonStanding","content":"..."},{"id":"s5","title":"Interaction avec les autres","icon":"Users","content":"..."},{"id":"s6","title":"${pronom_poss_maj} thérapies en cours","icon":"Activity","content":"..."}]}`;
 
       userMessage = `Prenom de l'enfant: ${prenom}
+Sexe: ${isFem ? "fille" : "garçon"} (utilise les pronoms ${pronom_sujet}/${pronom_cod}/${pronom_cod_tonique})
 Diagnostic: ${enfant?.diagnostic_label ?? "non renseigné"}
 Intervenants actifs: ${JSON.stringify(intervenants)}
 Destinataire du livret: ${parent_context.destinataire ?? "non renseigné"}
