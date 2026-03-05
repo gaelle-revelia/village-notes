@@ -26,7 +26,7 @@ const CAS_USAGE = [
   key: "transmission",
   emoji: "📖",
   title: "Transmission",
-  subtitle: "Fais connaître Selena",
+  subtitle: "__DYNAMIC_TRANSMISSION__",
   route: "/outils/synthese/transmission"
 },
 ] as const;
@@ -208,7 +208,7 @@ const OutilsSynthese = () => {
                     className="block text-[13px] font-sans leading-snug mt-0.5"
                     style={{ color: "#9A9490" }}
                   >
-                    {cas.subtitle}
+                    {cas.subtitle === "__DYNAMIC_TRANSMISSION__" ? `Fais connaître ${displayName}` : cas.subtitle}
                   </span>
                 </div>
                 <ChevronRight size={18} style={{ color: "#9A9490" }} className="flex-shrink-0" />
