@@ -19,14 +19,14 @@ const CAS_USAGE = [
   key: "mdph",
   emoji: "📋",
   title: "Dossier MDPH",
-  subtitle: "Prépare mon dossier MDPH",
+  subtitle: "Aide moi à préparer mon dossier",
   route: "/outils/synthese/mdph"
 },
 {
   key: "rdv",
   emoji: "🩺",
   title: "Préparer un RDV",
-  subtitle: "Briefing, présenter ou transmettre",
+  subtitle: "Arriver préparé à ta prochaine consultation",
   route: "/outils/synthese/rdv"
 },
 {
