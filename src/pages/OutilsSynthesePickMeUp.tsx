@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Mic, Copy, Share2, Pencil, RefreshCw, CalendarIcon } from "lucide-react";
+import { ArrowLeft, Mic, Copy, Share2, Pencil, RefreshCw, CalendarIcon, Sparkles } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -39,22 +39,23 @@ const PERIODS = [
 ];
 
 const AiBubble = ({ text }: { text: string }) => (
-  <div className="flex items-start gap-3 mb-5">
+  <div className="flex items-end gap-3 mb-5">
     <div
       className="flex-shrink-0 flex items-center justify-center"
       style={{
-        width: 36,
-        height: 36,
+        width: 40,
+        height: 40,
         borderRadius: "50%",
         background: "linear-gradient(135deg, #E8736A, #8B74E0)",
+        boxShadow: "0 0 16px rgba(139,116,224,0.4)",
       }}
     >
-      <span className="text-[16px] leading-none">✨</span>
+      <Sparkles size={18} color="#fff" />
     </div>
     <div className="flex-1 min-w-0">
       <span
         className="block mb-1 font-sans font-medium"
-        style={{ color: "#8B74E0", fontSize: 10 }}
+        style={{ color: "#8B74E0", fontSize: 11 }}
       >
         The Village
       </span>
@@ -62,9 +63,9 @@ const AiBubble = ({ text }: { text: string }) => (
         className="px-4 py-3 inline-block"
         style={{
           ...glassCard,
-          background: "rgba(139,116,224,0.07)",
-          border: "1px solid rgba(139,116,224,0.18)",
-          maxWidth: "92%",
+          background: "rgba(255,255,255,0.55)",
+          border: "1px solid rgba(255,255,255,0.85)",
+          maxWidth: "75%",
         }}
       >
         <p className="text-[14px] font-sans leading-snug" style={{ color: "#1E1A1A" }}>
@@ -78,14 +79,14 @@ const AiBubble = ({ text }: { text: string }) => (
 const UserBubble = ({ text }: { text: string }) => (
   <div className="flex justify-end mb-4">
     <div
-      className="px-4 py-3 inline-block max-w-[80%]"
+      className="px-4 py-3 inline-block"
       style={{
-        ...glassCard,
-        background: "rgba(139,116,224,0.13)",
-        border: "1px solid rgba(139,116,224,0.25)",
+        background: "linear-gradient(135deg, #E8736A, #8B74E0)",
+        borderRadius: 16,
+        maxWidth: "70%",
       }}
     >
-      <p className="text-[14px] font-sans leading-snug" style={{ color: "#1E1A1A" }}>
+      <p className="text-[14px] font-sans leading-snug" style={{ color: "#fff" }}>
         {text}
       </p>
     </div>
@@ -172,11 +173,40 @@ const OutilsSynthesePickMeUp = () => {
 
       {/* STEP 1 */}
       {step === 1 && (
-        <main className="flex-1 px-4 pt-5 pb-24">
+        <main className="flex-1 px-4 pt-5 pb-28">
           <AiBubble text="Comment tu te sens en ce moment ? (Ta réponse m'aide à trouver le bon angle)" />
 
+          {/* Section separator */}
+          <div className="flex items-center gap-3 my-5">
+            <div className="flex-1 h-px" style={{ background: "rgba(154,148,144,0.25)" }} />
+            <span className="text-[10px] font-sans font-medium tracking-widest uppercase" style={{ color: "#9A9490" }}>
+              Un remontant — {displayName}
+            </span>
+            <div className="flex-1 h-px" style={{ background: "rgba(154,148,144,0.25)" }} />
+          </div>
+
+          {/* Mic orb */}
+          <div className="flex flex-col items-center gap-2 mb-5">
+            <div
+              className="flex items-center justify-center"
+              style={{
+                width: 72,
+                height: 72,
+                borderRadius: "50%",
+                background: "linear-gradient(135deg, #E8736A, #8B74E0)",
+                boxShadow: "0 0 24px rgba(139,116,224,0.4)",
+                cursor: "not-allowed",
+              }}
+            >
+              <Mic size={30} color="#fff" />
+            </div>
+            <span className="text-[12px] font-sans" style={{ color: "#9A9490" }}>
+              Appuie pour parler
+            </span>
+          </div>
+
           {/* Chips — 2×2 grid */}
-          <div className="grid grid-cols-2 gap-2 ml-12 mb-4" style={{ maxWidth: "92%" }}>
+          <div className="grid grid-cols-2 gap-2 mb-4 px-2">
             {EMOTIONS.map((e) => (
               <button
                 key={e}
@@ -184,7 +214,7 @@ const OutilsSynthesePickMeUp = () => {
                   setSelectedEmotion(selectedEmotion === e ? null : e);
                   setFreeText("");
                 }}
-                className="px-3 py-2.5 text-left text-[13px] font-sans transition-all w-fit"
+                className="px-3 py-2.5 text-[13px] font-sans transition-all text-left"
                 style={{
                   ...(selectedEmotion === e
                     ? { background: "#8B74E0", color: "#fff", borderRadius: 14, border: "none" }
@@ -196,44 +226,53 @@ const OutilsSynthesePickMeUp = () => {
             ))}
           </div>
 
-          {/* User bubble — after chips */}
-          {hasEmotion && <UserBubble text={emotionText} />}
-
-          {/* Mic orb */}
-          <div className="flex flex-col items-center gap-3 mb-4">
-            <div
-              className="flex items-center justify-center"
-              style={{
-                width: 64,
-                height: 64,
-                borderRadius: "50%",
-                background: "linear-gradient(135deg, #E8736A, #8B74E0)",
-                cursor: "not-allowed",
-              }}
-            >
-              <Mic size={28} color="#fff" />
-            </div>
-            <span className="text-[13px] font-sans" style={{ color: "#9A9490" }}>
-              ou
-            </span>
+          {/* "ou" separator */}
+          <div className="flex justify-center my-4">
+            <span className="text-[13px] font-sans" style={{ color: "#9A9490" }}>ou</span>
           </div>
 
-          {/* CTA */}
-          <button
-            disabled={!hasEmotion}
-            onClick={() => setStep(2)}
-            className="w-full py-3.5 text-[15px] font-sans font-semibold transition-opacity"
+          {/* Textarea */}
+          <div className="mb-5">
+            <Textarea
+              placeholder="Écris ici si tu préfères..."
+              value={freeText}
+              onChange={(e) => {
+                setFreeText(e.target.value);
+                if (e.target.value.trim()) setSelectedEmotion(null);
+              }}
+              className="text-[14px] font-sans border-none italic placeholder:italic"
+              style={{ ...glassCard, borderRadius: 14, minHeight: 80 }}
+            />
+          </div>
+
+          {/* User bubble */}
+          {hasEmotion && <UserBubble text={emotionText} />}
+
+          {/* CTA sticky bottom */}
+          <div
+            className="fixed bottom-16 left-0 right-0 z-10 px-4 py-3"
             style={{
-              background: "linear-gradient(135deg, #E8736A, #8B74E0)",
-              color: "#fff",
-              borderRadius: 14,
-              border: "none",
-              opacity: hasEmotion ? 1 : 0.4,
-              cursor: hasEmotion ? "pointer" : "not-allowed",
+              background: "rgba(255,255,255,0.72)",
+              backdropFilter: "blur(20px) saturate(1.5)",
+              WebkitBackdropFilter: "blur(20px) saturate(1.5)",
             }}
           >
-            Choisir la période →
-          </button>
+            <button
+              disabled={!hasEmotion}
+              onClick={() => setStep(2)}
+              className="w-full py-3.5 text-[15px] font-sans font-semibold transition-opacity"
+              style={{
+                background: "linear-gradient(135deg, #E8736A, #8B74E0)",
+                color: "#fff",
+                borderRadius: 14,
+                border: "none",
+                opacity: hasEmotion ? 1 : 0.4,
+                cursor: hasEmotion ? "pointer" : "not-allowed",
+              }}
+            >
+              Choisir la période →
+            </button>
+          </div>
         </main>
       )}
 
