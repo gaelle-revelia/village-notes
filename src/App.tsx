@@ -24,6 +24,7 @@ import SelenaScreen from "./pages/SelenaScreen";
 import OutilsScreen from "./pages/OutilsScreen";
 import OutilsActivites from "./pages/OutilsActivites";
 import OutilsActiviteCreer from "./pages/OutilsActiviteCreer";
+import OutilsSynthese from "./pages/OutilsSynthese";
 import ExplorerScreen from "./pages/ExplorerScreen";
 import OnboardingInvite from "./pages/OnboardingInvite";
 import Vocabulaire from "./pages/Vocabulaire";
@@ -45,6 +46,11 @@ const AppRoutes = () => {
       <Route path="/outils/activites/creer" element={<OutilsActiviteCreer />} />
       <Route path="/outils/activites/:id/chrono" element={<OutilsActiviteChrono />} />
       <Route path="/outils/activites/:id/manuel" element={<OutilsActiviteManuel />} />
+      <Route path="/outils/synthese" element={<OutilsSynthese />} />
+      <Route path="/outils/synthese/pick-me-up" element={<PlaceholderScreen title="Pick-me-up" />} />
+      <Route path="/outils/synthese/mdph" element={<PlaceholderScreen title="Dossier MDPH" />} />
+      <Route path="/outils/synthese/rdv" element={<PlaceholderScreen title="Préparer un RDV" />} />
+      <Route path="/outils/synthese/transmission" element={<PlaceholderScreen title="Transmission" />} />
       <Route path="/explorer" element={<ExplorerScreen />} />
       <Route path="/onboarding" element={<Onboarding />} />
       <Route path="/reset-password" element={<ResetPassword />} />
