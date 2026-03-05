@@ -272,7 +272,7 @@ const OutilsSyntheseTransmission = () => {
         <SectionProgress current={idx + 1} />
         <SectionTag number={s.number} title={q(s.title)} />
         <AiBubble text={q(s.question)} />
-        <AiBubble text={q(SECTION_HELPERS[idx])} italic />
+        <AiBubble text={q(SECTION_HELPERS[idx])} />
         <WiredMicOrb disabled={isPast} onTranscription={(text) => !isPast && updateAnswer(idx, (answers[idx] ? answers[idx] + " " : "") + text)} />
         <OrSeparator />
         <div className="mb-2 flex justify-end">
