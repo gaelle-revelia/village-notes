@@ -74,9 +74,9 @@ export function useVocalRecording(): UseVocalRecordingReturn {
         const blob = new Blob(chunksRef.current, { type: mimeType });
         chunksRef.current = [];
 
-        if (blob.size === 0 || finalElapsed < 2) {
-          if (finalElapsed < 2) {
-            setError("Enregistrement trop court — parle au moins 2 secondes.");
+        if (blob.size === 0 || finalElapsed < 10) {
+          if (finalElapsed < 10) {
+            setError("Enregistrement trop court — parle au moins 10 secondes.");
           } else {
             setError("Transcription échouée — réessaie ou utilise la saisie texte.");
           }
