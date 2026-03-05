@@ -137,15 +137,15 @@ Titres : "Remontant · Fév 2026" · "Dossier MDPH · Renouvellement" · "Briefi
 **`sessions_activite`** : id · activite_id · enfant_id · duree_secondes · distance · notes · created_at
 → RLS : SELECT si rôle IS NOT NULL · INSERT/UPDATE/DELETE si rôle IN ('owner','coparent')
 
-**`syntheses`** ✅ CRÉÉE
+**`syntheses`** ← À CRÉER (migration P1)
 ```sql
-id uuid PK · enfant_id · user_id · cas_usage text · periode_debut date · periode_fin date
+id uuid PK · enfant_id · membre_id · cas_usage text · periode_debut date · periode_fin date
 contenu text · etat_emotionnel text · vocal_mdph text · reponses_transmission jsonb · metadata jsonb · created_at
 ```
 `cas_usage` : `'pick_me_up'|'mdph'|'rdv_briefing'|'rdv_presentation'|'transmission'`
 `periode_debut/fin` : null pour MDPH et Transmission
 
-**Champs MDPH sur `enfants`** ✅ AJOUTÉS : `mdph_type_demande text` · `mdph_derniere_demande date`
+**Champs MDPH sur `enfants`** ← À AJOUTER : `mdph_type_demande text` · `mdph_derniere_demande date`
 
 ## Edge functions
 | Fonction | Rôle |
