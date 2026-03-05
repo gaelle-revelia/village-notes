@@ -24,89 +24,89 @@ const glassCard: React.CSSProperties = {
   border: "1px solid rgba(255,255,255,0.85)",
   borderRadius: 16,
   boxShadow:
-    "0 4px 24px rgba(139,116,224,0.08), 0 1px 4px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9)",
+  "0 4px 24px rgba(139,116,224,0.08), 0 1px 4px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9)"
 };
 
 const PERIODS = [
-  "Ce mois-ci",
-  "3 derniers mois",
-  "6 derniers mois",
-  "Depuis le début",
-];
+"Ce mois-ci",
+"3 derniers mois",
+"6 derniers mois",
+"Depuis le début"];
+
 
 // --- Sub-components ---
 
-const AiBubble = ({ text }: { text: string }) => (
-  <div className="flex items-end gap-3 mb-5">
+const AiBubble = ({ text }: {text: string;}) =>
+<div className="flex items-end gap-3 mb-5">
     <div
-      className="flex-shrink-0 flex items-center justify-center"
-      style={{
-        width: 40,
-        height: 40,
-        borderRadius: "50%",
-        background: "linear-gradient(135deg, #E8736A, #8B74E0)",
-        boxShadow: "0 0 16px rgba(139,116,224,0.4)",
-      }}
-    >
+    className="flex-shrink-0 flex items-center justify-center"
+    style={{
+      width: 40,
+      height: 40,
+      borderRadius: "50%",
+      background: "linear-gradient(135deg, #E8736A, #8B74E0)",
+      boxShadow: "0 0 16px rgba(139,116,224,0.4)"
+    }}>
+    
       <Sparkles size={18} color="#fff" />
     </div>
     <div className="flex-1 min-w-0">
       <span
-        className="block mb-1 font-sans font-medium"
-        style={{ color: "#8B74E0", fontSize: 11 }}
-      >
+      className="block mb-1 font-sans font-medium"
+      style={{ color: "#8B74E0", fontSize: 11 }}>
+      
         The Village
       </span>
       <div
-        className="px-4 py-3 inline-block"
-        style={{
-          ...glassCard,
-          background: "rgba(255,255,255,0.55)",
-          border: "1px solid rgba(255,255,255,0.85)",
-          maxWidth: "75%",
-        }}
-      >
+      className="px-4 py-3 inline-block"
+      style={{
+        ...glassCard,
+        background: "rgba(255,255,255,0.55)",
+        border: "1px solid rgba(255,255,255,0.85)",
+        maxWidth: "75%"
+      }}>
+      
         <p className="text-[14px] font-sans leading-snug" style={{ color: "#1E1A1A" }}>
           {text}
         </p>
       </div>
     </div>
-  </div>
-);
+  </div>;
 
-const UserBubble = ({ text }: { text: string }) => (
-  <div className="flex justify-end mb-4">
+
+const UserBubble = ({ text }: {text: string;}) =>
+<div className="flex justify-end mb-4">
     <div
-      className="px-4 py-3 inline-block"
-      style={{
-        background: "linear-gradient(135deg, #E8736A, #8B74E0)",
-        borderRadius: 16,
-        maxWidth: "70%",
-      }}
-    >
+    className="px-4 py-3 inline-block"
+    style={{
+      background: "linear-gradient(135deg, #E8736A, #8B74E0)",
+      borderRadius: 16,
+      maxWidth: "70%"
+    }}>
+    
       <p className="text-[14px] font-sans leading-snug" style={{ color: "#fff" }}>
         {text}
       </p>
     </div>
-  </div>
-);
+  </div>;
 
-const SectionSeparator = ({ text }: { text: string }) => (
-  <div className="flex items-center gap-3 my-5">
+
+const SectionSeparator = ({ text }: {text: string;}) =>
+<div className="flex items-center gap-3 my-5">
     <div className="flex-1 h-px" style={{ background: "rgba(154,148,144,0.25)" }} />
     <span
-      className="text-[10px] font-sans font-medium tracking-widest uppercase"
-      style={{ color: "#9A9490" }}
-    >
+    className="text-[10px] font-sans font-medium tracking-widest uppercase"
+    style={{ color: "#9A9490" }}>
+    
       {text}
     </span>
     <div className="flex-1 h-px" style={{ background: "rgba(154,148,144,0.25)" }} />
-  </div>
-);
+  </div>;
+
 
 // --- Helpers ---
 
-function computeDateRange(period: string): { start: Date; end: Date } {
+function computeDateRange(period: string): {start: Date;end: Date;} {
   const now = new Date();
   const end = now;
   switch (period) {
@@ -135,11 +135,11 @@ const OutilsSynthesePickMeUp = () => {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const EMOTIONS = [
-    "Je suis épuisé(e)",
-    "Je doute que ça avance",
-    `Voir où en est ${displayName}`,
-    "Faire un point étape",
-  ];
+  "Je suis épuisé(e)",
+  "Je doute que ça avance",
+  `Voir où en est ${displayName}`,
+  "Faire un point étape"];
+
 
   // Phase model
   type Phase = "emotion" | "period" | "result";
@@ -161,14 +161,14 @@ const OutilsSynthesePickMeUp = () => {
 
   useEffect(() => {
     if (!user) return;
-    supabase
-      .from("profiles")
-      .select("prenom")
-      .eq("user_id", user.id)
-      .single()
-      .then(({ data }) => {
-        if (data?.prenom) setParentPrenom(data.prenom);
-      });
+    supabase.
+    from("profiles").
+    select("prenom").
+    eq("user_id", user.id).
+    single().
+    then(({ data }) => {
+      if (data?.prenom) setParentPrenom(data.prenom);
+    });
   }, [user]);
 
   // Auto-scroll on phase change
@@ -182,11 +182,11 @@ const OutilsSynthesePickMeUp = () => {
   const emotionText = selectedEmotion || freeText.trim();
   const hasEmotion = emotionText.length > 0;
 
-  const periodText = selectedPeriod
-    ? selectedPeriod
-    : dateStart && dateEnd
-      ? `Du ${format(dateStart, "d MMM yyyy", { locale: fr })} au ${format(dateEnd, "d MMM yyyy", { locale: fr })}`
-      : null;
+  const periodText = selectedPeriod ?
+  selectedPeriod :
+  dateStart && dateEnd ?
+  `Du ${format(dateStart, "d MMM yyyy", { locale: fr })} au ${format(dateEnd, "d MMM yyyy", { locale: fr })}` :
+  null;
   const hasPeriod = !!periodText;
 
   // Fetch counts when period changes (only in period phase)
@@ -195,19 +195,19 @@ const OutilsSynthesePickMeUp = () => {
     const startISO = start.toISOString();
     const endISO = end.toISOString();
     const [memosRes, sessionsRes] = await Promise.all([
-      supabase
-        .from("memos")
-        .select("id", { count: "exact", head: true })
-        .eq("enfant_id", enfantId)
-        .gte("created_at", startISO)
-        .lte("created_at", endISO),
-      supabase
-        .from("sessions_activite")
-        .select("id", { count: "exact", head: true })
-        .eq("enfant_id", enfantId)
-        .gte("created_at", startISO)
-        .lte("created_at", endISO),
-    ]);
+    supabase.
+    from("memos").
+    select("id", { count: "exact", head: true }).
+    eq("enfant_id", enfantId).
+    gte("created_at", startISO).
+    lte("created_at", endISO),
+    supabase.
+    from("sessions_activite").
+    select("id", { count: "exact", head: true }).
+    eq("enfant_id", enfantId).
+    gte("created_at", startISO).
+    lte("created_at", endISO)]
+    );
     setMemoCount(memosRes.count ?? 0);
     setActiviteCount(sessionsRes.count ?? 0);
   }, [enfantId]);
@@ -250,35 +250,35 @@ const OutilsSynthesePickMeUp = () => {
             backdropFilter: "blur(20px) saturate(1.5)",
             WebkitBackdropFilter: "blur(20px) saturate(1.5)",
             borderTop: "1px solid rgba(255,255,255,0.6)",
-            boxShadow: "0 -2px 12px rgba(0,0,0,0.05)",
-          }}
-        >
+            boxShadow: "0 -2px 12px rgba(0,0,0,0.05)"
+          }}>
+          
           {[
-            { icon: Copy, label: "Copier", action: handleCopy },
-            { icon: Share2, label: "Partager", action: () => {} },
-            { icon: Pencil, label: "Modifier", action: () => {} },
-            { icon: RefreshCw, label: "Régénérer", action: () => {} },
-          ].map(({ icon: Icon, label, action }) => (
-            <button
-              key={label}
-              onClick={action}
-              className="flex flex-col items-center gap-1 text-[11px] font-sans"
-              style={{ color: "#1E1A1A" }}
-            >
+          { icon: Copy, label: "Copier", action: handleCopy },
+          { icon: Share2, label: "Partager", action: () => {} },
+          { icon: Pencil, label: "Modifier", action: () => {} },
+          { icon: RefreshCw, label: "Régénérer", action: () => {} }].
+          map(({ icon: Icon, label, action }) =>
+          <button
+            key={label}
+            onClick={action}
+            className="flex flex-col items-center gap-1 text-[11px] font-sans"
+            style={{ color: "#1E1A1A" }}>
+            
               <Icon size={18} />
               {label}
             </button>
-          ))}
-        </div>
-      );
+          )}
+        </div>);
+
     }
 
     const isEmotion = phase === "emotion";
     const enabled = isEmotion ? hasEmotion : hasPeriod;
     const label = isEmotion ? "Continuer →" : "Analyser →";
     const onTap = () => {
-      if (isEmotion) setPhase("period");
-      else setPhase("result");
+      if (isEmotion) setPhase("period");else
+      setPhase("result");
     };
 
     return (
@@ -287,9 +287,9 @@ const OutilsSynthesePickMeUp = () => {
         style={{
           background: "rgba(255,255,255,0.72)",
           backdropFilter: "blur(20px) saturate(1.5)",
-          WebkitBackdropFilter: "blur(20px) saturate(1.5)",
-        }}
-      >
+          WebkitBackdropFilter: "blur(20px) saturate(1.5)"
+        }}>
+        
         <button
           disabled={!enabled}
           onClick={onTap}
@@ -300,13 +300,13 @@ const OutilsSynthesePickMeUp = () => {
             borderRadius: 14,
             border: "none",
             opacity: enabled ? 1 : 0.4,
-            cursor: enabled ? "pointer" : "not-allowed",
-          }}
-        >
+            cursor: enabled ? "pointer" : "not-allowed"
+          }}>
+          
           {label}
         </button>
-      </div>
-    );
+      </div>);
+
   };
 
   return (
@@ -319,9 +319,9 @@ const OutilsSynthesePickMeUp = () => {
           backdropFilter: "blur(20px) saturate(1.5)",
           WebkitBackdropFilter: "blur(20px) saturate(1.5)",
           borderBottom: "1px solid rgba(255,255,255,0.6)",
-          boxShadow: "0 2px 12px rgba(0,0,0,0.05)",
-        }}
-      >
+          boxShadow: "0 2px 12px rgba(0,0,0,0.05)"
+        }}>
+        
         <button onClick={() => navigate("/outils/synthese")} className="flex items-center justify-center" aria-label="Retour">
           <ArrowLeft size={20} style={{ color: "#1E1A1A" }} />
         </button>
@@ -349,9 +349,9 @@ const OutilsSynthesePickMeUp = () => {
               background: "linear-gradient(135deg, #E8736A, #8B74E0)",
               boxShadow: "0 0 24px rgba(139,116,224,0.4)",
               cursor: "not-allowed",
-              opacity: emotionDisabled ? 0.4 : 1,
-            }}
-          >
+              opacity: emotionDisabled ? 0.4 : 1
+            }}>
+            
             <Mic size={30} color="#fff" />
           </div>
           <span className="text-[12px] font-sans" style={{ color: "#9A9490" }}>
@@ -360,27 +360,27 @@ const OutilsSynthesePickMeUp = () => {
         </div>
 
         {/* Emotion chips */}
-        <div className="grid grid-cols-2 gap-2 mb-4 px-2 justify-items-center">
-          {EMOTIONS.map((e) => (
-            <button
-              key={e}
-              disabled={emotionDisabled}
-              onClick={() => {
-                setSelectedEmotion(selectedEmotion === e ? null : e);
-                setFreeText("");
-              }}
-              className="w-fit px-3.5 py-2 text-[12px] font-sans transition-all text-left"
-              style={{
-                ...(selectedEmotion === e
-                  ? { background: "#8B74E0", color: "#fff", borderRadius: 999, border: "none" }
-                  : { ...glassCard, borderRadius: 999 }),
-                opacity: emotionDisabled ? 0.5 : 1,
-                cursor: emotionDisabled ? "default" : "pointer",
-              }}
-            >
+        <div className="flex flex-wrap justify-center gap-2">
+          {EMOTIONS.map((e) =>
+          <button
+            key={e}
+            disabled={emotionDisabled}
+            onClick={() => {
+              setSelectedEmotion(selectedEmotion === e ? null : e);
+              setFreeText("");
+            }}
+            className="w-fit px-3.5 py-2 text-[12px] font-sans transition-all text-left"
+            style={{
+              ...(selectedEmotion === e ?
+              { background: "#8B74E0", color: "#fff", borderRadius: 999, border: "none" } :
+              { ...glassCard, borderRadius: 999 }),
+              opacity: emotionDisabled ? 0.5 : 1,
+              cursor: emotionDisabled ? "default" : "pointer"
+            }}>
+            
               {e}
             </button>
-          ))}
+          )}
         </div>
 
         {/* "ou" separator */}
@@ -399,13 +399,13 @@ const OutilsSynthesePickMeUp = () => {
               if (e.target.value.trim()) setSelectedEmotion(null);
             }}
             className="text-[14px] font-sans border-none italic placeholder:italic"
-            style={{ ...glassCard, borderRadius: 14, minHeight: 80, maxWidth: "75%" }}
-          />
+            style={{ ...glassCard, borderRadius: 14, minHeight: 80, maxWidth: "75%" }} />
+          
         </div>
 
         {/* ===== BLOCK 2 — visible when phase >= 'period' ===== */}
-        {(phase === "period" || phase === "result") && (
-          <>
+        {(phase === "period" || phase === "result") &&
+        <>
             {/* User bubble echoing emotion */}
             <UserBubble text={emotionText} />
 
@@ -415,27 +415,27 @@ const OutilsSynthesePickMeUp = () => {
 
             {/* Period chips */}
             <div className="grid grid-cols-2 gap-2 mb-4 px-2 justify-items-center">
-              {PERIODS.map((p) => (
-                <button
-                  key={p}
-                  disabled={periodDisabled}
-                  onClick={() => {
-                    setSelectedPeriod(selectedPeriod === p ? null : p);
-                    setDateStart(undefined);
-                    setDateEnd(undefined);
-                  }}
-                  className="w-fit px-3.5 py-2 text-[12px] font-sans transition-all text-left"
-                  style={{
-                    ...(selectedPeriod === p
-                      ? { background: "#8B74E0", color: "#fff", borderRadius: 999, border: "none" }
-                      : { ...glassCard, borderRadius: 999 }),
-                    opacity: periodDisabled ? 0.5 : 1,
-                    cursor: periodDisabled ? "default" : "pointer",
-                  }}
-                >
+              {PERIODS.map((p) =>
+            <button
+              key={p}
+              disabled={periodDisabled}
+              onClick={() => {
+                setSelectedPeriod(selectedPeriod === p ? null : p);
+                setDateStart(undefined);
+                setDateEnd(undefined);
+              }}
+              className="w-fit px-3.5 py-2 text-[12px] font-sans transition-all text-left"
+              style={{
+                ...(selectedPeriod === p ?
+                { background: "#8B74E0", color: "#fff", borderRadius: 999, border: "none" } :
+                { ...glassCard, borderRadius: 999 }),
+                opacity: periodDisabled ? 0.5 : 1,
+                cursor: periodDisabled ? "default" : "pointer"
+              }}>
+              
                   {p}
                 </button>
-              ))}
+            )}
             </div>
 
             {/* "ou" separator */}
@@ -452,45 +452,45 @@ const OutilsSynthesePickMeUp = () => {
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
-                        variant="outline"
-                        disabled={periodDisabled}
-                        className={cn("flex-1 justify-start text-left text-[13px] font-normal", !dateStart && "text-muted-foreground")}
-                        style={{ borderRadius: 999 }}
-                      >
+                      variant="outline"
+                      disabled={periodDisabled}
+                      className={cn("flex-1 justify-start text-left text-[13px] font-normal", !dateStart && "text-muted-foreground")}
+                      style={{ borderRadius: 999 }}>
+                      
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {dateStart ? format(dateStart, "d MMM yyyy", { locale: fr }) : "Du"}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
                       <Calendar
-                        mode="single"
-                        selected={dateStart}
-                        onSelect={(d) => { setDateStart(d || undefined); setSelectedPeriod(null); }}
-                        initialFocus
-                        className={cn("p-3 pointer-events-auto")}
-                      />
+                      mode="single"
+                      selected={dateStart}
+                      onSelect={(d) => {setDateStart(d || undefined);setSelectedPeriod(null);}}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")} />
+                    
                     </PopoverContent>
                   </Popover>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
-                        variant="outline"
-                        disabled={periodDisabled}
-                        className={cn("flex-1 justify-start text-left text-[13px] font-normal", !dateEnd && "text-muted-foreground")}
-                        style={{ borderRadius: 999 }}
-                      >
+                      variant="outline"
+                      disabled={periodDisabled}
+                      className={cn("flex-1 justify-start text-left text-[13px] font-normal", !dateEnd && "text-muted-foreground")}
+                      style={{ borderRadius: 999 }}>
+                      
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {dateEnd ? format(dateEnd, "d MMM yyyy", { locale: fr }) : "Au"}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
                       <Calendar
-                        mode="single"
-                        selected={dateEnd}
-                        onSelect={(d) => { setDateEnd(d || undefined); setSelectedPeriod(null); }}
-                        initialFocus
-                        className={cn("p-3 pointer-events-auto")}
-                      />
+                      mode="single"
+                      selected={dateEnd}
+                      onSelect={(d) => {setDateEnd(d || undefined);setSelectedPeriod(null);}}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")} />
+                    
                     </PopoverContent>
                   </Popover>
                 </div>
@@ -498,20 +498,20 @@ const OutilsSynthesePickMeUp = () => {
             </div>
 
             {/* Counter card */}
-            {hasPeriod && memoCount !== null && activiteCount !== null && (
-              <div className="mb-5 px-4 py-3" style={{ ...glassCard }}>
+            {hasPeriod && memoCount !== null && activiteCount !== null &&
+          <div className="mb-5 px-4 py-3" style={{ ...glassCard }}>
                 <p className="text-[13px] font-sans text-center" style={{ color: "#1E1A1A" }}>
                   <Sparkles size={14} className="inline mr-1" style={{ color: "#8B74E0" }} />
                   <span className="font-semibold">{memoCount}</span> mémo{memoCount !== 1 ? "s" : ""} · <span className="font-semibold">{activiteCount}</span> activité{activiteCount !== 1 ? "s" : ""} sur <span className="italic">{periodText}</span>
                 </p>
               </div>
-            )}
+          }
           </>
-        )}
+        }
 
         {/* ===== BLOCK 3 — visible when phase === 'result' ===== */}
-        {phase === "result" && (
-          <>
+        {phase === "result" &&
+        <>
             <UserBubble text={periodText!} />
 
             <SectionSeparator text="Ton remontant" />
@@ -526,7 +526,7 @@ const OutilsSynthesePickMeUp = () => {
               Synthèse des observations de {parentPrenom ?? "Parent"} pour {displayName} · The Village · Mars 2026
             </p>
           </>
-        )}
+        }
 
         {/* Scroll anchor */}
         <div ref={bottomRef} />
@@ -536,8 +536,8 @@ const OutilsSynthesePickMeUp = () => {
       {renderStickyBottom()}
 
       <BottomNavBar />
-    </div>
-  );
+    </div>);
+
 };
 
 export default OutilsSynthesePickMeUp;
