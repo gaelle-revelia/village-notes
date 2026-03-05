@@ -44,7 +44,93 @@ serve(async (req) => {
     }
     const userId = claimsData.claims.sub as string;
 
-    const { memo_id, mode, text_input } = await req.json();
+    const body = await req.json();
+    const { memo_id, mode, text_input, audio_path } = body;
+
+    // --- transcription_only mode: no memo interaction ---
+    if (mode === "transcription_only") {
+      if (!audio_path) {
+        return new Response(JSON.stringify({ error: "audio_path required for transcription_only mode" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+      const { data: audioData, error: downloadError } = await supabase.storage
+        .from("audio-temp")
+        .download(audio_path);
+
+      if (downloadError || !audioData) {
+        return new Response(JSON.stringify({ error: "Failed to download audio: " + downloadError?.message }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const arrayBuffer = await audioData.arrayBuffer();
+      const base64Audio = btoa(
+        new Uint8Array(arrayBuffer).reduce((data, byte) => data + String.fromCharCode(byte), "")
+      );
+
+      const transcribeResponse = await fetch(
+        "https://ai.gateway.lovable.dev/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${lovableApiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "google/gemini-3-flash-preview",
+            messages: [
+              {
+                role: "system",
+                content: "Transcris fidèlement ce message audio en français. Retourne uniquement le texte transcrit, sans ponctuation excessive, sans mise en forme, sans commentaire.",
+              },
+              {
+                role: "user",
+                content: [
+                  { type: "input_audio", input_audio: { data: base64Audio, format: "wav" } },
+                  { type: "text", text: "Transcris cet enregistrement vocal en français." },
+                ],
+              },
+            ],
+          }),
+        }
+      );
+
+      // Delete audio immediately
+      await supabase.storage.from("audio-temp").remove([audio_path]);
+
+      if (!transcribeResponse.ok) {
+        const errText = await transcribeResponse.text();
+        console.error("Transcription error:", transcribeResponse.status, errText);
+        if (transcribeResponse.status === 429) {
+          return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again later." }), {
+            status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        if (transcribeResponse.status === 402) {
+          return new Response(JSON.stringify({ error: "AI credits exhausted." }), {
+            status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        return new Response(JSON.stringify({ error: "Transcription failed" }), {
+          status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const transcribeResult = await transcribeResponse.json();
+      const transcription = transcribeResult.choices?.[0]?.message?.content || "";
+
+      return new Response(
+        JSON.stringify({ transcription }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     if (!memo_id) {
       return new Response(JSON.stringify({ error: "memo_id required" }), {
         status: 400,

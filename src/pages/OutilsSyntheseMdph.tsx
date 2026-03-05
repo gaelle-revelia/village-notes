@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Mic, Copy, Share2, Pencil, RefreshCw, Sparkles, Settings, Stethoscope, BookOpen, Users, Briefcase, Mail } from "lucide-react";
+import { ArrowLeft, Copy, Share2, Pencil, RefreshCw, Sparkles, Settings, Stethoscope, BookOpen, Users, Briefcase, Mail } from "lucide-react";
+import WiredMicOrb from "@/components/synthese/WiredMicOrb";
 import BottomNavBar from "@/components/BottomNavBar";
 import { useEnfantPrenom } from "@/hooks/useEnfantPrenom";
 import { useEnfantId } from "@/hooks/useEnfantId";
@@ -53,17 +54,7 @@ const SectionSeparator = ({ text }: { text: string }) => (
   </div>
 );
 
-const MicOrb = ({ disabled }: { disabled?: boolean }) => (
-  <div className="flex flex-col items-center gap-2 mb-5">
-    <div
-      className="flex items-center justify-center"
-      style={{ width: 72, height: 72, borderRadius: "50%", background: "linear-gradient(135deg, #E8736A, #8B74E0)", boxShadow: "0 0 24px rgba(139,116,224,0.4)", cursor: "not-allowed", opacity: disabled ? 0.4 : 1 }}
-    >
-      <Mic size={30} color="#fff" />
-    </div>
-    <span className="text-[12px] font-sans" style={{ color: "#9A9490" }}>Appuie pour parler</span>
-  </div>
-);
+// MicOrb removed — using WiredMicOrb instead
 
 const OrSeparator = () => (
   <div className="flex justify-center my-4">
@@ -330,7 +321,7 @@ const OutilsSyntheseMdph = () => {
             <div className="mb-2 flex justify-end">
               <Textarea placeholder="Précise si besoin..." value={q3Text} disabled={past(3)} onChange={(e) => setQ3Text(e.target.value)} className="text-[14px] font-sans border-none italic placeholder:italic" style={{ ...glassCard, borderRadius: 14, minHeight: 70, maxWidth: "80%" }} />
             </div>
-            <MicOrb disabled={past(3)} />
+            <WiredMicOrb disabled={past(3)} onTranscription={(text) => setQ3Text((prev) => prev ? prev + " " + text : text)} />
           </>
         )}
 
@@ -357,7 +348,7 @@ const OutilsSyntheseMdph = () => {
             <div className="mb-2 flex justify-end">
               <Textarea placeholder="Décris ton projet..." value={q5Text} disabled={past(5)} onChange={(e) => setQ5Text(e.target.value)} className="text-[14px] font-sans border-none italic placeholder:italic" style={{ ...glassCard, borderRadius: 14, minHeight: 70, maxWidth: "80%" }} />
             </div>
-            <MicOrb disabled={past(5)} />
+            <WiredMicOrb disabled={past(5)} onTranscription={(text) => setQ5Text((prev) => prev ? prev + " " + text : text)} />
           </>
         )}
 
@@ -366,7 +357,7 @@ const OutilsSyntheseMdph = () => {
           <>
             <UserBubble text={q5Answer()} />
             <AiBubble text="Y a-t-il quelque chose d'important que je ne vois pas dans tes mémos ?" />
-            <MicOrb disabled={past(6)} />
+            <WiredMicOrb disabled={past(6)} onTranscription={(text) => setQ6Text((prev) => prev ? prev + " " + text : text)} />
             <OrSeparator />
             <div className="mb-5 flex justify-end">
               <Textarea placeholder="Ajoute ce que tu veux mettre en avant..." value={q6Text} disabled={past(6)} onChange={(e) => setQ6Text(e.target.value)} className="text-[14px] font-sans border-none italic placeholder:italic" style={{ ...glassCard, borderRadius: 14, minHeight: 70, maxWidth: "80%" }} />
