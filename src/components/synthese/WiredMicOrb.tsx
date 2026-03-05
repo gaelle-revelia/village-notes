@@ -2,6 +2,12 @@ import { Mic, Loader2 } from "lucide-react";
 import { useVocalRecording } from "@/hooks/useVocalRecording";
 import { useCallback } from "react";
 
+const formatTime = (s: number) => {
+  const m = Math.floor(s / 60).toString().padStart(2, "0");
+  const sec = (s % 60).toString().padStart(2, "0");
+  return `${m}:${sec}`;
+};
+
 interface WiredMicOrbProps {
   onTranscription: (text: string) => void;
   disabled?: boolean;
@@ -9,12 +15,6 @@ interface WiredMicOrbProps {
 
 export default function WiredMicOrb({ onTranscription, disabled }: WiredMicOrbProps) {
   const { isRecording, isTranscribing, error, elapsedSeconds, startRecording, stopRecording } = useVocalRecording();
-
-  const formatTime = (s: number) => {
-    const m = Math.floor(s / 60).toString().padStart(2, "0");
-    const sec = (s % 60).toString().padStart(2, "0");
-    return `${m}:${sec}`;
-  };
 
   const handleTap = useCallback(async () => {
     if (disabled || isTranscribing) return;
