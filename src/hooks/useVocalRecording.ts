@@ -20,6 +20,7 @@ export function useVocalRecording(): UseVocalRecordingReturn {
   const chunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const elapsedSecondsRef = useRef(0);
 
   const startRecording = useCallback(async () => {
     setError(null);
@@ -41,7 +42,10 @@ export function useVocalRecording(): UseVocalRecordingReturn {
 
       recorder.start(1000);
       setElapsedSeconds(0);
-      timerRef.current = setInterval(() => setElapsedSeconds((s) => s + 1), 1000);
+      elapsedSecondsRef.current = 0;
+      timerRef.current = setInterval(() => {
+        setElapsedSeconds((s) => { elapsedSecondsRef.current = s + 1; return s + 1; });
+      }, 1000);
       setIsRecording(true);
     } catch {
       setError("Microphone non disponible — utilise la saisie texte.");
@@ -61,15 +65,21 @@ export function useVocalRecording(): UseVocalRecordingReturn {
 
       recorder.onstop = async () => {
         if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
+        const finalElapsed = elapsedSecondsRef.current;
         setIsRecording(false);
+        setElapsedSeconds(0);
         streamRef.current?.getTracks().forEach((t) => t.stop());
 
         const mimeType = recorder.mimeType || "audio/webm";
         const blob = new Blob(chunksRef.current, { type: mimeType });
         chunksRef.current = [];
 
-        if (blob.size === 0) {
-          setError("Transcription échouée — réessaie ou utilise la saisie texte.");
+        if (blob.size === 0 || finalElapsed < 2) {
+          if (finalElapsed < 2) {
+            setError("Enregistrement trop court — parle au moins 2 secondes.");
+          } else {
+            setError("Transcription échouée — réessaie ou utilise la saisie texte.");
+          }
           resolve(null);
           return;
         }
