@@ -29,6 +29,7 @@ import OutilsSyntheseRdv from "./pages/OutilsSyntheseRdv";
 import OutilsSynthesePickMeUp from "./pages/OutilsSynthesePickMeUp";
 import OutilsSyntheseMdph from "./pages/OutilsSyntheseMdph";
 import OutilsSyntheseRdvBriefing from "./pages/OutilsSyntheseRdvBriefing";
+import OutilsSyntheseTransmission from "./pages/OutilsSyntheseTransmission";
 import ExplorerScreen from "./pages/ExplorerScreen";
 import OnboardingInvite from "./pages/OnboardingInvite";
 import Vocabulaire from "./pages/Vocabulaire";
@@ -56,7 +57,7 @@ const AppRoutes = () => {
       <Route path="/outils/synthese/rdv" element={<OutilsSyntheseRdv />} />
       <Route path="/outils/synthese/rdv/briefing" element={<OutilsSyntheseRdvBriefing />} />
       <Route path="/outils/synthese/rdv/presentation" element={<PlaceholderScreen title="Présenter l'enfant" />} />
-      <Route path="/outils/synthese/transmission" element={<PlaceholderScreen title="Transmission" />} />
+      <Route path="/outils/synthese/transmission" element={<OutilsSyntheseTransmission />} />
       <Route path="/explorer" element={<ExplorerScreen />} />
       <Route path="/onboarding" element={<Onboarding />} />
       <Route path="/reset-password" element={<ResetPassword />} />
