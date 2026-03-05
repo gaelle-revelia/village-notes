@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 interface StepEnfantProps {
-  onNext: (data: { prenom: string; dateNaissance: string; diagnostic: string; prenomParent: string }) => void;
+  onNext: (data: { prenom: string; dateNaissance: string; diagnostic: string; prenomParent: string; sexe: string | null }) => void;
 }
 
 export function StepEnfant({ onNext }: StepEnfantProps) {
@@ -12,6 +12,7 @@ export function StepEnfant({ onNext }: StepEnfantProps) {
   const [prenom, setPrenom] = useState("");
   const [dateNaissance, setDateNaissance] = useState("");
   const [diagnostic, setDiagnostic] = useState("");
+  const [sexe, setSexe] = useState<string | null>(null);
   const [error, setError] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -20,7 +21,7 @@ export function StepEnfant({ onNext }: StepEnfantProps) {
       setError("Le prénom est obligatoire");
       return;
     }
-    onNext({ prenom: prenom.trim(), dateNaissance, diagnostic: diagnostic.trim(), prenomParent: prenomParent.trim() });
+    onNext({ prenom: prenom.trim(), dateNaissance, diagnostic: diagnostic.trim(), prenomParent: prenomParent.trim(), sexe });
   };
 
   return (
@@ -56,6 +57,32 @@ export function StepEnfant({ onNext }: StepEnfantProps) {
             maxLength={100}
           />
           {error && <p className="text-sm text-destructive">{error}</p>}
+        </div>
+
+        <div className="space-y-2">
+          <Label>Son genre (pour personnaliser les textes)</Label>
+          <div className="flex gap-3">
+            {[
+              { value: "F", label: "Fille" },
+              { value: "M", label: "Garçon" },
+            ].map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setSexe(sexe === opt.value ? null : opt.value)}
+                className="flex-1 rounded-xl py-2.5 text-sm font-medium font-sans transition-all"
+                style={{
+                  background: sexe === opt.value
+                    ? "linear-gradient(135deg, #E8736A, #8B74E0)"
+                    : "rgba(255,255,255,0.55)",
+                  color: sexe === opt.value ? "#fff" : "#1E1A1A",
+                  border: sexe === opt.value ? "none" : "1px solid rgba(255,255,255,0.85)",
+                }}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="space-y-2">

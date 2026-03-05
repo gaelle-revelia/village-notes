@@ -60,7 +60,7 @@ const Onboarding = () => {
     return <Navigate to="/timeline" replace />;
   }
 
-  const handleEnfant = async (data: { prenom: string; dateNaissance: string; diagnostic: string; prenomParent: string }) => {
+  const handleEnfant = async (data: { prenom: string; dateNaissance: string; diagnostic: string; prenomParent: string; sexe: string | null }) => {
     setSaving(true);
     const { data: enfant, error } = await supabase
       .from("enfants")
@@ -69,7 +69,8 @@ const Onboarding = () => {
         prenom: data.prenom,
         date_naissance: data.dateNaissance || null,
         diagnostic_label: data.diagnostic || null,
-      })
+        sexe: data.sexe || null,
+      } as any)
       .select("id")
       .single();
 

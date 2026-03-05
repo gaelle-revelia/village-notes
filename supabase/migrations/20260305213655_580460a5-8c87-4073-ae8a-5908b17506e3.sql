@@ -1,0 +1,1 @@
+ALTER TABLE public.enfants ADD COLUMN sexe text DEFAULT NULL;
