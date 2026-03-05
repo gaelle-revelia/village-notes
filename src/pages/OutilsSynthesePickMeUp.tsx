@@ -281,11 +281,11 @@ const OutilsSynthesePickMeUp = () => {
 
       {/* STEP 2 */}
       {step === 2 && (
-        <main className="flex-1 px-4 pt-5 pb-24">
+        <main className="flex-1 px-4 pt-5 pb-28">
           <AiBubble text="Sur quelle période tu veux qu'on regarde ?" />
 
-          {/* Period chips */}
-          <div className="flex flex-col gap-2 ml-12 mb-6">
+          {/* Period chips — 2×2 grid */}
+          <div className="grid grid-cols-2 gap-2 mb-4 px-2">
             {PERIODS.map((p) => (
               <button
                 key={p}
@@ -294,11 +294,11 @@ const OutilsSynthesePickMeUp = () => {
                   setDateStart(undefined);
                   setDateEnd(undefined);
                 }}
-                className="px-4 py-2.5 text-left text-[14px] font-sans transition-all"
+                className="w-fit px-3.5 py-2 text-[12px] font-sans transition-all text-left"
                 style={{
                   ...(selectedPeriod === p
-                    ? { background: "#8B74E0", color: "#fff", borderRadius: 14, border: "none" }
-                    : { ...glassCard, borderRadius: 14 }),
+                    ? { background: "#8B74E0", color: "#fff", borderRadius: 999, border: "none" }
+                    : { ...glassCard, borderRadius: 999 }),
                 }}
               >
                 {p}
@@ -306,76 +306,92 @@ const OutilsSynthesePickMeUp = () => {
             ))}
           </div>
 
-          {/* Custom date range */}
-          <div className="ml-12 mb-5">
-            <span className="block text-[12px] font-sans mb-2" style={{ color: "#9A9490" }}>
-              Ou choisis une période personnalisée
-            </span>
-            <div className="flex gap-2">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn("flex-1 justify-start text-left text-[13px] font-normal", !dateStart && "text-muted-foreground")}
-                    style={{ borderRadius: 12 }}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {dateStart ? format(dateStart, "d MMM yyyy", { locale: fr }) : "Début"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={dateStart}
-                    onSelect={(d) => { setDateStart(d || undefined); setSelectedPeriod(null); }}
-                    initialFocus
-                    className={cn("p-3 pointer-events-auto")}
-                  />
-                </PopoverContent>
-              </Popover>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn("flex-1 justify-start text-left text-[13px] font-normal", !dateEnd && "text-muted-foreground")}
-                    style={{ borderRadius: 12 }}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {dateEnd ? format(dateEnd, "d MMM yyyy", { locale: fr }) : "Fin"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={dateEnd}
-                    onSelect={(d) => { setDateEnd(d || undefined); setSelectedPeriod(null); }}
-                    initialFocus
-                    className={cn("p-3 pointer-events-auto")}
-                  />
-                </PopoverContent>
-              </Popover>
+          {/* "ou" separator */}
+          <div className="flex justify-center my-4">
+            <span className="text-[13px] font-sans" style={{ color: "#9A9490" }}>ou</span>
+          </div>
+
+          {/* Custom date range — right-aligned */}
+          <div className="flex justify-end mb-5">
+            <div style={{ maxWidth: "75%" }} className="w-full">
+              <span className="block text-[12px] font-sans mb-2" style={{ color: "#9A9490" }}>
+                Choisis une période personnalisée
+              </span>
+              <div className="flex gap-2">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn("flex-1 justify-start text-left text-[13px] font-normal", !dateStart && "text-muted-foreground")}
+                      style={{ borderRadius: 999 }}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {dateStart ? format(dateStart, "d MMM yyyy", { locale: fr }) : "Début"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={dateStart}
+                      onSelect={(d) => { setDateStart(d || undefined); setSelectedPeriod(null); }}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn("flex-1 justify-start text-left text-[13px] font-normal", !dateEnd && "text-muted-foreground")}
+                      style={{ borderRadius: 999 }}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {dateEnd ? format(dateEnd, "d MMM yyyy", { locale: fr }) : "Fin"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={dateEnd}
+                      onSelect={(d) => { setDateEnd(d || undefined); setSelectedPeriod(null); }}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
             </div>
           </div>
 
           {/* User bubble */}
           {hasPeriod && <UserBubble text={periodText!} />}
 
-          {/* CTA */}
-          <button
-            disabled={!hasPeriod}
-            onClick={() => setStep(3)}
-            className="w-full py-3.5 text-[15px] font-sans font-semibold transition-opacity"
+          {/* CTA sticky bottom */}
+          <div
+            className="fixed bottom-16 left-0 right-0 z-10 px-4 py-3"
             style={{
-              background: "linear-gradient(135deg, #E8736A, #8B74E0)",
-              color: "#fff",
-              borderRadius: 14,
-              border: "none",
-              opacity: hasPeriod ? 1 : 0.4,
-              cursor: hasPeriod ? "pointer" : "not-allowed",
+              background: "rgba(255,255,255,0.72)",
+              backdropFilter: "blur(20px) saturate(1.5)",
+              WebkitBackdropFilter: "blur(20px) saturate(1.5)",
             }}
           >
-            Générer mon remontant →
-          </button>
+            <button
+              disabled={!hasPeriod}
+              onClick={() => setStep(3)}
+              className="w-full py-3.5 text-[15px] font-sans font-semibold transition-opacity"
+              style={{
+                background: "linear-gradient(135deg, #E8736A, #8B74E0)",
+                color: "#fff",
+                borderRadius: 14,
+                border: "none",
+                opacity: hasPeriod ? 1 : 0.4,
+                cursor: hasPeriod ? "pointer" : "not-allowed",
+              }}
+            >
+              Continuer →
+            </button>
+          </div>
         </main>
       )}
 
