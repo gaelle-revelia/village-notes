@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
+import PreciserBlocDrawer from "@/components/synthese/PreciserBlocDrawer";
 
 const glassCard: React.CSSProperties = {
   background: "rgba(255,255,255,0.38)",
@@ -82,14 +83,14 @@ interface ResultCardProps {
   body: string;
 }
 
-const ResultCard = ({ icon, title, body }: ResultCardProps) => (
+const ResultCard = ({ icon, title, body, onPreciser }: ResultCardProps & { onPreciser?: () => void }) => (
   <div className="mb-4 px-5 py-4" style={glassCard}>
     <div className="flex items-center gap-2 mb-2">
       {icon}
       <h3 className="text-[16px] font-serif font-semibold" style={{ color: "#1E1A1A" }}>{title}</h3>
     </div>
     <p className="text-[14px] font-sans leading-relaxed mb-3" style={{ color: "#1E1A1A" }}>{body}</p>
-    <button className="w-full py-2.5 text-[13px] font-sans font-medium" style={{ border: "1.5px dashed #8B74E0", color: "#8B74E0", borderRadius: 12, background: "transparent" }}>
+    <button onClick={onPreciser} className="w-full py-2.5 text-[13px] font-sans font-medium" style={{ border: "1.5px dashed #8B74E0", color: "#8B74E0", borderRadius: 12, background: "transparent" }}>
       ✏️ Préciser ce bloc
     </button>
   </div>
@@ -150,6 +151,8 @@ const OutilsSyntheseTransmission = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedBlocks, setGeneratedBlocks] = useState<any[] | null>(null);
   const [sexe, setSexe] = useState<string | null>(null);
+  const [syntheseId, setSyntheseId] = useState<string | null>(null);
+  const [refineBloc, setRefineBloc] = useState<{ id: string; title: string; content: string; cas_usage: string } | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -192,6 +195,7 @@ const OutilsSyntheseTransmission = () => {
       if (data?.blocks) {
         setGeneratedBlocks(data.blocks);
       }
+      if (data?.synthese_id) setSyntheseId(data.synthese_id);
       setPhase(7);
     } catch (e) {
       console.error("generate-synthesis error:", e);
@@ -388,6 +392,7 @@ const OutilsSyntheseTransmission = () => {
                   icon={iconMap[block.icon] || <User size={18} style={{ color: "#8B74E0" }} />}
                   title={block.title}
                   body={block.content}
+                  onPreciser={() => setRefineBloc({ id: block.id, title: block.title, content: block.content, cas_usage: "transmission" })}
                 />
               );
             }) : RESULT_CARDS.map((card, i) => (
@@ -403,6 +408,18 @@ const OutilsSyntheseTransmission = () => {
       </main>
 
       {renderCta()}
+
+      <PreciserBlocDrawer
+        isOpen={!!refineBloc}
+        onClose={() => setRefineBloc(null)}
+        bloc={refineBloc}
+        enfantId={enfantId ?? ""}
+        syntheseId={syntheseId ?? ""}
+        onBlockUpdated={(blocId, newContent) => {
+          setGeneratedBlocks((prev) => prev?.map((b) => b.id === blocId ? { ...b, content: newContent } : b) ?? null);
+        }}
+      />
+
       <BottomNavBar />
     </div>
   );

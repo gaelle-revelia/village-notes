@@ -15,6 +15,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import PreciserBlocDrawer from "@/components/synthese/PreciserBlocDrawer";
 
 // --- Shared styles ---
 
@@ -147,6 +148,8 @@ const OutilsSynthesePickMeUp = () => {
   const [phase, setPhase] = useState<Phase>("emotion");
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedContent, setGeneratedContent] = useState<string | null>(null);
+  const [syntheseId, setSyntheseId] = useState<string | null>(null);
+  const [refineBloc, setRefineBloc] = useState<{ id: string; title: string; content: string; cas_usage: string } | null>(null);
 
   // Block 1 state
   const [selectedEmotion, setSelectedEmotion] = useState<string | null>(null);
@@ -264,6 +267,7 @@ const OutilsSynthesePickMeUp = () => {
       if (blocks?.[0]?.content) {
         setGeneratedContent(blocks[0].content);
       }
+      if (data?.synthese_id) setSyntheseId(data.synthese_id);
       setPhase("result");
     } catch (e) {
       console.error("generate-synthesis error:", e);
@@ -552,11 +556,18 @@ const OutilsSynthesePickMeUp = () => {
 
             <SectionSeparator text="Ton remontant" />
 
-            <div className="px-5 py-4 mb-6" style={{ ...glassCard }}>
+            <div className="px-5 py-4 mb-4" style={{ ...glassCard }}>
               <p className="text-[14px] font-sans leading-relaxed" style={{ color: "#1E1A1A" }}>
                 {displayContent}
               </p>
             </div>
+            <button
+              onClick={() => setRefineBloc({ id: "narrative", title: "Ce qui s'est passé", content: displayContent, cas_usage: "pick_me_up" })}
+              className="w-full py-2.5 text-[13px] font-sans font-medium mb-6"
+              style={{ border: "1.5px dashed #8B74E0", color: "#8B74E0", borderRadius: 12, background: "transparent" }}
+            >
+              ✏️ Préciser ce bloc
+            </button>
 
             <p className="text-center text-[10px] font-sans mb-6" style={{ color: "#9A9490" }}>
               Synthèse des observations de {parentPrenom ?? "Parent"} pour {displayName} · The Village · Mars 2026
@@ -570,6 +581,17 @@ const OutilsSynthesePickMeUp = () => {
 
       {/* Sticky CTA / action bar */}
       {renderStickyBottom()}
+
+      <PreciserBlocDrawer
+        isOpen={!!refineBloc}
+        onClose={() => setRefineBloc(null)}
+        bloc={refineBloc}
+        enfantId={enfantId ?? ""}
+        syntheseId={syntheseId ?? ""}
+        onBlockUpdated={(blocId, newContent) => {
+          if (blocId === "narrative") setGeneratedContent(newContent);
+        }}
+      />
 
       <BottomNavBar />
     </div>);

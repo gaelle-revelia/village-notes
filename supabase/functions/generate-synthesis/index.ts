@@ -308,6 +308,92 @@ Destinataire du livret: ${parent_context.destinataire ?? "non renseigné"}
 Réponses du parent par section: ${JSON.stringify(parent_context.reponses ?? [])}`;
     }
 
+    if (type === "refine_block") {
+      const { bloc_id, bloc_title, bloc_content, precision, cas_usage, synthese_id } = parent_context;
+      if (!bloc_id || !bloc_content || !precision || !synthese_id) {
+        return new Response(
+          JSON.stringify({ error: "Missing refine_block params" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const refineSystemPrompt = `Tu es The Village. Un parent vient de préciser un bloc d'un document déjà généré. Tu dois régénérer uniquement ce bloc en intégrant la précision du parent dans le contenu existant.
+
+Règles absolues :
+- Conserver le ton et le style du bloc original
+- Intégrer la précision naturellement — pas en l'ajoutant mécaniquement à la fin
+- Ne jamais inventer d'informations non présentes dans le contenu original ou la précision
+- Jamais de jargon médical sans explication
+- Respecter la longueur approximative du bloc original
+- Le prénom de l'enfant ne doit jamais être modifié, accentué ou altéré
+
+Retourne UNIQUEMENT ce JSON sans markdown ni commentaire :
+{"content": "..."}`;
+
+      const refineUserMessage = `Bloc concerné: ${bloc_title}
+Contenu actuel: ${bloc_content}
+Précision du parent: ${precision}
+Prénom de l'enfant: ${prenom}
+Pronoms: ${pronom_sujet} / ${accord}`;
+
+      const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+      if (!LOVABLE_API_KEY) {
+        return new Response(
+          JSON.stringify({ error: "LOVABLE_API_KEY not configured" }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "google/gemini-3-flash-preview",
+          messages: [
+            { role: "system", content: refineSystemPrompt },
+            { role: "user", content: refineUserMessage },
+          ],
+        }),
+      });
+
+      if (!aiResp.ok) {
+        const st = aiResp.status;
+        if (st === 429) return new Response(JSON.stringify({ error: "Trop de requêtes — réessaie dans quelques instants." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        if (st === 402) return new Response(JSON.stringify({ error: "Crédits IA épuisés." }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        return new Response(JSON.stringify({ error: "AI gateway error" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
+      const aiD = await aiResp.json();
+      const raw = aiD.choices?.[0]?.message?.content ?? "";
+      let newContent = "";
+      try {
+        const clean = raw.replace(/```json/g, "").replace(/```/g, "").trim();
+        const parsed = JSON.parse(clean);
+        newContent = parsed.content ?? "";
+      } catch {
+        console.error("Failed to parse refine response:", raw);
+        return new Response(JSON.stringify({ error: "Failed to parse AI response" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
+      // Update syntheses row
+      const { data: synRow } = await supabase.from("syntheses").select("contenu").eq("id", synthese_id).single();
+      if (synRow?.contenu) {
+        try {
+          const blocks = JSON.parse(synRow.contenu);
+          const idx = blocks.findIndex((b: any) => b.id === bloc_id);
+          if (idx !== -1) {
+            blocks[idx].content = newContent;
+            await supabase.from("syntheses").update({ contenu: JSON.stringify(blocks) }).eq("id", synthese_id);
+          }
+        } catch { /* ignore parse error on existing contenu */ }
+      }
+
+      return new Response(
+        JSON.stringify({ bloc_id, content: newContent }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     if (!systemPrompt) {
       return new Response(
         JSON.stringify({ error: `Unknown type: ${type}` }),
