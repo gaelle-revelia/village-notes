@@ -137,6 +137,8 @@ export type Database = {
           date_naissance: string | null
           diagnostic_label: string | null
           id: string
+          mdph_derniere_demande: string | null
+          mdph_type_demande: string | null
           prenom: string
           user_id: string
         }
@@ -145,6 +147,8 @@ export type Database = {
           date_naissance?: string | null
           diagnostic_label?: string | null
           id?: string
+          mdph_derniere_demande?: string | null
+          mdph_type_demande?: string | null
           prenom: string
           user_id: string
         }
@@ -153,6 +157,8 @@ export type Database = {
           date_naissance?: string | null
           diagnostic_label?: string | null
           id?: string
+          mdph_derniere_demande?: string | null
+          mdph_type_demande?: string | null
           prenom?: string
           user_id?: string
         }
@@ -425,6 +431,59 @@ export type Database = {
           name_normalized?: string
         }
         Relationships: []
+      }
+      syntheses: {
+        Row: {
+          cas_usage: string
+          contenu: string | null
+          created_at: string | null
+          enfant_id: string
+          etat_emotionnel: string | null
+          id: string
+          metadata: Json | null
+          periode_debut: string | null
+          periode_fin: string | null
+          reponses_transmission: Json | null
+          user_id: string
+          vocal_mdph: string | null
+        }
+        Insert: {
+          cas_usage: string
+          contenu?: string | null
+          created_at?: string | null
+          enfant_id: string
+          etat_emotionnel?: string | null
+          id?: string
+          metadata?: Json | null
+          periode_debut?: string | null
+          periode_fin?: string | null
+          reponses_transmission?: Json | null
+          user_id: string
+          vocal_mdph?: string | null
+        }
+        Update: {
+          cas_usage?: string
+          contenu?: string | null
+          created_at?: string | null
+          enfant_id?: string
+          etat_emotionnel?: string | null
+          id?: string
+          metadata?: Json | null
+          periode_debut?: string | null
+          periode_fin?: string | null
+          reponses_transmission?: Json | null
+          user_id?: string
+          vocal_mdph?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "syntheses_enfant_id_fkey"
+            columns: ["enfant_id"]
+            isOneToOne: false
+            referencedRelation: "enfants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
