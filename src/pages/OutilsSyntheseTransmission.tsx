@@ -51,7 +51,7 @@ const SectionSeparator = ({ text }: { text: string }) => (
 
 const MicOrb = () => (
   <div className="flex flex-col items-center gap-2 mb-5">
-    <div className="flex items-center justify-center" style={{ width: 72, height: 72, borderRadius: "50%", background: "linear-gradient(135deg, #E8736A, #8B74E0)", boxShadow: "0 0 24px rgba(139,116,224,0.4)", cursor: "not-allowed", opacity: 0.4 }}>
+    <div className="flex items-center justify-center" style={{ width: 72, height: 72, borderRadius: "50%", background: "linear-gradient(to right, #E8736A, #8B74E0)", boxShadow: "0 0 12px rgba(139,116,224,0.5)", cursor: "not-allowed", opacity: 0.4 }}>
       <Mic size={30} color="#fff" />
     </div>
     <span className="text-[12px] font-sans" style={{ color: "#9A9490" }}>Appuie pour parler</span>
@@ -70,7 +70,7 @@ const SectionProgress = ({ current }: { current: number }) => (
       <span className="text-[11px] font-sans font-medium" style={{ color: "#9A9490" }}>Section {current} sur 6</span>
     </div>
     <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(139,116,224,0.12)" }}>
-      <div className="h-full rounded-full transition-all duration-500" style={{ width: `${(current / 6) * 100}%`, background: "linear-gradient(135deg, #E8736A, #8B74E0)" }} />
+      <div className="h-full rounded-full transition-all duration-500" style={{ width: `${(current / 6) * 100}%`, background: "#8B74E0" }} />
     </div>
   </div>
 );
