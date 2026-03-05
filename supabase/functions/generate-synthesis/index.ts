@@ -324,7 +324,7 @@ Règles absolues :
 - Intégrer la précision naturellement — pas en l'ajoutant mécaniquement à la fin
 - Ne jamais inventer d'informations non présentes dans le contenu original ou la précision
 - Jamais de jargon médical sans explication
-- Respecter la longueur approximative du bloc original
+- La précision du parent est prioritaire — elle doit être intégralement présente dans le bloc régénéré, sans rien omettre. Si le bloc doit être plus long pour tout intégrer, c'est acceptable. Ne jamais sacrifier une information du parent pour raccourcir le texte.
 - Le prénom de l'enfant ne doit jamais être modifié, accentué ou altéré
 
 Retourne UNIQUEMENT ce JSON sans markdown ni commentaire :
