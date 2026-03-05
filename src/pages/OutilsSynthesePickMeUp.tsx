@@ -151,8 +151,8 @@ const OutilsSynthesePickMeUp = () => {
 
   // Block 2 state
   const [selectedPeriod, setSelectedPeriod] = useState<string | null>(null);
-  const [dateStart, setDateStart] = useState<Date | undefined>();
-  const [dateEnd, setDateEnd] = useState<Date | undefined>();
+  const [dateStart, setDateStart] = useState<Date | undefined>(subMonths(new Date(), 3));
+  const [dateEnd, setDateEnd] = useState<Date | undefined>(new Date());
   const [memoCount, setMemoCount] = useState<number | null>(null);
   const [activiteCount, setActiviteCount] = useState<number | null>(null);
 
@@ -424,7 +424,11 @@ const OutilsSynthesePickMeUp = () => {
               key={p}
               disabled={periodDisabled}
               onClick={() => {
-                setSelectedPeriod(selectedPeriod === p ? null : p);
+                if (selectedPeriod === p) {
+                  setSelectedPeriod(null);
+                } else {
+                  setSelectedPeriod(p);
+                }
                 setDateStart(undefined);
                 setDateEnd(undefined);
               }}
