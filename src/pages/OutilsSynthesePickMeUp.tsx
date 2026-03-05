@@ -176,7 +176,7 @@ const OutilsSynthesePickMeUp = () => {
     setTimeout(() => {
       bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     }, 100);
-  }, [phase]);
+  }, [phase, memoCount, activiteCount]);
 
   // Derived
   const emotionText = selectedEmotion || freeText.trim();
