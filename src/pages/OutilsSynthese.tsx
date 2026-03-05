@@ -105,67 +105,87 @@ const OutilsSynthese = () => {
       </header>
 
       <main className="flex-1 px-4 pt-5 pb-24">
-        {/* IA bubble */}
-        <div
-          className="mb-6 px-4 py-3"
-          style={{
-            ...glassCard,
-            background: "rgba(139,116,224,0.07)",
-            border: "1px solid rgba(139,116,224,0.18)"
-          }}>
-          
-          <p className="text-[14px] font-sans leading-snug" style={{ color: "#1E1A1A" }}>
-            {countsLoaded ?
-            <>
-                J'ai <span className="font-semibold">{memoCount}</span> mémo{memoCount !== 1 ? "s" : ""} et{" "}
-                <span className="font-semibold">{activiteCount}</span> activité{activiteCount !== 1 ? "s" : ""} de{" "}
-                <span className="font-semibold">{displayName}</span> dans mes données.
-                {" "}De quoi as-tu besoin aujourd'hui ?
-              </> :
+        {/* Agent chat layout */}
+        <div className="flex items-start gap-3 mb-4">
+          {/* Avatar */}
+          <div
+            className="flex-shrink-0 flex items-center justify-center"
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: "50%",
+              background: "linear-gradient(135deg, #E8736A, #8B74E0)",
+            }}
+          >
+            <span className="text-[16px] leading-none">✨</span>
+          </div>
 
-            <>Chargement des données de {displayName}…</>
-            }
-          </p>
+          {/* Bubble */}
+          <div className="flex-1 min-w-0">
+            <span
+              className="block mb-1 font-sans font-medium"
+              style={{ color: "#8B74E0", fontSize: 10 }}
+            >
+              The Village
+            </span>
+            <div
+              className="px-4 py-3 inline-block"
+              style={{
+                ...glassCard,
+                background: "rgba(139,116,224,0.07)",
+                border: "1px solid rgba(139,116,224,0.18)",
+                maxWidth: "92%",
+              }}
+            >
+              <p className="text-[14px] font-sans leading-snug" style={{ color: "#1E1A1A" }}>
+                {countsLoaded ? (
+                  <>
+                    J'ai <span className="font-semibold">{memoCount}</span> mémo{memoCount !== 1 ? "s" : ""} et{" "}
+                    <span className="font-semibold">{activiteCount}</span> activité{activiteCount !== 1 ? "s" : ""} de{" "}
+                    <span className="font-semibold">{displayName}</span> dans mes données.
+                    {" "}De quoi as-tu besoin aujourd'hui&nbsp;?
+                  </>
+                ) : (
+                  <>Chargement des données de {displayName}…</>
+                )}
+              </p>
+            </div>
+          </div>
         </div>
 
-        {/* Cards */}
-        <div className="flex flex-col gap-3">
+        {/* Option cards — indented under the bubble */}
+        <div className="flex flex-col gap-2.5 ml-12">
           {CAS_USAGE.map((cas) => {
             const subtitle =
-            cas.key === "transmission" ?
-            cas.subtitle.replace("{prenom}", displayName) :
-            cas.subtitle;
+              cas.key === "transmission"
+                ? cas.subtitle.replace("{prenom}", displayName)
+                : cas.subtitle;
 
             return (
               <button
                 key={cas.key}
                 onClick={() => navigate(cas.route)}
-                className="flex items-center gap-4 px-4 py-4 text-left transition-transform active:scale-[0.98]"
-                style={glassCard}>
-                
-                {/* Emoji */}
-                <span className="flex-shrink-0 text-[28px] leading-none">{cas.emoji}</span>
-
-                {/* Text */}
+                className="flex items-center gap-3 px-4 py-3.5 text-left transition-transform active:scale-[0.98]"
+                style={{ ...glassCard, maxWidth: "92%" }}
+              >
+                <span className="flex-shrink-0 text-[24px] leading-none">{cas.emoji}</span>
                 <div className="flex-1 min-w-0">
                   <span
                     className="block text-[15px] font-serif font-semibold leading-tight"
-                    style={{ color: "#1E1A1A" }}>
-                    
+                    style={{ color: "#1E1A1A" }}
+                  >
                     {cas.title}
                   </span>
                   <span
                     className="block text-[13px] font-sans leading-snug mt-0.5"
-                    style={{ color: "#9A9490" }}>
-                    
+                    style={{ color: "#9A9490" }}
+                  >
                     {subtitle}
                   </span>
                 </div>
-
-                {/* Chevron */}
                 <ChevronRight size={18} style={{ color: "#9A9490" }} className="flex-shrink-0" />
-              </button>);
-
+              </button>
+            );
           })}
         </div>
       </main>
