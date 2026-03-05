@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { ArrowLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, ChevronRight, Sparkles } from "lucide-react";
 import BottomNavBar from "@/components/BottomNavBar";
 import { useEnfantPrenom } from "@/hooks/useEnfantPrenom";
 import { useEnfantId } from "@/hooks/useEnfantId";
@@ -132,7 +132,7 @@ const OutilsSynthese = () => {
               background: "linear-gradient(135deg, #E8736A, #8B74E0)",
             }}
           >
-            <span className="text-[16px] leading-none">✨</span>
+            <Sparkles size={18} color="#fff" />
           </div>
           <div className="flex-1 min-w-0">
             <span
