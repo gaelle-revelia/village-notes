@@ -23,11 +23,11 @@ const CAS_USAGE = [
   route: "/outils/synthese/mdph"
 },
 {
-  key: "rdv",
-  emoji: "🩺",
-  title: "Préparer un RDV",
-  subtitle: "Arriver préparé à ta prochaine consultation",
-  route: "/outils/synthese/rdv"
+  key: "transmission",
+  emoji: "📖",
+  title: "Transmission",
+  subtitle: "Fais connaître Selena",
+  route: "/outils/synthese/transmission"
 },
 ] as const;
 
