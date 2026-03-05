@@ -1,112 +1,43 @@
 
 
-# Migration Supabase -- Synthese Magique
+## Plan: Pick-me-up flow — 3 screens in one component
 
-## Issues found in the proposed SQL
+### What changes
 
-1. **`enfant_membres` has `user_id`, not `membre_id`** -- the RLS policy references a non-existent column.
-2. **`syntheses.membre_id` references `auth.users(id)`** -- project rules prohibit FK to `auth.users`. Will use `user_id uuid NOT NULL` without FK instead.
-3. **CHECK constraints** (`cas_usage`, `mdph_type_demande`) -- per project guidelines, CHECK constraints cause restoration failures. Will use **validation triggers** instead.
+**1. Replace `src/pages/OutilsSynthesePickMeUp.tsx`** (currently a placeholder)
 
-## Corrected migration (3 operations)
+Single component with `step` state (1→2→3). Reuses exact same conversational layout pattern from `OutilsSyntheseRdv.tsx` (avatar ✨ + "The Village" label + glass bubble).
 
-### 1. Create table `syntheses`
+**Step 1 — Emotional state:**
+- IA bubble: "Comment tu te sens en ce moment ? (Ta réponse m'aide à trouver le bon angle)"
+- 4 single-select chips below (ml-12 indent). Selected state: bg `#8B74E0`, white text. Default: glass card style.
+- Centered mic orb (~64px, gradient `#E8736A→#8B74E0`, `Mic` icon) — non-functional, decorative
+- "ou" separator (muted, centered)
+- Textarea with placeholder "Écris ici si tu préfères..."
+- When chip selected OR textarea has content → right-aligned user bubble appears with the text + CTA "Choisir la période →" activates
+- CTA: gradient button, full width, border-radius 14px, disabled until selection
 
-```sql
-CREATE TABLE public.syntheses (
-  id                    uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  enfant_id             uuid NOT NULL REFERENCES enfants(id) ON DELETE CASCADE,
-  user_id               uuid NOT NULL,
-  cas_usage             text NOT NULL,
-  periode_debut         date,
-  periode_fin           date,
-  contenu               text,
-  etat_emotionnel       text,
-  vocal_mdph            text,
-  reponses_transmission jsonb,
-  metadata              jsonb,
-  created_at            timestamptz DEFAULT now()
-);
-```
+**Step 2 — Period selection:**
+- New IA bubble: "Sur quelle période tu veux qu'on regarde ?"
+- 4 period chips (single select, same styling)
+- Optional custom date range: two date pickers (start/end) using existing `Calendar` + `Popover` components
+- Selection → right-aligned user bubble + CTA "Générer mon remontant →" activates
 
-Plus a validation trigger for `cas_usage`:
+**Step 3 — Generated document (mocked):**
+- Title "Ton remontant" (Fraunces 600)
+- Static mocked narrative paragraph (warm tone, about child using `useEnfantPrenom`)
+- Legal mention at bottom: "Synthèse des observations de [parent] pour [enfant] · The Village · Mars 2026" (DM Sans 10px, muted). Parent name from profiles via `useAuth`.
+- Fixed bottom action bar (liquid glass): 4 buttons — 📋 Copier (clipboard API + toast) · 📤 Partager · ✏️ Modifier · 🔄 Régénérer (all no-op except Copier)
 
-```sql
-CREATE OR REPLACE FUNCTION public.validate_synthese_cas_usage()
-RETURNS trigger LANGUAGE plpgsql AS $$
-BEGIN
-  IF NEW.cas_usage NOT IN ('pick_me_up','mdph','rdv_briefing','rdv_presentation','transmission') THEN
-    RAISE EXCEPTION 'Invalid cas_usage: %', NEW.cas_usage;
-  END IF;
-  RETURN NEW;
-END;
-$$;
+**Navigation:** Back arrow: step 3→2, 2→1, 1→`/outils/synthese`. Header title changes per step.
 
-CREATE TRIGGER trg_validate_synthese_cas_usage
-  BEFORE INSERT OR UPDATE ON public.syntheses
-  FOR EACH ROW EXECUTE FUNCTION public.validate_synthese_cas_usage();
-```
+**2. Update `src/App.tsx`** — Replace placeholder route with new component import.
 
-### 2. RLS on `syntheses`
+### Files touched
+- `src/pages/OutilsSynthesePickMeUp.tsx` — new file (replaces placeholder)
+- `src/App.tsx` — update import for pick-me-up route
 
-```sql
-ALTER TABLE public.syntheses ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "syntheses_access" ON public.syntheses
-  FOR ALL
-  TO authenticated
-  USING (
-    EXISTS (
-      SELECT 1 FROM enfant_membres
-      WHERE enfant_membres.enfant_id = syntheses.enfant_id
-        AND enfant_membres.user_id = auth.uid()
-    )
-  )
-  WITH CHECK (
-    EXISTS (
-      SELECT 1 FROM enfant_membres
-      WHERE enfant_membres.enfant_id = syntheses.enfant_id
-        AND enfant_membres.user_id = auth.uid()
-    )
-  );
-```
-
-### 3. Add columns to `enfants`
-
-```sql
-ALTER TABLE public.enfants
-  ADD COLUMN IF NOT EXISTS mdph_type_demande text,
-  ADD COLUMN IF NOT EXISTS mdph_derniere_demande date;
-```
-
-Plus a validation trigger for `mdph_type_demande`:
-
-```sql
-CREATE OR REPLACE FUNCTION public.validate_enfant_mdph_type()
-RETURNS trigger LANGUAGE plpgsql AS $$
-BEGIN
-  IF NEW.mdph_type_demande IS NOT NULL
-     AND NEW.mdph_type_demande NOT IN ('premiere_demande','renouvellement') THEN
-    RAISE EXCEPTION 'Invalid mdph_type_demande: %', NEW.mdph_type_demande;
-  END IF;
-  RETURN NEW;
-END;
-$$;
-
-CREATE TRIGGER trg_validate_enfant_mdph_type
-  BEFORE INSERT OR UPDATE ON public.enfants
-  FOR EACH ROW EXECUTE FUNCTION public.validate_enfant_mdph_type();
-```
-
-## Summary of corrections vs. original request
-
-| Original | Corrected | Reason |
-|---|---|---|
-| `membre_id uuid REFERENCES auth.users(id)` | `user_id uuid NOT NULL` (no FK) | No FK to auth.users per project rules |
-| `enfant_membres.membre_id` in RLS | `enfant_membres.user_id` | Actual column name |
-| `CHECK (cas_usage IN (...))` | Validation trigger | CHECK must be immutable; triggers safer |
-| `CHECK (mdph_type_demande IN (...))` | Validation trigger | Same reason |
-| Missing `WITH CHECK` on RLS | Added | Required for INSERT/UPDATE |
-
-No React components, edge functions, or other tables will be touched.
+### Not touched
+- `OutilsSynthese.tsx`, `OutilsSyntheseRdv.tsx`, any `/rdv/*`, `/transmission`, `/mdph` pages
+- No edge functions, no database changes
 
