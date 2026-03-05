@@ -138,7 +138,7 @@ const OutilsSynthesePickMeUp = () => {
   "Je suis épuisé(e)",
   "Je traverse un moment de doute",
   `Voir où en est ${displayName}`,
-  "Faire un point étape"];
+  "Je veux faire un point étape"];
 
 
   // Phase model
