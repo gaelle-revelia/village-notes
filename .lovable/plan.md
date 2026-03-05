@@ -1,59 +1,61 @@
 
 
-## Plan: Create `generate-synthesis` Edge Function + Frontend Integration
+## Plan: Add `transcription_only` mode + `useVocalRecording` hook + Wire vocal orbs
 
-### Critical Issues in Provided Code
+Same plan as previously approved, with one correction on Part 3.
 
-The user-provided implementation has several bugs that must be fixed:
+### Part 1 — Edge function `process-memo`: add `transcription_only` mode
 
-1. **Wrong AI endpoint**: Uses `api.anthropic.com` instead of the Lovable AI Gateway (`https://ai.gateway.lovable.dev/v1/chat/completions`). Must also use `LOVABLE_API_KEY` and OpenAI-compatible format.
-2. **Wrong column names**:
-   - `enfant_membres.membre_id` → should be `enfant_membres.user_id`
-   - `enfants.diagnostic` → should be `enfants.diagnostic_label`
-   - `intervenants.frequence` → column doesn't exist, remove it
-   - `syntheses.membre_id` → should be `syntheses.user_id`
-3. **Missing required field**: `memos.insert` is missing `user_id` (NOT NULL column)
-4. **CORS headers incomplete**: Missing `x-supabase-client-platform` headers
+**File**: `supabase/functions/process-memo/index.ts`
 
-### Changes
+Add early branch before `memo_id` validation. When `mode === "transcription_only"`:
+- Parse `audio_path` from body (no `memo_id` needed)
+- Download from `audio-temp`, convert to base64, call Gemini with simple transcription prompt
+- Delete audio immediately
+- Return `{ transcription: "..." }`
+- No memo table interaction
 
-**1. Update `supabase/config.toml`** — Add `generate-synthesis` function entry with `verify_jwt = false`
+### Part 2 — Shared hook `useVocalRecording`
 
-**2. Create `supabase/functions/generate-synthesis/index.ts`** — Full implementation with fixes:
-- Use Lovable AI Gateway with `LOVABLE_API_KEY`
-- OpenAI-compatible request format (`messages` array, `model` field at top level)
-- Fix all column name references
-- Handle 429/402 errors from AI gateway
-- Three prompt branches: `pick_me_up`, `mdph`, `transmission` (using the user's prompts verbatim)
-- Double-write to `syntheses` + `memos` tables
-- Return `{ blocks, synthese_id }`
+**Create**: `src/hooks/useVocalRecording.ts`
 
-**3. Update `src/pages/OutilsSynthesePickMeUp.tsx`**:
-- Import `useEnfantId`
-- Add `isGenerating` + `generatedBlocks` state
-- On "Analyser →" tap: call `generate-synthesis` via `supabase.functions.invoke` with `type: "pick_me_up"`, show loading, replace mocked content with AI response
-- Handle errors with toast
+- `startRecording()`: getUserMedia, MediaRecorder, collect chunks
+- `stopRecording()`: assemble blob, upload to `audio-temp` as `synthesis/{uuid}.webm`, invoke `process-memo` with `mode: "transcription_only"`, return transcription
+- Exposed: `isRecording`, `isTranscribing`, `transcription`, `error`
 
-**4. Update `src/pages/OutilsSyntheseMdph.tsx`**:
-- Add `isGenerating` + `generatedBlocks` state
-- On "Générer le dossier →" tap: call with `type: "mdph"`, show loading
-- Replace mocked `ThematicBlock` content with AI response (title, icon, badge, content)
+### Part 3 — Wire orb in Pick-me-up (CORRECTED)
 
-**5. Update `src/pages/OutilsSyntheseTransmission.tsx`**:
-- Import `useEnfantId`
-- Add `isGenerating` + `generatedBlocks` state
-- On "Générer le livret complet →" tap: call with `type: "transmission"`, `parent_context: { destinataire, reponses }`, show loading
-- Replace mocked `ResultCard` content with AI response
+**File**: `src/pages/OutilsSynthesePickMeUp.tsx`
 
-### Loading/Error Pattern (all 3 pages)
-- CTA label changes to "Génération en cours..." with opacity pulse animation
-- Button disabled during generation
-- On error: toast "Une erreur est survenue — réessaie." and button returns to normal
-- On success: advance to result phase with real blocks
+- On transcription success: inject text into `freeText` state **only**
+- **Do NOT clear `selectedEmotion`** — chip selection stays intact
+- Orb disabled when `emotionDisabled`
 
-### No changes to
-- Database schema, RLS policies
-- Other edge functions
-- Navigation, design tokens
-- config.toml entries for other functions
+### Part 4 — Wire orbs in MDPH
+
+**File**: `src/pages/OutilsSyntheseMdph.tsx`
+
+- Replace static `MicOrb` with interactive `WiredMicOrb` for phases 3, 5, 6
+- Each orb appends transcription to its corresponding textarea state
+
+### Part 5 — Wire orbs in Transmission
+
+**File**: `src/pages/OutilsSyntheseTransmission.tsx`
+
+- Replace `MicOrb` in each of the 6 sections with independent `WiredMicOrb`
+- Each appends transcription to `answers[idx]`
+
+### Shared `WiredMicOrb` component
+
+**Create**: `src/components/synthese/WiredMicOrb.tsx`
+
+Takes `onTranscription`, `disabled`, `appendMode`. Uses `useVocalRecording` internally. Four visual states: default (gradient + glow), recording (pulse + "En écoute..."), transcribing (spinner + "Transcription..."), error (red text below).
+
+### Files changed
+1. `supabase/functions/process-memo/index.ts` — add branch
+2. `src/hooks/useVocalRecording.ts` — new
+3. `src/components/synthese/WiredMicOrb.tsx` — new
+4. `src/pages/OutilsSynthesePickMeUp.tsx` — wire orb
+5. `src/pages/OutilsSyntheseMdph.tsx` — wire orbs
+6. `src/pages/OutilsSyntheseTransmission.tsx` — wire orbs
 
