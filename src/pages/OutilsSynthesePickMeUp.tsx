@@ -192,6 +192,8 @@ const OutilsSynthesePickMeUp = () => {
   // Fetch counts when period changes (only in period phase)
   const fetchCounts = useCallback(async (start: Date, end: Date) => {
     if (!enfantId) return;
+    const startDate = format(start, "yyyy-MM-dd");
+    const endDate = format(end, "yyyy-MM-dd");
     const startISO = start.toISOString();
     const endISO = end.toISOString();
     const [memosRes, sessionsRes] = await Promise.all([
@@ -199,8 +201,8 @@ const OutilsSynthesePickMeUp = () => {
     from("memos").
     select("id", { count: "exact", head: true }).
     eq("enfant_id", enfantId).
-    gte("created_at", startISO).
-    lte("created_at", endISO),
+    gte("memo_date", startDate).
+    lte("memo_date", endDate),
     supabase.
     from("sessions_activite").
     select("id", { count: "exact", head: true }).
