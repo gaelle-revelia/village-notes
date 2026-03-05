@@ -136,7 +136,7 @@ const OutilsSynthesePickMeUp = () => {
 
   const EMOTIONS = [
   "Je suis épuisé(e)",
-  "Je doute que ça avance",
+  "Je traverse un moment de doute",
   `Voir où en est ${displayName}`,
   "Faire un point étape"];
 
