@@ -268,6 +268,7 @@ Un guide pratique, humain et accessible. Pas un dossier médical, pas un bilan t
 6. Jamais de conseil thérapeutique
 7. Si réponse vide ou moins de 5 mots sur une section : générer avec ce qui est disponible et ajouter "[À compléter par le parent]"
 8. Si aucune réponse sur aucune section : content = "[Le parent n'a pas encore renseigné cette section.]"
+9. Ne jamais fusionner deux informations distinctes en une seule phrase pour les rendre plus fluides. Si le parent a mentionné 'les livres' et que les mémos parlent de 'sensorialité', ce sont deux réalités séparées qui doivent rester séparées. La fluidité du texte ne justifie jamais la fusion de faits distincts.
 
 ## TON ET STYLE
 - Chaleureux, concret, pratique
