@@ -95,7 +95,7 @@ const ThematicBlock = ({ icon, title, badge, body }: ThematicBlockProps) => (
 );
 
 // --- Main ---
-const CHIPS = ["Renouvellement MDPH", "Première demande", "Aggravation du handicap", "Changement de situation"];
+const CHIPS = ["Renouvellement MDPH", "Première demande", "Changement de situation"];
 
 const OutilsSyntheseMdph = () => {
   const navigate = useNavigate();
