@@ -4,10 +4,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 interface StepEnfantProps {
-  onNext: (data: { prenom: string; dateNaissance: string; diagnostic: string }) => void;
+  onNext: (data: { prenom: string; dateNaissance: string; diagnostic: string; prenomParent: string }) => void;
 }
 
 export function StepEnfant({ onNext }: StepEnfantProps) {
+  const [prenomParent, setPrenomParent] = useState("");
   const [prenom, setPrenom] = useState("");
   const [dateNaissance, setDateNaissance] = useState("");
   const [diagnostic, setDiagnostic] = useState("");
@@ -19,7 +20,7 @@ export function StepEnfant({ onNext }: StepEnfantProps) {
       setError("Le prénom est obligatoire");
       return;
     }
-    onNext({ prenom: prenom.trim(), dateNaissance, diagnostic: diagnostic.trim() });
+    onNext({ prenom: prenom.trim(), dateNaissance, diagnostic: diagnostic.trim(), prenomParent: prenomParent.trim() });
   };
 
   return (
@@ -32,6 +33,18 @@ export function StepEnfant({ onNext }: StepEnfantProps) {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="prenom-parent">Votre prénom</Label>
+          <Input
+            id="prenom-parent"
+            value={prenomParent}
+            onChange={(e) => setPrenomParent(e.target.value)}
+            placeholder="ex : Gaëlle"
+            className="rounded-lg"
+            maxLength={100}
+          />
+        </div>
+
         <div className="space-y-2">
           <Label htmlFor="prenom">Son prénom</Label>
           <Input
