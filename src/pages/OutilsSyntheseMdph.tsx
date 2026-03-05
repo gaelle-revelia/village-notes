@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import PreciserBlocDrawer from "@/components/synthese/PreciserBlocDrawer";
 
 // --- Shared styles ---
 const glassCard: React.CSSProperties = {
@@ -100,7 +101,7 @@ interface ThematicBlockProps {
   body: string;
 }
 
-const ThematicBlock = ({ icon, title, badge, body }: ThematicBlockProps) => (
+const ThematicBlock = ({ icon, title, badge, body, onPreciser }: ThematicBlockProps & { onPreciser?: () => void }) => (
   <div className="mb-4 px-5 py-4" style={glassCard}>
     <div className="flex items-center gap-2 mb-2">
       {icon}
@@ -110,7 +111,7 @@ const ThematicBlock = ({ icon, title, badge, body }: ThematicBlockProps) => (
       {badge}
     </span>
     <p className="text-[14px] font-sans leading-relaxed mb-3" style={{ color: "#1E1A1A" }}>{body}</p>
-    <button className="w-full py-2.5 text-[13px] font-sans font-medium" style={{ border: "1.5px dashed #8B74E0", color: "#8B74E0", borderRadius: 12, background: "transparent" }}>
+    <button onClick={onPreciser} className="w-full py-2.5 text-[13px] font-sans font-medium" style={{ border: "1.5px dashed #8B74E0", color: "#8B74E0", borderRadius: 12, background: "transparent" }}>
       ✏️ Préciser ce bloc
     </button>
   </div>
@@ -140,6 +141,8 @@ const OutilsSyntheseMdph = () => {
   const [emailValue, setEmailValue] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedBlocks, setGeneratedBlocks] = useState<any[] | null>(null);
+  const [syntheseId, setSyntheseId] = useState<string | null>(null);
+  const [refineBloc, setRefineBloc] = useState<{ id: string; title: string; content: string; cas_usage: string } | null>(null);
 
   // Q1 single-select
   const [q1, setQ1] = useState<string | null>(null);
@@ -229,6 +232,7 @@ const OutilsSyntheseMdph = () => {
       if (data?.blocks) {
         setGeneratedBlocks(data.blocks);
       }
+      if (data?.synthese_id) setSyntheseId(data.synthese_id);
       setPhase(7);
     } catch (e) {
       console.error("generate-synthesis error:", e);
@@ -386,6 +390,7 @@ const OutilsSyntheseMdph = () => {
                   title={block.title}
                   badge={block.badge || ""}
                   body={block.content}
+                  onPreciser={() => setRefineBloc({ id: block.id, title: block.title, content: block.content, cas_usage: "mdph" })}
                 />
               );
             }) : (
@@ -407,6 +412,18 @@ const OutilsSyntheseMdph = () => {
       </main>
 
       {renderCta()}
+
+      <PreciserBlocDrawer
+        isOpen={!!refineBloc}
+        onClose={() => setRefineBloc(null)}
+        bloc={refineBloc}
+        enfantId={enfantId ?? ""}
+        syntheseId={syntheseId ?? ""}
+        onBlockUpdated={(blocId, newContent) => {
+          setGeneratedBlocks((prev) => prev?.map((b) => b.id === blocId ? { ...b, content: newContent } : b) ?? null);
+        }}
+      />
+
       <BottomNavBar />
     </div>
   );
