@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Mic, Sparkles, User, Brain, Moon, PersonStanding, Users, Pill, Activity, Mail } from "lucide-react";
+import { ArrowLeft, Sparkles, User, Brain, Moon, PersonStanding, Users, Pill, Activity, Mail } from "lucide-react";
+import WiredMicOrb from "@/components/synthese/WiredMicOrb";
 import BottomNavBar from "@/components/BottomNavBar";
 import { useEnfantPrenom } from "@/hooks/useEnfantPrenom";
 import { useEnfantId } from "@/hooks/useEnfantId";
@@ -50,14 +51,7 @@ const SectionSeparator = ({ text }: { text: string }) => (
   </div>
 );
 
-const MicOrb = () => (
-  <div className="flex flex-col items-center gap-2 mb-5">
-    <div className="flex items-center justify-center" style={{ width: 72, height: 72, borderRadius: "50%", background: "linear-gradient(to right, #E8736A, #8B74E0)", boxShadow: "0 0 12px rgba(139,116,224,0.5)", cursor: "not-allowed", opacity: 0.4 }}>
-      <Mic size={30} color="#fff" />
-    </div>
-    <span className="text-[12px] font-sans" style={{ color: "#9A9490" }}>Appuie pour parler</span>
-  </div>
-);
+// MicOrb removed — using WiredMicOrb instead
 
 const OrSeparator = () => (
   <div className="flex justify-center my-4">
@@ -269,7 +263,7 @@ const OutilsSyntheseTransmission = () => {
         <SectionProgress current={idx + 1} />
         <SectionTag number={s.number} title={q(s.title)} />
         <AiBubble text={q(s.question)} />
-        <MicOrb />
+        <WiredMicOrb disabled={isPast} onTranscription={(text) => !isPast && updateAnswer(idx, (answers[idx] ? answers[idx] + " " : "") + text)} />
         <OrSeparator />
         <div className="mb-2 flex justify-end">
           <Textarea

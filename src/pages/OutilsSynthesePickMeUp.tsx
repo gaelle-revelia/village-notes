@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Mic, Copy, Share2, Pencil, RefreshCw, CalendarIcon, Sparkles } from "lucide-react";
+import { ArrowLeft, Copy, Share2, Pencil, RefreshCw, CalendarIcon, Sparkles } from "lucide-react";
+import WiredMicOrb from "@/components/synthese/WiredMicOrb";
 import { format, subMonths, startOfMonth } from "date-fns";
 import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -375,25 +376,12 @@ const OutilsSynthesePickMeUp = () => {
         <AiBubble text="Pas besoin d'être précis(e) — quelques mots, ce qui vient." />
 
         {/* Mic orb */}
-        <div className="flex flex-col items-center gap-2 mb-5">
-          <div
-            className="flex items-center justify-center"
-            style={{
-              width: 72,
-              height: 72,
-              borderRadius: "50%",
-              background: "linear-gradient(135deg, #E8736A, #8B74E0)",
-              boxShadow: "0 0 24px rgba(139,116,224,0.4)",
-              cursor: "not-allowed",
-              opacity: emotionDisabled ? 0.4 : 1
-            }}>
-            
-            <Mic size={30} color="#fff" />
-          </div>
-          <span className="text-[12px] font-sans" style={{ color: "#9A9490" }}>
-            Appuie pour parler
-          </span>
-        </div>
+        <WiredMicOrb
+          disabled={emotionDisabled}
+          onTranscription={(text) => {
+            setFreeText((prev) => prev ? prev + " " + text : text);
+          }}
+        />
 
         {/* Emotion chips */}
         <div className="flex flex-wrap justify-center gap-2">
