@@ -1,33 +1,36 @@
 import { useNavigate } from "react-router-dom";
-import { ChevronRight, Sparkles, ClipboardList, Stethoscope, BookOpen } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowLeft, ChevronRight } from "lucide-react";
 import BottomNavBar from "@/components/BottomNavBar";
 import { useEnfantPrenom } from "@/hooks/useEnfantPrenom";
+import { useEnfantId } from "@/hooks/useEnfantId";
+import { supabase } from "@/integrations/supabase/client";
 
 const CAS_USAGE = [
   {
     key: "pick_me_up",
-    icon: Sparkles,
+    emoji: "✨",
     title: "Pick-me-up",
     subtitle: "Rappelle-moi ce qui s'est passé",
     route: "/outils/synthese/pick-me-up",
   },
   {
     key: "mdph",
-    icon: ClipboardList,
+    emoji: "📋",
     title: "Dossier MDPH",
     subtitle: "Prépare mon dossier MDPH",
     route: "/outils/synthese/mdph",
   },
   {
     key: "rdv",
-    icon: Stethoscope,
+    emoji: "🩺",
     title: "Préparer un RDV",
     subtitle: "Briefing, présenter ou transmettre",
     route: "/outils/synthese/rdv",
   },
   {
     key: "transmission",
-    icon: BookOpen,
+    emoji: "📖",
     title: "Transmission",
     subtitle: "Fais connaître {prenom}",
     route: "/outils/synthese/transmission",
@@ -47,12 +50,37 @@ const glassCard: React.CSSProperties = {
 const OutilsSynthese = () => {
   const navigate = useNavigate();
   const prenom = useEnfantPrenom();
+  const { enfantId } = useEnfantId();
+  const [memoCount, setMemoCount] = useState<number | null>(null);
+  const [activiteCount, setActiviteCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!enfantId) return;
+    const fetchCounts = async () => {
+      const [memosRes, sessionsRes] = await Promise.all([
+        supabase
+          .from("memos")
+          .select("id", { count: "exact", head: true })
+          .eq("enfant_id", enfantId),
+        supabase
+          .from("sessions_activite")
+          .select("id", { count: "exact", head: true })
+          .eq("enfant_id", enfantId),
+      ]);
+      setMemoCount(memosRes.count ?? 0);
+      setActiviteCount(sessionsRes.count ?? 0);
+    };
+    fetchCounts();
+  }, [enfantId]);
+
+  const displayName = prenom ?? "votre enfant";
+  const countsLoaded = memoCount !== null && activiteCount !== null;
 
   return (
     <div className="flex min-h-screen flex-col">
       {/* Header */}
       <header
-        className="sticky top-0 z-10 px-4 py-3 flex items-center"
+        className="sticky top-0 z-10 px-4 py-3 flex items-center gap-3"
         style={{
           background: "rgba(255,255,255,0.72)",
           backdropFilter: "blur(20px) saturate(1.5)",
@@ -63,39 +91,50 @@ const OutilsSynthese = () => {
       >
         <button
           onClick={() => navigate("/outils")}
-          className="mr-3 flex items-center justify-center"
+          className="flex items-center justify-center"
           aria-label="Retour"
         >
-          <ChevronRight size={20} className="rotate-180" style={{ color: "#1E1A1A" }} />
+          <ArrowLeft size={20} style={{ color: "#1E1A1A" }} />
         </button>
-        <h1 className="text-lg font-serif font-semibold" style={{ color: "#1E1A1A" }}>
-          Synthèse magique
-        </h1>
-      </header>
-
-      <main className="flex-1 px-4 pt-6 pb-24">
-        {/* Title */}
-        <h2
-          className="font-serif font-semibold text-[22px] leading-tight mb-2"
+        <h1
+          className="text-xl font-serif font-semibold"
           style={{ color: "#1E1A1A" }}
         >
           De quoi as-tu besoin ?
-        </h2>
-        <p
-          className="text-[14px] font-sans leading-snug mb-6"
-          style={{ color: "#9A9490" }}
+        </h1>
+      </header>
+
+      <main className="flex-1 px-4 pt-5 pb-24">
+        {/* IA bubble */}
+        <div
+          className="mb-6 px-4 py-3"
+          style={{
+            ...glassCard,
+            background: "rgba(139,116,224,0.07)",
+            border: "1px solid rgba(139,116,224,0.18)",
+          }}
         >
-          Je vais analyser les notes de {prenom ?? "votre enfant"} et préparer exactement ce
-          qu'il te faut.
-        </p>
+          <p className="text-[14px] font-sans leading-snug" style={{ color: "#1E1A1A" }}>
+            {countsLoaded ? (
+              <>
+                J'ai <span className="font-semibold">{memoCount}</span> mémo{memoCount !== 1 ? "s" : ""} et{" "}
+                <span className="font-semibold">{activiteCount}</span> activité{activiteCount !== 1 ? "s" : ""} de{" "}
+                <span className="font-semibold">{displayName}</span> dans mes données.
+                {" "}De quoi as-tu besoin aujourd'hui ?
+              </>
+            ) : (
+              <>Chargement des données de {displayName}…</>
+            )}
+          </p>
+        </div>
 
         {/* Cards */}
         <div className="flex flex-col gap-3">
           {CAS_USAGE.map((cas) => {
-            const Icon = cas.icon;
-            const subtitle = cas.key === "transmission"
-              ? cas.subtitle.replace("{prenom}", prenom ?? "votre enfant")
-              : cas.subtitle;
+            const subtitle =
+              cas.key === "transmission"
+                ? cas.subtitle.replace("{prenom}", displayName)
+                : cas.subtitle;
 
             return (
               <button
@@ -104,22 +143,13 @@ const OutilsSynthese = () => {
                 className="flex items-center gap-4 px-4 py-4 text-left transition-transform active:scale-[0.98]"
                 style={glassCard}
               >
-                {/* Icon circle */}
-                <div
-                  className="flex-shrink-0 flex items-center justify-center rounded-xl"
-                  style={{
-                    width: 44,
-                    height: 44,
-                    background: "linear-gradient(135deg, #E8736A, #8B74E0)",
-                  }}
-                >
-                  <Icon size={22} color="#fff" strokeWidth={2} />
-                </div>
+                {/* Emoji */}
+                <span className="flex-shrink-0 text-[28px] leading-none">{cas.emoji}</span>
 
                 {/* Text */}
                 <div className="flex-1 min-w-0">
                   <span
-                    className="block text-[15px] font-sans font-semibold leading-tight"
+                    className="block text-[15px] font-serif font-semibold leading-tight"
                     style={{ color: "#1E1A1A" }}
                   >
                     {cas.title}
