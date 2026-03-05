@@ -26,6 +26,7 @@ import OutilsActivites from "./pages/OutilsActivites";
 import OutilsActiviteCreer from "./pages/OutilsActiviteCreer";
 import OutilsSynthese from "./pages/OutilsSynthese";
 import OutilsSyntheseRdv from "./pages/OutilsSyntheseRdv";
+import OutilsSynthesePickMeUp from "./pages/OutilsSynthesePickMeUp";
 import ExplorerScreen from "./pages/ExplorerScreen";
 import OnboardingInvite from "./pages/OnboardingInvite";
 import Vocabulaire from "./pages/Vocabulaire";
@@ -48,7 +49,7 @@ const AppRoutes = () => {
       <Route path="/outils/activites/:id/chrono" element={<OutilsActiviteChrono />} />
       <Route path="/outils/activites/:id/manuel" element={<OutilsActiviteManuel />} />
       <Route path="/outils/synthese" element={<OutilsSynthese />} />
-      <Route path="/outils/synthese/pick-me-up" element={<PlaceholderScreen title="Pick-me-up" />} />
+      <Route path="/outils/synthese/pick-me-up" element={<OutilsSynthesePickMeUp />} />
       <Route path="/outils/synthese/mdph" element={<PlaceholderScreen title="Dossier MDPH" />} />
       <Route path="/outils/synthese/rdv" element={<OutilsSyntheseRdv />} />
       <Route path="/outils/synthese/rdv/briefing" element={<PlaceholderScreen title="Briefing séance" />} />
