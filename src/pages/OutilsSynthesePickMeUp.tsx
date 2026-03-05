@@ -442,62 +442,68 @@ const OutilsSynthesePickMeUp = () => {
             )}
             </div>
 
-            {/* "ou" separator */}
-            <div className="flex justify-center my-4">
-              <span className="text-[10px] font-sans font-medium tracking-widest uppercase" style={{ color: "#9A9490" }}>
-                Ou choisir une période précise
-              </span>
-            </div>
-
-            {/* Date range picker — right-aligned */}
-            <div className="flex justify-end mb-5">
-              <div style={{ maxWidth: "75%" }} className="w-full">
-                <div className="flex gap-2">
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
+            {/* Date range picker — liquid glass card */}
+            <div
+              className="mb-5 mt-4"
+              style={{
+                background: "rgba(255,255,255,0.38)",
+                backdropFilter: "blur(16px) saturate(1.6)",
+                WebkitBackdropFilter: "blur(16px) saturate(1.6)",
+                border: "1px solid rgba(255,255,255,0.85)",
+                borderRadius: 16,
+                padding: 16,
+              }}
+            >
+              <div className="flex justify-center mb-3">
+                <span className="text-[10px] font-sans font-medium tracking-widest uppercase" style={{ color: "#9A9490" }}>
+                  Ou choisir une période précise
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
                       variant="outline"
                       disabled={periodDisabled}
                       className={cn("flex-1 justify-start text-left text-[13px] font-normal", !dateStart && "text-muted-foreground")}
-                      style={{ borderRadius: 999 }}>
-                      
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {dateStart ? format(dateStart, "d MMM yyyy", { locale: fr }) : "Du"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
+                      style={{ borderRadius: 999 }}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {dateStart ? format(dateStart, "d MMM yyyy", { locale: fr }) : "Du"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
                       mode="single"
                       selected={dateStart}
                       onSelect={(d) => {setDateStart(d || undefined);setSelectedPeriod(null);}}
                       initialFocus
-                      className={cn("p-3 pointer-events-auto")} />
-                    
-                    </PopoverContent>
-                  </Popover>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
                       variant="outline"
                       disabled={periodDisabled}
                       className={cn("flex-1 justify-start text-left text-[13px] font-normal", !dateEnd && "text-muted-foreground")}
-                      style={{ borderRadius: 999 }}>
-                      
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {dateEnd ? format(dateEnd, "d MMM yyyy", { locale: fr }) : "Au"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
+                      style={{ borderRadius: 999 }}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {dateEnd ? format(dateEnd, "d MMM yyyy", { locale: fr }) : "Au"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
                       mode="single"
                       selected={dateEnd}
                       onSelect={(d) => {setDateEnd(d || undefined);setSelectedPeriod(null);}}
                       initialFocus
-                      className={cn("p-3 pointer-events-auto")} />
-                    
-                    </PopoverContent>
-                  </Popover>
-                </div>
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
 
