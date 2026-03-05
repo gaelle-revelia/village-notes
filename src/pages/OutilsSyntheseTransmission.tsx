@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Mic, Sparkles, User, Brain, Moon, PersonStanding, Users, Pill, Mail } from "lucide-react";
+import { ArrowLeft, Mic, Sparkles, User, Brain, Moon, PersonStanding, Users, Pill, Activity, Mail } from "lucide-react";
 import BottomNavBar from "@/components/BottomNavBar";
 import { useEnfantPrenom } from "@/hooks/useEnfantPrenom";
+import { useEnfantId } from "@/hooks/useEnfantId";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Textarea } from "@/components/ui/textarea";
@@ -132,6 +133,7 @@ type Phase = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
 const OutilsSyntheseTransmission = () => {
   const navigate = useNavigate();
   const prenom = useEnfantPrenom();
+  const { enfantId } = useEnfantId();
   const { user } = useAuth();
   const { toast } = useToast();
   const displayName = prenom ?? "votre enfant";
@@ -142,6 +144,8 @@ const OutilsSyntheseTransmission = () => {
   const [answers, setAnswers] = useState<string[]>(["", "", "", "", "", ""]);
   const [emailValue, setEmailValue] = useState("");
   const [parentPrenom, setParentPrenom] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedBlocks, setGeneratedBlocks] = useState<any[] | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -154,6 +158,38 @@ const OutilsSyntheseTransmission = () => {
 
   const updateAnswer = (idx: number, val: string) => {
     setAnswers((prev) => { const n = [...prev]; n[idx] = val; return n; });
+  };
+
+  const handleGenerateTransmission = async () => {
+    if (!enfantId || !user) return;
+    setIsGenerating(true);
+    try {
+      const reponses = SECTIONS.map((s, i) => ({
+        section: s.number,
+        question: s.question,
+        reponse: answers[i],
+      }));
+      const { data, error } = await supabase.functions.invoke("generate-synthesis", {
+        body: {
+          type: "transmission",
+          enfant_id: enfantId,
+          parent_context: {
+            destinataire,
+            reponses,
+          },
+        },
+      });
+      if (error) throw error;
+      if (data?.blocks) {
+        setGeneratedBlocks(data.blocks);
+      }
+      setPhase(7);
+    } catch (e) {
+      console.error("generate-synthesis error:", e);
+      toast({ title: "Une erreur est survenue — réessaie.", variant: "destructive" });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const past = (p: Phase) => phase > p;
@@ -195,16 +231,25 @@ const OutilsSyntheseTransmission = () => {
     }
 
     const isLast = phase === 6;
-    const enabled = answers[phase - 1].trim().length > 0;
-    const label = isLast ? "Générer le livret complet →" : "Continuer →";
+    const enabled = answers[phase - 1].trim().length > 0 && !isGenerating;
+    const label = isLast ? (isGenerating ? "Génération en cours..." : "Générer le livret complet →") : "Continuer →";
     const nextPhase = (phase + 1) as Phase;
+
+    const handleCtaTap = async () => {
+      if (!enabled) return;
+      if (isLast) {
+        await handleGenerateTransmission();
+      } else {
+        setPhase(nextPhase);
+      }
+    };
 
     return (
       <div className="fixed bottom-16 left-0 right-0 z-10 px-4 py-3" style={{ background: "rgba(255,255,255,0.72)", backdropFilter: "blur(20px) saturate(1.5)", WebkitBackdropFilter: "blur(20px) saturate(1.5)" }}>
         <button
-          onClick={() => enabled && setPhase(nextPhase)}
+          onClick={handleCtaTap}
           disabled={!enabled}
-          className="w-full py-3.5 text-[15px] font-sans font-semibold transition-opacity"
+          className={`w-full py-3.5 text-[15px] font-sans font-semibold transition-opacity ${isGenerating ? "animate-pulse" : ""}`}
           style={{ background: "linear-gradient(135deg, #E8736A, #8B74E0)", color: "#fff", borderRadius: 14, border: "none", opacity: enabled ? 1 : 0.45 }}
         >
           {label}
@@ -302,7 +347,25 @@ const OutilsSyntheseTransmission = () => {
           <>
             <UserBubble text={answers[5] || "…"} />
             <SectionSeparator text={`Livret de transmission — ${displayName}`} />
-            {RESULT_CARDS.map((card, i) => (
+            {generatedBlocks ? generatedBlocks.map((block: any, i: number) => {
+              const iconMap: Record<string, React.ReactNode> = {
+                User: <User size={18} style={{ color: "#8B74E0" }} />,
+                Brain: <Brain size={18} style={{ color: "#8B74E0" }} />,
+                Moon: <Moon size={18} style={{ color: "#8B74E0" }} />,
+                PersonStanding: <PersonStanding size={18} style={{ color: "#8B74E0" }} />,
+                Users: <Users size={18} style={{ color: "#8B74E0" }} />,
+                Activity: <Activity size={18} style={{ color: "#8B74E0" }} />,
+                Pill: <Pill size={18} style={{ color: "#8B74E0" }} />,
+              };
+              return (
+                <ResultCard
+                  key={block.id || i}
+                  icon={iconMap[block.icon] || <User size={18} style={{ color: "#8B74E0" }} />}
+                  title={block.title}
+                  body={block.content}
+                />
+              );
+            }) : RESULT_CARDS.map((card, i) => (
               <ResultCard key={i} icon={card.icon} title={q(card.title)} body={q(card.body)} />
             ))}
             <p className="text-center text-[10px] font-sans mb-6" style={{ color: "#9A9490" }}>

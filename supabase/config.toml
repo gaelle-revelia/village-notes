@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.suggest-icon]
 verify_jwt = false
+
+[functions.generate-synthesis]
+verify_jwt = false
