@@ -366,8 +366,10 @@ const OutilsSynthesePickMeUp = () => {
             key={e}
             disabled={emotionDisabled}
             onClick={() => {
-              setSelectedEmotion(selectedEmotion === e ? null : e);
+              if (emotionDisabled) return;
+              setSelectedEmotion(e);
               setFreeText("");
+              setPhase("period");
             }}
             className="w-fit px-3.5 py-2 text-[12px] font-sans transition-all text-left"
             style={{
