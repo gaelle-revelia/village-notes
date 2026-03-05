@@ -118,7 +118,16 @@ const RESULT_CARDS = [
   { icon: <Pill size={18} style={{ color: "#8B74E0" }} />, title: "Ses thérapies en cours", body: "Kinésithérapie 3×/semaine (motricité, verticalisation). Ergothérapie 1×/semaine (préhension, installation). Orthophonie 2×/semaine (communication alternative). Psychomotricité 1×/semaine (schéma corporel, stimulations sensorielles)." },
 ];
 
-type Phase = 1 | 2 | 3 | 4 | 5 | 6 | 7;
+const DESTINATAIRES = [
+  { emoji: "👶", label: "Babysitter" },
+  { emoji: "🏫", label: "AESH" },
+  { emoji: "👨‍👩‍👧", label: "Famille" },
+  { emoji: "🏥", label: "Nouvelle structure" },
+  { emoji: "🏕️", label: "Séjour / colonie" },
+  { emoji: "", label: "Autre" },
+];
+
+type Phase = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
 const OutilsSyntheseTransmission = () => {
   const navigate = useNavigate();
@@ -128,7 +137,8 @@ const OutilsSyntheseTransmission = () => {
   const displayName = prenom ?? "votre enfant";
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  const [phase, setPhase] = useState<Phase>(1);
+  const [phase, setPhase] = useState<Phase>(0);
+  const [destinataire, setDestinataire] = useState<string | null>(null);
   const [answers, setAnswers] = useState<string[]>(["", "", "", "", "", ""]);
   const [emailValue, setEmailValue] = useState("");
   const [parentPrenom, setParentPrenom] = useState<string | null>(null);
@@ -152,6 +162,22 @@ const OutilsSyntheseTransmission = () => {
   const q = (text: string) => text.replace(/Selena/g, displayName);
 
   const renderCta = () => {
+    if (phase === 0) {
+      const enabled = !!destinataire;
+      return (
+        <div className="fixed bottom-16 left-0 right-0 z-10 px-4 py-3" style={{ background: "rgba(255,255,255,0.72)", backdropFilter: "blur(20px) saturate(1.5)", WebkitBackdropFilter: "blur(20px) saturate(1.5)" }}>
+          <button
+            onClick={() => enabled && setPhase(1)}
+            disabled={!enabled}
+            className="w-full py-3.5 text-[15px] font-sans font-semibold transition-opacity"
+            style={{ background: "linear-gradient(135deg, #E8736A, #8B74E0)", color: "#fff", borderRadius: 14, border: "none", opacity: enabled ? 1 : 0.45 }}
+          >
+            Commencer →
+          </button>
+        </div>
+      );
+    }
+
     if (phase === 7) {
       return (
         <div className="fixed bottom-16 left-0 right-0 z-10 px-4 py-3" style={{ background: "rgba(255,255,255,0.72)", backdropFilter: "blur(20px) saturate(1.5)", WebkitBackdropFilter: "blur(20px) saturate(1.5)", borderTop: "1px solid rgba(255,255,255,0.6)", boxShadow: "0 -2px 12px rgba(0,0,0,0.05)" }}>
@@ -233,8 +259,36 @@ const OutilsSyntheseTransmission = () => {
         <AiBubble text={`Je vais te poser 6 questions pour construire le livret de ${displayName}.`} />
         <AiBubble text="Tu réponds à la voix ou à l'écrit, librement." />
 
-        {/* Section 1 — always visible */}
-        {renderSection(0)}
+        {/* Destinataire block */}
+        <SectionSeparator text="POUR QUI CE LIVRET ?" />
+        <AiBubble text="Avant de commencer, dis-moi pour qui tu prépares ce livret." />
+        <AiBubble text="Le ton et les priorités s'adapteront automatiquement." />
+        <div className="grid grid-cols-2 gap-2 mb-5 max-w-[320px] mx-auto">
+          {DESTINATAIRES.map((d) => {
+            const selected = destinataire === d.label;
+            return (
+              <button
+                key={d.label}
+                onClick={() => phase === 0 && setDestinataire(d.label)}
+                disabled={phase > 0}
+                className="py-2.5 px-3 text-[12px] font-sans font-medium transition-all"
+                style={{
+                  ...glassCard,
+                  borderRadius: 999,
+                  background: selected ? "rgba(139,116,224,0.15)" : "rgba(255,255,255,0.55)",
+                  border: selected ? "1.5px solid #8B74E0" : "1px solid rgba(255,255,255,0.85)",
+                  color: selected ? "#8B74E0" : "#1E1A1A",
+                  opacity: phase > 0 && !selected ? 0.4 : 1,
+                }}
+              >
+                {d.emoji ? `${d.emoji} ` : ""}{d.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Section 1 — visible after destinataire */}
+        {phase >= 1 && renderSection(0)}
 
         {/* Sections 2-6 */}
         {phase >= 2 && renderSection(1)}
