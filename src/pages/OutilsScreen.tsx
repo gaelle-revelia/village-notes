@@ -5,7 +5,7 @@ import { ProfileAvatar } from "@/components/ProfileAvatar";
 
 const TOOLS = [
   { label: "Suivi d'activités", icon: Activity, route: "/outils/activites", active: true },
-  { label: "Synthèse magique", icon: Sparkles, route: null, active: false },
+  { label: "Synthèse magique", icon: Sparkles, route: "/outils/synthese", active: true },
   { label: "Planning", icon: CalendarDays, route: null, active: false },
   { label: "Export", icon: Share2, route: null, active: false },
 ] as const;
