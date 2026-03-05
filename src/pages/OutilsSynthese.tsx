@@ -55,12 +55,27 @@ const OutilsSynthese = () => {
   const { user } = useAuth();
   const [memoCount, setMemoCount] = useState<number | null>(null);
   const [activiteCount, setActiviteCount] = useState<number | null>(null);
+  const [parentName, setParentName] = useState<string>("");
 
-  const parentName = (() => {
-    const local = (user?.email ?? "").split("@")[0] ?? "";
-    const name = local.split(/[._-]/)[0] ?? "";
-    return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
-  })();
+  // Fetch parent prenom from profiles
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("profiles")
+      .select("prenom")
+      .eq("user_id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.prenom) {
+          setParentName(data.prenom);
+        } else {
+          // Fallback: extract from email
+          const local = (user.email ?? "").split("@")[0] ?? "";
+          const name = local.split(/[._-]/)[0] ?? "";
+          setParentName(name.charAt(0).toUpperCase() + name.slice(1).toLowerCase());
+        }
+      });
+  }, [user]);
 
   useEffect(() => {
     if (!enfantId) return;

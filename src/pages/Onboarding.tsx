@@ -60,7 +60,7 @@ const Onboarding = () => {
     return <Navigate to="/timeline" replace />;
   }
 
-  const handleEnfant = async (data: { prenom: string; dateNaissance: string; diagnostic: string }) => {
+  const handleEnfant = async (data: { prenom: string; dateNaissance: string; diagnostic: string; prenomParent: string }) => {
     setSaving(true);
     const { data: enfant, error } = await supabase
       .from("enfants")
@@ -95,6 +95,14 @@ const Onboarding = () => {
 
     setEnfantId(enfant.id);
     setPrenomEnfant(data.prenom);
+
+    // Save parent first name to profiles (non-blocking)
+    if (data.prenomParent) {
+      supabase.from("profiles").upsert(
+        { user_id: user.id, prenom: data.prenomParent } as any,
+        { onConflict: "user_id" }
+      ).then(() => {});
+    }
 
     // Generate phonetic variants for the child's first name (non-blocking)
     try {

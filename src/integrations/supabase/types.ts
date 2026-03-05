@@ -347,18 +347,21 @@ export type Database = {
           created_at: string
           id: string
           onboarding_completed: boolean
+          prenom: string | null
           user_id: string
         }
         Insert: {
           created_at?: string
           id?: string
           onboarding_completed?: boolean
+          prenom?: string | null
           user_id: string
         }
         Update: {
           created_at?: string
           id?: string
           onboarding_completed?: boolean
+          prenom?: string | null
           user_id?: string
         }
         Relationships: []
