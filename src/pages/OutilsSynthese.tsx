@@ -4,6 +4,7 @@ import { ArrowLeft, ChevronRight } from "lucide-react";
 import BottomNavBar from "@/components/BottomNavBar";
 import { useEnfantPrenom } from "@/hooks/useEnfantPrenom";
 import { useEnfantId } from "@/hooks/useEnfantId";
+import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
 const CAS_USAGE = [
@@ -51,8 +52,15 @@ const OutilsSynthese = () => {
   const navigate = useNavigate();
   const prenom = useEnfantPrenom();
   const { enfantId } = useEnfantId();
+  const { user } = useAuth();
   const [memoCount, setMemoCount] = useState<number | null>(null);
   const [activiteCount, setActiviteCount] = useState<number | null>(null);
+
+  const parentName = (() => {
+    const local = (user?.email ?? "").split("@")[0] ?? "";
+    const name = local.split(/[._-]/)[0] ?? "";
+    return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+  })();
 
   useEffect(() => {
     if (!enfantId) return;
@@ -105,9 +113,8 @@ const OutilsSynthese = () => {
       </header>
 
       <main className="flex-1 px-4 pt-5 pb-24">
-        {/* Agent chat layout */}
-        <div className="flex items-start gap-3 mb-4">
-          {/* Avatar */}
+        {/* Greeting bubble */}
+        <div className="flex items-start gap-3 mb-3">
           <div
             className="flex-shrink-0 flex items-center justify-center"
             style={{
@@ -119,8 +126,6 @@ const OutilsSynthese = () => {
           >
             <span className="text-[16px] leading-none">✨</span>
           </div>
-
-          {/* Bubble */}
           <div className="flex-1 min-w-0">
             <span
               className="block mb-1 font-sans font-medium"
@@ -128,6 +133,26 @@ const OutilsSynthese = () => {
             >
               The Village
             </span>
+            <div
+              className="px-4 py-3 inline-block"
+              style={{
+                ...glassCard,
+                background: "rgba(139,116,224,0.07)",
+                border: "1px solid rgba(139,116,224,0.18)",
+                maxWidth: "92%",
+              }}
+            >
+              <p className="text-[14px] font-sans leading-snug" style={{ color: "#1E1A1A" }}>
+                Bonjour {parentName} 👋
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Counter bubble — no avatar, aligned under first bubble */}
+        <div className="flex items-start gap-3 mb-4">
+          <div className="flex-shrink-0" style={{ width: 36 }} />
+          <div className="flex-1 min-w-0">
             <div
               className="px-4 py-3 inline-block"
               style={{
