@@ -175,8 +175,8 @@ const OutilsSynthesePickMeUp = () => {
         <main className="flex-1 px-4 pt-5 pb-24">
           <AiBubble text="Comment tu te sens en ce moment ? (Ta réponse m'aide à trouver le bon angle)" />
 
-          {/* Chips */}
-          <div className="flex flex-col gap-2 ml-12 mb-6">
+          {/* Chips — 2×2 grid */}
+          <div className="grid grid-cols-2 gap-2 ml-12 mb-4" style={{ maxWidth: "92%" }}>
             {EMOTIONS.map((e) => (
               <button
                 key={e}
@@ -184,7 +184,7 @@ const OutilsSynthesePickMeUp = () => {
                   setSelectedEmotion(selectedEmotion === e ? null : e);
                   setFreeText("");
                 }}
-                className="px-4 py-2.5 text-left text-[14px] font-sans transition-all"
+                className="px-3 py-2.5 text-left text-[13px] font-sans transition-all w-fit"
                 style={{
                   ...(selectedEmotion === e
                     ? { background: "#8B74E0", color: "#fff", borderRadius: 14, border: "none" }
@@ -196,6 +196,9 @@ const OutilsSynthesePickMeUp = () => {
             ))}
           </div>
 
+          {/* User bubble — after chips */}
+          {hasEmotion && <UserBubble text={emotionText} />}
+
           {/* Mic orb */}
           <div className="flex flex-col items-center gap-3 mb-4">
             <div
@@ -205,7 +208,6 @@ const OutilsSynthesePickMeUp = () => {
                 height: 64,
                 borderRadius: "50%",
                 background: "linear-gradient(135deg, #E8736A, #8B74E0)",
-                opacity: 0.5,
                 cursor: "not-allowed",
               }}
             >
@@ -215,23 +217,6 @@ const OutilsSynthesePickMeUp = () => {
               ou
             </span>
           </div>
-
-          {/* Textarea */}
-          <div className="ml-12 mb-5">
-            <Textarea
-              placeholder="Écris ici si tu préfères..."
-              value={freeText}
-              onChange={(e) => {
-                setFreeText(e.target.value);
-                if (e.target.value.trim()) setSelectedEmotion(null);
-              }}
-              className="text-[14px] font-sans border-none"
-              style={{ ...glassCard, borderRadius: 14, minHeight: 80 }}
-            />
-          </div>
-
-          {/* User bubble */}
-          {hasEmotion && <UserBubble text={emotionText} />}
 
           {/* CTA */}
           <button
