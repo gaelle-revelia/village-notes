@@ -208,7 +208,7 @@ const OutilsSynthese = () => {
                     className="block text-[13px] font-sans leading-snug mt-0.5"
                     style={{ color: "#9A9490" }}
                   >
-                    {cas.subtitle === "__DYNAMIC_TRANSMISSION__" ? `Fais connaître ${displayName}` : cas.subtitle}
+                    {cas.subtitle === "__DYNAMIC_TRANSMISSION__" ? `Présenter ${displayName} à un nouvel interlocuteur` : cas.subtitle}
                   </span>
                 </div>
                 <ChevronRight size={18} style={{ color: "#9A9490" }} className="flex-shrink-0" />
