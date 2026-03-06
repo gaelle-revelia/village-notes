@@ -551,67 +551,103 @@ const AxeDetail = ({
       </div>
 
       <div className="flex flex-col gap-2.5">
-        {sorted.map((p) => (
-          <div
-            key={p.id}
-            onClick={() => setSelectedPepite(p)}
-            className="cursor-pointer transition-transform active:scale-[0.98]"
-            style={{
-              background: "rgba(255,255,255,0.38)",
-              backdropFilter: "blur(16px) saturate(1.6)",
-              WebkitBackdropFilter: "blur(16px) saturate(1.6)",
-              border: "1px solid rgba(255,255,255,0.85)",
-              borderLeft: `3px solid ${axe.couleur}`,
-              borderRadius: 14,
-              boxShadow: "0 2px 12px rgba(139,116,224,0.06)",
-              padding: "12px 14px",
-            }}
-          >
-            <div className="flex items-start gap-2">
-              <span style={{ color: axe.couleur, fontSize: 12, lineHeight: 1.5 }}>
-                ✦
-              </span>
-              <p
-                style={{
-                  fontFamily: "'Fraunces', serif",
-                  fontSize: 13,
-                  fontStyle: "italic",
-                  color: "#1E1A1A",
-                  lineHeight: 1.45,
-                  flex: 1,
-                }}
-              >
-                {p.resume || "Sans résumé"}
-              </p>
+        {sorted.map((p) => {
+          const badge = TYPE_BADGES[p.type] || TYPE_BADGES.vocal;
+          const isActivite = p.type === "activite";
+          const isEvenement = p.type === "evenement";
+          const rawStr = p.resume || "";
+
+          // Activite: parse "Titre — Duration / Distance"
+          let activiteTitre = "";
+          let activiteStats: { value: string; label: string }[] = [];
+          if (isActivite && rawStr) {
+            const parts = rawStr.split(" — ");
+            activiteTitre = parts[0];
+            const statsRaw = parts[1] || "";
+            activiteStats = statsRaw.split(" / ").filter(Boolean).map((s, i) => ({
+              value: s.trim(),
+              label: i === 0 ? "Durée" : "Distance",
+            }));
+          }
+
+          return (
+            <div
+              key={p.id}
+              onClick={() => setSelectedPepite(p)}
+              className="cursor-pointer transition-transform active:scale-[0.98]"
+              style={getPepiteCardStyle(p.type)}
+            >
+              {/* Meta row: ✦ + badge + date */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center" style={{ gap: 7 }}>
+                  <span style={{ color: axe.couleur, fontSize: 12, lineHeight: 1 }}>✦</span>
+                  <div style={{ width: 1, height: 11, backgroundColor: "rgba(0,0,0,0.1)" }} />
+                  <span
+                    style={{
+                      fontFamily: "'DM Sans', sans-serif",
+                      fontSize: 9,
+                      fontWeight: 600,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.05em",
+                      color: badge.color,
+                    }}
+                  >
+                    {badge.emoji} {badge.label}
+                  </span>
+                </div>
+                <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: "#9A9490" }}>
+                  {format(new Date(p.created_at), "d MMM yyyy", { locale: fr })}
+                </span>
+              </div>
+
+              {/* Resume / content */}
+              {isActivite && rawStr ? (
+                <>
+                  <p
+                    className="mt-1.5"
+                    style={{ fontFamily: "'Fraunces', serif", fontSize: 16, lineHeight: 1.3, color: "#1E1A1A", fontWeight: 700 }}
+                  >
+                    {activiteTitre}
+                  </p>
+                  {activiteStats.length > 0 && (
+                    <div className="flex items-center gap-2.5 mt-1">
+                      {activiteStats.map((s, i) => (
+                        <div key={i} className="flex items-center gap-2.5">
+                          {i > 0 && <div style={{ width: 1, height: 22, background: "rgba(139,116,224,0.2)" }} />}
+                          <div className="flex flex-col items-center">
+                            <span style={{ fontFamily: "'Fraunces', serif", fontSize: 16, fontWeight: 700, color: "#1E1A1A", lineHeight: 1.2 }}>
+                              {s.value}
+                            </span>
+                            <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: "#9A9490", fontWeight: 500 }}>
+                              {s.label}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              ) : rawStr ? (
+                <p
+                  className="line-clamp-2 mt-1.5"
+                  style={{
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontSize: 14,
+                    lineHeight: 1.45,
+                    color: isEvenement ? "#8A6A00" : "#1E1A1A",
+                    fontWeight: isEvenement ? 600 : 400,
+                  }}
+                >
+                  {rawStr}
+                </p>
+              ) : (
+                <p className="line-clamp-2 mt-1.5" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#9A9490", fontStyle: "italic" }}>
+                  Sans résumé
+                </p>
+              )}
             </div>
-            <div className="flex items-center gap-2 mt-2">
-              <span
-                style={{
-                  fontFamily: "'DM Sans', sans-serif",
-                  fontSize: 9,
-                  textTransform: "uppercase",
-                  color: typeColor(p.type),
-                  background: `${typeColor(p.type)}18`,
-                  borderRadius: 8,
-                  padding: "2px 7px",
-                  fontWeight: 600,
-                  letterSpacing: 0.4,
-                }}
-              >
-                {p.type}
-              </span>
-              <span
-                style={{
-                  fontFamily: "'DM Sans', sans-serif",
-                  fontSize: 10,
-                  color: "#9A9490",
-                }}
-              >
-                {format(new Date(p.created_at), "d MMM yyyy", { locale: fr })}
-              </span>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* ── Bottom sheet ── */}
