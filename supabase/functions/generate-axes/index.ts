@@ -38,8 +38,14 @@ Réponse 1 (ce sur quoi on travaille): ${reponse_1}
 Réponse 2 (ce qu'on observe): ${reponse_2}
 Réponse 3 (l'essentiel à garder en cap): ${reponse_3}
 
+Règles pour les labels :
+- 3 à 6 mots maximum
+- Formulé comme un cap de travail actif, pas comme une citation ou une observation
+- Dans les mots du parent, jamais en jargon clinique
+- Exemples de bons labels : 'Tonus et tenue du corps', 'Se faire comprendre', 'Bouger plus librement', 'Bien-être et confort au quotidien'
+- Exemples de mauvais labels : 'Que son corps soit moins un obstacle', 'Elle met en place des stratégies', 'Qu elle soit heureuse'
+
 Règles absolues:
-- Les labels doivent être dans les mots du parent, jamais en jargon clinique
 - Jamais de pronostic, jamais de diagnostic, jamais de comparaison à des normes
 - Assigne une couleur hex à chaque axe selon sa nature:
   #E8736A moteur/physique, #8B74E0 cognitif/psychomoteur,
