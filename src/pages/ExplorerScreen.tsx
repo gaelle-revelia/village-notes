@@ -11,6 +11,13 @@ const FILTERS = [
   { label: "Médical", bg: "#8A9BAE" },
 ] as const;
 
+const FEATURED = [
+  { domaine: "Moteur", bg: "linear-gradient(145deg, #F0907A, #E8736A, #C8564E)", titre: "La kiné à la maison, les bons réflexes", circles: [{ top: -20, right: -10, size: 80 }, { bottom: 40, left: -25, size: 60 }] },
+  { domaine: "Cognitif", bg: "linear-gradient(145deg, #A08AEA, #8B74E0, #6A54C0)", titre: "Comprendre les bilans neuropsychologiques", circles: [{ top: 10, right: 20, size: 70 }, { bottom: 60, left: 10, size: 50 }] },
+  { domaine: "Sensoriel", bg: "linear-gradient(145deg, #5EC09A, #44A882, #2E8862)", titre: "Intégration sensorielle : par où commencer ?", circles: [{ top: -15, left: 30, size: 90 }, { bottom: 30, right: -20, size: 55 }] },
+  { domaine: "Bien-être", bg: "linear-gradient(145deg, #F0B85A, #E8A44A, #C8842A)", titre: "Prendre soin de soi pour mieux prendre soin", circles: [{ top: 5, right: -15, size: 75 }, { bottom: 50, left: -10, size: 65 }] },
+] as const;
+
 const ExplorerScreen = () => {
   const [activeFilter, setActiveFilter] = useState("Tout");
 
@@ -113,6 +120,68 @@ const ExplorerScreen = () => {
             </button>
           );
         })}
+      </div>
+
+      {/* À la une */}
+      <div style={{ marginTop: 24 }}>
+        <h2 style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 20, color: "#1E1A1A", padding: "0 24px", marginBottom: 12 }}>
+          À la une
+        </h2>
+        <div
+          className="flex gap-3 overflow-x-auto"
+          style={{ padding: "0 24px", scrollbarWidth: "none", msOverflowStyle: "none" }}
+        >
+          {FEATURED.map((card) => (
+            <div
+              key={card.titre}
+              className="shrink-0 relative overflow-hidden flex flex-col justify-end"
+              style={{ width: 200, height: 240, borderRadius: 20, background: card.bg }}
+            >
+              {/* Decorative circles */}
+              {card.circles.map((c, i) => (
+                <div
+                  key={i}
+                  className="absolute rounded-full"
+                  style={{
+                    width: c.size, height: c.size,
+                    background: "rgba(255,255,255,0.17)",
+                    top: "top" in c ? c.top : undefined,
+                    bottom: "bottom" in c ? c.bottom : undefined,
+                    left: "left" in c ? c.left : undefined,
+                    right: "right" in c ? c.right : undefined,
+                  }}
+                />
+              ))}
+              {/* Dark overlay */}
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.45) 100%)" }} />
+              {/* Content */}
+              <div className="relative z-10 p-4 flex flex-col gap-2">
+                <span
+                  style={{
+                    alignSelf: "flex-start",
+                    background: "rgba(255,255,255,0.25)",
+                    backdropFilter: "blur(8px)",
+                    WebkitBackdropFilter: "blur(8px)",
+                    border: "1px solid rgba(255,255,255,0.4)",
+                    borderRadius: 10,
+                    padding: "3px 8px",
+                    fontSize: 10,
+                    fontWeight: 600,
+                    color: "#fff",
+                    textTransform: "uppercase",
+                    letterSpacing: 0.5,
+                    fontFamily: "'DM Sans', sans-serif",
+                  }}
+                >
+                  {card.domaine}
+                </span>
+                <span style={{ fontFamily: "'Fraunces', serif", fontSize: 16, fontWeight: 600, color: "#fff", lineHeight: 1.25 }}>
+                  {card.titre}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Content will be added here */}
