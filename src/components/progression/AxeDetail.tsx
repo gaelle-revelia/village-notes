@@ -102,7 +102,61 @@ const TYPE_COLORS: Record<string, string> = {
   note: "#44A882",
   activite: "#E8736A",
   document: "#8A9BAE",
+  evenement: "#E8C84A",
 };
+
+const TYPE_BADGES: Record<string, { emoji: string; label: string; color: string }> = {
+  vocal: { emoji: "🎙️", label: "Vocal", color: "#8B74E0" },
+  note: { emoji: "✏️", label: "Note", color: "#44A882" },
+  evenement: { emoji: "⭐", label: "Étape", color: "#E8C84A" },
+  document: { emoji: "📄", label: "Document", color: "#8A9BAE" },
+  activite: { emoji: "🏃", label: "Activité", color: "#8B74E0" },
+};
+
+function getPepiteCardStyle(type: string) {
+  if (type === "evenement") {
+    return {
+      background: "rgba(255,248,220,0.55)",
+      backdropFilter: "blur(16px) saturate(1.6)",
+      WebkitBackdropFilter: "blur(16px) saturate(1.6)",
+      border: "1px solid rgba(232,200,74,0.35)",
+      borderRadius: 16,
+      padding: "11px 13px",
+      boxShadow: "0 4px 24px rgba(232,200,74,0.12), inset 0 1px 0 rgba(255,255,255,0.9)",
+    };
+  }
+  if (type === "document") {
+    return {
+      background: "rgba(240,243,247,0.55)",
+      backdropFilter: "blur(16px) saturate(1.6)",
+      WebkitBackdropFilter: "blur(16px) saturate(1.6)",
+      border: "1px solid rgba(138,155,174,0.25)",
+      borderRadius: 16,
+      padding: "11px 13px",
+      boxShadow: "0 4px 24px rgba(139,116,224,0.08), 0 1px 4px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9)",
+    };
+  }
+  if (type === "activite") {
+    return {
+      background: "rgba(232,239,255,0.45)",
+      backdropFilter: "blur(16px) saturate(1.6)",
+      WebkitBackdropFilter: "blur(16px) saturate(1.6)",
+      border: "1px solid rgba(139,116,224,0.2)",
+      borderRadius: 16,
+      padding: "11px 13px",
+      boxShadow: "0 4px 24px rgba(139,116,224,0.08), 0 1px 4px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9)",
+    };
+  }
+  return {
+    background: "rgba(255,255,255,0.38)",
+    backdropFilter: "blur(16px) saturate(1.6)",
+    WebkitBackdropFilter: "blur(16px) saturate(1.6)",
+    border: "1px solid rgba(255,255,255,0.85)",
+    borderRadius: 16,
+    padding: "11px 13px",
+    boxShadow: "0 4px 24px rgba(139,116,224,0.08), 0 1px 4px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9)",
+  };
+}
 
 const AxeDetail = ({
   axe,
@@ -497,67 +551,103 @@ const AxeDetail = ({
       </div>
 
       <div className="flex flex-col gap-2.5">
-        {sorted.map((p) => (
-          <div
-            key={p.id}
-            onClick={() => setSelectedPepite(p)}
-            className="cursor-pointer transition-transform active:scale-[0.98]"
-            style={{
-              background: "rgba(255,255,255,0.38)",
-              backdropFilter: "blur(16px) saturate(1.6)",
-              WebkitBackdropFilter: "blur(16px) saturate(1.6)",
-              border: "1px solid rgba(255,255,255,0.85)",
-              borderLeft: `3px solid ${axe.couleur}`,
-              borderRadius: 14,
-              boxShadow: "0 2px 12px rgba(139,116,224,0.06)",
-              padding: "12px 14px",
-            }}
-          >
-            <div className="flex items-start gap-2">
-              <span style={{ color: axe.couleur, fontSize: 12, lineHeight: 1.5 }}>
-                ✦
-              </span>
-              <p
-                style={{
-                  fontFamily: "'Fraunces', serif",
-                  fontSize: 13,
-                  fontStyle: "italic",
-                  color: "#1E1A1A",
-                  lineHeight: 1.45,
-                  flex: 1,
-                }}
-              >
-                {p.resume || "Sans résumé"}
-              </p>
+        {sorted.map((p) => {
+          const badge = TYPE_BADGES[p.type] || TYPE_BADGES.vocal;
+          const isActivite = p.type === "activite";
+          const isEvenement = p.type === "evenement";
+          const rawStr = p.resume || "";
+
+          // Activite: parse "Titre — Duration / Distance"
+          let activiteTitre = "";
+          let activiteStats: { value: string; label: string }[] = [];
+          if (isActivite && rawStr) {
+            const parts = rawStr.split(" — ");
+            activiteTitre = parts[0];
+            const statsRaw = parts[1] || "";
+            activiteStats = statsRaw.split(" / ").filter(Boolean).map((s, i) => ({
+              value: s.trim(),
+              label: i === 0 ? "Durée" : "Distance",
+            }));
+          }
+
+          return (
+            <div
+              key={p.id}
+              onClick={() => setSelectedPepite(p)}
+              className="cursor-pointer transition-transform active:scale-[0.98]"
+              style={getPepiteCardStyle(p.type)}
+            >
+              {/* Meta row: ✦ + badge + date */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center" style={{ gap: 7 }}>
+                  <span style={{ color: axe.couleur, fontSize: 12, lineHeight: 1 }}>✦</span>
+                  <div style={{ width: 1, height: 11, backgroundColor: "rgba(0,0,0,0.1)" }} />
+                  <span
+                    style={{
+                      fontFamily: "'DM Sans', sans-serif",
+                      fontSize: 9,
+                      fontWeight: 600,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.05em",
+                      color: badge.color,
+                    }}
+                  >
+                    {badge.emoji} {badge.label}
+                  </span>
+                </div>
+                <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: "#9A9490" }}>
+                  {format(new Date(p.created_at), "d MMM yyyy", { locale: fr })}
+                </span>
+              </div>
+
+              {/* Resume / content */}
+              {isActivite && rawStr ? (
+                <>
+                  <p
+                    className="mt-1.5"
+                    style={{ fontFamily: "'Fraunces', serif", fontSize: 16, lineHeight: 1.3, color: "#1E1A1A", fontWeight: 700 }}
+                  >
+                    {activiteTitre}
+                  </p>
+                  {activiteStats.length > 0 && (
+                    <div className="flex items-center gap-2.5 mt-1">
+                      {activiteStats.map((s, i) => (
+                        <div key={i} className="flex items-center gap-2.5">
+                          {i > 0 && <div style={{ width: 1, height: 22, background: "rgba(139,116,224,0.2)" }} />}
+                          <div className="flex flex-col items-center">
+                            <span style={{ fontFamily: "'Fraunces', serif", fontSize: 16, fontWeight: 700, color: "#1E1A1A", lineHeight: 1.2 }}>
+                              {s.value}
+                            </span>
+                            <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: "#9A9490", fontWeight: 500 }}>
+                              {s.label}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              ) : rawStr ? (
+                <p
+                  className="line-clamp-2 mt-1.5"
+                  style={{
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontSize: 14,
+                    lineHeight: 1.45,
+                    color: isEvenement ? "#8A6A00" : "#1E1A1A",
+                    fontWeight: isEvenement ? 600 : 400,
+                  }}
+                >
+                  {rawStr}
+                </p>
+              ) : (
+                <p className="line-clamp-2 mt-1.5" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#9A9490", fontStyle: "italic" }}>
+                  Sans résumé
+                </p>
+              )}
             </div>
-            <div className="flex items-center gap-2 mt-2">
-              <span
-                style={{
-                  fontFamily: "'DM Sans', sans-serif",
-                  fontSize: 9,
-                  textTransform: "uppercase",
-                  color: typeColor(p.type),
-                  background: `${typeColor(p.type)}18`,
-                  borderRadius: 8,
-                  padding: "2px 7px",
-                  fontWeight: 600,
-                  letterSpacing: 0.4,
-                }}
-              >
-                {p.type}
-              </span>
-              <span
-                style={{
-                  fontFamily: "'DM Sans', sans-serif",
-                  fontSize: 10,
-                  color: "#9A9490",
-                }}
-              >
-                {format(new Date(p.created_at), "d MMM yyyy", { locale: fr })}
-              </span>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* ── Bottom sheet ── */}
