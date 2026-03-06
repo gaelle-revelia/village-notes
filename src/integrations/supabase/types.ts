@@ -61,6 +61,47 @@ export type Database = {
           },
         ]
       }
+      axes_developpement: {
+        Row: {
+          actif: boolean | null
+          couleur: string
+          created_at: string | null
+          enfant_id: string
+          id: string
+          label: string
+          ordre: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          actif?: boolean | null
+          couleur: string
+          created_at?: string | null
+          enfant_id: string
+          id?: string
+          label: string
+          ordre?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          actif?: boolean | null
+          couleur?: string
+          created_at?: string | null
+          enfant_id?: string
+          id?: string
+          label?: string
+          ordre?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "axes_developpement_enfant_id_fkey"
+            columns: ["enfant_id"]
+            isOneToOne: false
+            referencedRelation: "enfants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       enfant_lexique: {
         Row: {
           created_at: string | null
@@ -133,6 +174,7 @@ export type Database = {
       }
       enfants: {
         Row: {
+          backfill_done: boolean | null
           created_at: string
           date_naissance: string | null
           diagnostic_label: string | null
@@ -144,6 +186,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          backfill_done?: boolean | null
           created_at?: string
           date_naissance?: string | null
           diagnostic_label?: string | null
@@ -155,6 +198,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          backfill_done?: boolean | null
           created_at?: string
           date_naissance?: string | null
           diagnostic_label?: string | null
@@ -344,6 +388,42 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      pepites: {
+        Row: {
+          axe_id: string
+          created_at: string | null
+          id: string
+          memo_id: string
+        }
+        Insert: {
+          axe_id: string
+          created_at?: string | null
+          id?: string
+          memo_id: string
+        }
+        Update: {
+          axe_id?: string
+          created_at?: string | null
+          id?: string
+          memo_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pepites_axe_id_fkey"
+            columns: ["axe_id"]
+            isOneToOne: false
+            referencedRelation: "axes_developpement"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pepites_memo_id_fkey"
+            columns: ["memo_id"]
+            isOneToOne: false
+            referencedRelation: "memos"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
