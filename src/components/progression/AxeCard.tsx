@@ -1,5 +1,4 @@
 import { ChevronRight } from "lucide-react";
-import { useState, useEffect } from "react";
 
 interface Pepite {
   id: string;
