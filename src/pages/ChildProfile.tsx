@@ -4,6 +4,7 @@ import { ArrowLeft, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useEnfantId } from "@/hooks/useEnfantId";
 import { toast } from "sonner";
+import CarteProgressionOnboarding from "@/components/progression/CarteProgressionOnboarding";
 
 export default function ChildProfile() {
   const { enfantId } = useEnfantId();
@@ -11,6 +12,8 @@ export default function ChildProfile() {
   const [prenom, setPrenom] = useState<string | null>(null);
   const [sexe, setSexe] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [showCarteOnboarding, setShowCarteOnboarding] = useState(false);
+  const [checkingAxes, setCheckingAxes] = useState(true);
 
   useEffect(() => {
     if (!enfantId) return;
@@ -24,6 +27,16 @@ export default function ChildProfile() {
           setPrenom(data.prenom);
           setSexe(data.sexe);
         }
+      });
+
+    // Check if axes exist
+    supabase
+      .from("axes_developpement")
+      .select("id", { count: "exact", head: true })
+      .eq("enfant_id", enfantId)
+      .then(({ count }) => {
+        if (count === 0) setShowCarteOnboarding(true);
+        setCheckingAxes(false);
       });
   }, [enfantId]);
 
@@ -78,6 +91,15 @@ export default function ChildProfile() {
 
         <p className="text-sm font-sans text-muted-foreground mt-4">D'autres options de profil seront bientôt disponibles.</p>
       </main>
+
+      {/* Carte de Progression onboarding overlay */}
+      {!checkingAxes && showCarteOnboarding && enfantId && prenom && (
+        <CarteProgressionOnboarding
+          enfantId={enfantId}
+          prenom={prenom}
+          onComplete={() => setShowCarteOnboarding(false)}
+        />
+      )}
     </div>
   );
 }
