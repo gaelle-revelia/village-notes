@@ -82,11 +82,45 @@ const ExplorerScreen = () => {
         </div>
       </div>
 
+      {/* Filter chips */}
+      <div
+        className="flex gap-2 overflow-x-auto"
+        style={{ padding: "16px 24px 0", scrollbarWidth: "none", msOverflowStyle: "none" }}
+      >
+        {FILTERS.map((f) => {
+          const active = activeFilter === f.label;
+          return (
+            <button
+              key={f.label}
+              onClick={() => setActiveFilter(f.label)}
+              className="shrink-0"
+              style={{
+                background: active ? f.bg : "rgba(255,255,255,0.5)",
+                backdropFilter: active ? "none" : "blur(8px)",
+                WebkitBackdropFilter: active ? "none" : "blur(8px)",
+                border: active ? "none" : "1.5px solid rgba(255,255,255,0.8)",
+                borderRadius: 20,
+                padding: "8px 14px",
+                fontSize: 12,
+                fontWeight: active ? 600 : 400,
+                fontFamily: "'DM Sans', sans-serif",
+                color: active ? "#fff" : "#9A9490",
+                outline: "none",
+                cursor: "pointer",
+              }}
+            >
+              {f.label}
+            </button>
+          );
+        })}
+      </div>
+
       {/* Content will be added here */}
     </div>
     <style>{`div::-webkit-scrollbar { display: none; }`}</style>
     <BottomNavBar />
   </div>
-);
+  );
+};
 
 export default ExplorerScreen;
