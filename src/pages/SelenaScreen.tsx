@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { differenceInYears, differenceInMonths } from "date-fns";
+import { HelpCircle } from "lucide-react";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import BottomNavBar from "@/components/BottomNavBar";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { useEnfantPrenom } from "@/hooks/useEnfantPrenom";
@@ -49,6 +51,7 @@ const SelenaScreen = () => {
   const [pepitesByAxe, setPepitesByAxe] = useState<Record<string, PepiteWithDate[]>>({});
   const [pepitesRichByAxe, setPepitesRichByAxe] = useState<Record<string, PepiteRich[]>>({});
   const [selectedAxeId, setSelectedAxeId] = useState<string | null>(null);
+  const [showHelpSheet, setShowHelpSheet] = useState(false);
 
   // Check if axes exist + fetch date_naissance
   useEffect(() => {
@@ -201,53 +204,8 @@ const SelenaScreen = () => {
         ) : hasAxes && axes.length > 0 ? (
           /* ── Main synthèse view ── */
           <div className="flex flex-col gap-5">
-            {/* Child header */}
-            <div className="flex flex-col items-center gap-2">
-              <div
-                className="flex items-center justify-center rounded-full"
-                style={{
-                  width: 44,
-                  height: 44,
-                  background: "linear-gradient(135deg, #E8736A, #8B74E0)",
-                }}
-              >
-                <span
-                  style={{
-                    fontFamily: "'Fraunces', serif",
-                    fontSize: 20,
-                    fontWeight: 600,
-                    color: "#fff",
-                  }}
-                >
-                  {(prenom || "E")[0].toUpperCase()}
-                </span>
-              </div>
-
-              <div className="text-center">
-                <p
-                  style={{
-                    fontFamily: "'Fraunces', serif",
-                    fontSize: 22,
-                    fontWeight: 600,
-                    color: "#1E1A1A",
-                  }}
-                >
-                  {prenom}
-                </p>
-                {age && (
-                  <p
-                    style={{
-                      fontFamily: "'DM Sans', sans-serif",
-                      fontSize: 11.5,
-                      color: "#9A9490",
-                      marginTop: 2,
-                    }}
-                  >
-                    {age}
-                  </p>
-                )}
-              </div>
-
+            {/* Badge row */}
+            <div className="flex items-center justify-between w-full">
               <span
                 style={{
                   background: "rgba(139,116,224,0.12)",
@@ -263,6 +221,13 @@ const SelenaScreen = () => {
               >
                 ✦ Carte de Progression
               </span>
+              <button
+                onClick={() => setShowHelpSheet(true)}
+                className="p-1"
+                aria-label="Aide"
+              >
+                <HelpCircle size={18} color="#9A9490" />
+              </button>
             </div>
 
             {/* Intro text */}
@@ -270,16 +235,14 @@ const SelenaScreen = () => {
               className="text-center"
               style={{
                 fontFamily: "'DM Sans', sans-serif",
-                fontSize: 12.5,
+                fontSize: 13,
                 color: "#9A9490",
                 fontStyle: "italic",
-                lineHeight: 1.5,
-                maxWidth: 300,
-                margin: "0 auto",
+                lineHeight: 1.6,
+                padding: "0 24px",
               }}
             >
-              Ce que {prenom} explore en ce moment — les moments notés au fil
-              des jours forment sa carte.
+              Chaque note que tu poses devient une étoile. Ensemble, elles dessinent le chemin de {prenom} — pas une ligne droite, une constellation.
             </p>
 
             {/* Section header */}
@@ -333,6 +296,56 @@ const SelenaScreen = () => {
           onComplete={() => setShowCarteOnboarding(false)}
         />
       )}
+
+      {/* Pedagogical help sheet */}
+      <Sheet open={showHelpSheet} onOpenChange={setShowHelpSheet}>
+        <SheetContent
+          side="bottom"
+          className="rounded-t-2xl px-6 pb-8 pt-3"
+          style={{
+            background: "rgba(255,255,255,0.92)",
+            backdropFilter: "blur(20px)",
+            WebkitBackdropFilter: "blur(20px)",
+          }}
+        >
+          {/* Handle bar */}
+          <div className="flex justify-center mb-5">
+            <div style={{ width: 36, height: 4, borderRadius: 2, background: "#E0E0E0" }} />
+          </div>
+          <SheetTitle
+            style={{
+              fontFamily: "'Fraunces', serif",
+              fontSize: 18,
+              fontWeight: 600,
+              color: "#1E1A1A",
+              marginBottom: 16,
+            }}
+          >
+            Comment ça marche ?
+          </SheetTitle>
+          <div className="flex flex-col gap-4">
+            {[
+              "Chaque mémo que tu notes est analysé et associé à un axe si le lien est évident.",
+              "Les axes sont dans tes mots — jamais du jargon médical.",
+              "Pas de score, pas de jugement. Juste le chemin parcouru, visible.",
+            ].map((text, i) => (
+              <div key={i} className="flex gap-3 items-start">
+                <span style={{ color: "#8B74E0", fontSize: 13, lineHeight: "1.6", flexShrink: 0 }}>✦</span>
+                <p
+                  style={{
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontSize: 13.5,
+                    color: "#1E1A1A",
+                    lineHeight: 1.6,
+                  }}
+                >
+                  {text}
+                </p>
+              </div>
+            ))}
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 };
