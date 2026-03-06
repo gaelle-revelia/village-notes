@@ -20,16 +20,72 @@ function hashToFloat(str: string, seed: number): number {
   return (((h >>> 0) % 10000) / 10000);
 }
 
+const REF_WIDTH = 300; // reference width for collision math
+const MIN_DIST = 16;
+
+function placeCircles(
+  pepitesWithRecency: { id: string; recency: number }[]
+): { id: string; cx: number; cy: number; r: number; opacity: number; dur: number; delay: number }[] {
+  const placed: { cx: number; cy: number; r: number }[] = [];
+  const result: { id: string; cx: number; cy: number; r: number; opacity: number; dur: number; delay: number }[] = [];
+
+  for (const p of pepitesWithRecency) {
+    const r = 3 + p.recency * 3;
+    const initCxPct = hashToFloat(p.id, 1) * 90 + 5;
+    const initCx = (initCxPct / 100) * REF_WIDTH;
+    const initCy = hashToFloat(p.id, 2) * 76 + 8; // 8–84px for 100px height
+
+    let bestCx = initCx;
+    let bestCy = initCy;
+    let found = !placed.some(
+      (c) => Math.hypot(c.cx - bestCx, c.cy - bestCy) < MIN_DIST
+    );
+
+    if (!found) {
+      for (let attempt = 0; attempt < 80 && !found; attempt++) {
+        const angle = (attempt % 24) * 15 * (Math.PI / 180);
+        const radius = 8 * (1 + Math.floor(attempt / 24));
+        const candidateCx = initCx + Math.cos(angle) * radius;
+        const candidateCy = initCy + Math.sin(angle) * radius;
+
+        if (candidateCx < 5 || candidateCx > REF_WIDTH - 5 || candidateCy < 5 || candidateCy > 95) continue;
+
+        if (!placed.some((c) => Math.hypot(c.cx - candidateCx, c.cy - candidateCy) < MIN_DIST)) {
+          bestCx = candidateCx;
+          bestCy = candidateCy;
+          found = true;
+        }
+      }
+    }
+
+    if (!found) continue; // skip silently
+
+    placed.push({ cx: bestCx, cy: bestCy, r });
+    result.push({
+      id: p.id,
+      cx: (bestCx / REF_WIDTH) * 100,
+      cy: bestCy,
+      r,
+      opacity: 0.4 + p.recency * 0.45,
+      dur: 2.5 + hashToFloat(p.id, 3) * 2.5,
+      delay: hashToFloat(p.id, 4),
+    });
+  }
+
+  return result;
+}
+
 const AxeCard = ({ axe, pepites, onClick }: AxeCardProps) => {
   const now = Date.now();
   const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
 
-  // Compute recency factor 0..1 (1 = most recent)
   const pepitesWithRecency = pepites.map((p) => {
     const age = now - new Date(p.created_at).getTime();
-    const recency = Math.max(0, 1 - age / (thirtyDaysMs * 6)); // 6 months scale
+    const recency = Math.max(0, 1 - age / (thirtyDaysMs * 6));
     return { ...p, recency };
   });
+
+  const circles = placeCircles(pepitesWithRecency);
 
   return (
     <div
@@ -46,7 +102,6 @@ const AxeCard = ({ axe, pepites, onClick }: AxeCardProps) => {
         padding: "14px 16px 10px",
       }}
     >
-      {/* Top row */}
       <div className="flex items-center gap-2">
         <span
           className="shrink-0 rounded-full"
@@ -66,43 +121,33 @@ const AxeCard = ({ axe, pepites, onClick }: AxeCardProps) => {
         <ChevronRight size={16} color="#9A9490" />
       </div>
 
-      {/* Mini constellation */}
       <svg
         width="100%"
-        height={52}
+        height={100}
         className="mt-2"
         style={{ display: "block" }}
       >
-        {pepitesWithRecency.length > 0 ? (
-          pepitesWithRecency.map((p, i) => {
-            const cx = hashToFloat(p.id, 1) * 90 + 5; // 5%–95%
-            const cy = hashToFloat(p.id, 2) * 36 + 8; // 8–44px
-            const r = 3 + p.recency * 3; // 3–6px
-            const opacity = 0.4 + p.recency * 0.45; // 0.40–0.85
-            const dur = 2.5 + hashToFloat(p.id, 3) * 2.5; // 2.5–5s
-            const delay = hashToFloat(p.id, 4); // 0–1s
-
-            return (
-              <circle
-                key={p.id}
-                cx={`${cx}%`}
-                cy={cy}
-                r={r}
-                fill={axe.couleur}
-                style={{
-                  opacity,
-                  animation: `axePulse ${dur}s ${delay}s ease-in-out infinite alternate`,
-                }}
-              />
-            );
-          })
+        {circles.length > 0 ? (
+          circles.map((c) => (
+            <circle
+              key={c.id}
+              cx={`${c.cx}%`}
+              cy={c.cy}
+              r={c.r}
+              fill={axe.couleur}
+              style={{
+                opacity: c.opacity,
+                animation: `axePulse ${c.dur}s ${c.delay}s ease-in-out infinite alternate`,
+              }}
+            />
+          ))
         ) : (
           <>
             {[0, 1, 2, 3, 4].map((i) => (
               <circle
                 key={i}
                 cx={`${15 + i * 17}%`}
-                cy={22}
+                cy={45}
                 r={4}
                 fill="none"
                 stroke={axe.couleur}
