@@ -1,7 +1,20 @@
+import { useState } from "react";
 import BottomNavBar from "@/components/BottomNavBar";
 import { Bookmark, Search } from "lucide-react";
 
-const ExplorerScreen = () => (
+const FILTERS = [
+  { label: "Tout", bg: "linear-gradient(135deg, #E8736A, #8B74E0)" },
+  { label: "Moteur", bg: "#E8736A" },
+  { label: "Cognitif", bg: "#8B74E0" },
+  { label: "Sensoriel", bg: "#44A882" },
+  { label: "Bien-être", bg: "#E8A44A" },
+  { label: "Médical", bg: "#8A9BAE" },
+] as const;
+
+const ExplorerScreen = () => {
+  const [activeFilter, setActiveFilter] = useState("Tout");
+
+  return (
   <div className="flex min-h-screen flex-col">
     <div
       className="overflow-y-auto flex-1"
@@ -69,11 +82,45 @@ const ExplorerScreen = () => (
         </div>
       </div>
 
+      {/* Filter chips */}
+      <div
+        className="flex gap-2 overflow-x-auto"
+        style={{ padding: "16px 24px 0", scrollbarWidth: "none", msOverflowStyle: "none" }}
+      >
+        {FILTERS.map((f) => {
+          const active = activeFilter === f.label;
+          return (
+            <button
+              key={f.label}
+              onClick={() => setActiveFilter(f.label)}
+              className="shrink-0"
+              style={{
+                background: active ? f.bg : "rgba(255,255,255,0.5)",
+                backdropFilter: active ? "none" : "blur(8px)",
+                WebkitBackdropFilter: active ? "none" : "blur(8px)",
+                border: active ? "none" : "1.5px solid rgba(255,255,255,0.8)",
+                borderRadius: 20,
+                padding: "8px 14px",
+                fontSize: 12,
+                fontWeight: active ? 600 : 400,
+                fontFamily: "'DM Sans', sans-serif",
+                color: active ? "#fff" : "#9A9490",
+                outline: "none",
+                cursor: "pointer",
+              }}
+            >
+              {f.label}
+            </button>
+          );
+        })}
+      </div>
+
       {/* Content will be added here */}
     </div>
     <style>{`div::-webkit-scrollbar { display: none; }`}</style>
     <BottomNavBar />
   </div>
-);
+  );
+};
 
 export default ExplorerScreen;
