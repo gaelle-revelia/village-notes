@@ -128,10 +128,11 @@ const AxeCard = ({ axe, pepites, onClick }: AxeCardProps) => {
         style={{ display: "block" }}
       >
         {circles.length > 0 ? (
-          circles.map((c, i) => {
-            const entranceDelayMs = i * 60;
-            const entranceDurationMs = 400;
-            const twinkleDelayS = (entranceDelayMs + entranceDurationMs) / 1000;
+          circles.map((c) => {
+            const dur = 2.5 + hashToFloat(c.id, 3) * 2.5;
+            const delay = hashToFloat(c.id, 4) * 1.2;
+            const baseOp = c.opacity;
+            const dimOp = baseOp * 0.4;
 
             return (
               <circle
@@ -141,13 +142,18 @@ const AxeCard = ({ axe, pepites, onClick }: AxeCardProps) => {
                 r={c.r}
                 fill={axe.couleur}
                 style={{
-                  opacity: mounted ? c.opacity : 0,
-                  transition: `opacity ${entranceDurationMs}ms ease-out ${entranceDelayMs}ms`,
-                  animation: mounted
-                    ? `axePulse ${c.dur}s ${twinkleDelayS + c.delay}s ease-in-out infinite alternate`
-                    : "none",
+                  opacity: baseOp,
+                  animation: `twinkle-${c.id.slice(0, 8)} ${dur}s ${delay}s ease-in-out infinite`,
                 }}
-              />
+              >
+                <style>{`
+                  @keyframes twinkle-${c.id.slice(0, 8)} {
+                    0% { opacity: ${baseOp}; }
+                    50% { opacity: ${dimOp}; }
+                    100% { opacity: ${baseOp}; }
+                  }
+                `}</style>
+              </circle>
             );
           })
         ) : (
