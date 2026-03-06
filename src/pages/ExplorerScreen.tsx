@@ -184,7 +184,50 @@ const ExplorerScreen = () => {
         </div>
       </div>
 
-      {/* Content will be added here */}
+      {/* Par domaine */}
+      <div style={{ marginTop: 28 }}>
+        <h2 style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 20, color: "#1E1A1A", padding: "0 24px", marginBottom: 12 }}>
+          Par domaine
+        </h2>
+        <div className="grid grid-cols-2 gap-3" style={{ padding: "0 24px" }}>
+          {[
+            { nom: "Moteur & physique", couleur: "#E8736A", count: "12 ressources" },
+            { nom: "Cognitif & psychomoteur", couleur: "#8B74E0", count: "9 ressources" },
+            { nom: "Sensoriel & communication", couleur: "#44A882", count: "14 ressources" },
+            { nom: "Bien-être & émotionnel", couleur: "#E8A44A", count: "8 ressources" },
+            { nom: "Médical & administratif", couleur: "#8A9BAE", count: "11 ressources" },
+            { nom: "Témoignages de parents", couleur: "#8B74E0", count: "7 histoires" },
+          ].map((d) => (
+            <div
+              key={d.nom}
+              className="relative overflow-hidden flex flex-col"
+              style={{
+                background: "rgba(255,255,255,0.38)",
+                backdropFilter: "blur(16px) saturate(1.6)",
+                WebkitBackdropFilter: "blur(16px) saturate(1.6)",
+                border: "1px solid rgba(255,255,255,0.85)",
+                borderRadius: 18,
+                boxShadow: "0 4px 24px rgba(139,116,224,0.08), inset 0 1px 0 rgba(255,255,255,0.9)",
+                padding: "18px 14px",
+                minHeight: 100,
+              }}
+            >
+              <div style={{ width: 8, height: 8, borderRadius: "50%", background: d.couleur, marginBottom: 10 }} />
+              <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600, color: "#1E1A1A", lineHeight: 1.3 }}>
+                {d.nom}
+              </span>
+              <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: "#9A9490", marginTop: 4 }}>
+                {d.count}
+              </span>
+              {/* Decorative circle */}
+              <div
+                className="absolute"
+                style={{ width: 50, height: 50, borderRadius: "50%", background: d.couleur, opacity: 0.12, bottom: -10, right: -10 }}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
     <style>{`div::-webkit-scrollbar { display: none; }`}</style>
     <BottomNavBar />
