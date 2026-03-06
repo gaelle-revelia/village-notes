@@ -51,6 +51,7 @@ const SelenaScreen = () => {
   const [pepitesByAxe, setPepitesByAxe] = useState<Record<string, PepiteWithDate[]>>({});
   const [pepitesRichByAxe, setPepitesRichByAxe] = useState<Record<string, PepiteRich[]>>({});
   const [selectedAxeId, setSelectedAxeId] = useState<string | null>(null);
+  const [showHelpSheet, setShowHelpSheet] = useState(false);
 
   // Check if axes exist + fetch date_naissance
   useEffect(() => {
