@@ -204,53 +204,8 @@ const SelenaScreen = () => {
         ) : hasAxes && axes.length > 0 ? (
           /* ── Main synthèse view ── */
           <div className="flex flex-col gap-5">
-            {/* Child header */}
-            <div className="flex flex-col items-center gap-2">
-              <div
-                className="flex items-center justify-center rounded-full"
-                style={{
-                  width: 44,
-                  height: 44,
-                  background: "linear-gradient(135deg, #E8736A, #8B74E0)",
-                }}
-              >
-                <span
-                  style={{
-                    fontFamily: "'Fraunces', serif",
-                    fontSize: 20,
-                    fontWeight: 600,
-                    color: "#fff",
-                  }}
-                >
-                  {(prenom || "E")[0].toUpperCase()}
-                </span>
-              </div>
-
-              <div className="text-center">
-                <p
-                  style={{
-                    fontFamily: "'Fraunces', serif",
-                    fontSize: 22,
-                    fontWeight: 600,
-                    color: "#1E1A1A",
-                  }}
-                >
-                  {prenom}
-                </p>
-                {age && (
-                  <p
-                    style={{
-                      fontFamily: "'DM Sans', sans-serif",
-                      fontSize: 11.5,
-                      color: "#9A9490",
-                      marginTop: 2,
-                    }}
-                  >
-                    {age}
-                  </p>
-                )}
-              </div>
-
+            {/* Badge row */}
+            <div className="flex items-center justify-between w-full">
               <span
                 style={{
                   background: "rgba(139,116,224,0.12)",
@@ -266,6 +221,13 @@ const SelenaScreen = () => {
               >
                 ✦ Carte de Progression
               </span>
+              <button
+                onClick={() => setShowHelpSheet(true)}
+                className="p-1"
+                aria-label="Aide"
+              >
+                <HelpCircle size={18} color="#9A9490" />
+              </button>
             </div>
 
             {/* Intro text */}
@@ -273,16 +235,14 @@ const SelenaScreen = () => {
               className="text-center"
               style={{
                 fontFamily: "'DM Sans', sans-serif",
-                fontSize: 12.5,
+                fontSize: 13,
                 color: "#9A9490",
                 fontStyle: "italic",
-                lineHeight: 1.5,
-                maxWidth: 300,
-                margin: "0 auto",
+                lineHeight: 1.6,
+                padding: "0 24px",
               }}
             >
-              Ce que {prenom} explore en ce moment — les moments notés au fil
-              des jours forment sa carte.
+              Chaque note que tu poses devient une étoile. Ensemble, elles dessinent le chemin de {prenom} — pas une ligne droite, une constellation.
             </p>
 
             {/* Section header */}
