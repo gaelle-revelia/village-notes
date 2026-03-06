@@ -1,45 +1,58 @@
 
 
-## Plan: Carte de Progression main view on /selena
+## Plan: "Préciser ce bloc" — refine_block mode + PreciserBlocDrawer
 
-### New file: `src/components/progression/AxeCard.tsx`
+### Part 1 — Edge function: add `refine_block` mode
 
-Standalone component receiving an axe object and its pepites array.
+In `supabase/functions/generate-synthesis/index.ts`, add a new branch:
 
-**Props**: `{ axe: { id, label, couleur, ordre }, pepites: { id: string, created_at: string }[], onClick: (id: string) => void }`
+- Parse `bloc_id`, `bloc_title`, `bloc_content`, `precision`, `cas_usage`, `synthese_id` from body
+- Fetch enfant `prenom` + `sexe` (reuse existing pattern)
+- System prompt: regenerate only this block, integrate precision naturally, keep tone/length, no invention, return `{ "content": "..." }`
+- User message: bloc_title + bloc_content + precision + prenom + pronouns
+- Update `syntheses` row: read `contenu` JSON, find bloc by `bloc_id`, replace content, write back
+- Return `{ bloc_id, content }`
 
-**Rendering**:
-- Liquid glass card with left border 3px solid axe.couleur
-- Top row: colored dot 8px + label (Fraunces 15px) + ChevronRight 16px right-aligned
-- SVG mini constellation (height 52px, full width):
-  - One circle per pepite, positioned deterministically using a simple hash of pepite.id
-  - Radius 3–6px based on recency, fill axe.couleur, opacity 0.40–0.85
-  - CSS keyframe animation on opacity only (random duration 2.5–5s, random delay 0–1s)
-  - If 0 pepites: 5 dashed circles + italic empty-state text
-- onClick → console.log(axe.id) for now
+### Part 2 — Create PreciserBlocDrawer component
 
-### Modified file: `src/pages/SelenaScreen.tsx`
+New file: `src/components/synthese/PreciserBlocDrawer.tsx`
 
-**New data fetching** (inside the existing useEffect or a second one):
-1. Fetch `enfants.date_naissance` for enfantId
-2. When `hasAxes` is true, fetch axes from `axes_developpement` (actif=true, order by ordre ASC)
-3. For each axe, fetch pepites joined with memos.created_at
+**Props:** `isOpen`, `onClose`, `bloc: { id, title, content, cas_usage }`, `enfantId`, `syntheseId`, `onBlockUpdated: (blocId: string, newContent: string) => void`
 
-**Header section** (replaces the current empty `{hasAxes && null}`):
-- Avatar circle 44px with gradient background, initial letter
-- Child name (Fraunces 22px) + computed age from date_naissance (DM Sans 11.5px #9A9490)
-- Badge pill "✦ Carte de Progression"
-- Intro text italic
+**UI structure (top to bottom):**
 
-**Axes list**:
-- Section row: "AXES ACTIFS" left, "Archives" right
-- Map over fetched axes → render `<AxeCard />` for each
+1. **DrawerTitle:** "✏️ Préciser ce bloc"
+2. **Current content preview:**
+   - Label: "Ce bloc actuellement :" — DM Sans 12px, color `#9A9490`
+   - Glass card showing `bloc.content`, `line-clamp-3` by default
+   - If content exceeds 3 lines, show a "voir tout" toggle (DM Sans 12px, color `#8B74E0`) that expands/collapses the card
+   - State: `expanded` boolean, toggles between `line-clamp-3` and full display
+3. **Textarea:** placeholder "Ajoute ta précision ici..."
+4. **WiredMicOrb:** voice input appends to textarea
+5. **CTA:** "Régénérer ce bloc →" gradient button, disabled if textarea empty, pulses during loading
 
-### What won't be touched
-- CarteProgressionOnboarding, useAuth, BottomNavBar, any other page
+**On submit:** invoke `generate-synthesis` with `type: "refine_block"`, on success call `onBlockUpdated`, close drawer, toast success.
 
-### Age computation
-- `differenceInYears` + `differenceInMonths` from date-fns (already installed)
-- Format: "X ans et Y mois" or "X mois" if < 1 year
-- Omitted entirely if date_naissance is null
+### Part 3 — Wire buttons in all 3 result pages
+
+**Transmission** (`OutilsSyntheseTransmission.tsx`):
+- State: `refineBloc`, `syntheseId`
+- ResultCard "Préciser ce bloc" → opens drawer with bloc data
+- `onBlockUpdated` → update `generatedBlocks` in place
+
+**MDPH** (`OutilsSyntheseMdph.tsx`):
+- Same pattern with ThematicBlock buttons
+
+**Pick-me-up** (`OutilsSynthesePickMeUp.tsx`):
+- Single block ("narrative"), add "Préciser ce bloc" button, same drawer
+
+### Files changed
+
+| File | Action |
+|---|---|
+| `supabase/functions/generate-synthesis/index.ts` | Add `refine_block` branch |
+| `src/components/synthese/PreciserBlocDrawer.tsx` | Create |
+| `src/pages/OutilsSyntheseTransmission.tsx` | Wire drawer |
+| `src/pages/OutilsSyntheseMdph.tsx` | Wire drawer |
+| `src/pages/OutilsSynthesePickMeUp.tsx` | Wire drawer |
 

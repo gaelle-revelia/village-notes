@@ -123,3 +123,8 @@
     font-weight: 600;
   }
 }
+
+@keyframes axePulse {
+  0% { opacity: var(--pulse-from, 0.4); }
+  100% { opacity: var(--pulse-to, 0.85); }
+}
