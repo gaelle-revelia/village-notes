@@ -296,6 +296,56 @@ const SelenaScreen = () => {
           onComplete={() => setShowCarteOnboarding(false)}
         />
       )}
+
+      {/* Pedagogical help sheet */}
+      <Sheet open={showHelpSheet} onOpenChange={setShowHelpSheet}>
+        <SheetContent
+          side="bottom"
+          className="rounded-t-2xl px-6 pb-8 pt-3"
+          style={{
+            background: "rgba(255,255,255,0.92)",
+            backdropFilter: "blur(20px)",
+            WebkitBackdropFilter: "blur(20px)",
+          }}
+        >
+          {/* Handle bar */}
+          <div className="flex justify-center mb-5">
+            <div style={{ width: 36, height: 4, borderRadius: 2, background: "#E0E0E0" }} />
+          </div>
+          <SheetTitle
+            style={{
+              fontFamily: "'Fraunces', serif",
+              fontSize: 18,
+              fontWeight: 600,
+              color: "#1E1A1A",
+              marginBottom: 16,
+            }}
+          >
+            Comment ça marche ?
+          </SheetTitle>
+          <div className="flex flex-col gap-4">
+            {[
+              "Chaque mémo que tu notes est analysé et associé à un axe si le lien est évident.",
+              "Les axes sont dans tes mots — jamais du jargon médical.",
+              "Pas de score, pas de jugement. Juste le chemin parcouru, visible.",
+            ].map((text, i) => (
+              <div key={i} className="flex gap-3 items-start">
+                <span style={{ color: "#8B74E0", fontSize: 13, lineHeight: "1.6", flexShrink: 0 }}>✦</span>
+                <p
+                  style={{
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontSize: 13.5,
+                    color: "#1E1A1A",
+                    lineHeight: 1.6,
+                  }}
+                >
+                  {text}
+                </p>
+              </div>
+            ))}
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 };
