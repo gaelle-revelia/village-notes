@@ -256,7 +256,7 @@ const Timeline = () => {
         }}
       >
         <div className="flex items-center justify-between">
-          <h1 className="text-[28px] font-semibold text-foreground">
+          <h1 style={{ fontFamily: "'Fraunces', serif", fontSize: 30, fontWeight: 700, color: "#1E1A1A", letterSpacing: -0.5 }}>
             The Village
           </h1>
           <ProfileAvatar />

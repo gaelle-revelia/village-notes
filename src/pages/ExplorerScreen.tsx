@@ -35,6 +35,7 @@ const ExplorerScreen = () => {
             fontWeight: 700,
             fontSize: 30,
             color: "#1E1A1A",
+            letterSpacing: -0.5,
           }}
         >
           Explorer
