@@ -1,6 +1,6 @@
 import { useState } from "react";
 import BottomNavBar from "@/components/BottomNavBar";
-import { Bookmark, Search } from "lucide-react";
+import { Bookmark, Search, Activity, Brain, Mic, HeartPulse, ChevronRight } from "lucide-react";
 
 const FILTERS = [
   { label: "Tout", bg: "linear-gradient(135deg, #E8736A, #8B74E0)" },
@@ -224,6 +224,52 @@ const ExplorerScreen = () => {
                 className="absolute"
                 style={{ width: 50, height: 50, borderRadius: "50%", background: d.couleur, opacity: 0.12, bottom: -10, right: -10 }}
               />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Récemment ajouté */}
+      <div style={{ marginTop: 28 }}>
+        <h2 style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 20, color: "#1E1A1A", padding: "0 24px", marginBottom: 12 }}>
+          Récemment ajouté
+        </h2>
+        <div className="flex flex-col gap-2.5" style={{ padding: "0 24px" }}>
+          {([
+            { couleur: "#8B74E0", icon: Brain, tag: "Cognitif · Guide", titre: "Préparer un bilan neuro : les questions à poser", meta: "5 min · Fiche pratique" },
+            { couleur: "#44A882", icon: Mic, tag: "Sensoriel · Témoignage", titre: "Mona, maman de Léo — \"On a appris à l'écouter autrement\"", meta: "8 min · À lire" },
+            { couleur: "#E8736A", icon: Activity, tag: "Moteur · Fiche", titre: "Stimuler la motricité fine avec du matériel du quotidien", meta: "3 min · Exercices pratiques" },
+            { couleur: "#8A9BAE", icon: HeartPulse, tag: "Médical · Guide", titre: "MDPH : comprendre les démarches pas à pas", meta: "10 min · Guide complet" },
+          ] as const).map((item) => (
+            <div
+              key={item.titre}
+              className="flex items-center"
+              style={{
+                gap: 14,
+                background: "rgba(255,255,255,0.38)",
+                backdropFilter: "blur(16px) saturate(1.6)",
+                WebkitBackdropFilter: "blur(16px) saturate(1.6)",
+                border: "1px solid rgba(255,255,255,0.85)",
+                borderRadius: 16,
+                boxShadow: "0 4px 24px rgba(139,116,224,0.08), inset 0 1px 0 rgba(255,255,255,0.9)",
+                padding: "14px 16px",
+              }}
+            >
+              <div className="shrink-0 flex items-center justify-center" style={{ width: 46, height: 46, borderRadius: 13, background: item.couleur }}>
+                <item.icon size={22} color="#fff" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <span style={{ display: "block", fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.6, color: item.couleur, opacity: 0.8, fontFamily: "'DM Sans', sans-serif" }}>
+                  {item.tag}
+                </span>
+                <span className="line-clamp-2" style={{ display: "block", fontSize: 14, fontWeight: 500, color: "#1E1A1A", lineHeight: 1.3, fontFamily: "'DM Sans', sans-serif" }}>
+                  {item.titre}
+                </span>
+                <span style={{ display: "block", fontSize: 11, color: "#9A9490", marginTop: 4, fontFamily: "'DM Sans', sans-serif" }}>
+                  {item.meta}
+                </span>
+              </div>
+              <ChevronRight size={16} color="#9A9490" style={{ opacity: 0.4 }} className="shrink-0" />
             </div>
           ))}
         </div>
