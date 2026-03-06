@@ -1,28 +1,77 @@
 import BottomNavBar from "@/components/BottomNavBar";
-import { ProfileAvatar } from "@/components/ProfileAvatar";
+import { Bookmark, Search } from "lucide-react";
 
 const ExplorerScreen = () => (
   <div className="flex min-h-screen flex-col">
-    <header
-      className="sticky top-0 z-10 px-4 py-3 flex items-center justify-between"
-      style={{
-        background: "rgba(255,255,255,0.72)",
-        backdropFilter: "blur(20px) saturate(1.5)",
-        WebkitBackdropFilter: "blur(20px) saturate(1.5)",
-        borderBottom: "1px solid rgba(255,255,255,0.6)",
-        boxShadow: "0 2px 12px rgba(0,0,0,0.05)",
-      }}
-    >
-      <h1 className="text-xl font-serif font-semibold text-foreground">Explorer</h1>
-      <ProfileAvatar />
-    </header>
-    <main
-      className="flex-1 overflow-y-auto px-4"
+    <div
+      className="overflow-y-auto flex-1"
       style={{ paddingBottom: 100, scrollbarWidth: "none", msOverflowStyle: "none" }}
     >
+      {/* Header */}
+      <div className="flex items-center justify-between" style={{ padding: "24px 24px 0" }}>
+        <h1
+          style={{
+            fontFamily: "'Fraunces', serif",
+            fontWeight: 700,
+            fontSize: 30,
+            color: "#1E1A1A",
+          }}
+        >
+          Explorer
+        </h1>
+        <button
+          className="flex items-center gap-1.5"
+          style={{
+            background: "rgba(255,255,255,0.55)",
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
+            border: "1px solid rgba(255,255,255,0.8)",
+            borderRadius: 20,
+            padding: "7px 14px",
+            fontSize: 13,
+            fontFamily: "'DM Sans', sans-serif",
+            fontWeight: 500,
+            color: "#1E1A1A",
+            cursor: "default",
+          }}
+        >
+          <Bookmark size={14} />
+          Mes favoris
+        </button>
+      </div>
+
+      {/* Search bar */}
+      <div style={{ padding: "16px 24px 0" }}>
+        <div
+          className="flex items-center gap-3"
+          style={{
+            background: "rgba(255,255,255,0.45)",
+            backdropFilter: "blur(12px) saturate(1.4)",
+            WebkitBackdropFilter: "blur(12px) saturate(1.4)",
+            border: "1px solid rgba(255,255,255,0.65)",
+            borderRadius: 14,
+            boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+            padding: "12px 16px",
+          }}
+        >
+          <Search size={18} color="#9A9490" />
+          <input
+            type="text"
+            placeholder="Rechercher une ressource…"
+            readOnly
+            className="flex-1 bg-transparent outline-none border-none"
+            style={{
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: 14,
+              color: "#1E1A1A",
+            }}
+          />
+        </div>
+      </div>
+
       {/* Content will be added here */}
-    </main>
-    <style>{`main::-webkit-scrollbar { display: none; }`}</style>
+    </div>
+    <style>{`div::-webkit-scrollbar { display: none; }`}</style>
     <BottomNavBar />
   </div>
 );
