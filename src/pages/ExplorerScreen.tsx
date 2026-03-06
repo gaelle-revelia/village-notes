@@ -41,25 +41,28 @@ const ExplorerScreen = () => {
         >
           Explorer
         </h1>
-        <button
-          className="flex items-center gap-1.5"
-          style={{
-            background: "rgba(255,255,255,0.55)",
-            backdropFilter: "blur(12px)",
-            WebkitBackdropFilter: "blur(12px)",
-            border: "1px solid rgba(255,255,255,0.8)",
-            borderRadius: 20,
-            padding: "7px 14px",
-            fontSize: 13,
-            fontFamily: "'DM Sans', sans-serif",
-            fontWeight: 500,
-            color: "#1E1A1A",
-            cursor: "default",
-          }}
-        >
-          <Bookmark size={14} />
-          Mes favoris
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            className="flex items-center gap-1.5"
+            style={{
+              background: "rgba(255,255,255,0.55)",
+              backdropFilter: "blur(12px)",
+              WebkitBackdropFilter: "blur(12px)",
+              border: "1px solid rgba(255,255,255,0.8)",
+              borderRadius: 20,
+              padding: "7px 14px",
+              fontSize: 13,
+              fontFamily: "'DM Sans', sans-serif",
+              fontWeight: 500,
+              color: "#1E1A1A",
+              cursor: "default",
+            }}
+          >
+            <Bookmark size={14} />
+            Mes favoris
+          </button>
+          <ProfileAvatar />
+        </div>
       </div>
 
       {/* Search bar */}
