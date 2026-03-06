@@ -11,6 +11,13 @@ const FILTERS = [
   { label: "Médical", bg: "#8A9BAE" },
 ] as const;
 
+const FEATURED = [
+  { domaine: "Moteur", bg: "linear-gradient(145deg, #F0907A, #E8736A, #C8564E)", titre: "La kiné à la maison, les bons réflexes", circles: [{ top: -20, right: -10, size: 80 }, { bottom: 40, left: -25, size: 60 }] },
+  { domaine: "Cognitif", bg: "linear-gradient(145deg, #A08AEA, #8B74E0, #6A54C0)", titre: "Comprendre les bilans neuropsychologiques", circles: [{ top: 10, right: 20, size: 70 }, { bottom: 60, left: 10, size: 50 }] },
+  { domaine: "Sensoriel", bg: "linear-gradient(145deg, #5EC09A, #44A882, #2E8862)", titre: "Intégration sensorielle : par où commencer ?", circles: [{ top: -15, left: 30, size: 90 }, { bottom: 30, right: -20, size: 55 }] },
+  { domaine: "Bien-être", bg: "linear-gradient(145deg, #F0B85A, #E8A44A, #C8842A)", titre: "Prendre soin de soi pour mieux prendre soin", circles: [{ top: 5, right: -15, size: 75 }, { bottom: 50, left: -10, size: 65 }] },
+] as const;
+
 const ExplorerScreen = () => {
   const [activeFilter, setActiveFilter] = useState("Tout");
 
