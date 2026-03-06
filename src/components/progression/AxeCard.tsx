@@ -76,7 +76,6 @@ function placeCircles(
 }
 
 const AxeCard = ({ axe, pepites, onClick }: AxeCardProps) => {
-  const [mounted, setMounted] = useState(false);
   const now = Date.now();
   const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
 
@@ -87,11 +86,6 @@ const AxeCard = ({ axe, pepites, onClick }: AxeCardProps) => {
   });
 
   const circles = placeCircles(pepitesWithRecency);
-
-  useEffect(() => {
-    const raf = requestAnimationFrame(() => setMounted(true));
-    return () => cancelAnimationFrame(raf);
-  }, []);
 
   return (
     <div
