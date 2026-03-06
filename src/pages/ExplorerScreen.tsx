@@ -122,6 +122,68 @@ const ExplorerScreen = () => {
         })}
       </div>
 
+      {/* À la une */}
+      <div style={{ marginTop: 24 }}>
+        <h2 style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 20, color: "#1E1A1A", padding: "0 24px", marginBottom: 12 }}>
+          À la une
+        </h2>
+        <div
+          className="flex gap-3 overflow-x-auto"
+          style={{ padding: "0 24px", scrollbarWidth: "none", msOverflowStyle: "none" }}
+        >
+          {FEATURED.map((card) => (
+            <div
+              key={card.titre}
+              className="shrink-0 relative overflow-hidden flex flex-col justify-end"
+              style={{ width: 200, height: 240, borderRadius: 20, background: card.bg }}
+            >
+              {/* Decorative circles */}
+              {card.circles.map((c, i) => (
+                <div
+                  key={i}
+                  className="absolute rounded-full"
+                  style={{
+                    width: c.size, height: c.size,
+                    background: "rgba(255,255,255,0.17)",
+                    top: "top" in c ? c.top : undefined,
+                    bottom: "bottom" in c ? c.bottom : undefined,
+                    left: "left" in c ? c.left : undefined,
+                    right: "right" in c ? c.right : undefined,
+                  }}
+                />
+              ))}
+              {/* Dark overlay */}
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.45) 100%)" }} />
+              {/* Content */}
+              <div className="relative z-10 p-4 flex flex-col gap-2">
+                <span
+                  style={{
+                    alignSelf: "flex-start",
+                    background: "rgba(255,255,255,0.25)",
+                    backdropFilter: "blur(8px)",
+                    WebkitBackdropFilter: "blur(8px)",
+                    border: "1px solid rgba(255,255,255,0.4)",
+                    borderRadius: 10,
+                    padding: "3px 8px",
+                    fontSize: 10,
+                    fontWeight: 600,
+                    color: "#fff",
+                    textTransform: "uppercase",
+                    letterSpacing: 0.5,
+                    fontFamily: "'DM Sans', sans-serif",
+                  }}
+                >
+                  {card.domaine}
+                </span>
+                <span style={{ fontFamily: "'Fraunces', serif", fontSize: 16, fontWeight: 600, color: "#fff", lineHeight: 1.25 }}>
+                  {card.titre}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Content will be added here */}
     </div>
     <style>{`div::-webkit-scrollbar { display: none; }`}</style>
