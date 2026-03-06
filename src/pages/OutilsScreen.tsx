@@ -35,7 +35,7 @@ const OutilsScreen = () => {
           boxShadow: "0 2px 12px rgba(0,0,0,0.05)",
         }}
       >
-        <h1 className="text-xl font-serif font-semibold text-foreground">Outils</h1>
+        <h1 style={{ fontFamily: "'Fraunces', serif", fontSize: 30, fontWeight: 700, color: "#1E1A1A", letterSpacing: -0.5 }}>Outils</h1>
         <ProfileAvatar />
       </header>
 
