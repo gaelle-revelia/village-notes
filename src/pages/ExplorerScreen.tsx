@@ -1,5 +1,6 @@
 import { useState } from "react";
 import BottomNavBar from "@/components/BottomNavBar";
+import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { Bookmark, Search, Activity, Brain, Mic, HeartPulse, ChevronRight } from "lucide-react";
 
 const FILTERS = [
