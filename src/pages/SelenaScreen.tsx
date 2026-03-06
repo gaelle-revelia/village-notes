@@ -1,9 +1,31 @@
+import { useEffect, useState } from "react";
 import BottomNavBar from "@/components/BottomNavBar";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { useEnfantPrenom } from "@/hooks/useEnfantPrenom";
+import { useEnfantId } from "@/hooks/useEnfantId";
+import { supabase } from "@/integrations/supabase/client";
+import CarteProgressionOnboarding from "@/components/progression/CarteProgressionOnboarding";
 
 const SelenaScreen = () => {
   const prenom = useEnfantPrenom();
+  const { enfantId } = useEnfantId();
+  const [showCarteOnboarding, setShowCarteOnboarding] = useState(false);
+  const [checkingAxes, setCheckingAxes] = useState(true);
+
+  useEffect(() => {
+    if (!enfantId) return;
+    supabase
+      .from("axes_developpement")
+      .select("id", { count: "exact", head: true })
+      .eq("enfant_id", enfantId)
+      .eq("actif", true)
+      .then(({ count }) => {
+        if (count === 0) setShowCarteOnboarding(true);
+        setCheckingAxes(false);
+      });
+  }, [enfantId]);
+
+  const hasAxes = !checkingAxes && !showCarteOnboarding;
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -12,10 +34,20 @@ const SelenaScreen = () => {
         <ProfileAvatar />
       </header>
       <main className="flex-1 flex flex-col items-center justify-center px-4 text-center gap-3 pb-20">
-        <span className="text-4xl">🌿</span>
-        <p className="text-[15px] font-sans text-muted-foreground">Bientôt disponible</p>
+        {hasAxes && (
+          /* Carte de Progression view — to be built in next prompt */
+          null
+        )}
       </main>
       <BottomNavBar />
+
+      {!checkingAxes && showCarteOnboarding && enfantId && prenom && (
+        <CarteProgressionOnboarding
+          enfantId={enfantId}
+          prenom={prenom}
+          onComplete={() => setShowCarteOnboarding(false)}
+        />
+      )}
     </div>
   );
 };
