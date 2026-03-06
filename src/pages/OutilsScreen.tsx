@@ -28,7 +28,6 @@ const OutilsScreen = () => {
       <header
         className="sticky top-0 z-10 px-4 py-3 flex items-center justify-between"
         style={{
-          background: "rgba(255,255,255,0.72)",
           backdropFilter: "blur(20px) saturate(1.5)",
           WebkitBackdropFilter: "blur(20px) saturate(1.5)",
           borderBottom: "1px solid rgba(255,255,255,0.6)",
