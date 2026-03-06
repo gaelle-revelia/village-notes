@@ -1,7 +1,20 @@
+import { useState } from "react";
 import BottomNavBar from "@/components/BottomNavBar";
 import { Bookmark, Search } from "lucide-react";
 
-const ExplorerScreen = () => (
+const FILTERS = [
+  { label: "Tout", bg: "linear-gradient(135deg, #E8736A, #8B74E0)" },
+  { label: "Moteur", bg: "#E8736A" },
+  { label: "Cognitif", bg: "#8B74E0" },
+  { label: "Sensoriel", bg: "#44A882" },
+  { label: "Bien-être", bg: "#E8A44A" },
+  { label: "Médical", bg: "#8A9BAE" },
+] as const;
+
+const ExplorerScreen = () => {
+  const [activeFilter, setActiveFilter] = useState("Tout");
+
+  return (
   <div className="flex min-h-screen flex-col">
     <div
       className="overflow-y-auto flex-1"
