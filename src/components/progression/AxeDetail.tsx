@@ -102,7 +102,61 @@ const TYPE_COLORS: Record<string, string> = {
   note: "#44A882",
   activite: "#E8736A",
   document: "#8A9BAE",
+  evenement: "#E8C84A",
 };
+
+const TYPE_BADGES: Record<string, { emoji: string; label: string; color: string }> = {
+  vocal: { emoji: "🎙️", label: "Vocal", color: "#8B74E0" },
+  note: { emoji: "✏️", label: "Note", color: "#44A882" },
+  evenement: { emoji: "⭐", label: "Étape", color: "#E8C84A" },
+  document: { emoji: "📄", label: "Document", color: "#8A9BAE" },
+  activite: { emoji: "🏃", label: "Activité", color: "#8B74E0" },
+};
+
+function getPepiteCardStyle(type: string) {
+  if (type === "evenement") {
+    return {
+      background: "rgba(255,248,220,0.55)",
+      backdropFilter: "blur(16px) saturate(1.6)",
+      WebkitBackdropFilter: "blur(16px) saturate(1.6)",
+      border: "1px solid rgba(232,200,74,0.35)",
+      borderRadius: 16,
+      padding: "11px 13px",
+      boxShadow: "0 4px 24px rgba(232,200,74,0.12), inset 0 1px 0 rgba(255,255,255,0.9)",
+    };
+  }
+  if (type === "document") {
+    return {
+      background: "rgba(240,243,247,0.55)",
+      backdropFilter: "blur(16px) saturate(1.6)",
+      WebkitBackdropFilter: "blur(16px) saturate(1.6)",
+      border: "1px solid rgba(138,155,174,0.25)",
+      borderRadius: 16,
+      padding: "11px 13px",
+      boxShadow: "0 4px 24px rgba(139,116,224,0.08), 0 1px 4px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9)",
+    };
+  }
+  if (type === "activite") {
+    return {
+      background: "rgba(232,239,255,0.45)",
+      backdropFilter: "blur(16px) saturate(1.6)",
+      WebkitBackdropFilter: "blur(16px) saturate(1.6)",
+      border: "1px solid rgba(139,116,224,0.2)",
+      borderRadius: 16,
+      padding: "11px 13px",
+      boxShadow: "0 4px 24px rgba(139,116,224,0.08), 0 1px 4px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9)",
+    };
+  }
+  return {
+    background: "rgba(255,255,255,0.38)",
+    backdropFilter: "blur(16px) saturate(1.6)",
+    WebkitBackdropFilter: "blur(16px) saturate(1.6)",
+    border: "1px solid rgba(255,255,255,0.85)",
+    borderRadius: 16,
+    padding: "11px 13px",
+    boxShadow: "0 4px 24px rgba(139,116,224,0.08), 0 1px 4px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9)",
+  };
+}
 
 const AxeDetail = ({
   axe,
