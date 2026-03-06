@@ -157,7 +157,6 @@ const AxeCard = ({ axe, pepites, onClick }: AxeCardProps) => {
               />
             );
           })
-        )
         ) : (
           <>
             {[0, 1, 2, 3, 4].map((i) => (
