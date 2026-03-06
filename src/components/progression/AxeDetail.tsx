@@ -16,7 +16,7 @@ function hashToFloat(str: string, seed: number): number {
 }
 
 const REF_WIDTH = 300;
-const MIN_DIST = 16;
+const MIN_DIST_LARGE = 28;
 
 interface PlacedCircle {
   id: string;
@@ -44,17 +44,17 @@ function placeCirclesLarge(
     let bestCx = initCx;
     let bestCy = initCy;
     let found = !placed.some(
-      (c) => Math.hypot(c.cx - bestCx, c.cy - bestCy) < MIN_DIST
+      (c) => Math.hypot(c.cx - bestCx, c.cy - bestCy) < MIN_DIST_LARGE
     );
 
     if (!found) {
       for (let attempt = 0; attempt < 80 && !found; attempt++) {
         const angle = (attempt % 24) * 15 * (Math.PI / 180);
-        const radius = 8 * (1 + Math.floor(attempt / 24));
+        const radius = 10 * (1 + Math.floor(attempt / 24));
         const candidateCx = initCx + Math.cos(angle) * radius;
         const candidateCy = initCy + Math.sin(angle) * radius;
         if (candidateCx < 8 || candidateCx > REF_WIDTH - 8 || candidateCy < 8 || candidateCy > height - 8) continue;
-        if (!placed.some((c) => Math.hypot(c.cx - candidateCx, c.cy - candidateCy) < MIN_DIST)) {
+        if (!placed.some((c) => Math.hypot(c.cx - candidateCx, c.cy - candidateCy) < MIN_DIST_LARGE)) {
           bestCx = candidateCx;
           bestCy = candidateCy;
           found = true;
