@@ -1,6 +1,6 @@
 import { useState } from "react";
 import BottomNavBar from "@/components/BottomNavBar";
-import { Bookmark, Search } from "lucide-react";
+import { Bookmark, Search, Activity, Brain, Mic, HeartPulse, ChevronRight } from "lucide-react";
 
 const FILTERS = [
   { label: "Tout", bg: "linear-gradient(135deg, #E8736A, #8B74E0)" },
