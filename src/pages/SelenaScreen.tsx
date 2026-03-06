@@ -7,6 +7,7 @@ import { useEnfantId } from "@/hooks/useEnfantId";
 import { supabase } from "@/integrations/supabase/client";
 import CarteProgressionOnboarding from "@/components/progression/CarteProgressionOnboarding";
 import AxeCard from "@/components/progression/AxeCard";
+import AxeDetail, { type PepiteDetail } from "@/components/progression/AxeDetail";
 
 interface Axe {
   id: string;
@@ -18,6 +19,12 @@ interface Axe {
 interface PepiteWithDate {
   id: string;
   created_at: string;
+}
+
+interface PepiteRich extends PepiteWithDate {
+  memo_id: string;
+  resume: string | null;
+  type: string;
 }
 
 function computeAge(dateNaissance: string): string | null {
@@ -40,6 +47,8 @@ const SelenaScreen = () => {
   const [dateNaissance, setDateNaissance] = useState<string | null>(null);
   const [axes, setAxes] = useState<Axe[]>([]);
   const [pepitesByAxe, setPepitesByAxe] = useState<Record<string, PepiteWithDate[]>>({});
+  const [pepitesRichByAxe, setPepitesRichByAxe] = useState<Record<string, PepiteRich[]>>({});
+  const [selectedAxeId, setSelectedAxeId] = useState<string | null>(null);
 
   // Check if axes exist + fetch date_naissance
   useEffect(() => {
@@ -84,32 +93,73 @@ const SelenaScreen = () => {
       if (!axesData || axesData.length === 0) return;
       setAxes(axesData);
 
-      // Fetch pepites for all axes at once, joined with memo created_at
+      // Fetch pepites with memo resume and type
       const axeIds = axesData.map((a) => a.id);
       const { data: pepitesData } = await supabase
         .from("pepites")
-        .select("id, axe_id, memos(created_at)")
+        .select("id, axe_id, memo_id, created_at, memos(created_at, content_structured, type)")
         .in("axe_id", axeIds);
 
       const grouped: Record<string, PepiteWithDate[]> = {};
-      for (const ax of axesData) grouped[ax.id] = [];
+      const groupedRich: Record<string, PepiteRich[]> = {};
+      for (const ax of axesData) {
+        grouped[ax.id] = [];
+        groupedRich[ax.id] = [];
+      }
 
       if (pepitesData) {
         for (const p of pepitesData as any[]) {
           const createdAt = p.memos?.created_at || p.created_at;
+          const resume =
+            p.memos?.content_structured?.resume || null;
+          const memoType = p.memos?.type || "vocal";
+
           if (grouped[p.axe_id]) {
             grouped[p.axe_id].push({ id: p.id, created_at: createdAt });
+            groupedRich[p.axe_id].push({
+              id: p.id,
+              created_at: createdAt,
+              memo_id: p.memo_id,
+              resume,
+              type: memoType,
+            });
           }
         }
       }
 
       setPepitesByAxe(grouped);
+      setPepitesRichByAxe(groupedRich);
     };
 
     fetchAxesData();
   }, [hasAxes, enfantId]);
 
   const age = dateNaissance ? computeAge(dateNaissance) : null;
+
+  const selectedAxe = selectedAxeId ? axes.find((a) => a.id === selectedAxeId) : null;
+
+  const handleRemovePepite = (pepiteId: string) => {
+    if (!selectedAxeId) return;
+    setPepitesRichByAxe((prev) => ({
+      ...prev,
+      [selectedAxeId]: prev[selectedAxeId]?.filter((p) => p.id !== pepiteId) || [],
+    }));
+    setPepitesByAxe((prev) => ({
+      ...prev,
+      [selectedAxeId]: prev[selectedAxeId]?.filter((p) => p.id !== pepiteId) || [],
+    }));
+  };
+
+  const handleArchiveAxe = () => {
+    setAxes((prev) => prev.filter((a) => a.id !== selectedAxeId));
+    setSelectedAxeId(null);
+  };
+
+  const handleRenameAxe = (newLabel: string) => {
+    setAxes((prev) =>
+      prev.map((a) => (a.id === selectedAxeId ? { ...a, label: newLabel } : a))
+    );
+  };
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -137,7 +187,19 @@ const SelenaScreen = () => {
       </header>
 
       <main className="flex-1 px-4 pb-24 pt-5">
-        {hasAxes && axes.length > 0 && (
+        {hasAxes && axes.length > 0 && selectedAxe && selectedAxeId ? (
+          /* ── Axe detail view ── */
+          <AxeDetail
+            axe={selectedAxe}
+            pepites={pepitesRichByAxe[selectedAxeId] || []}
+            prenom={prenom || "Enfant"}
+            onBack={() => setSelectedAxeId(null)}
+            onRemovePepite={handleRemovePepite}
+            onArchiveAxe={handleArchiveAxe}
+            onRenameAxe={handleRenameAxe}
+          />
+        ) : hasAxes && axes.length > 0 ? (
+          /* ── Main synthèse view ── */
           <div className="flex flex-col gap-5">
             {/* Child header */}
             <div className="flex flex-col items-center gap-2">
@@ -254,12 +316,12 @@ const SelenaScreen = () => {
                   key={axe.id}
                   axe={axe}
                   pepites={pepitesByAxe[axe.id] || []}
-                  onClick={(id) => console.log("Axe clicked:", id)}
+                  onClick={(id) => setSelectedAxeId(id)}
                 />
               ))}
             </div>
           </div>
-        )}
+        ) : null}
       </main>
 
       <BottomNavBar />
