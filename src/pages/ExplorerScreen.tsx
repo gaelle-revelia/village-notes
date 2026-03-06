@@ -29,6 +29,7 @@ const ExplorerScreen = () => {
     >
       {/* Header */}
       <div className="flex items-center justify-between" style={{ padding: "24px 24px 0" }}>
+        <ProfileAvatar />
         <h1
           style={{
             fontFamily: "'Fraunces', serif",
