@@ -553,6 +553,8 @@ ${lexiqueFormatted}` : "(aucun lexique pour cet enfant)"}`,
       })
       .eq("id", memo_id);
 
+    await detectPepites(supabase, lovableApiKey, memo_id, memo.enfant_id, structured?.resume);
+
     return new Response(
       JSON.stringify({
         transcription,
