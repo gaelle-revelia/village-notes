@@ -1,4 +1,5 @@
 import { ChevronRight } from "lucide-react";
+import { useState, useEffect } from "react";
 
 interface Pepite {
   id: string;
@@ -76,6 +77,7 @@ function placeCircles(
 }
 
 const AxeCard = ({ axe, pepites, onClick }: AxeCardProps) => {
+  const [mounted, setMounted] = useState(false);
   const now = Date.now();
   const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
 
@@ -86,6 +88,11 @@ const AxeCard = ({ axe, pepites, onClick }: AxeCardProps) => {
   });
 
   const circles = placeCircles(pepitesWithRecency);
+
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => setMounted(true));
+    return () => cancelAnimationFrame(raf);
+  }, []);
 
   return (
     <div
@@ -128,19 +135,28 @@ const AxeCard = ({ axe, pepites, onClick }: AxeCardProps) => {
         style={{ display: "block" }}
       >
         {circles.length > 0 ? (
-          circles.map((c) => (
-            <circle
-              key={c.id}
-              cx={`${c.cx}%`}
-              cy={c.cy}
-              r={c.r}
-              fill={axe.couleur}
-              style={{
-                opacity: c.opacity,
-                animation: `axePulse ${c.dur}s ${c.delay}s ease-in-out infinite alternate`,
-              }}
-            />
-          ))
+          circles.map((c, i) => {
+            const entranceDelayMs = i * 60;
+            const entranceDurationMs = 400;
+            const twinkleDelayS = (entranceDelayMs + entranceDurationMs) / 1000;
+
+            return (
+              <circle
+                key={c.id}
+                cx={`${c.cx}%`}
+                cy={c.cy}
+                r={c.r}
+                fill={axe.couleur}
+                style={{
+                  opacity: mounted ? c.opacity : 0,
+                  transition: `opacity ${entranceDurationMs}ms ease-out ${entranceDelayMs}ms`,
+                  animation: mounted
+                    ? `axePulse ${c.dur}s ${twinkleDelayS + c.delay}s ease-in-out infinite alternate`
+                    : "none",
+                }}
+              />
+            );
+          })
         ) : (
           <>
             {[0, 1, 2, 3, 4].map((i) => (
