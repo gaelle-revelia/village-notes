@@ -417,6 +417,8 @@ ${lexiqueFormatted ? `Lexique contextuel :\n${lexiqueFormatted}` : ""}`,
         processing_status: "done",
       }).eq("id", memo_id);
 
+      await detectPepites(supabase, lovableApiKey, memo_id, memo.enfant_id, quickStructured.resume);
+
       return new Response(
         JSON.stringify({
           transcription,
