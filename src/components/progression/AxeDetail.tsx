@@ -16,7 +16,7 @@ function hashToFloat(str: string, seed: number): number {
 }
 
 const REF_WIDTH = 300;
-const MIN_DIST = 16;
+const MIN_DIST_LARGE = 28;
 
 interface PlacedCircle {
   id: string;
