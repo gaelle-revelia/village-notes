@@ -1,25 +1,58 @@
 
 
-## Plan: Fix AxeCard constellation spacing
+## Plan: "Préciser ce bloc" — refine_block mode + PreciserBlocDrawer
 
-### File: `src/components/progression/AxeCard.tsx`
+### Part 1 — Edge function: add `refine_block` mode
 
-**Change 1** — Line 72: `height={52}` → `height={100}`
+In `supabase/functions/generate-synthesis/index.ts`, add a new branch:
 
-**Change 2** — Replace the simple hash-based positioning (lines 77-98) with anti-collision logic:
+- Parse `bloc_id`, `bloc_title`, `bloc_content`, `precision`, `cas_usage`, `synthese_id` from body
+- Fetch enfant `prenom` + `sexe` (reuse existing pattern)
+- System prompt: regenerate only this block, integrate precision naturally, keep tone/length, no invention, return `{ "content": "..." }`
+- User message: bloc_title + bloc_content + precision + prenom + pronouns
+- Update `syntheses` row: read `contenu` JSON, find bloc by `bloc_id`, replace content, write back
+- Return `{ bloc_id, content }`
 
-- Add a `placedCircles` array before the map
-- For each pepite, compute initial candidate position using existing `hashToFloat` (adjust cy range to 8–84px for the new 100px height)
-- Use absolute pixel positions (assume ~300px card width for collision math; use a fixed reference width since SVG uses %)
-- Check distance to all placed circles; minimum 16px between centers
-- If too close: try up to 80 alternatives by rotating around candidate (angle steps of 15°, radius steps of 8px)
-- If placed successfully, push to `placedCircles` and render; otherwise skip silently
-- No pepites limit — render all that fit
+### Part 2 — Create PreciserBlocDrawer component
 
-**Change 3** — No 12-pepite slice exists in current code (already showing all), so no removal needed.
+New file: `src/components/synthese/PreciserBlocDrawer.tsx`
 
-Empty state dashed circles: adjust `cy` from 22 to ~45 to center in the new 100px height.
+**Props:** `isOpen`, `onClose`, `bloc: { id, title, content, cas_usage }`, `enfantId`, `syntheseId`, `onBlockUpdated: (blocId: string, newContent: string) => void`
 
-### Nothing else touched
-- No changes to SelenaScreen, CarteProgressionOnboarding, BottomNavBar, useAuth, or any other file.
+**UI structure (top to bottom):**
+
+1. **DrawerTitle:** "✏️ Préciser ce bloc"
+2. **Current content preview:**
+   - Label: "Ce bloc actuellement :" — DM Sans 12px, color `#9A9490`
+   - Glass card showing `bloc.content`, `line-clamp-3` by default
+   - If content exceeds 3 lines, show a "voir tout" toggle (DM Sans 12px, color `#8B74E0`) that expands/collapses the card
+   - State: `expanded` boolean, toggles between `line-clamp-3` and full display
+3. **Textarea:** placeholder "Ajoute ta précision ici..."
+4. **WiredMicOrb:** voice input appends to textarea
+5. **CTA:** "Régénérer ce bloc →" gradient button, disabled if textarea empty, pulses during loading
+
+**On submit:** invoke `generate-synthesis` with `type: "refine_block"`, on success call `onBlockUpdated`, close drawer, toast success.
+
+### Part 3 — Wire buttons in all 3 result pages
+
+**Transmission** (`OutilsSyntheseTransmission.tsx`):
+- State: `refineBloc`, `syntheseId`
+- ResultCard "Préciser ce bloc" → opens drawer with bloc data
+- `onBlockUpdated` → update `generatedBlocks` in place
+
+**MDPH** (`OutilsSyntheseMdph.tsx`):
+- Same pattern with ThematicBlock buttons
+
+**Pick-me-up** (`OutilsSynthesePickMeUp.tsx`):
+- Single block ("narrative"), add "Préciser ce bloc" button, same drawer
+
+### Files changed
+
+| File | Action |
+|---|---|
+| `supabase/functions/generate-synthesis/index.ts` | Add `refine_block` branch |
+| `src/components/synthese/PreciserBlocDrawer.tsx` | Create |
+| `src/pages/OutilsSyntheseTransmission.tsx` | Wire drawer |
+| `src/pages/OutilsSyntheseMdph.tsx` | Wire drawer |
+| `src/pages/OutilsSynthesePickMeUp.tsx` | Wire drawer |
 
