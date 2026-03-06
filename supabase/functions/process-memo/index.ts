@@ -7,6 +7,74 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+async function detectPepites(
+  supabase: any,
+  lovableApiKey: string,
+  memo_id: string,
+  enfant_id: string | null,
+  resume: string | null | undefined
+) {
+  try {
+    if (!enfant_id || !resume) return;
+
+    const { data: axes } = await supabase
+      .from("axes_developpement")
+      .select("id, label")
+      .eq("enfant_id", enfant_id)
+      .eq("actif", true);
+
+    if (!axes || axes.length === 0) return;
+
+    const axesFormatted = axes.map((a: any) => `- ID: ${a.id} | Label: ${a.label}`).join("\n");
+
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${lovableApiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        messages: [
+          {
+            role: "system",
+            content: `Tu analyses un mémo parental d'un enfant en situation de handicap.
+Résumé du mémo : '${resume}'
+Axes actifs :
+${axesFormatted}
+Réponds UNIQUEMENT avec un JSON valide sans markdown :
+{ "axe_ids": ["uuid"] }
+0, 1 ou 2 axe_ids maximum. [] si aucun lien évident.
+Interdit : pronostic, diagnostic, comparaison à des normes.`,
+          },
+          { role: "user", content: "Analyse ce mémo et retourne les axe_ids correspondants." },
+        ],
+      }),
+    });
+
+    if (!response.ok) {
+      console.error("detectPepites AI error:", response.status);
+      return;
+    }
+
+    const result = await response.json();
+    const rawContent = result.choices?.[0]?.message?.content || "";
+    const cleaned = rawContent.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
+    const parsed = JSON.parse(cleaned);
+    const axeIds: string[] = Array.isArray(parsed.axe_ids) ? parsed.axe_ids.slice(0, 2) : [];
+
+    const validAxeIds = axes.map((a: any) => a.id);
+    for (const axeId of axeIds) {
+      if (!validAxeIds.includes(axeId)) continue;
+      await supabase
+        .from("pepites")
+        .upsert({ memo_id, axe_id: axeId }, { onConflict: "memo_id,axe_id", ignoreDuplicates: true });
+    }
+  } catch (err) {
+    console.error("detectPepites error (non-blocking):", err);
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -349,6 +417,8 @@ ${lexiqueFormatted ? `Lexique contextuel :\n${lexiqueFormatted}` : ""}`,
         processing_status: "done",
       }).eq("id", memo_id);
 
+      await detectPepites(supabase, lovableApiKey, memo_id, memo.enfant_id, quickStructured.resume);
+
       return new Response(
         JSON.stringify({
           transcription,
@@ -482,6 +552,8 @@ ${lexiqueFormatted}` : "(aucun lexique pour cet enfant)"}`,
         processing_status: "done",
       })
       .eq("id", memo_id);
+
+    await detectPepites(supabase, lovableApiKey, memo_id, memo.enfant_id, structured?.resume);
 
     return new Response(
       JSON.stringify({

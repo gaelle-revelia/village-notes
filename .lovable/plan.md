@@ -1,37 +1,58 @@
 
 
-## Plan: Add pepites detection block to process-memo
+## Plan: "Préciser ce bloc" — refine_block mode + PreciserBlocDrawer
 
-### What changes
+### Part 1 — Edge function: add `refine_block` mode
 
-**File: `supabase/functions/process-memo/index.ts`**
+In `supabase/functions/generate-synthesis/index.ts`, add a new branch:
 
-Add a `detectPepites` helper function and call it in two places, both after `processing_status = 'done'` and before returning the response.
+- Parse `bloc_id`, `bloc_title`, `bloc_content`, `precision`, `cas_usage`, `synthese_id` from body
+- Fetch enfant `prenom` + `sexe` (reuse existing pattern)
+- System prompt: regenerate only this block, integrate precision naturally, keep tone/length, no invention, return `{ "content": "..." }`
+- User message: bloc_title + bloc_content + precision + prenom + pronouns
+- Update `syntheses` row: read `contenu` JSON, find bloc by `bloc_id`, replace content, write back
+- Return `{ bloc_id, content }`
 
-**Helper function** (top-level, before `serve`):
-- Takes `supabase`, `lovableApiKey`, `memo_id`, `enfant_id`, `resume`
-- If no `enfant_id` or no `resume`: return silently
-- Query `axes_developpement` where `enfant_id` and `actif = true`
-- If no axes: return silently
-- Call `google/gemini-2.5-flash` with the specified prompt
-- Parse `axe_ids` array, INSERT into `pepites` with ON CONFLICT DO NOTHING
-- Entire function wrapped in try/catch — errors logged only
+### Part 2 — Create PreciserBlocDrawer component
 
-**Call site 1** — text_quick path (after line 350, before the return on line 352):
-```typescript
-await detectPepites(supabase, lovableApiKey, memo_id, memo.enfant_id, quickStructured.resume);
-```
+New file: `src/components/synthese/PreciserBlocDrawer.tsx`
 
-**Call site 2** — main structuration path (after line 484, before the return on line 486):
-```typescript
-await detectPepites(supabase, lovableApiKey, memo_id, memo.enfant_id, structured?.resume);
-```
+**Props:** `isOpen`, `onClose`, `bloc: { id, title, content, cas_usage }`, `enfantId`, `syntheseId`, `onBlockUpdated: (blocId: string, newContent: string) => void`
 
-**Skipped for**: `transcription_only` mode (no memo), `document` type memos (no AI structuration happens for them anyway — they don't reach these code paths).
+**UI structure (top to bottom):**
 
-### What won't be touched
-- Transcription logic, auth, CORS, audio download/delete
-- processing_status flow
-- Existing structuration prompt
-- All other edge functions
+1. **DrawerTitle:** "✏️ Préciser ce bloc"
+2. **Current content preview:**
+   - Label: "Ce bloc actuellement :" — DM Sans 12px, color `#9A9490`
+   - Glass card showing `bloc.content`, `line-clamp-3` by default
+   - If content exceeds 3 lines, show a "voir tout" toggle (DM Sans 12px, color `#8B74E0`) that expands/collapses the card
+   - State: `expanded` boolean, toggles between `line-clamp-3` and full display
+3. **Textarea:** placeholder "Ajoute ta précision ici..."
+4. **WiredMicOrb:** voice input appends to textarea
+5. **CTA:** "Régénérer ce bloc →" gradient button, disabled if textarea empty, pulses during loading
+
+**On submit:** invoke `generate-synthesis` with `type: "refine_block"`, on success call `onBlockUpdated`, close drawer, toast success.
+
+### Part 3 — Wire buttons in all 3 result pages
+
+**Transmission** (`OutilsSyntheseTransmission.tsx`):
+- State: `refineBloc`, `syntheseId`
+- ResultCard "Préciser ce bloc" → opens drawer with bloc data
+- `onBlockUpdated` → update `generatedBlocks` in place
+
+**MDPH** (`OutilsSyntheseMdph.tsx`):
+- Same pattern with ThematicBlock buttons
+
+**Pick-me-up** (`OutilsSynthesePickMeUp.tsx`):
+- Single block ("narrative"), add "Préciser ce bloc" button, same drawer
+
+### Files changed
+
+| File | Action |
+|---|---|
+| `supabase/functions/generate-synthesis/index.ts` | Add `refine_block` branch |
+| `src/components/synthese/PreciserBlocDrawer.tsx` | Create |
+| `src/pages/OutilsSyntheseTransmission.tsx` | Wire drawer |
+| `src/pages/OutilsSyntheseMdph.tsx` | Wire drawer |
+| `src/pages/OutilsSynthesePickMeUp.tsx` | Wire drawer |
 
