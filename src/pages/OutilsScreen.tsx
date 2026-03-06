@@ -1,11 +1,12 @@
 import { useNavigate } from "react-router-dom";
-import { Activity, Sparkles, CalendarDays, Share2 } from "lucide-react";
+import { Activity, Sparkles, CalendarDays, Share2, Wind } from "lucide-react";
 import BottomNavBar from "@/components/BottomNavBar";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
 
 const TOOLS = [
   { label: "Suivi d'activités", icon: Activity, route: "/outils/activites", active: true },
   { label: "Synthèse magique", icon: Sparkles, route: "/outils/synthese", active: true },
+  { label: "Cohérence cardiaque", subtitle: "Respiration guidée", icon: Wind, route: "/outils/coherence", active: true, iconBg: "linear-gradient(135deg, #E8A44A, #E8736A)", iconColor: "#fff" },
   { label: "Planning", icon: CalendarDays, route: null, active: false },
   { label: "Export", icon: Share2, route: null, active: false },
 ] as const;
@@ -69,11 +70,11 @@ const OutilsScreen = () => {
                     width: 44,
                     height: 44,
                     background: tool.active
-                      ? "linear-gradient(135deg, #E8736A, #8B74E0)"
+                      ? ("iconBg" in tool && tool.iconBg ? tool.iconBg : "linear-gradient(135deg, #E8736A, #8B74E0)")
                       : "rgba(138,155,174,0.15)",
                   }}
                 >
-                  <Icon size={22} color={tool.active ? "#fff" : "#8A9BAE"} strokeWidth={2} />
+                  <Icon size={22} color={tool.active ? ("iconColor" in tool && tool.iconColor ? tool.iconColor : "#fff") : "#8A9BAE"} strokeWidth={2} />
                 </div>
                 <span
                   className="text-[13px] font-sans font-medium leading-tight"
@@ -81,6 +82,14 @@ const OutilsScreen = () => {
                 >
                   {tool.label}
                 </span>
+                {"subtitle" in tool && tool.subtitle && (
+                  <span
+                    className="text-[10px] font-sans font-normal leading-tight"
+                    style={{ color: "#9A9490", marginTop: -2 }}
+                  >
+                    {tool.subtitle}
+                  </span>
+                )}
               </button>
             );
           })}
