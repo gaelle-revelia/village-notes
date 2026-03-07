@@ -71,7 +71,7 @@ Réponds UNIQUEMENT avec un JSON valide, sans markdown, sans backticks:
           { role: "system", content: "Tu es un assistant spécialisé. Réponds UNIQUEMENT avec un JSON valide, sans markdown, sans commentaire." },
           { role: "user", content: userPrompt },
         ],
-        max_tokens: 1000,
+        max_tokens: 1500,
       }),
     });
 
