@@ -210,7 +210,7 @@ const DescTextarea = ({
   );
 };
 
-
+const AxeDetail = ({
   axe,
   pepites,
   prenom,
