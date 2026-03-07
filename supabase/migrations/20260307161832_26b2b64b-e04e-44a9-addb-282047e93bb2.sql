@@ -1,0 +1,1 @@
+ALTER TABLE axes_developpement ADD COLUMN description text;
