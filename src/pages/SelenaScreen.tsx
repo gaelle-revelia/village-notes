@@ -16,6 +16,7 @@ interface Axe {
   label: string;
   couleur: string;
   ordre: number;
+  description: string | null;
 }
 
 interface PepiteWithDate {
@@ -88,7 +89,7 @@ const SelenaScreen = () => {
     const fetchAxesData = async () => {
       const { data: axesData } = await supabase
         .from("axes_developpement")
-        .select("id, label, couleur, ordre")
+        .select("id, label, couleur, ordre, description")
         .eq("enfant_id", enfantId)
         .eq("actif", true)
         .order("ordre", { ascending: true });
@@ -164,6 +165,13 @@ const SelenaScreen = () => {
     );
   };
 
+  const handleUpdateDescription = (desc: string) => {
+    if (!selectedAxeId) return;
+    setAxes((prev) =>
+      prev.map((a) => (a.id === selectedAxeId ? { ...a, description: desc } : a))
+    );
+  };
+
   return (
     <div className="flex min-h-screen flex-col">
       <header
@@ -200,6 +208,7 @@ const SelenaScreen = () => {
             onRemovePepite={handleRemovePepite}
             onArchiveAxe={handleArchiveAxe}
             onRenameAxe={handleRenameAxe}
+            onUpdateDescription={handleUpdateDescription}
           />
         ) : hasAxes && axes.length > 0 ? (
           /* ── Main synthèse view ── */

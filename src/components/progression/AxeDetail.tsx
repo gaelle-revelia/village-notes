@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { ChevronLeft, MoreHorizontal, Pencil, Archive } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -88,13 +88,14 @@ export interface PepiteDetail {
 }
 
 interface AxeDetailProps {
-  axe: { id: string; label: string; couleur: string; ordre: number };
+  axe: { id: string; label: string; couleur: string; ordre: number; description?: string | null };
   pepites: PepiteDetail[];
   prenom: string;
   onBack: () => void;
   onRemovePepite: (pepiteId: string) => void;
   onArchiveAxe: () => void;
   onRenameAxe: (newLabel: string) => void;
+  onUpdateDescription?: (desc: string) => void;
 }
 
 const TYPE_COLORS: Record<string, string> = {
@@ -166,6 +167,7 @@ const AxeDetail = ({
   onRemovePepite,
   onArchiveAxe,
   onRenameAxe,
+  onUpdateDescription,
 }: AxeDetailProps) => {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -173,6 +175,9 @@ const AxeDetail = ({
   const [labelDraft, setLabelDraft] = useState(axe.label);
   const [selectedPepite, setSelectedPepite] = useState<PepiteDetail | null>(null);
   const [confirmArchive, setConfirmArchive] = useState(false);
+  const [editingDesc, setEditingDesc] = useState(false);
+  const [descDraft, setDescDraft] = useState(axe.description || "");
+  const descRef = useRef<HTMLTextAreaElement>(null);
 
   const now = Date.now();
   const sixMonthsMs = 30 * 24 * 60 * 60 * 1000 * 6;
@@ -328,6 +333,66 @@ const AxeDetail = ({
               ? "Aucune pépite encore — elles arrivent avec tes notes"
               : `${pepites.length} pépite${pepites.length > 1 ? "s" : ""} dans cet axe`}
           </p>
+        </div>
+
+        {/* Editable description */}
+        <div style={{ padding: "0 4px", marginTop: 4 }}>
+          {editingDesc ? (
+            <textarea
+              ref={descRef}
+              value={descDraft}
+              onChange={(e) => {
+                setDescDraft(e.target.value);
+                // Auto-height
+                if (descRef.current) {
+                  descRef.current.style.height = "auto";
+                  descRef.current.style.height = descRef.current.scrollHeight + "px";
+                }
+              }}
+              onBlur={async () => {
+                setEditingDesc(false);
+                const trimmed = descDraft.trim();
+                await supabase
+                  .from("axes_developpement")
+                  .update({ description: trimmed || null })
+                  .eq("id", axe.id);
+                onUpdateDescription?.(trimmed);
+              }}
+              autoFocus
+              style={{
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: 13.5,
+                color: "#6B6560",
+                lineHeight: 1.6,
+                width: "100%",
+                border: "none",
+                outline: "none",
+                background: "rgba(255,255,255,0.5)",
+                borderRadius: 8,
+                padding: "8px 10px",
+                resize: "none",
+                overflow: "hidden",
+              }}
+            />
+          ) : (
+            <p
+              onClick={() => {
+                setDescDraft(axe.description || "");
+                setEditingDesc(true);
+              }}
+              style={{
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: axe.description ? 13.5 : 13,
+                color: axe.description ? "#6B6560" : "#C4BFB9",
+                fontStyle: axe.description ? "normal" : "italic",
+                lineHeight: 1.6,
+                cursor: "pointer",
+                margin: 0,
+              }}
+            >
+              {axe.description || "Ajoute un contexte à cet axe…"}
+            </p>
+          )}
         </div>
 
         {/* Options menu */}
