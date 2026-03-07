@@ -242,7 +242,7 @@ const SelenaScreen = () => {
                 padding: "0 24px",
               }}
             >
-              Chaque mémo devient une étoile. Ensemble, elles dessinent le chemin de {prenom} — pas une ligne droite, une constellation.
+              Chaque mémo témoignant d'un progrès, même petit, devient une étoile. Ensemble, elles dessinent le chemin de {prenom} — pas une ligne droite, une constellation.
             </p>
 
             {/* Section header */}
