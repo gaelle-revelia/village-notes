@@ -165,6 +165,13 @@ const SelenaScreen = () => {
     );
   };
 
+  const handleUpdateDescription = (desc: string) => {
+    if (!selectedAxeId) return;
+    setAxes((prev) =>
+      prev.map((a) => (a.id === selectedAxeId ? { ...a, description: desc } : a))
+    );
+  };
+
   return (
     <div className="flex min-h-screen flex-col">
       <header
