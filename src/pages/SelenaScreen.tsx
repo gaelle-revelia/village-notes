@@ -89,7 +89,7 @@ const SelenaScreen = () => {
     const fetchAxesData = async () => {
       const { data: axesData } = await supabase
         .from("axes_developpement")
-        .select("id, label, couleur, ordre")
+        .select("id, label, couleur, ordre, description")
         .eq("enfant_id", enfantId)
         .eq("actif", true)
         .order("ordre", { ascending: true });
