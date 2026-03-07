@@ -208,6 +208,7 @@ const SelenaScreen = () => {
             onRemovePepite={handleRemovePepite}
             onArchiveAxe={handleArchiveAxe}
             onRenameAxe={handleRenameAxe}
+            onUpdateDescription={handleUpdateDescription}
           />
         ) : hasAxes && axes.length > 0 ? (
           /* ── Main synthèse view ── */

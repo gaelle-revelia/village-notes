@@ -167,6 +167,7 @@ const AxeDetail = ({
   onRemovePepite,
   onArchiveAxe,
   onRenameAxe,
+  onUpdateDescription,
 }: AxeDetailProps) => {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -174,6 +175,9 @@ const AxeDetail = ({
   const [labelDraft, setLabelDraft] = useState(axe.label);
   const [selectedPepite, setSelectedPepite] = useState<PepiteDetail | null>(null);
   const [confirmArchive, setConfirmArchive] = useState(false);
+  const [editingDesc, setEditingDesc] = useState(false);
+  const [descDraft, setDescDraft] = useState(axe.description || "");
+  const descRef = useRef<HTMLTextAreaElement>(null);
 
   const now = Date.now();
   const sixMonthsMs = 30 * 24 * 60 * 60 * 1000 * 6;
