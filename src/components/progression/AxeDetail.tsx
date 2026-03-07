@@ -335,66 +335,6 @@ const AxeDetail = ({
           </p>
         </div>
 
-        {/* Editable description */}
-        <div style={{ padding: "0 4px", marginTop: 4 }}>
-          {editingDesc ? (
-            <textarea
-              ref={descRef}
-              value={descDraft}
-              onChange={(e) => {
-                setDescDraft(e.target.value);
-                // Auto-height
-                if (descRef.current) {
-                  descRef.current.style.height = "auto";
-                  descRef.current.style.height = descRef.current.scrollHeight + "px";
-                }
-              }}
-              onBlur={async () => {
-                setEditingDesc(false);
-                const trimmed = descDraft.trim();
-                await supabase
-                  .from("axes_developpement")
-                  .update({ description: trimmed || null })
-                  .eq("id", axe.id);
-                onUpdateDescription?.(trimmed);
-              }}
-              autoFocus
-              style={{
-                fontFamily: "'DM Sans', sans-serif",
-                fontSize: 13.5,
-                color: "#6B6560",
-                lineHeight: 1.6,
-                width: "100%",
-                border: "none",
-                outline: "none",
-                background: "rgba(255,255,255,0.5)",
-                borderRadius: 8,
-                padding: "8px 10px",
-                resize: "none",
-                overflow: "hidden",
-              }}
-            />
-          ) : (
-            <p
-              onClick={() => {
-                setDescDraft(axe.description || "");
-                setEditingDesc(true);
-              }}
-              style={{
-                fontFamily: "'DM Sans', sans-serif",
-                fontSize: axe.description ? 13.5 : 13,
-                color: axe.description ? "#6B6560" : "#C4BFB9",
-                fontStyle: axe.description ? "normal" : "italic",
-                lineHeight: 1.6,
-                cursor: "pointer",
-                margin: 0,
-              }}
-            >
-              {axe.description || "Ajoute un contexte à cet axe…"}
-            </p>
-          )}
-        </div>
-
         {/* Options menu */}
         <div className="relative">
           <button
