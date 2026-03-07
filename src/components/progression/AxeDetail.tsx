@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { ChevronLeft, MoreHorizontal, Pencil, Archive } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
