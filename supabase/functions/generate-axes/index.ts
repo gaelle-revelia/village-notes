@@ -45,6 +45,13 @@ Règles pour les labels :
 - Exemples de bons labels : 'Tonus et tenue du corps', 'Se faire comprendre', 'Bouger plus librement', 'Bien-être et confort au quotidien'
 - Exemples de mauvais labels : 'Que son corps soit moins un obstacle', 'Elle met en place des stratégies', 'Qu elle soit heureuse'
 
+Pour chaque axe, génère aussi une description de 1 à 2 phrases.
+- Elle doit être écrite dans les mots du parent, pas en jargon médical
+- Elle doit ancrer l'axe dans le quotidien réel décrit dans ses réponses
+- Elle doit être spécifique à cet axe — pas une reformulation générale
+- Elle peut commencer par 'Tu travailles...', 'C'est le fil rouge de...', 'Au quotidien...' ou toute formulation naturelle
+- Jamais de pronostic, jamais de comparaison, jamais de jugement
+
 Règles absolues:
 - Jamais de pronostic, jamais de diagnostic, jamais de comparaison à des normes
 - Assigne une couleur hex à chaque axe selon sa nature:
@@ -54,9 +61,9 @@ Règles absolues:
 
 Réponds UNIQUEMENT avec un JSON valide, sans markdown, sans backticks:
 { "axes": [
-  { "label": "string", "couleur": "#hex" },
-  { "label": "string", "couleur": "#hex" },
-  { "label": "string", "couleur": "#hex" }
+  { "label": "string", "couleur": "#hex", "description": "string" },
+  { "label": "string", "couleur": "#hex", "description": "string" },
+  { "label": "string", "couleur": "#hex", "description": "string" }
 ]}`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -71,7 +78,7 @@ Réponds UNIQUEMENT avec un JSON valide, sans markdown, sans backticks:
           { role: "system", content: "Tu es un assistant spécialisé. Réponds UNIQUEMENT avec un JSON valide, sans markdown, sans commentaire." },
           { role: "user", content: userPrompt },
         ],
-        max_tokens: 1000,
+        max_tokens: 1500,
       }),
     });
 
