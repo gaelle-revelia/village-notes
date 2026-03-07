@@ -159,7 +159,58 @@ function getPepiteCardStyle(type: string) {
   };
 }
 
-const AxeDetail = ({
+const DescTextarea = ({
+  descRef,
+  value,
+  onChange,
+  onBlur,
+}: {
+  descRef: React.RefObject<HTMLTextAreaElement>;
+  value: string;
+  onChange: (val: string) => void;
+  onBlur: () => void;
+}) => {
+  useEffect(() => {
+    if (descRef.current) {
+      descRef.current.style.height = "auto";
+      descRef.current.style.height = descRef.current.scrollHeight + "px";
+      descRef.current.focus();
+    }
+  }, []);
+
+  return (
+    <textarea
+      ref={descRef}
+      rows={1}
+      value={value}
+      onChange={(e) => {
+        onChange(e.target.value);
+        if (descRef.current) {
+          descRef.current.style.height = "auto";
+          descRef.current.style.height = descRef.current.scrollHeight + "px";
+        }
+      }}
+      onBlur={onBlur}
+      style={{
+        fontFamily: "'DM Sans', sans-serif",
+        fontSize: 13.5,
+        color: "#6B6560",
+        lineHeight: 1.6,
+        width: "100%",
+        border: "none",
+        outline: "none",
+        background: "rgba(255,255,255,0.5)",
+        borderRadius: 8,
+        padding: "8px 10px",
+        resize: "none",
+        overflow: "hidden",
+        height: "auto",
+      }}
+    />
+  );
+};
+
+
   axe,
   pepites,
   prenom,
