@@ -88,13 +88,14 @@ export interface PepiteDetail {
 }
 
 interface AxeDetailProps {
-  axe: { id: string; label: string; couleur: string; ordre: number };
+  axe: { id: string; label: string; couleur: string; ordre: number; description?: string | null };
   pepites: PepiteDetail[];
   prenom: string;
   onBack: () => void;
   onRemovePepite: (pepiteId: string) => void;
   onArchiveAxe: () => void;
   onRenameAxe: (newLabel: string) => void;
+  onUpdateDescription?: (desc: string) => void;
 }
 
 const TYPE_COLORS: Record<string, string> = {
