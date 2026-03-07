@@ -16,6 +16,7 @@ interface Axe {
   label: string;
   couleur: string;
   ordre: number;
+  description: string | null;
 }
 
 interface PepiteWithDate {
