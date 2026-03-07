@@ -1,58 +1,26 @@
 
 
-## Plan: "Préciser ce bloc" — refine_block mode + PreciserBlocDrawer
+## Plan: Add editable description field in AxeDetail
 
-### Part 1 — Edge function: add `refine_block` mode
+### Changes needed
 
-In `supabase/functions/generate-synthesis/index.ts`, add a new branch:
+**1. `src/pages/SelenaScreen.tsx`** — Pass `description` through to AxeDetail
 
-- Parse `bloc_id`, `bloc_title`, `bloc_content`, `precision`, `cas_usage`, `synthese_id` from body
-- Fetch enfant `prenom` + `sexe` (reuse existing pattern)
-- System prompt: regenerate only this block, integrate precision naturally, keep tone/length, no invention, return `{ "content": "..." }`
-- User message: bloc_title + bloc_content + precision + prenom + pronouns
-- Update `syntheses` row: read `contenu` JSON, find bloc by `bloc_id`, replace content, write back
-- Return `{ bloc_id, content }`
+- Update `Axe` interface to include `description: string | null`
+- Update the Supabase query (line 91) to also select `description`
+- Add `onUpdateDescription` handler that updates local state
+- Pass `axe` (now with description) and `onUpdateDescription` to `<AxeDetail>`
 
-### Part 2 — Create PreciserBlocDrawer component
+**2. `src/components/progression/AxeDetail.tsx`** — Add editable description
 
-New file: `src/components/synthese/PreciserBlocDrawer.tsx`
+- Update `AxeDetailProps.axe` to include `description?: string | null`
+- Add `onUpdateDescription?: (desc: string) => void` to props
+- Add state: `editingDesc` (boolean), `descDraft` (string)
+- After the pepite count `<p>` (line 330), insert a new block:
+  - Display mode: `<p>` showing description text or italic placeholder
+  - Edit mode: `<textarea>` with auto-height, no border, subtle bg
+  - On click → enter edit mode
+  - On blur → save to Supabase (`axes_developpement.description`), call `onUpdateDescription`, exit edit mode
 
-**Props:** `isOpen`, `onClose`, `bloc: { id, title, content, cas_usage }`, `enfantId`, `syntheseId`, `onBlockUpdated: (blocId: string, newContent: string) => void`
-
-**UI structure (top to bottom):**
-
-1. **DrawerTitle:** "✏️ Préciser ce bloc"
-2. **Current content preview:**
-   - Label: "Ce bloc actuellement :" — DM Sans 12px, color `#9A9490`
-   - Glass card showing `bloc.content`, `line-clamp-3` by default
-   - If content exceeds 3 lines, show a "voir tout" toggle (DM Sans 12px, color `#8B74E0`) that expands/collapses the card
-   - State: `expanded` boolean, toggles between `line-clamp-3` and full display
-3. **Textarea:** placeholder "Ajoute ta précision ici..."
-4. **WiredMicOrb:** voice input appends to textarea
-5. **CTA:** "Régénérer ce bloc →" gradient button, disabled if textarea empty, pulses during loading
-
-**On submit:** invoke `generate-synthesis` with `type: "refine_block"`, on success call `onBlockUpdated`, close drawer, toast success.
-
-### Part 3 — Wire buttons in all 3 result pages
-
-**Transmission** (`OutilsSyntheseTransmission.tsx`):
-- State: `refineBloc`, `syntheseId`
-- ResultCard "Préciser ce bloc" → opens drawer with bloc data
-- `onBlockUpdated` → update `generatedBlocks` in place
-
-**MDPH** (`OutilsSyntheseMdph.tsx`):
-- Same pattern with ThematicBlock buttons
-
-**Pick-me-up** (`OutilsSynthesePickMeUp.tsx`):
-- Single block ("narrative"), add "Préciser ce bloc" button, same drawer
-
-### Files changed
-
-| File | Action |
-|---|---|
-| `supabase/functions/generate-synthesis/index.ts` | Add `refine_block` branch |
-| `src/components/synthese/PreciserBlocDrawer.tsx` | Create |
-| `src/pages/OutilsSyntheseTransmission.tsx` | Wire drawer |
-| `src/pages/OutilsSyntheseMdph.tsx` | Wire drawer |
-| `src/pages/OutilsSynthesePickMeUp.tsx` | Wire drawer |
+No other files touched.
 
