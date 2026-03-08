@@ -1,34 +1,58 @@
 
 
-## Plan: Fix checkbox visibility + handle duplicate-email fake-success
+## Plan: "Préciser ce bloc" — refine_block mode + PreciserBlocDrawer
 
-### Issue 1 — Checkbox not visible
+### Part 1 — Edge function: add `refine_block` mode
 
-**Root cause**: The container uses `justify-center min-h-screen` without scrolling. On small viewports, content overflows and the bottom (checkbox + button) is clipped.
+In `supabase/functions/generate-synthesis/index.ts`, add a new branch:
 
-**Fix** in `ScreenPassword` (line 321):
-- Change `justify-center min-h-screen` to `justify-start min-h-screen overflow-y-auto`
-- Or wrap the form content in a scrollable container
+- Parse `bloc_id`, `bloc_title`, `bloc_content`, `precision`, `cas_usage`, `synthese_id` from body
+- Fetch enfant `prenom` + `sexe` (reuse existing pattern)
+- System prompt: regenerate only this block, integrate precision naturally, keep tone/length, no invention, return `{ "content": "..." }`
+- User message: bloc_title + bloc_content + precision + prenom + pronouns
+- Update `syntheses` row: read `contenu` JSON, find bloc by `bloc_id`, replace content, write back
+- Return `{ bloc_id, content }`
 
-### Issue 2 — signUp() fake-success for duplicate emails
+### Part 2 — Create PreciserBlocDrawer component
 
-**Root cause**: Supabase returns `{ error: null, data: { user: { id: "...", identities: [] } } }` for already-registered emails. The code treats this as success.
+New file: `src/components/synthese/PreciserBlocDrawer.tsx`
 
-**Fix** in `submit()` after line 303:
-```ts
-const newUser = signUpData?.user;
-// Detect Supabase fake-success (duplicate email)
-if (!newUser || (newUser.identities && newUser.identities.length === 0)) {
-  setError("Cet email est déjà associé à un compte. Essayez de vous connecter.");
-  setSaving(false);
-  return;
-}
-```
+**Props:** `isOpen`, `onClose`, `bloc: { id, title, content, cas_usage }`, `enfantId`, `syntheseId`, `onBlockUpdated: (blocId: string, newContent: string) => void`
 
-This prevents `onDone()` from being called when no real account was created, and shows a clear error message.
+**UI structure (top to bottom):**
 
-### Files modified
-1. `src/pages/OnboardingInvite.tsx` — both fixes in ScreenPassword component
+1. **DrawerTitle:** "✏️ Préciser ce bloc"
+2. **Current content preview:**
+   - Label: "Ce bloc actuellement :" — DM Sans 12px, color `#9A9490`
+   - Glass card showing `bloc.content`, `line-clamp-3` by default
+   - If content exceeds 3 lines, show a "voir tout" toggle (DM Sans 12px, color `#8B74E0`) that expands/collapses the card
+   - State: `expanded` boolean, toggles between `line-clamp-3` and full display
+3. **Textarea:** placeholder "Ajoute ta précision ici..."
+4. **WiredMicOrb:** voice input appends to textarea
+5. **CTA:** "Régénérer ce bloc →" gradient button, disabled if textarea empty, pulses during loading
 
-### No other files touched.
+**On submit:** invoke `generate-synthesis` with `type: "refine_block"`, on success call `onBlockUpdated`, close drawer, toast success.
+
+### Part 3 — Wire buttons in all 3 result pages
+
+**Transmission** (`OutilsSyntheseTransmission.tsx`):
+- State: `refineBloc`, `syntheseId`
+- ResultCard "Préciser ce bloc" → opens drawer with bloc data
+- `onBlockUpdated` → update `generatedBlocks` in place
+
+**MDPH** (`OutilsSyntheseMdph.tsx`):
+- Same pattern with ThematicBlock buttons
+
+**Pick-me-up** (`OutilsSynthesePickMeUp.tsx`):
+- Single block ("narrative"), add "Préciser ce bloc" button, same drawer
+
+### Files changed
+
+| File | Action |
+|---|---|
+| `supabase/functions/generate-synthesis/index.ts` | Add `refine_block` branch |
+| `src/components/synthese/PreciserBlocDrawer.tsx` | Create |
+| `src/pages/OutilsSyntheseTransmission.tsx` | Wire drawer |
+| `src/pages/OutilsSyntheseMdph.tsx` | Wire drawer |
+| `src/pages/OutilsSynthesePickMeUp.tsx` | Wire drawer |
 
