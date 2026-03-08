@@ -13,6 +13,7 @@ Deno.serve(async (req) => {
 
   try {
     const { token, mark_used, user_id } = await req.json();
+    console.log("[verify-invite] received:", JSON.stringify({ token, mark_used, user_id }));
 
     if (!token) {
       return new Response(JSON.stringify({ error: "Token is required" }), {
