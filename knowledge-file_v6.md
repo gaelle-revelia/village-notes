@@ -19,7 +19,7 @@ L'IA est un facilitateur invisible. Le produit, c'est la mémoire organisée du 
 - **URL app** : https://thevillage-app.lovable.app
 - **Domaine** : the-village.app (OVH)
 - **Repo GitHub** : pinné avant chaque session risquée
-- **Modèle IA** : `google/gemini-2.5-flash` via Lovable AI gateway
+- **Modèle IA** : `google/gemini-3-flash-preview` via Lovable AI gateway (modèle unique pour toutes les edge functions)
 
 ---
 
