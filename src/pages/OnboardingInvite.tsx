@@ -272,6 +272,14 @@ function ScreenPassword({
       setError("Les mots de passe ne correspondent pas");
       return;
     }
+
+    // Resolve email from multiple sources
+    const resolvedEmail = email || localStorage.getItem("invite_email") || "";
+    if (!resolvedEmail) {
+      setError("Email introuvable, veuillez relancer l'invitation.");
+      return;
+    }
+
     setSaving(true);
     setError("");
 
