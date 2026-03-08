@@ -324,7 +324,7 @@ function ScreenPassword({
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-6 py-12">
+    <div className="flex flex-col items-center justify-start min-h-screen overflow-y-auto px-6 py-12">
       <h2
         className="text-center mb-2"
         style={{
