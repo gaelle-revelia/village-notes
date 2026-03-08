@@ -46,18 +46,6 @@ export function SignupForm({ onSwitchToLogin, onSuccess }: SignupFormProps) {
 
     setLoading(false);
 
-    if (!authError) {
-      // Save GDPR consent timestamp
-      const { data: { user: newUser } } = await supabase.auth.getUser();
-      if (newUser) {
-        await supabase.from("profiles").upsert({
-          user_id: newUser.id,
-          consent_at: new Date().toISOString(),
-          consent_version: "v1.0",
-        }, { onConflict: "user_id" });
-      }
-    }
-
     if (authError) {
       if (authError.message.includes("already registered") || authError.message.includes("already been registered")) {
         setErrors({ email: "Cet email est déjà associé à un compte. Vous souhaitez vous connecter ?" });
