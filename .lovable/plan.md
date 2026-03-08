@@ -1,41 +1,58 @@
 
 
-## Plan: Settings Page + delete-account Edge Function
+## Plan: "Préciser ce bloc" — refine_block mode + PreciserBlocDrawer
 
-### 1. Rewrite `src/pages/AppSettings.tsx`
+### Part 1 — Edge function: add `refine_block` mode
 
-Full settings page replacing the placeholder:
+In `supabase/functions/generate-synthesis/index.ts`, add a new branch:
 
-- **Header**: Back arrow + "Paramètres" title (Fraunces), same pattern as ChildProfile
-- **Section "Mon compte"**: Liquid glass card with email (from `useAuth()`) and prénom (fetched from `profiles` table where `user_id = auth.uid()`)
-- **Section "Zone de danger"**: Card with red-tinted border `rgba(220,38,38,0.2)`:
-  - Role fetched via `useEnfantId()` which returns `{ role }` 
-  - If `role === 'owner'`: disabled outlined red button + italic explanatory text
-  - If `role === 'coparent'` or `'famille'`: active outlined red button → opens `AlertDialog` confirmation modal
-- **On confirm**: calls `delete-account` edge function via `supabase.functions.invoke('delete-account')`, then redirects to `/auth`
-- No BottomNavBar, no gradient background on page (uses global gradient)
+- Parse `bloc_id`, `bloc_title`, `bloc_content`, `precision`, `cas_usage`, `synthese_id` from body
+- Fetch enfant `prenom` + `sexe` (reuse existing pattern)
+- System prompt: regenerate only this block, integrate precision naturally, keep tone/length, no invention, return `{ "content": "..." }`
+- User message: bloc_title + bloc_content + precision + prenom + pronouns
+- Update `syntheses` row: read `contenu` JSON, find bloc by `bloc_id`, replace content, write back
+- Return `{ bloc_id, content }`
 
-### 2. Create `supabase/functions/delete-account/index.ts`
+### Part 2 — Create PreciserBlocDrawer component
 
-- Same CORS pattern as invite-member (allowedOrigins + getCorsHeaders)
-- Manual Bearer token auth via `supabase.auth.getUser()`
-- Query `enfant_membres` for user's role — if `owner`, return 403
-- Delete from `enfant_membres` where `user_id` matches
-- Delete from `profiles` where `user_id` matches
-- Delete auth user via admin client using `SUPABASE_SERVICE_ROLE_KEY`
-- Return 200
+New file: `src/components/synthese/PreciserBlocDrawer.tsx`
 
-### 3. Update `supabase/config.toml`
+**Props:** `isOpen`, `onClose`, `bloc: { id, title, content, cas_usage }`, `enfantId`, `syntheseId`, `onBlockUpdated: (blocId: string, newContent: string) => void`
 
-Add `[functions.delete-account]` with `verify_jwt = false`.
+**UI structure (top to bottom):**
+
+1. **DrawerTitle:** "✏️ Préciser ce bloc"
+2. **Current content preview:**
+   - Label: "Ce bloc actuellement :" — DM Sans 12px, color `#9A9490`
+   - Glass card showing `bloc.content`, `line-clamp-3` by default
+   - If content exceeds 3 lines, show a "voir tout" toggle (DM Sans 12px, color `#8B74E0`) that expands/collapses the card
+   - State: `expanded` boolean, toggles between `line-clamp-3` and full display
+3. **Textarea:** placeholder "Ajoute ta précision ici..."
+4. **WiredMicOrb:** voice input appends to textarea
+5. **CTA:** "Régénérer ce bloc →" gradient button, disabled if textarea empty, pulses during loading
+
+**On submit:** invoke `generate-synthesis` with `type: "refine_block"`, on success call `onBlockUpdated`, close drawer, toast success.
+
+### Part 3 — Wire buttons in all 3 result pages
+
+**Transmission** (`OutilsSyntheseTransmission.tsx`):
+- State: `refineBloc`, `syntheseId`
+- ResultCard "Préciser ce bloc" → opens drawer with bloc data
+- `onBlockUpdated` → update `generatedBlocks` in place
+
+**MDPH** (`OutilsSyntheseMdph.tsx`):
+- Same pattern with ThematicBlock buttons
+
+**Pick-me-up** (`OutilsSynthesePickMeUp.tsx`):
+- Single block ("narrative"), add "Préciser ce bloc" button, same drawer
 
 ### Files changed
+
 | File | Action |
 |---|---|
-| `src/pages/AppSettings.tsx` | Rewrite |
-| `supabase/functions/delete-account/index.ts` | Create |
-| `supabase/config.toml` | Add function entry |
-
-### Not touched
-useAuth.tsx, any other page, any existing edge function, RLS policies.
+| `supabase/functions/generate-synthesis/index.ts` | Add `refine_block` branch |
+| `src/components/synthese/PreciserBlocDrawer.tsx` | Create |
+| `src/pages/OutilsSyntheseTransmission.tsx` | Wire drawer |
+| `src/pages/OutilsSyntheseMdph.tsx` | Wire drawer |
+| `src/pages/OutilsSynthesePickMeUp.tsx` | Wire drawer |
 
