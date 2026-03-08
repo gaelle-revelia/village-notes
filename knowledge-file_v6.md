@@ -19,7 +19,7 @@ L'IA est un facilitateur invisible. Le produit, c'est la mémoire organisée du 
 - **URL app** : https://thevillage-app.lovable.app
 - **Domaine** : the-village.app (OVH)
 - **Repo GitHub** : pinné avant chaque session risquée
-- **Modèle IA** : `google/gemini-2.5-flash` via Lovable AI gateway
+- **Modèle IA** : `google/gemini-3-flash-preview` via Lovable AI gateway (modèle unique pour toutes les edge functions)
 
 ---
 
@@ -529,18 +529,19 @@ CREATE POLICY "pepites_access" ON pepites
 
 ## Edge functions
 
-| Fonction | Rôle | verify_jwt |
-|---|---|---|
-| `process-memo` | Transcription audio + structuration IA + détection pépites | false |
-| `generate-lexique` | Génération variantes phonétiques | false |
-| `suggest-icon` | Suggestion icône Lucide pour activité | false |
-| `invite-member` | Envoi invitation email via Resend | false |
-| `verify-invite-token` | Validation token invitation | false |
-| `generate-synthesis` | Génération Synthèse Magique (4 moteurs) | false *(à créer)* |
-| `generate-axes` | Génération axes depuis réponses onboarding Carte | false *(à créer)* |
-| `backfill-pepites` | Association rétroactive mémos → axes (run once) | false *(à créer)* |
+| Fonction | Rôle | verify_jwt | Modèle IA |
+|---|---|---|---|
+| `process-memo` | Transcription audio + structuration IA + détection pépites | false | `google/gemini-3-flash-preview` |
+| `generate-lexique` | Génération variantes phonétiques | false | `google/gemini-3-flash-preview` |
+| `suggest-icon` | Suggestion icône Lucide pour activité | false | `google/gemini-3-flash-preview` |
+| `invite-member` | Envoi invitation email via Resend | false | — (pas d'IA) |
+| `verify-invite-token` | Validation token invitation | false | — (pas d'IA) |
+| `generate-synthesis` | Génération Synthèse Magique (4 moteurs) | false | `google/gemini-3-flash-preview` |
+| `generate-axes` | Génération axes depuis réponses onboarding Carte | false | `google/gemini-3-flash-preview` |
+| `backfill-pepites` | Association rétroactive mémos → axes (run once) | false | `google/gemini-3-flash-preview` |
 
 > `verify_jwt = false` sur toutes les fonctions — auth vérifiée manuellement via Bearer token dans chaque fonction.
+> **Modèle standard unique** : `google/gemini-3-flash-preview` pour tous les appels IA (transcription audio multimodale, structuration, classification, génération). Aucune exception.
 
 ---
 
@@ -559,7 +560,7 @@ CREATE POLICY "pepites_access" ON pepites
 
 **Fetch lexique** : toutes sources confondues (`onboarding_prenom` + `onboarding_structure` + `manual`), groupées par `mot_correct`.
 
-**Mode `text_quick`** : appel simplifié, JSON `{ "resume": "..." }` uniquement. Modèle : `google/gemini-2.5-flash-lite`. Fallback si parse échoue : 60 premiers caractères du texte brut.
+**Mode `text_quick`** : appel simplifié, JSON `{ "resume": "..." }` uniquement. Modèle : `google/gemini-3-flash-preview`. Fallback si parse échoue : 60 premiers caractères du texte brut.
 
 ### Bloc pépites dans `process-memo` ← NOUVEAU
 
@@ -812,7 +813,7 @@ RLS sur les deux tables selon `get_membre_role(enfant_id)` :
 
 ### Sélection d'icône intelligente
 
-- Edge function `suggest-icon` → `google/gemini-2.5-flash`
+- Edge function `suggest-icon` → `google/gemini-3-flash-preview`
 - Déclenché au `onBlur` du champ nom si domaine sélectionné
 - Retourne un nom d'icône Lucide parmi 33 autorisées
 - Picker grid 6 colonnes pour changer manuellement
