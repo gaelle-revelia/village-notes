@@ -319,6 +319,7 @@ function ScreenPassword({
         const { error: fnError } = await supabase.functions.invoke("verify-invite-token", {
           body: { token: inviteToken, mark_used: true, user_id: newUser.id },
         });
+        console.log("[invite] fnError:", fnError);
         if (fnError) {
           setError("Erreur lors de la création de votre accès. Veuillez réessayer.");
           setSaving(false);

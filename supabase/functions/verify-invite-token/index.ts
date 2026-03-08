@@ -85,6 +85,7 @@ Deno.serve(async (req) => {
           },
           { onConflict: "user_id", ignoreDuplicates: true }
         );
+        console.log("[verify-invite] profiles result:", profileErr);
         if (profileErr) {
           console.error("profiles upsert failed:", profileErr);
           return new Response(JSON.stringify({ error: "Failed to provision profile" }), {
