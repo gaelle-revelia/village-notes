@@ -1,58 +1,60 @@
 
 
-## Plan: "Préciser ce bloc" — refine_block mode + PreciserBlocDrawer
+## Plan: R-05 — Strict CORS Origin Allowlist
 
-### Part 1 — Edge function: add `refine_block` mode
+### What changes
 
-In `supabase/functions/generate-synthesis/index.ts`, add a new branch:
+In all 8 edge functions, replace the static `corsHeaders` object with a dynamic CORS helper that checks the request `Origin` against an allowlist.
 
-- Parse `bloc_id`, `bloc_title`, `bloc_content`, `precision`, `cas_usage`, `synthese_id` from body
-- Fetch enfant `prenom` + `sexe` (reuse existing pattern)
-- System prompt: regenerate only this block, integrate precision naturally, keep tone/length, no invention, return `{ "content": "..." }`
-- User message: bloc_title + bloc_content + precision + prenom + pronouns
-- Update `syntheses` row: read `contenu` JSON, find bloc by `bloc_id`, replace content, write back
-- Return `{ bloc_id, content }`
+### Pattern applied (identical in all 8 files)
 
-### Part 2 — Create PreciserBlocDrawer component
+**Before:**
+```typescript
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, ...",
+};
+```
 
-New file: `src/components/synthese/PreciserBlocDrawer.tsx`
+**After:**
+```typescript
+const allowedOrigins = [
+  "https://the-village.app",
+  "https://thevillage-app.lovable.app",
+];
 
-**Props:** `isOpen`, `onClose`, `bloc: { id, title, content, cas_usage }`, `enfantId`, `syntheseId`, `onBlockUpdated: (blocId: string, newContent: string) => void`
+function getCorsHeaders(req: Request) {
+  const origin = req.headers.get("origin") || "";
+  const corsOrigin = allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
+  return {
+    "Access-Control-Allow-Origin": corsOrigin,
+    "Access-Control-Allow-Headers":
+      "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+  };
+}
+```
 
-**UI structure (top to bottom):**
+Then every `corsHeaders` reference becomes `getCorsHeaders(req)` — both in the OPTIONS preflight and all response objects.
 
-1. **DrawerTitle:** "✏️ Préciser ce bloc"
-2. **Current content preview:**
-   - Label: "Ce bloc actuellement :" — DM Sans 12px, color `#9A9490`
-   - Glass card showing `bloc.content`, `line-clamp-3` by default
-   - If content exceeds 3 lines, show a "voir tout" toggle (DM Sans 12px, color `#8B74E0`) that expands/collapses the card
-   - State: `expanded` boolean, toggles between `line-clamp-3` and full display
-3. **Textarea:** placeholder "Ajoute ta précision ici..."
-4. **WiredMicOrb:** voice input appends to textarea
-5. **CTA:** "Régénérer ce bloc →" gradient button, disabled if textarea empty, pulses during loading
+### Files modified (CORS only, no logic changes)
 
-**On submit:** invoke `generate-synthesis` with `type: "refine_block"`, on success call `onBlockUpdated`, close drawer, toast success.
+1. `supabase/functions/process-memo/index.ts`
+2. `supabase/functions/generate-lexique/index.ts`
+3. `supabase/functions/generate-synthesis/index.ts`
+4. `supabase/functions/generate-axes/index.ts`
+5. `supabase/functions/backfill-pepites/index.ts`
+6. `supabase/functions/suggest-icon/index.ts`
+7. `supabase/functions/invite-member/index.ts`
+8. `supabase/functions/verify-invite-token/index.ts`
 
-### Part 3 — Wire buttons in all 3 result pages
+### What is NOT touched
 
-**Transmission** (`OutilsSyntheseTransmission.tsx`):
-- State: `refineBloc`, `syntheseId`
-- ResultCard "Préciser ce bloc" → opens drawer with bloc data
-- `onBlockUpdated` → update `generatedBlocks` in place
+- Authentication logic
+- Business logic
+- Frontend code
+- Any other configuration
 
-**MDPH** (`OutilsSyntheseMdph.tsx`):
-- Same pattern with ThematicBlock buttons
+### Risk
 
-**Pick-me-up** (`OutilsSynthesePickMeUp.tsx`):
-- Single block ("narrative"), add "Préciser ce bloc" button, same drawer
-
-### Files changed
-
-| File | Action |
-|---|---|
-| `supabase/functions/generate-synthesis/index.ts` | Add `refine_block` branch |
-| `src/components/synthese/PreciserBlocDrawer.tsx` | Create |
-| `src/pages/OutilsSyntheseTransmission.tsx` | Wire drawer |
-| `src/pages/OutilsSyntheseMdph.tsx` | Wire drawer |
-| `src/pages/OutilsSynthesePickMeUp.tsx` | Wire drawer |
+Low. The only behavioral change is rejecting cross-origin requests from unlisted domains. All app traffic comes from the two allowed origins. Preview URLs (`id-preview--*.lovable.app`) will be blocked — this is acceptable since they share the same Supabase session and the functions validate auth via Bearer token regardless.
 
