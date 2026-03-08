@@ -13,6 +13,7 @@ Deno.serve(async (req) => {
 
   try {
     const { token, mark_used, user_id } = await req.json();
+    console.log("[verify-invite] received:", JSON.stringify({ token, mark_used, user_id }));
 
     if (!token) {
       return new Response(JSON.stringify({ error: "Token is required" }), {
@@ -65,6 +66,7 @@ Deno.serve(async (req) => {
           },
           { onConflict: "enfant_id,user_id", ignoreDuplicates: true }
         );
+        console.log("[verify-invite] enfant_membres result:", membresErr);
         if (membresErr) {
           console.error("enfant_membres upsert failed:", membresErr);
           return new Response(JSON.stringify({ error: "Failed to provision membership" }), {
@@ -83,6 +85,7 @@ Deno.serve(async (req) => {
           },
           { onConflict: "user_id", ignoreDuplicates: true }
         );
+        console.log("[verify-invite] profiles result:", profileErr);
         if (profileErr) {
           console.error("profiles upsert failed:", profileErr);
           return new Response(JSON.stringify({ error: "Failed to provision profile" }), {

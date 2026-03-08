@@ -300,6 +300,8 @@ function ScreenPassword({
           return;
         }
         const newUser = signUpData?.user;
+        console.log("[invite] signUpData:", JSON.stringify(signUpData));
+        console.log("[invite] newUser:", newUser?.id);
         // Detect Supabase fake-success (duplicate email returns empty identities)
         if (!newUser || (newUser.identities && newUser.identities.length === 0)) {
           setError("Cet email est déjà associé à un compte. Essayez de vous connecter.");
@@ -308,6 +310,7 @@ function ScreenPassword({
         }
         // Provision user + invalidate token server-side (service_role bypasses RLS)
         const inviteToken = localStorage.getItem("invite_token");
+        console.log("[invite] inviteToken:", inviteToken);
         if (!inviteToken) {
           setError("Lien d'invitation invalide. Veuillez réutiliser le lien reçu par email.");
           setSaving(false);
@@ -316,6 +319,7 @@ function ScreenPassword({
         const { error: fnError } = await supabase.functions.invoke("verify-invite-token", {
           body: { token: inviteToken, mark_used: true, user_id: newUser.id },
         });
+        console.log("[invite] fnError:", fnError);
         if (fnError) {
           setError("Erreur lors de la création de votre accès. Veuillez réessayer.");
           setSaving(false);
