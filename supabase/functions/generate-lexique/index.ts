@@ -18,6 +18,7 @@ function getCorsHeaders(req: Request) {
 const SYSTEM_PROMPT = `Tu es un assistant qui génère des variantes phonétiques pour améliorer la transcription vocale automatique en français. Retourne UNIQUEMENT un tableau JSON valide, sans markdown, sans commentaire, sans texte autour.`;
 
 serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }

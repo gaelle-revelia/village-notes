@@ -30,6 +30,7 @@ ArrowUp, MoveHorizontal, StretchHorizontal, PersonStanding, Accessibility,
 Gamepad2, Puzzle, BookOpen, Paintbrush, Scissors, Timer, Zap, Sparkles`;
 
 serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
