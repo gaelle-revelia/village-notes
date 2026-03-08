@@ -283,31 +283,27 @@ function ScreenPassword({
     setSaving(true);
     setError("");
 
-    // Step 1: Auth — sign up or update password
+    // Step 1: Sign out any existing session to avoid overwriting another user's password
     const { data: { session } } = await supabase.auth.getSession();
-    if (session?.user) {
-      const { error: err } = await supabase.auth.updateUser({ password: pw });
-      if (err) {
-        setError(err.message);
-        setSaving(false);
-        return;
-      }
-    } else {
-      const { data: signUpData, error: err } = await supabase.auth.signUp({
-        email: resolvedEmail,
-        password: pw,
-      });
-      if (err) {
-        setError(err.message);
-        setSaving(false);
-        return;
-      }
-      // Detect fake success: Supabase returns user with empty identities for existing emails
-      if (!signUpData.user || (signUpData.user.identities && signUpData.user.identities.length === 0)) {
-        setError("Un compte existe déjà avec cet email. Utilisez « J'ai déjà un compte ».");
-        setSaving(false);
-        return;
-      }
+    if (session) {
+      await supabase.auth.signOut();
+    }
+
+    // Step 2: Always create a fresh account for the invited user
+    const { data: signUpData, error: err } = await supabase.auth.signUp({
+      email: resolvedEmail,
+      password: pw,
+    });
+    if (err) {
+      setError(err.message);
+      setSaving(false);
+      return;
+    }
+    // Detect fake success: Supabase returns user with empty identities for existing emails
+    if (!signUpData.user || (signUpData.user.identities && signUpData.user.identities.length === 0)) {
+      setError("Un compte existe déjà avec cet email. Utilisez « J'ai déjà un compte ».");
+      setSaving(false);
+      return;
     }
 
     // Step 2: Confirm we have a valid authenticated user
