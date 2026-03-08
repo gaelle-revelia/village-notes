@@ -111,6 +111,22 @@ Deno.serve(async (req) => {
       console.warn("Skipping delete confirmation email: missing RESEND_API_KEY or user email");
     }
 
+    // Get enfant_id before deleting membership
+    const { data: membershipData } = await supabaseAdmin
+      .from("enfant_membres")
+      .select("enfant_id")
+      .eq("user_id", userId);
+
+    // Deactivate matching intervenants by email + enfant_id
+    if (userEmail && membershipData?.length) {
+      const enfantIds = membershipData.map((m) => m.enfant_id);
+      await supabaseAdmin
+        .from("intervenants")
+        .update({ actif: false })
+        .eq("email", userEmail)
+        .in("enfant_id", enfantIds);
+    }
+
     // Delete enfant_membres row
     await supabaseAdmin
       .from("enfant_membres")
