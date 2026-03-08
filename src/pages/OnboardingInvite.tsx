@@ -437,7 +437,19 @@ function ScreenPassword({
           </p>
         )}
 
-        <PrimaryButton onClick={submit} disabled={saving}>
+        <div className="flex items-start gap-3">
+          <Checkbox
+            id="consent-invite"
+            checked={consent}
+            onCheckedChange={(checked) => setConsent(checked === true)}
+            className="mt-0.5"
+          />
+          <Label htmlFor="consent-invite" className="text-sm leading-relaxed font-normal text-muted-foreground cursor-pointer">
+            J'accepte la politique de confidentialité et les conditions d'utilisation
+          </Label>
+        </div>
+
+        <PrimaryButton onClick={submit} disabled={saving || !consent}>
           {saving ? "Création..." : "Créer mon accès"}
         </PrimaryButton>
         <GhostButton onClick={onBack}>← Retour</GhostButton>
