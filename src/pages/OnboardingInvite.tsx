@@ -275,43 +275,46 @@ function ScreenPassword({
       setError("Les mots de passe ne correspondent pas");
       return;
     }
-    setSaving(true);
-    setError("");
+    try {
+      setSaving(true);
+      setError("");
 
-    // If user already has a session, update password; otherwise sign up
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session?.user) {
-      const { error: err } = await supabase.auth.updateUser({ password: pw });
-      if (err) {
-        setError(err.message);
-        setSaving(false);
-        return;
-      }
-    } else {
-      // New user: sign up with email from invitation
-      const enfantId = localStorage.getItem("invite_enfant_id");
-      const inviteRole = localStorage.getItem("invite_role") || "coparent";
-      const { data: signUpData, error: err } = await supabase.auth.signUp({
-        email,
-        password: pw,
-      });
-      if (err) {
-        setError(err.message);
-        setSaving(false);
-        return;
-      }
-      const newUser = signUpData?.user;
-      // Detect Supabase fake-success (duplicate email returns empty identities)
-      if (!newUser || (newUser.identities && newUser.identities.length === 0)) {
-        setError("Cet email est déjà associé à un compte. Essayez de vous connecter.");
-        setSaving(false);
-        return;
-      }
-      // Provision user + invalidate token server-side (service_role bypasses RLS)
-      const inviteToken = localStorage.getItem("invite_token");
-      if (inviteToken) {
+      // If user already has a session, update password; otherwise sign up
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        const { error: err } = await supabase.auth.updateUser({ password: pw });
+        if (err) {
+          setError(err.message);
+          setSaving(false);
+          return;
+        }
+      } else {
+        // New user: sign up with email from invitation
+        const { data: signUpData, error: err } = await supabase.auth.signUp({
+          email,
+          password: pw,
+        });
+        if (err) {
+          setError(err.message);
+          setSaving(false);
+          return;
+        }
+        const newUser = signUpData?.user;
+        // Detect Supabase fake-success (duplicate email returns empty identities)
+        if (!newUser || (newUser.identities && newUser.identities.length === 0)) {
+          setError("Cet email est déjà associé à un compte. Essayez de vous connecter.");
+          setSaving(false);
+          return;
+        }
+        // Provision user + invalidate token server-side (service_role bypasses RLS)
+        const inviteToken = localStorage.getItem("invite_token");
+        if (!inviteToken) {
+          setError("Lien d'invitation invalide. Veuillez réutiliser le lien reçu par email.");
+          setSaving(false);
+          return;
+        }
         const { error: fnError } = await supabase.functions.invoke("verify-invite-token", {
-          body: { token: inviteToken, mark_used: true, user_id: newUser?.id },
+          body: { token: inviteToken, mark_used: true, user_id: newUser.id },
         });
         if (fnError) {
           setError("Erreur lors de la création de votre accès. Veuillez réessayer.");
@@ -319,8 +322,12 @@ function ScreenPassword({
           return;
         }
       }
+      onDone();
+    } catch (e: any) {
+      console.error("submit error:", e);
+      setError("Une erreur inattendue est survenue. Veuillez réessayer.");
+      setSaving(false);
     }
-    onDone();
   };
 
   return (
