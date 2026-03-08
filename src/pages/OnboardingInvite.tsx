@@ -275,7 +275,7 @@ function ScreenPassword({
     setSaving(true);
     setError("");
 
-    // If user already has a session, update password; otherwise sign up
+    // Step 1: Auth — sign up or update password
     const { data: { session } } = await supabase.auth.getSession();
     if (session?.user) {
       const { error: err } = await supabase.auth.updateUser({ password: pw });
@@ -285,8 +285,7 @@ function ScreenPassword({
         return;
       }
     } else {
-      // New user: sign up with email from invitation
-      const { error: err } = await supabase.auth.signUp({
+      const { data: signUpData, error: err } = await supabase.auth.signUp({
         email,
         password: pw,
       });
@@ -295,13 +294,26 @@ function ScreenPassword({
         setSaving(false);
         return;
       }
+      // Detect fake success: Supabase returns user with empty identities for existing emails
+      if (!signUpData.user || (signUpData.user.identities && signUpData.user.identities.length === 0)) {
+        setError("Un compte existe déjà avec cet email. Utilisez « J'ai déjà un compte ».");
+        setSaving(false);
+        return;
+      }
     }
 
-    // Server-side provisioning: profiles + enfant_membres + mark token used
+    // Step 2: Confirm we have a valid authenticated user
+    const { data: { user: currentUser }, error: getUserError } = await supabase.auth.getUser();
+    if (getUserError || !currentUser?.id) {
+      setError("Impossible de vérifier votre compte. Veuillez réessayer.");
+      setSaving(false);
+      return;
+    }
+
+    // Step 3: Provision profile + membership + mark token used
     const inviteToken = localStorage.getItem("invite_token");
-    const { data: { user: currentUser } } = await supabase.auth.getUser();
-    if (!inviteToken || !currentUser) {
-      setError("Impossible de finaliser l'inscription. Veuillez réessayer.");
+    if (!inviteToken) {
+      setError("Jeton d'invitation introuvable. Veuillez réouvrir le lien d'invitation.");
       setSaving(false);
       return;
     }
@@ -312,7 +324,7 @@ function ScreenPassword({
     );
 
     if (provisionError || provisionResult?.error) {
-      setError(provisionResult?.error || "Erreur lors de la création du compte. Veuillez réessayer.");
+      setError("Une erreur est survenue, veuillez contacter contact@the-village.app");
       setSaving(false);
       return;
     }
