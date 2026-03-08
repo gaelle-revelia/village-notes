@@ -3,8 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Mic, Eye, EyeOff } from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 import useEmblaCarousel from "embla-carousel-react";
 
 // ─── helpers ───────────────────────────────────────────────────────
@@ -263,7 +261,6 @@ function ScreenPassword({
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
-  const [consent, setConsent] = useState(false);
   const strength = passwordStrength(pw);
 
   const submit = async () => {
@@ -275,67 +272,54 @@ function ScreenPassword({
       setError("Les mots de passe ne correspondent pas");
       return;
     }
-    try {
-      setSaving(true);
-      setError("");
+    setSaving(true);
+    setError("");
 
-      // If user already has a session, update password; otherwise sign up
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        const { error: err } = await supabase.auth.updateUser({ password: pw });
-        if (err) {
-          setError(err.message);
-          setSaving(false);
-          return;
-        }
-      } else {
-        // New user: sign up with email from invitation
-        const { data: signUpData, error: err } = await supabase.auth.signUp({
-          email,
-          password: pw,
-        });
-        if (err) {
-          setError(err.message);
-          setSaving(false);
-          return;
-        }
-        const newUser = signUpData?.user;
-        console.log("[invite] signUpData:", JSON.stringify(signUpData));
-        console.log("[invite] newUser:", newUser?.id);
-        // Detect Supabase fake-success (duplicate email returns empty identities)
-        if (!newUser || (newUser.identities && newUser.identities.length === 0)) {
-          setError("Cet email est déjà associé à un compte. Essayez de vous connecter.");
-          setSaving(false);
-          return;
-        }
-        // Provision user + invalidate token server-side (service_role bypasses RLS)
-        const inviteToken = localStorage.getItem("invite_token");
-        console.log("[invite] inviteToken:", inviteToken);
-        if (!inviteToken) {
-          setError("Lien d'invitation invalide. Veuillez réutiliser le lien reçu par email.");
-          setSaving(false);
-          return;
-        }
-        const { error: fnError } = await supabase.functions.invoke("verify-invite-token", {
-          body: { token: inviteToken, mark_used: true, user_id: newUser.id },
-        });
-        console.log("[invite] fnError:", fnError);
-        if (fnError) {
-          setError("Erreur lors de la création de votre accès. Veuillez réessayer.");
-          setSaving(false);
-          return;
+    // If user already has a session, update password; otherwise sign up
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user) {
+      const { error: err } = await supabase.auth.updateUser({ password: pw });
+      if (err) {
+        setError(err.message);
+        setSaving(false);
+        return;
+      }
+    } else {
+      // New user: sign up with email from invitation
+      const enfantId = localStorage.getItem("invite_enfant_id");
+      const inviteRole = localStorage.getItem("invite_role") || "coparent";
+      const { error: err } = await supabase.auth.signUp({
+        email,
+        password: pw,
+      });
+      if (err) {
+        setError(err.message);
+        setSaving(false);
+        return;
+      }
+      // Upsert enfant_membres
+      if (enfantId) {
+        const { data: { user: newUser } } = await supabase.auth.getUser();
+        if (newUser) {
+          await supabase.from("enfant_membres" as any).upsert(
+            { enfant_id: enfantId, user_id: newUser.id, role: inviteRole } as any,
+            { onConflict: "enfant_id,user_id", ignoreDuplicates: true }
+          );
         }
       }
-      onDone();
-    } catch (e: any) {
-      console.error("submit error:", e);
-      setError("Une erreur inattendue est survenue. Veuillez réessayer.");
-      setSaving(false);
+      // Invalidate the invite token
+      const inviteToken = localStorage.getItem("invite_token");
+      if (inviteToken) {
+        await supabase.functions.invoke("verify-invite-token", {
+          body: { token: inviteToken, mark_used: true },
+        });
+      }
     }
+    onDone();
   };
 
   return (
-    <div className="flex flex-col items-center justify-start min-h-screen overflow-y-auto px-6 py-12">
+    <div className="flex flex-col items-center justify-center min-h-screen px-6 py-12">
       <h2
         className="text-center mb-2"
         style={{
@@ -442,19 +426,7 @@ function ScreenPassword({
           </p>
         )}
 
-        <div className="flex items-start gap-3">
-          <Checkbox
-            id="consent-invite"
-            checked={consent}
-            onCheckedChange={(checked) => setConsent(checked === true)}
-            className="mt-0.5"
-          />
-          <Label htmlFor="consent-invite" className="text-sm leading-relaxed font-normal text-muted-foreground cursor-pointer">
-            J'accepte la politique de confidentialité et les conditions d'utilisation
-          </Label>
-        </div>
-
-        <PrimaryButton onClick={submit} disabled={saving || !consent}>
+        <PrimaryButton onClick={submit} disabled={saving}>
           {saving ? "Création..." : "Créer mon accès"}
         </PrimaryButton>
         <GhostButton onClick={onBack}>← Retour</GhostButton>

@@ -12,8 +12,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { token, mark_used, user_id } = await req.json();
-    console.log("[verify-invite] received:", JSON.stringify({ token, mark_used, user_id }));
+    const { token, mark_used } = await req.json();
 
     if (!token) {
       return new Response(JSON.stringify({ error: "Token is required" }), {
@@ -54,47 +53,8 @@ Deno.serve(async (req) => {
       });
     }
 
-    // If mark_used is true, provision user and invalidate the token
+    // If mark_used is true, invalidate the token
     if (mark_used) {
-      if (user_id) {
-        const { error: membresErr } = await supabaseAdmin.from("enfant_membres").upsert(
-          {
-            enfant_id: invitation.enfant_id,
-            user_id,
-            role: invitation.role,
-            joined_at: new Date().toISOString(),
-          },
-          { onConflict: "enfant_id,user_id", ignoreDuplicates: true }
-        );
-        console.log("[verify-invite] enfant_membres result:", membresErr);
-        if (membresErr) {
-          console.error("enfant_membres upsert failed:", membresErr);
-          return new Response(JSON.stringify({ error: "Failed to provision membership" }), {
-            status: 500,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
-        }
-
-        const { error: profileErr } = await supabaseAdmin.from("profiles").upsert(
-          {
-            user_id,
-            prenom: "",
-            onboarding_completed: true,
-            consent_version: "v1.0",
-            consent_at: new Date().toISOString(),
-          },
-          { onConflict: "user_id", ignoreDuplicates: true }
-        );
-        console.log("[verify-invite] profiles result:", profileErr);
-        if (profileErr) {
-          console.error("profiles upsert failed:", profileErr);
-          return new Response(JSON.stringify({ error: "Failed to provision profile" }), {
-            status: 500,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
-        }
-      }
-
       await supabaseAdmin
         .from("invitations")
         .update({ status: "used" })
