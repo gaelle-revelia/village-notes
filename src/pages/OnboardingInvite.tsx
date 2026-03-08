@@ -263,6 +263,7 @@ function ScreenPassword({
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [consent, setConsent] = useState(false);
   const strength = passwordStrength(pw);
 
   const submit = async () => {
