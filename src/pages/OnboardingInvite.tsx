@@ -310,6 +310,7 @@ function ScreenPassword({
         }
         // Provision user + invalidate token server-side (service_role bypasses RLS)
         const inviteToken = localStorage.getItem("invite_token");
+        console.log("[invite] inviteToken:", inviteToken);
         if (!inviteToken) {
           setError("Lien d'invitation invalide. Veuillez réutiliser le lien reçu par email.");
           setSaving(false);
