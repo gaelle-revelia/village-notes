@@ -66,6 +66,7 @@ Deno.serve(async (req) => {
           },
           { onConflict: "enfant_id,user_id", ignoreDuplicates: true }
         );
+        console.log("[verify-invite] enfant_membres result:", membresErr);
         if (membresErr) {
           console.error("enfant_membres upsert failed:", membresErr);
           return new Response(JSON.stringify({ error: "Failed to provision membership" }), {
