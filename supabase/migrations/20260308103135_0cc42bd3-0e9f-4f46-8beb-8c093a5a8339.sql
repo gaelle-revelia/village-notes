@@ -1,0 +1,1 @@
+UPDATE invitations SET status = 'pending' WHERE email = 'alt.d9-104ignp@yopmail.com' AND status = 'used';
