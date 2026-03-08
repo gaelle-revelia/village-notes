@@ -272,6 +272,14 @@ function ScreenPassword({
       setError("Les mots de passe ne correspondent pas");
       return;
     }
+
+    // Resolve email from multiple sources
+    const resolvedEmail = email || localStorage.getItem("invite_email") || "";
+    if (!resolvedEmail) {
+      setError("Email introuvable, veuillez relancer l'invitation.");
+      return;
+    }
+
     setSaving(true);
     setError("");
 
@@ -286,7 +294,7 @@ function ScreenPassword({
       }
     } else {
       const { data: signUpData, error: err } = await supabase.auth.signUp({
-        email,
+        email: resolvedEmail,
         password: pw,
       });
       if (err) {
@@ -1011,6 +1019,7 @@ export default function OnboardingInvite() {
         localStorage.setItem("invite_token", token);
         setRole(data.role);
         setInviteEmail(data.email);
+        if (data.email) localStorage.setItem("invite_email", data.email);
       }
 
       // Step 2: Load context data
@@ -1073,6 +1082,7 @@ export default function OnboardingInvite() {
     localStorage.removeItem("invite_role");
     localStorage.removeItem("invite_token");
     localStorage.removeItem("invite_hash");
+    localStorage.removeItem("invite_email");
     navigate("/timeline");
   }, [navigate]);
 
