@@ -301,28 +301,11 @@ function ScreenPassword({
         return;
       }
       const newUser = signUpData?.user;
-      // Upsert enfant_membres
-      if (enfantId && newUser) {
-        await supabase.from("enfant_membres" as any).upsert(
-          { enfant_id: enfantId, user_id: newUser.id, role: inviteRole } as any,
-          { onConflict: "enfant_id,user_id", ignoreDuplicates: true }
-        );
-      }
-      // Insert profile for invited user
-      if (newUser) {
-        await supabase.from("profiles").upsert({
-          user_id: newUser.id,
-          prenom: "",
-          onboarding_completed: true,
-          consent_version: "v1.0",
-          consent_at: new Date().toISOString(),
-        } as any, { onConflict: "user_id", ignoreDuplicates: true });
-      }
-      // Invalidate the invite token
+      // Provision user + invalidate token server-side (service_role bypasses RLS)
       const inviteToken = localStorage.getItem("invite_token");
       if (inviteToken) {
         await supabase.functions.invoke("verify-invite-token", {
-          body: { token: inviteToken, mark_used: true },
+          body: { token: inviteToken, mark_used: true, user_id: newUser?.id },
         });
       }
     }
