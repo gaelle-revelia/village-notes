@@ -430,6 +430,8 @@ export type Database = {
       }
       profiles: {
         Row: {
+          consent_at: string | null
+          consent_version: string | null
           created_at: string
           id: string
           onboarding_completed: boolean
@@ -437,6 +439,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          consent_at?: string | null
+          consent_version?: string | null
           created_at?: string
           id?: string
           onboarding_completed?: boolean
@@ -444,6 +448,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          consent_at?: string | null
+          consent_version?: string | null
           created_at?: string
           id?: string
           onboarding_completed?: boolean
