@@ -112,7 +112,11 @@ export function SignupForm({ onSwitchToLogin, onSuccess }: SignupFormProps) {
             className="mt-0.5"
           />
           <Label htmlFor="consent" className="text-sm leading-relaxed font-normal text-muted-foreground cursor-pointer">
-            J'accepte la politique de confidentialité et les conditions d'utilisation
+            J'accepte la{" "}
+            <a href="/politique-confidentialite" target="_blank" rel="noreferrer" className="text-primary hover:underline">
+              politique de confidentialité
+            </a>{" "}
+            et les conditions d'utilisation
           </Label>
         </div>
 

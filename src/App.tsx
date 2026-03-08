@@ -36,6 +36,7 @@ import OnboardingInvite from "./pages/OnboardingInvite";
 import Vocabulaire from "./pages/Vocabulaire";
 import PlaceholderScreen from "./components/PlaceholderScreen";
 import NotFound from "./pages/NotFound";
+import PolitiqueConfidentialite from "./pages/PolitiqueConfidentialite";
 
 const queryClient = new QueryClient();
 
@@ -75,6 +76,7 @@ const AppRoutes = () => {
       <Route path="/parametres" element={<AppSettings />} />
       <Route path="/onboarding-invite" element={<OnboardingInvite />} />
       <Route path="/vocabulaire" element={<Vocabulaire />} />
+      <Route path="/politique-confidentialite" element={<PolitiqueConfidentialite />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
