@@ -12,7 +12,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { token, mark_used } = await req.json();
+    const { token, mark_used, provision_user, user_id } = await req.json();
 
     if (!token) {
       return new Response(JSON.stringify({ error: "Token is required" }), {
@@ -53,7 +53,69 @@ Deno.serve(async (req) => {
       });
     }
 
-    // If mark_used is true, invalidate the token
+    // --- Provisioning mode: create profiles + enfant_membres server-side ---
+    if (provision_user && user_id) {
+      // 1. Upsert profiles
+      const { error: profileErr } = await supabaseAdmin
+        .from("profiles")
+        .upsert(
+          { user_id, onboarding_completed: false },
+          { onConflict: "user_id", ignoreDuplicates: true }
+        );
+
+      if (profileErr) {
+        console.error("profiles upsert error:", profileErr);
+        return new Response(
+          JSON.stringify({ error: "Failed to create profile", detail: profileErr.message }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // 2. Upsert enfant_membres
+      const { error: membreErr } = await supabaseAdmin
+        .from("enfant_membres")
+        .upsert(
+          {
+            enfant_id: invitation.enfant_id,
+            user_id,
+            role: invitation.role,
+          },
+          { onConflict: "enfant_id,user_id", ignoreDuplicates: true }
+        );
+
+      if (membreErr) {
+        console.error("enfant_membres upsert error:", membreErr);
+        return new Response(
+          JSON.stringify({ error: "Failed to create membership", detail: membreErr.message }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // 3. Mark token as used
+      const { error: usedErr } = await supabaseAdmin
+        .from("invitations")
+        .update({ status: "used" })
+        .eq("token", token);
+
+      if (usedErr) {
+        console.error("mark used error:", usedErr);
+        return new Response(
+          JSON.stringify({ error: "Failed to invalidate token", detail: usedErr.message }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          enfant_id: invitation.enfant_id,
+          role: invitation.role,
+        }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // --- Legacy mode: just validate + optionally mark used ---
     if (mark_used) {
       await supabaseAdmin
         .from("invitations")
