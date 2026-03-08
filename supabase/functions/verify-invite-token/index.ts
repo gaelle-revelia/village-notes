@@ -56,7 +56,7 @@ Deno.serve(async (req) => {
     // If mark_used is true, provision user and invalidate the token
     if (mark_used) {
       if (user_id) {
-        await supabaseAdmin.from("enfant_membres").upsert(
+        const { error: membresErr } = await supabaseAdmin.from("enfant_membres").upsert(
           {
             enfant_id: invitation.enfant_id,
             user_id,
@@ -65,7 +65,15 @@ Deno.serve(async (req) => {
           },
           { onConflict: "enfant_id,user_id", ignoreDuplicates: true }
         );
-        await supabaseAdmin.from("profiles").upsert(
+        if (membresErr) {
+          console.error("enfant_membres upsert failed:", membresErr);
+          return new Response(JSON.stringify({ error: "Failed to provision membership" }), {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+
+        const { error: profileErr } = await supabaseAdmin.from("profiles").upsert(
           {
             user_id,
             prenom: "",
@@ -75,6 +83,13 @@ Deno.serve(async (req) => {
           },
           { onConflict: "user_id", ignoreDuplicates: true }
         );
+        if (profileErr) {
+          console.error("profiles upsert failed:", profileErr);
+          return new Response(JSON.stringify({ error: "Failed to provision profile" }), {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
       }
 
       await supabaseAdmin
