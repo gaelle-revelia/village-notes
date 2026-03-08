@@ -1,58 +1,44 @@
 
 
-## Plan: "Préciser ce bloc" — refine_block mode + PreciserBlocDrawer
+## Plan: Add debug console.log statements
 
-### Part 1 — Edge function: add `refine_block` mode
+Minimal changes — no logic modifications, only `console.log` additions.
 
-In `supabase/functions/generate-synthesis/index.ts`, add a new branch:
+### File 1 — `src/pages/OnboardingInvite.tsx`
 
-- Parse `bloc_id`, `bloc_title`, `bloc_content`, `precision`, `cas_usage`, `synthese_id` from body
-- Fetch enfant `prenom` + `sexe` (reuse existing pattern)
-- System prompt: regenerate only this block, integrate precision naturally, keep tone/length, no invention, return `{ "content": "..." }`
-- User message: bloc_title + bloc_content + precision + prenom + pronouns
-- Update `syntheses` row: read `contenu` JSON, find bloc by `bloc_id`, replace content, write back
-- Return `{ bloc_id, content }`
+**After line 302** (after `const newUser = signUpData?.user;`):
+```ts
+console.log("[invite] signUpData:", JSON.stringify(signUpData));
+console.log("[invite] newUser:", newUser?.id);
+```
 
-### Part 2 — Create PreciserBlocDrawer component
+**After line 310** (after `const inviteToken = localStorage.getItem("invite_token");`):
+```ts
+console.log("[invite] inviteToken:", inviteToken);
+```
 
-New file: `src/components/synthese/PreciserBlocDrawer.tsx`
+**After line 318** (after the `functions.invoke` call, before the `if (fnError)` check):
+```ts
+console.log("[invite] fnError:", fnError);
+```
 
-**Props:** `isOpen`, `onClose`, `bloc: { id, title, content, cas_usage }`, `enfantId`, `syntheseId`, `onBlockUpdated: (blocId: string, newContent: string) => void`
+### File 2 — `supabase/functions/verify-invite-token/index.ts`
 
-**UI structure (top to bottom):**
+**After line 18** (after `const { token, mark_used, user_id } = await req.json();`):
+```ts
+console.log("[verify-invite] received:", JSON.stringify({ token, mark_used, user_id }));
+```
 
-1. **DrawerTitle:** "✏️ Préciser ce bloc"
-2. **Current content preview:**
-   - Label: "Ce bloc actuellement :" — DM Sans 12px, color `#9A9490`
-   - Glass card showing `bloc.content`, `line-clamp-3` by default
-   - If content exceeds 3 lines, show a "voir tout" toggle (DM Sans 12px, color `#8B74E0`) that expands/collapses the card
-   - State: `expanded` boolean, toggles between `line-clamp-3` and full display
-3. **Textarea:** placeholder "Ajoute ta précision ici..."
-4. **WiredMicOrb:** voice input appends to textarea
-5. **CTA:** "Régénérer ce bloc →" gradient button, disabled if textarea empty, pulses during loading
+**After line 67** (after the `enfant_membres` upsert, before the existing `if (membresErr)`):
+```ts
+console.log("[verify-invite] enfant_membres result:", membresErr);
+```
 
-**On submit:** invoke `generate-synthesis` with `type: "refine_block"`, on success call `onBlockUpdated`, close drawer, toast success.
+**After line 86** (after the `profiles` upsert, before the existing `if (profileErr)`):
+```ts
+console.log("[verify-invite] profiles result:", profileErr);
+```
 
-### Part 3 — Wire buttons in all 3 result pages
-
-**Transmission** (`OutilsSyntheseTransmission.tsx`):
-- State: `refineBloc`, `syntheseId`
-- ResultCard "Préciser ce bloc" → opens drawer with bloc data
-- `onBlockUpdated` → update `generatedBlocks` in place
-
-**MDPH** (`OutilsSyntheseMdph.tsx`):
-- Same pattern with ThematicBlock buttons
-
-**Pick-me-up** (`OutilsSynthesePickMeUp.tsx`):
-- Single block ("narrative"), add "Préciser ce bloc" button, same drawer
-
-### Files changed
-
-| File | Action |
-|---|---|
-| `supabase/functions/generate-synthesis/index.ts` | Add `refine_block` branch |
-| `src/components/synthese/PreciserBlocDrawer.tsx` | Create |
-| `src/pages/OutilsSyntheseTransmission.tsx` | Wire drawer |
-| `src/pages/OutilsSyntheseMdph.tsx` | Wire drawer |
-| `src/pages/OutilsSynthesePickMeUp.tsx` | Wire drawer |
+### Post-edit
+Deploy `verify-invite-token` edge function after modification.
 
