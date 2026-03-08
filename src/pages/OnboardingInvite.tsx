@@ -245,14 +245,91 @@ function ScreenWelcome({
   );
 }
 
+function ScreenPrenom({
+  onNext,
+  onBack,
+  value,
+  onChange,
+}: {
+  onNext: () => void;
+  onBack: () => void;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  const valid = value.trim().length >= 2;
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen px-6 py-12">
+      <h2
+        className="text-center mb-2"
+        style={{
+          fontFamily: "Fraunces, serif",
+          fontWeight: 600,
+          fontSize: 24,
+          color: "#1E1A1A",
+        }}
+      >
+        Comment vous appelez-vous ?
+      </h2>
+      <p
+        className="text-center mb-8"
+        style={{
+          fontFamily: "DM Sans, sans-serif",
+          fontSize: 14,
+          color: "#9A9490",
+          maxWidth: 280,
+        }}
+      >
+        Pour personnaliser votre expérience dans le Village.
+      </p>
+
+      <div className="w-full max-w-xs space-y-4">
+        <div>
+          <label
+            style={{
+              fontFamily: "DM Sans, sans-serif",
+              fontSize: 13,
+              color: "#9A9490",
+              marginBottom: 6,
+              display: "block",
+            }}
+          >
+            Votre prénom
+          </label>
+          <input
+            type="text"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder="Prénom"
+            className="w-full px-4 py-3 rounded-xl outline-none"
+            style={{
+              fontFamily: "DM Sans, sans-serif",
+              fontSize: 14,
+              color: "#1E1A1A",
+              background: "rgba(255,255,255,0.45)",
+              border: "1px solid rgba(255,255,255,0.65)",
+            }}
+          />
+        </div>
+
+        <PrimaryButton onClick={onNext} disabled={!valid}>
+          Continuer
+        </PrimaryButton>
+        <GhostButton onClick={onBack}>← Retour</GhostButton>
+      </div>
+    </div>
+  );
+}
+
 function ScreenPassword({
   email,
   enfantPrenom,
+  invitePrenom,
   onDone,
   onBack,
 }: {
   email: string;
   enfantPrenom: string;
+  invitePrenom: string;
   onDone: () => void;
   onBack: () => void;
 }) {
@@ -261,6 +338,7 @@ function ScreenPassword({
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [consent, setConsent] = useState(false);
   const strength = passwordStrength(pw);
 
   const submit = async () => {
@@ -324,7 +402,16 @@ function ScreenPassword({
 
     const { data: provisionResult, error: provisionError } = await supabase.functions.invoke(
       "verify-invite-token",
-      { body: { token: inviteToken, provision_user: true, user_id: currentUser.id } }
+      {
+        body: {
+          token: inviteToken,
+          provision_user: true,
+          user_id: currentUser.id,
+          prenom: invitePrenom.trim() || null,
+          consent_at: new Date().toISOString(),
+          consent_version: "1.0",
+        },
+      }
     );
 
     if (provisionError || provisionResult?.error) {
@@ -337,7 +424,7 @@ function ScreenPassword({
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-6 py-12">
+    <div className="flex flex-col items-center justify-center min-h-screen px-6 py-12 overflow-y-auto">
       <h2
         className="text-center mb-2"
         style={{
@@ -432,6 +519,38 @@ function ScreenPassword({
           }}
         />
 
+        {/* RGPD Consent */}
+        <div className="flex items-start gap-3">
+          <input
+            type="checkbox"
+            id="invite-consent"
+            checked={consent}
+            onChange={(e) => setConsent(e.target.checked)}
+            className="mt-1 h-4 w-4 rounded border-muted-foreground accent-primary flex-shrink-0"
+          />
+          <label
+            htmlFor="invite-consent"
+            className="cursor-pointer"
+            style={{
+              fontFamily: "DM Sans, sans-serif",
+              fontSize: 13,
+              color: "#9A9490",
+              lineHeight: 1.5,
+            }}
+          >
+            J'accepte la{" "}
+            <a
+              href="/politique-confidentialite"
+              target="_blank"
+              rel="noreferrer"
+              style={{ color: "#8B74E0", textDecoration: "underline" }}
+            >
+              politique de confidentialité
+            </a>{" "}
+            et les conditions d'utilisation
+          </label>
+        </div>
+
         {error && (
           <p
             style={{
@@ -444,7 +563,7 @@ function ScreenPassword({
           </p>
         )}
 
-        <PrimaryButton onClick={submit} disabled={saving}>
+        <PrimaryButton onClick={submit} disabled={saving || !consent}>
           {saving ? "Création..." : "Créer mon accès"}
         </PrimaryButton>
         <GhostButton onClick={onBack}>← Retour</GhostButton>
