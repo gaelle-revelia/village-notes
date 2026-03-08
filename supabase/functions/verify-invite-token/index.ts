@@ -12,7 +12,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { token, mark_used, provision_user, user_id } = await req.json();
+    const { token, mark_used, provision_user, user_id, prenom, consent_at, consent_version } = await req.json();
 
     if (!token) {
       return new Response(JSON.stringify({ error: "Token is required" }), {
