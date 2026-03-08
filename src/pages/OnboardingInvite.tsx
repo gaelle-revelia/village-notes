@@ -1097,6 +1097,7 @@ export default function OnboardingInvite() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [step, setStep] = useState(1);
+  const [invitePrenom, setInvitePrenom] = useState("");
 
   const [enfantPrenom, setEnfantPrenom] = useState("");
   const [inviterName, setInviterName] = useState("");
