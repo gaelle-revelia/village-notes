@@ -36,6 +36,7 @@ import OnboardingInvite from "./pages/OnboardingInvite";
 import Vocabulaire from "./pages/Vocabulaire";
 import PlaceholderScreen from "./components/PlaceholderScreen";
 import NotFound from "./pages/NotFound";
+import PolitiqueConfidentialite from "./pages/PolitiqueConfidentialite";
 
 const queryClient = new QueryClient();
 
