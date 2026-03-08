@@ -286,8 +286,6 @@ function ScreenPassword({
       }
     } else {
       // New user: sign up with email from invitation
-      const enfantId = localStorage.getItem("invite_enfant_id");
-      const inviteRole = localStorage.getItem("invite_role") || "coparent";
       const { error: err } = await supabase.auth.signUp({
         email,
         password: pw,
@@ -297,24 +295,28 @@ function ScreenPassword({
         setSaving(false);
         return;
       }
-      // Upsert enfant_membres
-      if (enfantId) {
-        const { data: { user: newUser } } = await supabase.auth.getUser();
-        if (newUser) {
-          await supabase.from("enfant_membres" as any).upsert(
-            { enfant_id: enfantId, user_id: newUser.id, role: inviteRole } as any,
-            { onConflict: "enfant_id,user_id", ignoreDuplicates: true }
-          );
-        }
-      }
-      // Invalidate the invite token
-      const inviteToken = localStorage.getItem("invite_token");
-      if (inviteToken) {
-        await supabase.functions.invoke("verify-invite-token", {
-          body: { token: inviteToken, mark_used: true },
-        });
-      }
     }
+
+    // Server-side provisioning: profiles + enfant_membres + mark token used
+    const inviteToken = localStorage.getItem("invite_token");
+    const { data: { user: currentUser } } = await supabase.auth.getUser();
+    if (!inviteToken || !currentUser) {
+      setError("Impossible de finaliser l'inscription. Veuillez réessayer.");
+      setSaving(false);
+      return;
+    }
+
+    const { data: provisionResult, error: provisionError } = await supabase.functions.invoke(
+      "verify-invite-token",
+      { body: { token: inviteToken, provision_user: true, user_id: currentUser.id } }
+    );
+
+    if (provisionError || provisionResult?.error) {
+      setError(provisionResult?.error || "Erreur lors de la création du compte. Veuillez réessayer.");
+      setSaving(false);
+      return;
+    }
+
     onDone();
   };
 
