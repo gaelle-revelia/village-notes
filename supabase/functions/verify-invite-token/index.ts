@@ -12,7 +12,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { token, mark_used } = await req.json();
+    const { token, mark_used, user_id } = await req.json();
 
     if (!token) {
       return new Response(JSON.stringify({ error: "Token is required" }), {
@@ -53,8 +53,30 @@ Deno.serve(async (req) => {
       });
     }
 
-    // If mark_used is true, invalidate the token
+    // If mark_used is true, provision user and invalidate the token
     if (mark_used) {
+      if (user_id) {
+        await supabaseAdmin.from("enfant_membres").upsert(
+          {
+            enfant_id: invitation.enfant_id,
+            user_id,
+            role: invitation.role,
+            joined_at: new Date().toISOString(),
+          },
+          { onConflict: "enfant_id,user_id", ignoreDuplicates: true }
+        );
+        await supabaseAdmin.from("profiles").upsert(
+          {
+            user_id,
+            prenom: "",
+            onboarding_completed: true,
+            consent_version: "v1.0",
+            consent_at: new Date().toISOString(),
+          },
+          { onConflict: "user_id", ignoreDuplicates: true }
+        );
+      }
+
       await supabaseAdmin
         .from("invitations")
         .update({ status: "used" })
