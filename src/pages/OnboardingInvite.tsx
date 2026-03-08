@@ -304,9 +304,14 @@ function ScreenPassword({
       // Provision user + invalidate token server-side (service_role bypasses RLS)
       const inviteToken = localStorage.getItem("invite_token");
       if (inviteToken) {
-        await supabase.functions.invoke("verify-invite-token", {
+        const { error: fnError } = await supabase.functions.invoke("verify-invite-token", {
           body: { token: inviteToken, mark_used: true, user_id: newUser?.id },
         });
+        if (fnError) {
+          setError("Erreur lors de la création de votre accès. Veuillez réessayer.");
+          setSaving(false);
+          return;
+        }
       }
     }
     onDone();
