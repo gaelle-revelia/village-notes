@@ -1011,6 +1011,7 @@ export default function OnboardingInvite() {
         localStorage.setItem("invite_token", token);
         setRole(data.role);
         setInviteEmail(data.email);
+        if (data.email) localStorage.setItem("invite_email", data.email);
       }
 
       // Step 2: Load context data
