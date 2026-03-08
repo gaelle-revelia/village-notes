@@ -560,7 +560,7 @@ CREATE POLICY "pepites_access" ON pepites
 
 **Fetch lexique** : toutes sources confondues (`onboarding_prenom` + `onboarding_structure` + `manual`), groupées par `mot_correct`.
 
-**Mode `text_quick`** : appel simplifié, JSON `{ "resume": "..." }` uniquement. Modèle : `google/gemini-2.5-flash-lite`. Fallback si parse échoue : 60 premiers caractères du texte brut.
+**Mode `text_quick`** : appel simplifié, JSON `{ "resume": "..." }` uniquement. Modèle : `google/gemini-3-flash-preview`. Fallback si parse échoue : 60 premiers caractères du texte brut.
 
 ### Bloc pépites dans `process-memo` ← NOUVEAU
 
