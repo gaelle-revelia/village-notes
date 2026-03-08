@@ -813,7 +813,7 @@ RLS sur les deux tables selon `get_membre_role(enfant_id)` :
 
 ### Sélection d'icône intelligente
 
-- Edge function `suggest-icon` → `google/gemini-2.5-flash`
+- Edge function `suggest-icon` → `google/gemini-3-flash-preview`
 - Déclenché au `onBlur` du champ nom si domaine sélectionné
 - Retourne un nom d'icône Lucide parmi 33 autorisées
 - Picker grid 6 colonnes pour changer manuellement
