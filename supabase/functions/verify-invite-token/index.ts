@@ -12,7 +12,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { token, mark_used, provision_user, user_id } = await req.json();
+    const { token, mark_used, provision_user, user_id, prenom, consent_at, consent_version } = await req.json();
 
     if (!token) {
       return new Response(JSON.stringify({ error: "Token is required" }), {
@@ -56,12 +56,14 @@ Deno.serve(async (req) => {
     // --- Provisioning mode: create profiles + enfant_membres server-side ---
     if (provision_user && user_id) {
       // 1. Upsert profiles
+      const profileData: Record<string, unknown> = { user_id, onboarding_completed: false };
+      if (prenom) profileData.prenom = prenom;
+      if (consent_at) profileData.consent_at = consent_at;
+      if (consent_version) profileData.consent_version = consent_version;
+
       const { error: profileErr } = await supabaseAdmin
         .from("profiles")
-        .upsert(
-          { user_id, onboarding_completed: false },
-          { onConflict: "user_id", ignoreDuplicates: true }
-        );
+        .upsert(profileData, { onConflict: "user_id", ignoreDuplicates: false });
 
       if (profileErr) {
         console.error("profiles upsert error:", profileErr);
