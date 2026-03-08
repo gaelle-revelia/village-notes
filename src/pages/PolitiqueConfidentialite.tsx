@@ -73,7 +73,7 @@ const PolitiqueConfidentialite = () => {
               contact@the-village.app
             </a>
             <br />
-            Adresse : 2 rue Albert Rolland
+            Adresse : 2 rue Albert Rolland, 29200 Brest
           </Para>
 
           {/* Section 2 */}
