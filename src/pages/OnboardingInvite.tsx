@@ -300,6 +300,8 @@ function ScreenPassword({
           return;
         }
         const newUser = signUpData?.user;
+        console.log("[invite] signUpData:", JSON.stringify(signUpData));
+        console.log("[invite] newUser:", newUser?.id);
         // Detect Supabase fake-success (duplicate email returns empty identities)
         if (!newUser || (newUser.identities && newUser.identities.length === 0)) {
           setError("Cet email est déjà associé à un compte. Essayez de vous connecter.");
