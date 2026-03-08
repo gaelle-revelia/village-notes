@@ -1082,6 +1082,7 @@ export default function OnboardingInvite() {
     localStorage.removeItem("invite_role");
     localStorage.removeItem("invite_token");
     localStorage.removeItem("invite_hash");
+    localStorage.removeItem("invite_email");
     navigate("/timeline");
   }, [navigate]);
 
