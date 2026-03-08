@@ -1303,14 +1303,23 @@ export default function OnboardingInvite() {
           />
         )}
         {step === 2 && (
-          <ScreenPassword
-            email={inviteEmail || user?.email || ""}
-            enfantPrenom={enfantPrenom || "l'enfant"}
-            onDone={() => setStep(3)}
+          <ScreenPrenom
+            value={invitePrenom}
+            onChange={setInvitePrenom}
+            onNext={() => setStep(3)}
             onBack={() => setStep(1)}
           />
         )}
         {step === 3 && (
+          <ScreenPassword
+            email={inviteEmail || user?.email || ""}
+            enfantPrenom={enfantPrenom || "l'enfant"}
+            invitePrenom={invitePrenom}
+            onDone={() => setStep(4)}
+            onBack={() => setStep(2)}
+          />
+        )}
+        {step === 4 && (
           <DiscoveryCarousel
             slides={discoverySlides}
             onFinish={() => setStep(6)}
