@@ -291,7 +291,7 @@ function ScreenPassword({
       // New user: sign up with email from invitation
       const enfantId = localStorage.getItem("invite_enfant_id");
       const inviteRole = localStorage.getItem("invite_role") || "coparent";
-      const { error: err } = await supabase.auth.signUp({
+      const { data: signUpData, error: err } = await supabase.auth.signUp({
         email,
         password: pw,
       });
@@ -300,15 +300,23 @@ function ScreenPassword({
         setSaving(false);
         return;
       }
+      const newUser = signUpData?.user;
       // Upsert enfant_membres
-      if (enfantId) {
-        const { data: { user: newUser } } = await supabase.auth.getUser();
-        if (newUser) {
-          await supabase.from("enfant_membres" as any).upsert(
-            { enfant_id: enfantId, user_id: newUser.id, role: inviteRole } as any,
-            { onConflict: "enfant_id,user_id", ignoreDuplicates: true }
-          );
-        }
+      if (enfantId && newUser) {
+        await supabase.from("enfant_membres" as any).upsert(
+          { enfant_id: enfantId, user_id: newUser.id, role: inviteRole } as any,
+          { onConflict: "enfant_id,user_id", ignoreDuplicates: true }
+        );
+      }
+      // Insert profile for invited user
+      if (newUser) {
+        await supabase.from("profiles").upsert({
+          user_id: newUser.id,
+          prenom: "",
+          onboarding_completed: true,
+          consent_version: "v1.0",
+          consent_at: new Date().toISOString(),
+        } as any, { onConflict: "user_id", ignoreDuplicates: true });
       }
       // Invalidate the invite token
       const inviteToken = localStorage.getItem("invite_token");
