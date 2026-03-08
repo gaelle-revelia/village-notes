@@ -289,9 +289,12 @@ serve(async (req) => {
         }
       );
 
-      if (!transcribeResponse.ok) {
+    if (!transcribeResponse.ok) {
         const errText = await transcribeResponse.text();
         console.error("Transcription error:", transcribeResponse.status, errText);
+
+        // Always delete audio file on error to prevent orphaned files
+        await supabase.storage.from("audio-temp").remove([storagePath]);
 
         if (transcribeResponse.status === 429) {
           await supabase.from("memos").update({ processing_status: "error" }).eq("id", memo_id);
