@@ -109,7 +109,7 @@ const PolitiqueConfidentialite = () => {
               "Informations sur les intervenants thérapeutiques (nom, spécialité)",
               "Données d'activités suivies (type, durée, observations)",
               "Lexique phonétique personnalisé",
-              "Documents uploadés (PDF, images)",
+              "Documents PDF (comptes-rendus médicaux, ordonnances, bilans) — optionnel",
             ]}
           />
 
