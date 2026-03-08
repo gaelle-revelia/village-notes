@@ -294,7 +294,7 @@ function ScreenPassword({
       }
     } else {
       const { data: signUpData, error: err } = await supabase.auth.signUp({
-        email,
+        email: resolvedEmail,
         password: pw,
       });
       if (err) {
