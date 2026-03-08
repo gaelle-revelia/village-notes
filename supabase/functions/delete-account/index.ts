@@ -74,6 +74,43 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Fetch prenom before deletion
+    const { data: profile } = await supabaseAdmin
+      .from("profiles")
+      .select("prenom")
+      .eq("user_id", userId)
+      .single();
+
+    const prenom = profile?.prenom || "là";
+    const userEmail = user.email;
+
+    // Send confirmation email via Resend (non-blocking)
+    const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+    if (RESEND_API_KEY && userEmail) {
+      try {
+        const resendRes = await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${RESEND_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            from: "The Village <contact@the-village.app>",
+            to: [userEmail],
+            subject: "Votre accès à The Village a été supprimé",
+            text: `Bonjour ${prenom},\n\nVotre accès au village a bien été supprimé.\nVos souvenirs partagés restent accessibles aux autres membres du village.\n\nSi vous n'êtes pas à l'origine de cette action, contactez-nous immédiatement à contact@the-village.app\n\nL'équipe The Village`,
+          }),
+        });
+        if (!resendRes.ok) {
+          console.error("Resend delete-confirmation error:", resendRes.status, await resendRes.text());
+        }
+      } catch (emailErr) {
+        console.error("Failed to send delete confirmation email:", emailErr);
+      }
+    } else {
+      console.warn("Skipping delete confirmation email: missing RESEND_API_KEY or user email");
+    }
+
     // Delete enfant_membres row
     await supabaseAdmin
       .from("enfant_membres")
