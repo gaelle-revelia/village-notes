@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { supabase } from "@/integrations/supabase/client";
 
 const Waitlist = () => {
   const [submitted, setSubmitted] = useState(false);
@@ -11,10 +12,34 @@ const Waitlist = () => {
   const [email, setEmail] = useState("");
   const [raison, setRaison] = useState("");
   const [consent, setConsent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !consent) return;
+    setLoading(true);
+    setErrorMsg("");
+
+    const { error } = await supabase.from("waitlist" as any).insert({
+      email,
+      prenom: prenom || null,
+      nom: nom || null,
+      motivation: raison || null,
+      consent_at: new Date().toISOString(),
+    } as any);
+
+    setLoading(false);
+
+    if (error) {
+      if (error.code === "23505") {
+        setErrorMsg("Cette adresse est déjà sur la liste — on ne vous oublie pas 😊");
+      } else {
+        setErrorMsg("Une erreur est survenue. Veuillez réessayer.");
+      }
+      return;
+    }
+
     setSubmitted(true);
   };
 
@@ -96,15 +121,19 @@ const Waitlist = () => {
               </label>
             </div>
 
+            {errorMsg && (
+              <p className="font-sans text-sm text-[#E8736A] text-center">{errorMsg}</p>
+            )}
+
             <Button
               type="submit"
-              disabled={!email || !consent}
+              disabled={!email || !consent || loading}
               className="w-full text-white font-sans font-medium"
               style={{
                 background: "linear-gradient(135deg, #E8736A, #8B74E0)",
               }}
             >
-              Me prévenir
+              {loading ? "Envoi en cours..." : "Me prévenir"}
             </Button>
 
             <p className="font-sans text-xs text-[#9A9490] text-center">
