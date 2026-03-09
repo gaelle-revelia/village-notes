@@ -580,6 +580,36 @@ export type Database = {
           },
         ]
       }
+      waitlist: {
+        Row: {
+          consent_at: string
+          created_at: string | null
+          email: string
+          id: string
+          motivation: string | null
+          nom: string | null
+          prenom: string | null
+        }
+        Insert: {
+          consent_at: string
+          created_at?: string | null
+          email: string
+          id?: string
+          motivation?: string | null
+          nom?: string | null
+          prenom?: string | null
+        }
+        Update: {
+          consent_at?: string
+          created_at?: string | null
+          email?: string
+          id?: string
+          motivation?: string | null
+          nom?: string | null
+          prenom?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
