@@ -121,15 +121,19 @@ const Waitlist = () => {
               </label>
             </div>
 
+            {errorMsg && (
+              <p className="font-sans text-sm text-[#E8736A] text-center">{errorMsg}</p>
+            )}
+
             <Button
               type="submit"
-              disabled={!email || !consent}
+              disabled={!email || !consent || loading}
               className="w-full text-white font-sans font-medium"
               style={{
                 background: "linear-gradient(135deg, #E8736A, #8B74E0)",
               }}
             >
-              Me prévenir
+              {loading ? "Envoi en cours..." : "Me prévenir"}
             </Button>
 
             <p className="font-sans text-xs text-[#9A9490] text-center">
