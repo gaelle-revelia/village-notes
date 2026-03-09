@@ -37,6 +37,7 @@ import Vocabulaire from "./pages/Vocabulaire";
 import PlaceholderScreen from "./components/PlaceholderScreen";
 import NotFound from "./pages/NotFound";
 import PolitiqueConfidentialite from "./pages/PolitiqueConfidentialite";
+import Waitlist from "./pages/Waitlist";
 
 const queryClient = new QueryClient();
 
