@@ -109,9 +109,9 @@ export function LoginForm({ onSwitchToSignup, onForgotPassword }: LoginFormProps
 
       <p className="text-center text-sm text-muted-foreground">
         Pas encore de compte ?{" "}
-        <button onClick={onSwitchToSignup} className="text-primary hover:underline font-medium">
+        <a href="/waitlist" className="text-primary hover:underline font-medium">
           Créer mon espace
-        </button>
+        </a>
       </p>
     </div>
   );
