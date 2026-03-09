@@ -40,6 +40,11 @@ const Waitlist = () => {
       return;
     }
 
+    // Fire-and-forget: send confirmation emails
+    supabase.functions.invoke("send-waitlist-emails", {
+      body: { email, prenom, nom, motivation: raison, created_at: new Date().toISOString() },
+    }).catch((err) => console.error("Waitlist email error:", err));
+
     setSubmitted(true);
   };
 
