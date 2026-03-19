@@ -914,7 +914,6 @@ export default function OutilsQuestions() {
                 <X size={14} />
               </button>
             )}
-            />
           </div>
         </div>
 
