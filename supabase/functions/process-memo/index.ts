@@ -16,6 +16,9 @@ const QUESTION_REFORMULATION_PROMPT =
 
 Réponds uniquement en JSON: { "question": "...", "precisions": "..." }`;
 
+const ANSWER_REFORMULATION_PROMPT =
+  `Tu aides des parents d'enfants en situation de handicap à noter les réponses de leurs professionnels de santé. Reformule cette transcription en une réponse claire et directe, en 1 à 3 phrases courtes. Garde les termes médicaux importants. Réponds uniquement avec le texte reformulé, sans JSON, sans introduction.`;
+
 function getCorsHeaders(req: Request) {
   const origin = req.headers.get("origin") || "";
   const isLovablePreview =
@@ -261,6 +264,44 @@ async function reformulateQuestionFromTranscription(
   }
 }
 
+async function reformulateAnswerFromTranscription(
+  lovableApiKey: string,
+  transcription: string,
+): Promise<string> {
+  const response = await fetch(AI_GATEWAY_URL, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${lovableApiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: AI_MODEL,
+      messages: [
+        { role: "system", content: ANSWER_REFORMULATION_PROMPT },
+        { role: "user", content: `Transcription : ${transcription}` },
+      ],
+    }),
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    console.error("Answer reformulation error:", response.status, errText);
+
+    if (response.status === 429) {
+      throw new HttpError(429, "Rate limit exceeded. Please try again later.");
+    }
+    if (response.status === 402) {
+      throw new HttpError(402, "AI credits exhausted.");
+    }
+
+    throw new HttpError(500, "Answer reformulation failed");
+  }
+
+  const result = await response.json();
+  const content = result.choices?.[0]?.message?.content || "";
+  return content.trim();
+}
+
 serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
@@ -294,7 +335,7 @@ serve(async (req) => {
     const body = await req.json();
     const { memo_id, mode, text_input, audio_path } = body;
 
-    if (mode === "transcription_only" || mode === "question_reformulation") {
+    if (mode === "transcription_only" || mode === "question_reformulation" || mode === "answer_reformulation") {
       if (!audio_path) {
         return jsonResponse({ error: `audio_path required for ${mode} mode` }, corsHeaders, 400);
       }
@@ -306,8 +347,13 @@ serve(async (req) => {
         return jsonResponse({ transcription }, corsHeaders);
       }
 
-      const reformulated = await reformulateQuestionFromTranscription(lovableApiKey, transcription);
-      return jsonResponse(reformulated, corsHeaders);
+      if (mode === "question_reformulation") {
+        const reformulated = await reformulateQuestionFromTranscription(lovableApiKey, transcription);
+        return jsonResponse(reformulated, corsHeaders);
+      }
+
+      const answer = await reformulateAnswerFromTranscription(lovableApiKey, transcription);
+      return jsonResponse({ answer }, corsHeaders);
     }
 
     if (!memo_id) {

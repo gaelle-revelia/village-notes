@@ -10,7 +10,7 @@ interface UseVocalRecordingReturn {
   stopRecording: () => Promise<string | null>;
 }
 
-export function useVocalRecording(): UseVocalRecordingReturn {
+export function useVocalRecording(mode: string = "transcription_only"): UseVocalRecordingReturn {
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -97,14 +97,14 @@ export function useVocalRecording(): UseVocalRecordingReturn {
           if (uploadError) throw uploadError;
 
           const { data, error: fnError } = await supabase.functions.invoke("process-memo", {
-            body: { mode: "transcription_only", audio_path: audioPath },
+            body: { mode, audio_path: audioPath },
           });
 
           if (fnError) throw fnError;
 
-          const transcription = data?.transcription || "";
+          const result = data?.answer || data?.transcription || "";
           setIsTranscribing(false);
-          resolve(transcription);
+          resolve(result);
         } catch (err) {
           console.error("Vocal recording error:", err);
           setError("Transcription échouée — réessaie ou utilise la saisie texte.");
