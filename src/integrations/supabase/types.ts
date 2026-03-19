@@ -458,6 +458,53 @@ export type Database = {
         }
         Relationships: []
       }
+      questions: {
+        Row: {
+          answer: string | null
+          asked_at: string | null
+          child_id: string
+          created_at: string
+          id: string
+          linked_pro_ids: string[]
+          parent_id: string
+          show_in_timeline: boolean
+          status: string
+          text: string
+        }
+        Insert: {
+          answer?: string | null
+          asked_at?: string | null
+          child_id: string
+          created_at?: string
+          id?: string
+          linked_pro_ids?: string[]
+          parent_id: string
+          show_in_timeline?: boolean
+          status?: string
+          text: string
+        }
+        Update: {
+          answer?: string | null
+          asked_at?: string | null
+          child_id?: string
+          created_at?: string
+          id?: string
+          linked_pro_ids?: string[]
+          parent_id?: string
+          show_in_timeline?: boolean
+          status?: string
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questions_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "enfants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sessions_activite: {
         Row: {
           activite_id: string
