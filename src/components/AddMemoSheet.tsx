@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  NotebookPen, Mic, PenLine, FileText, Pin, Activity,
+  NotebookPen, PenLine, FileText, Pin, Activity,
   Timer, ChevronRight, ChevronLeft, X, MessageCircleQuestion,
 } from "lucide-react";
 import { icons } from "lucide-react";
@@ -39,7 +39,7 @@ interface Activite {
   unite_distance: string | null;
 }
 
-type View = "main" | "notes" | "activites" | "chrono-choice";
+type View = "main" | "activites" | "chrono-choice";
 
 interface Props {
   open: boolean;
@@ -82,7 +82,7 @@ export default function AddMemoSheet({ open, onOpenChange, enfantId }: Props) {
 
   const domain = (d: string) => DOMAIN_CONFIG[d] ?? DOMAIN_CONFIG["Médical"];
 
-  const translateX = view === "main" ? "0%" : view === "notes" ? "-25%" : view === "activites" ? "-50%" : "-75%";
+  const translateX = view === "main" ? "0%" : view === "activites" ? "-33.33%" : "-66.66%";
 
   return (
     <>
@@ -107,17 +107,17 @@ export default function AddMemoSheet({ open, onOpenChange, enfantId }: Props) {
             <div
               style={{
                 display: "flex",
-                width: "400%",
+                width: "300%",
                 transform: `translateX(${translateX})`,
                 transition: "transform 0.3s ease",
               }}
             >
               {/* === Main panel === */}
-              <nav className="w-full px-2 pb-4 pt-1" style={{ flex: "0 0 25%" }}>
+              <nav className="w-full px-2 pb-4 pt-1" style={{ flex: "0 0 33.33%" }}>
                 <MenuItem
                   icon={<NotebookPen className="h-5 w-5" />}
                   label="Note de rendez-vous"
-                  onClick={() => setView("notes")}
+                  onClick={() => go("/nouveau-memo-vocal")}
                 />
                 <MenuItem
                   icon={<MessageCircleQuestion className="h-5 w-5" />}
@@ -141,23 +141,8 @@ export default function AddMemoSheet({ open, onOpenChange, enfantId }: Props) {
                 />
               </nav>
 
-              {/* === Notes sub-menu === */}
-              <nav className="w-full px-2 pb-4 pt-1" style={{ flex: "0 0 25%" }}>
-                <BackHeader label="Note de rendez-vous" onBack={() => setView("main")} />
-                <MenuItem
-                  icon={<Mic className="h-5 w-5" />}
-                  label="Note vocale"
-                  onClick={() => go("/nouveau-memo-vocal")}
-                />
-                <MenuItem
-                  icon={<PenLine className="h-5 w-5" />}
-                  label="Note écrite"
-                  onClick={() => go("/nouvelle-note")}
-                />
-              </nav>
-
               {/* === Activites sub-menu === */}
-              <div className="w-full px-2 pb-4 pt-1" style={{ flex: "0 0 25%" }}>
+              <div className="w-full px-2 pb-4 pt-1" style={{ flex: "0 0 33.33%" }}>
                 <BackHeader label="Activité" onBack={() => setView("main")} />
                 {loadingActivites ? (
                   <div className="flex items-center justify-center py-6">
@@ -209,7 +194,7 @@ export default function AddMemoSheet({ open, onOpenChange, enfantId }: Props) {
               </div>
 
               {/* === Chrono/Manuel choice === */}
-              <div className="w-full px-2 pb-4 pt-1" style={{ flex: "0 0 25%" }}>
+              <div className="w-full px-2 pb-4 pt-1" style={{ flex: "0 0 33.33%" }}>
                 <BackHeader label={selectedActivite?.nom || "Activité"} onBack={() => setView("activites")} />
                 <div className="flex flex-col gap-3 mt-1">
                   <button
