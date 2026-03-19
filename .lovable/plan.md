@@ -1,58 +1,99 @@
 
+Current findings
 
-## Plan: "Préciser ce bloc" — refine_block mode + PreciserBlocDrawer
+1. Where the page currently lives
+- `NouvelleQuestion` is already defined in its own file:
+  - `src/pages/NouvelleQuestion.tsx`
+- It is not inlined inside `OutilsScreen.tsx`.
+- `src/pages/OutilsScreen.tsx` now only contains the Outils screen and navigates to the dedicated page.
 
-### Part 1 — Edge function: add `refine_block` mode
+2. Where the route is declared
+- In `src/App.tsx`:
+  - import: `import NouvelleQuestion from "./pages/NouvelleQuestion";`
+  - route: `<Route path="/nouvelle-question" element={<NouvelleQuestion />} />`
 
-In `supabase/functions/generate-synthesis/index.ts`, add a new branch:
+3. What currently handles each concern
 
-- Parse `bloc_id`, `bloc_title`, `bloc_content`, `precision`, `cas_usage`, `synthese_id` from body
-- Fetch enfant `prenom` + `sexe` (reuse existing pattern)
-- System prompt: regenerate only this block, integrate precision naturally, keep tone/length, no invention, return `{ "content": "..." }`
-- User message: bloc_title + bloc_content + precision + prenom + pronouns
-- Update `syntheses` row: read `contenu` JSON, find bloc by `bloc_id`, replace content, write back
-- Return `{ bloc_id, content }`
+- Voice recording
+  - Page-level UI/state: `src/pages/NouvelleQuestion.tsx`
+  - Recording/transcription hook: `src/hooks/useVocalRecording.ts`
+  - Current flow:
+    - starts/stops recording via `useVocalRecording()`
+    - `handleStopRecording()` gets the transcription
+    - transcription replaces `question`
+    - page switches to text mode
 
-### Part 2 — Create PreciserBlocDrawer component
+- Intervenant selection (multi-select)
+  - Local page components inside `src/pages/NouvelleQuestion.tsx`
+    - `IntervenantSelection`
+    - `IntervenantRow`
+  - Data fetching also lives in `NouvelleQuestion.tsx`
+    - fetches `intervenants`
+    - computes `recentIntervenants`
+    - manages `selectedIds`
+  - This is separate from memo’s single-select component:
+    - `src/components/memo/IntervenantSearchPicker.tsx`
 
-New file: `src/components/synthese/PreciserBlocDrawer.tsx`
+- Insert into `public.questions`
+  - `handleSubmit` inside `src/pages/NouvelleQuestion.tsx`
+  - Insert call:
+    - `supabase.from("questions").insert({ parent_id, child_id, text, linked_pro_ids, status: "to_ask" })`
 
-**Props:** `isOpen`, `onClose`, `bloc: { id, title, content, cas_usage }`, `enfantId`, `syntheseId`, `onBlockUpdated: (blocId: string, newContent: string) => void`
+4. Entry point from Outils
+- In `src/pages/OutilsScreen.tsx`
+- The “Nouvelle question” button uses:
+  - `onClick={() => navigate("/nouvelle-question")}`
 
-**UI structure (top to bottom):**
+Clean plan
 
-1. **DrawerTitle:** "✏️ Préciser ce bloc"
-2. **Current content preview:**
-   - Label: "Ce bloc actuellement :" — DM Sans 12px, color `#9A9490`
-   - Glass card showing `bloc.content`, `line-clamp-3` by default
-   - If content exceeds 3 lines, show a "voir tout" toggle (DM Sans 12px, color `#8B74E0`) that expands/collapses the card
-   - State: `expanded` boolean, toggles between `line-clamp-3` and full display
-3. **Textarea:** placeholder "Ajoute ta précision ici..."
-4. **WiredMicOrb:** voice input appends to textarea
-5. **CTA:** "Régénérer ce bloc →" gradient button, disabled if textarea empty, pulses during loading
+Goal
+- Keep all existing logic intact.
+- Only reorganize structure so the page mirrors `NouveauMemoVocal.tsx` more closely:
+  - date picker at top
+  - intervenant multi-select
+  - mic button below
 
-**On submit:** invoke `generate-synthesis` with `type: "refine_block"`, on success call `onBlockUpdated`, close drawer, toast success.
+Implementation plan
+1. Keep `src/pages/NouvelleQuestion.tsx` as the dedicated page file
+- No move is needed because it is already separated correctly.
+- Treat this file as the single source of truth for the question page.
 
-### Part 3 — Wire buttons in all 3 result pages
+2. Restructure the JSX in `NouvelleQuestion.tsx` to match the memo page order
+- Reorder the page layout to:
+  - top metadata block
+  - intervenant selection block
+  - voice block
+- Preserve the existing voice hook, search logic, selected pills, and submit logic.
 
-**Transmission** (`OutilsSyntheseTransmission.tsx`):
-- State: `refineBloc`, `syntheseId`
-- ResultCard "Préciser ce bloc" → opens drawer with bloc data
-- `onBlockUpdated` → update `generatedBlocks` in place
+3. Add a date picker at the top using the existing memo pattern
+- Reuse `MemoDatePicker` from:
+  - `src/components/memo/MemoDatePicker.tsx`
+- Keep it UI-only if questions do not persist a date field today.
+- This preserves current insert behavior while aligning the structure visually.
 
-**MDPH** (`OutilsSyntheseMdph.tsx`):
-- Same pattern with ThematicBlock buttons
+4. Keep intervenant multi-select exactly as-is
+- Do not rewrite:
+  - fetch logic
+  - recent logic
+  - pill logic
+  - toggle logic
+- Only move the rendered block so it sits above the mic section, like memo metadata appears above recording.
 
-**Pick-me-up** (`OutilsSynthesePickMeUp.tsx`):
-- Single block ("narrative"), add "Préciser ce bloc" button, same drawer
+5. Keep the mic/transcription flow unchanged
+- Continue using `useVocalRecording`
+- Continue replacing question text on transcription
+- Continue switching to text mode after successful transcription
+- No changes to backend calls or hook behavior
 
-### Files changed
+6. Keep question insertion unchanged
+- Leave `handleSubmit` and the `public.questions` insert payload exactly as-is
+- No table or schema changes
+- No changes to the navigation entry from `/outils`
 
-| File | Action |
-|---|---|
-| `supabase/functions/generate-synthesis/index.ts` | Add `refine_block` branch |
-| `src/components/synthese/PreciserBlocDrawer.tsx` | Create |
-| `src/pages/OutilsSyntheseTransmission.tsx` | Wire drawer |
-| `src/pages/OutilsSyntheseMdph.tsx` | Wire drawer |
-| `src/pages/OutilsSynthesePickMeUp.tsx` | Wire drawer |
-
+Result after refactor
+- File ownership remains clean:
+  - route: `src/App.tsx`
+  - launcher: `src/pages/OutilsScreen.tsx`
+  - page/UI/submit: `src/pages/NouvelleQuestion.tsx`
+  - recording logic: `src/hooks/useVocalRecording.ts`
+- UX structure will visually align better with `NouveauMemoVocal.tsx` without rewriting the existing question logic.
