@@ -810,7 +810,25 @@ export default function OutilsQuestions() {
           <ArrowLeft size={18} />
           <span>Retour</span>
         </button>
-        <h1 className="text-lg font-semibold text-foreground">Questions à poser</h1>
+        <h1 className="flex-1 text-lg font-semibold text-foreground">Questions à poser</h1>
+        <button
+          type="button"
+          onClick={() => navigate("/nouvelle-question")}
+          className="flex items-center justify-center"
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: 12,
+            background: "hsl(var(--background) / 0.45)",
+            backdropFilter: "blur(12px) saturate(1.4)",
+            WebkitBackdropFilter: "blur(12px) saturate(1.4)",
+            border: "1px solid hsl(var(--background) / 0.65)",
+            boxShadow: "0 2px 8px hsl(var(--foreground) / 0.05), inset 0 1px 0 hsl(var(--background) / 0.7)",
+          }}
+          aria-label="Nouvelle question"
+        >
+          <Plus size={16} className="text-muted-foreground" />
+        </button>
       </header>
 
       <main className="flex-1 px-4 pb-28 pt-4" onClick={handleMainClick}>
