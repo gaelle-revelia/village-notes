@@ -69,6 +69,13 @@ const searchFieldStyle: CSSProperties = {
     "0 2px 8px hsl(var(--foreground) / 0.05), inset 0 1px 0 hsl(var(--background) / 0.7)",
 };
 
+const glassFieldStyle: CSSProperties = {
+  background: "rgba(255,255,255,0.52)",
+  backdropFilter: "blur(16px) saturate(1.6)",
+  WebkitBackdropFilter: "blur(16px) saturate(1.6)",
+  border: "1px solid rgba(255,255,255,0.72)",
+};
+
 function normalize(value: string) {
   return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 }
