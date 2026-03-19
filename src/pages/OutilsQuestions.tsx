@@ -901,8 +901,19 @@ export default function OutilsQuestions() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Rechercher…"
-              className="w-full py-2 pl-9 pr-3 text-sm text-foreground outline-none placeholder:text-muted-foreground"
+              className="w-full py-2 pl-9 pr-8 text-sm text-foreground outline-none placeholder:text-muted-foreground"
               style={searchFieldStyle}
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full p-0.5 text-muted-foreground hover:text-foreground"
+                aria-label="Effacer la recherche"
+              >
+                <X size={14} />
+              </button>
+            )}
             />
           </div>
         </div>
