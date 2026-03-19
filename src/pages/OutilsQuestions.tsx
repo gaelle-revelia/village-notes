@@ -556,8 +556,10 @@ export default function OutilsQuestions() {
                         value={draft.precisions}
                         onChange={(e) => updateDraft(question.id, "precisions", e.target.value)}
                         onBlur={() => void flushAndSave(question.id)}
-                        rows={3}
-                        className="w-full resize-none rounded-lg px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        onInput={(e) => { e.currentTarget.style.height = 'auto'; e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px'; }}
+                        ref={(el) => { if (el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; } }}
+                        rows={1}
+                        className="w-full resize-none overflow-hidden rounded-lg px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                         style={glassFieldStyle}
                         placeholder="Contexte complémentaire (optionnel)"
                       />
