@@ -214,6 +214,40 @@ export default function OutilsQuestions() {
   const saveTimerRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
   const mainRef = useRef<HTMLElement>(null);
 
+  // Vocal recording for answer field
+  const {
+    isRecording: isAnswerRecording,
+    isTranscribing: isAnswerTranscribing,
+    error: answerVocalError,
+    elapsedSeconds: answerElapsed,
+    startRecording: startAnswerRecording,
+    stopRecording: stopAnswerRecording,
+  } = useVocalRecording();
+  const answerRecordingTargetRef = useRef<string | null>(null);
+
+  const handleAnswerMicTap = useCallback(async (questionId: string) => {
+    if (isAnswerTranscribing) return;
+    if (isAnswerRecording) {
+      const text = await stopAnswerRecording();
+      if (text && answerRecordingTargetRef.current) {
+        const qid = answerRecordingTargetRef.current;
+        setDrafts((prev) => {
+          const d = prev[qid];
+          if (!d) return prev;
+          const current = d.answer || "";
+          const appended = current ? `${current}\n${text}` : text;
+          return { ...prev, [qid]: { ...d, answer: appended } };
+        });
+        // trigger save
+        setTimeout(() => flushAndSave(qid), 100);
+      }
+      answerRecordingTargetRef.current = null;
+    } else {
+      answerRecordingTargetRef.current = questionId;
+      await startAnswerRecording();
+    }
+  }, [isAnswerRecording, isAnswerTranscribing, startAnswerRecording, stopAnswerRecording]);
+
   // cleanup timers on unmount
   useEffect(() => {
     const timers = saveTimerRef.current;
