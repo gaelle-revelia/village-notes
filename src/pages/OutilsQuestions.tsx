@@ -1,5 +1,5 @@
 import { type CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, Check, Loader2, Plus, Search, X } from "lucide-react";
+import { ArrowLeft, Check, Loader2, Plus, Search, SlidersHorizontal, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import BottomNavBar from "@/components/BottomNavBar";
 import { useAuth } from "@/hooks/useAuth";
