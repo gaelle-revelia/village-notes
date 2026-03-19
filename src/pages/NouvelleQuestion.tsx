@@ -69,6 +69,13 @@ const searchFieldStyle: CSSProperties = {
     "0 2px 8px hsl(var(--foreground) / 0.05), inset 0 1px 0 hsl(var(--background) / 0.7)",
 };
 
+const glassFieldStyle: CSSProperties = {
+  background: "rgba(255,255,255,0.52)",
+  backdropFilter: "blur(16px) saturate(1.6)",
+  WebkitBackdropFilter: "blur(16px) saturate(1.6)",
+  border: "1px solid rgba(255,255,255,0.72)",
+};
+
 function normalize(value: string) {
   return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 }
@@ -469,7 +476,8 @@ export default function NouvelleQuestion() {
                   onChange={(event) => setQuestion(event.target.value)}
                   placeholder="Écrivez votre question ici"
                   required
-                  className="h-12 w-full rounded-xl border border-input bg-background px-3 py-2 text-base font-medium text-foreground outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  className="h-12 w-full rounded-xl px-3 py-2 text-base font-medium text-foreground outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  style={glassFieldStyle}
                   autoFocus
                 />
               </div>
@@ -485,6 +493,7 @@ export default function NouvelleQuestion() {
                   placeholder="Ajoutez un contexte utile si besoin"
                   rows={3}
                   className="w-full rounded-xl resize-none"
+                  style={glassFieldStyle}
                 />
               </div>
 
