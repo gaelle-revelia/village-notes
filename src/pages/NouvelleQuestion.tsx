@@ -58,16 +58,6 @@ const glassHeader: CSSProperties = {
   boxShadow: "0 2px 12px hsl(var(--foreground) / 0.05)",
 };
 
-const glassCard: CSSProperties = {
-  background: "hsl(var(--background) / 0.38)",
-  backdropFilter: "blur(16px) saturate(1.6)",
-  WebkitBackdropFilter: "blur(16px) saturate(1.6)",
-  border: "1px solid hsl(var(--background) / 0.85)",
-  borderRadius: 16,
-  boxShadow:
-    "0 4px 24px hsl(var(--secondary) / 0.08), 0 1px 4px hsl(var(--foreground) / 0.06), inset 0 1px 0 hsl(var(--background) / 0.9)",
-};
-
 const searchFieldStyle: CSSProperties = {
   background: "hsl(var(--background) / 0.45)",
   backdropFilter: "blur(12px) saturate(1.4)",
@@ -312,9 +302,9 @@ export default function NouvelleQuestion() {
       </header>
 
       <main className="flex-1 px-4 py-6">
-        <div className="mx-auto max-w-[400px]">
+        <div className="mx-auto max-w-[400px] space-y-8">
           {mode === "voice" ? (
-            <section className="rounded-2xl p-6" style={glassCard}>
+            <section className="space-y-8 pt-4">
               {permissionDenied ? (
                 <div className="space-y-4 py-6 text-center">
                   <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-muted">
@@ -348,9 +338,7 @@ export default function NouvelleQuestion() {
                       disabled={isTranscribing}
                       className="relative z-10 flex h-24 w-24 items-center justify-center rounded-full text-primary-foreground shadow-lg transition-all disabled:cursor-wait disabled:opacity-70"
                       style={{
-                        background: isRecording
-                          ? "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)))"
-                          : "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)))",
+                        background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)))",
                         boxShadow: "0 12px 30px hsl(var(--secondary) / 0.3)",
                       }}
                       aria-label={isRecording ? "Arrêter l'enregistrement" : "Commencer l'enregistrement"}
@@ -388,6 +376,19 @@ export default function NouvelleQuestion() {
                   )}
                 </div>
               )}
+
+              <IntervenantSelection
+                loadingIntervenants={loadingIntervenants}
+                intervenants={intervenants}
+                filteredIntervenants={filteredIntervenants}
+                recentIntervenants={recentIntervenants}
+                selectedIntervenants={selectedIntervenants}
+                selectedIds={selectedIds}
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                onToggleIntervenant={toggleIntervenant}
+                label="Pour quel intervenant ?"
+              />
             </section>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -406,97 +407,18 @@ export default function NouvelleQuestion() {
                 />
               </div>
 
-              <div className="space-y-3">
-                <label htmlFor="question-intervenant-search" className="text-sm font-medium text-foreground">
-                  Choisir
-                </label>
-
-                {selectedIntervenants.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {selectedIntervenants.map((intervenant) => {
-                      const palette = getMemberPalette(intervenant.id);
-                      return (
-                        <div
-                          key={intervenant.id}
-                          className="inline-flex items-center gap-2 rounded-full border px-2.5 py-1.5 text-sm"
-                          style={{
-                            backgroundColor: `hsl(${palette.accent} / 0.14)`,
-                            borderColor: `hsl(${palette.accent} / 0.32)`,
-                            color: `hsl(${palette.accent})`,
-                          }}
-                        >
-                          <div
-                            className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-[11px] font-semibold text-white"
-                            style={{ background: palette.avatar }}
-                          >
-                            {intervenant.nom.charAt(0).toUpperCase()}
-                          </div>
-                          <span className="max-w-[140px] truncate font-medium">{intervenant.nom}</span>
-                          <button
-                            type="button"
-                            onClick={() => toggleIntervenant(intervenant.id)}
-                            className="inline-flex h-5 w-5 items-center justify-center rounded-full transition-colors hover:bg-foreground/5"
-                            aria-label={`Retirer ${intervenant.nom}`}
-                          >
-                            <X className="h-3.5 w-3.5" />
-                          </button>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <input
-                    id="question-intervenant-search"
-                    value={searchQuery}
-                    onChange={(event) => setSearchQuery(event.target.value)}
-                    placeholder="Nom ou spécialité..."
-                    className="w-full py-2.5 pl-9 pr-3 text-sm text-foreground outline-none placeholder:text-muted-foreground"
-                    style={searchFieldStyle}
-                  />
-                </div>
-
-                {loadingIntervenants ? (
-                  <p className="animate-pulse text-sm text-muted-foreground">Chargement...</p>
-                ) : intervenants.length === 0 ? (
-                  <p className="text-xs text-muted-foreground">Aucun membre enregistré.</p>
-                ) : searchQuery.trim() ? (
-                  <div className="space-y-1">
-                    <p className="px-1 text-xs text-muted-foreground">
-                      {filteredIntervenants.length} résultat{filteredIntervenants.length !== 1 ? "s" : ""}
-                    </p>
-                    {filteredIntervenants.map((intervenant) => (
-                      <IntervenantRow
-                        key={intervenant.id}
-                        intervenant={intervenant}
-                        query={searchQuery}
-                        selected={selectedIds.includes(intervenant.id)}
-                        onToggle={() => toggleIntervenant(intervenant.id)}
-                      />
-                    ))}
-                    {filteredIntervenants.length === 0 && (
-                      <p className="py-3 text-center text-xs text-muted-foreground">Aucun résultat</p>
-                    )}
-                  </div>
-                ) : recentIntervenants.length > 0 ? (
-                  <div className="space-y-1">
-                    <p className="px-1 text-xs font-medium tracking-[0.03em] text-muted-foreground">
-                      Récents
-                    </p>
-                    {recentIntervenants.map((intervenant) => (
-                      <IntervenantRow
-                        key={intervenant.id}
-                        intervenant={intervenant}
-                        query=""
-                        selected={selectedIds.includes(intervenant.id)}
-                        onToggle={() => toggleIntervenant(intervenant.id)}
-                      />
-                    ))}
-                  </div>
-                ) : null}
-              </div>
+              <IntervenantSelection
+                loadingIntervenants={loadingIntervenants}
+                intervenants={intervenants}
+                filteredIntervenants={filteredIntervenants}
+                recentIntervenants={recentIntervenants}
+                selectedIntervenants={selectedIntervenants}
+                selectedIds={selectedIds}
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                onToggleIntervenant={toggleIntervenant}
+                label="Choisir"
+              />
 
               <div className="space-y-3 pt-2">
                 <Button
@@ -520,6 +442,122 @@ export default function NouvelleQuestion() {
           )}
         </div>
       </main>
+    </div>
+  );
+}
+
+function IntervenantSelection({
+  loadingIntervenants,
+  intervenants,
+  filteredIntervenants,
+  recentIntervenants,
+  selectedIntervenants,
+  selectedIds,
+  searchQuery,
+  onSearchChange,
+  onToggleIntervenant,
+  label,
+}: {
+  loadingIntervenants: boolean;
+  intervenants: Intervenant[];
+  filteredIntervenants: Intervenant[];
+  recentIntervenants: Intervenant[];
+  selectedIntervenants: Intervenant[];
+  selectedIds: string[];
+  searchQuery: string;
+  onSearchChange: (value: string) => void;
+  onToggleIntervenant: (id: string) => void;
+  label: string;
+}) {
+  return (
+    <div className="space-y-3">
+      <label htmlFor="question-intervenant-search" className="text-sm font-medium text-foreground">
+        {label}
+      </label>
+
+      {selectedIntervenants.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {selectedIntervenants.map((intervenant) => {
+            const palette = getMemberPalette(intervenant.id);
+            return (
+              <div
+                key={intervenant.id}
+                className="inline-flex items-center gap-2 rounded-full border px-2.5 py-1.5 text-sm"
+                style={{
+                  backgroundColor: `hsl(${palette.accent} / 0.14)`,
+                  borderColor: `hsl(${palette.accent} / 0.32)`,
+                  color: `hsl(${palette.accent})`,
+                }}
+              >
+                <div
+                  className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-[11px] font-semibold text-white"
+                  style={{ background: palette.avatar }}
+                >
+                  {intervenant.nom.charAt(0).toUpperCase()}
+                </div>
+                <span className="max-w-[140px] truncate font-medium">{intervenant.nom}</span>
+                <button
+                  type="button"
+                  onClick={() => onToggleIntervenant(intervenant.id)}
+                  className="inline-flex h-5 w-5 items-center justify-center rounded-full transition-colors hover:bg-foreground/5"
+                  aria-label={`Retirer ${intervenant.nom}`}
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <input
+          id="question-intervenant-search"
+          value={searchQuery}
+          onChange={(event) => onSearchChange(event.target.value)}
+          placeholder="Nom ou spécialité..."
+          className="w-full py-2.5 pl-9 pr-3 text-sm text-foreground outline-none placeholder:text-muted-foreground"
+          style={searchFieldStyle}
+        />
+      </div>
+
+      {loadingIntervenants ? (
+        <p className="animate-pulse text-sm text-muted-foreground">Chargement...</p>
+      ) : intervenants.length === 0 ? (
+        <p className="text-xs text-muted-foreground">Aucun membre enregistré.</p>
+      ) : searchQuery.trim() ? (
+        <div className="space-y-1">
+          <p className="px-1 text-xs text-muted-foreground">
+            {filteredIntervenants.length} résultat{filteredIntervenants.length !== 1 ? "s" : ""}
+          </p>
+          {filteredIntervenants.map((intervenant) => (
+            <IntervenantRow
+              key={intervenant.id}
+              intervenant={intervenant}
+              query={searchQuery}
+              selected={selectedIds.includes(intervenant.id)}
+              onToggle={() => onToggleIntervenant(intervenant.id)}
+            />
+          ))}
+          {filteredIntervenants.length === 0 && (
+            <p className="py-3 text-center text-xs text-muted-foreground">Aucun résultat</p>
+          )}
+        </div>
+      ) : recentIntervenants.length > 0 ? (
+        <div className="space-y-1">
+          <p className="px-1 text-xs font-medium tracking-[0.03em] text-muted-foreground">Récents</p>
+          {recentIntervenants.map((intervenant) => (
+            <IntervenantRow
+              key={intervenant.id}
+              intervenant={intervenant}
+              query=""
+              selected={selectedIds.includes(intervenant.id)}
+              onToggle={() => onToggleIntervenant(intervenant.id)}
+            />
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }
