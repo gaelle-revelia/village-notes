@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  NotebookPen, PenLine, FileText, Pin, Activity,
+  Mic, PenLine, FileText, Sparkles, Activity,
   Timer, ChevronRight, ChevronLeft, X, MessageCircleQuestion,
 } from "lucide-react";
 import { icons } from "lucide-react";
