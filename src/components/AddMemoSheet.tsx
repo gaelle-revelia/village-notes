@@ -194,7 +194,7 @@ export default function AddMemoSheet({ open, onOpenChange, enfantId }: Props) {
               </div>
 
               {/* === Chrono/Manuel choice === */}
-              <div className="w-full px-2 pb-4 pt-1" style={{ flex: "0 0 25%" }}>
+              <div className="w-full px-2 pb-4 pt-1" style={{ flex: "0 0 33.33%" }}>
                 <BackHeader label={selectedActivite?.nom || "Activité"} onBack={() => setView("activites")} />
                 <div className="flex flex-col gap-3 mt-1">
                   <button
