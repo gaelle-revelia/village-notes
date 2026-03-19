@@ -759,7 +759,7 @@ export default function OutilsQuestions() {
                   <div className="space-y-2">
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0 flex-1">
-                        <p className="text-[15px] font-medium leading-6 text-foreground">{question.text}</p>
+                        <p style={{ fontSize: 14, fontWeight: 500 }} className="leading-5 text-foreground">{question.text}</p>
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0">
                         {isSaving && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
@@ -770,7 +770,7 @@ export default function OutilsQuestions() {
                     </div>
 
                     {question.precisions && (
-                      <p className="text-sm leading-5 text-muted-foreground line-clamp-2">{question.precisions}</p>
+                      <p style={{ fontSize: 13 }} className="leading-5 text-muted-foreground line-clamp-2">{question.precisions}</p>
                     )}
 
                     {linkedMembers.length > 0 && (
