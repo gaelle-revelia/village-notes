@@ -1,18 +1,34 @@
 
 
-## Plan: Remove "Note de rendez-vous" sub-menu
+## Findings
 
-### Changes in `src/components/AddMemoSheet.tsx`
+### 1. File
+All chrono logic lives in **`src/pages/OutilsActiviteChrono.tsx`** — no custom hook.
 
-1. **Change View type** (line 42): Remove `"notes"` from the union → `"main" | "activites" | "chrono-choice"`
+### 2. Current approach (broken)
+Line 92: `setInterval(() => setSeconds((s) => s + 1), 1000)`
 
-2. **Main menu** (~line 108): Change "Note de rendez-vous" `onClick` from `setView("notes")` to `go("/nouveau-memo-vocal")` (direct navigation)
+This is a **counter-based** timer: it increments `seconds` state by 1 every interval tick. When the phone screen locks, the browser suspends JS timers, so ticks are lost and the displayed time falls behind real elapsed time.
 
-3. **Remove Notes sub-menu panel** (~lines 127-139): Delete the entire `<nav>` panel for the notes sub-menu (contains "Note vocale" / "Note écrite")
+### 3. Minimal fix
 
-4. **Adjust sliding container**: Change from 4 panels (400%, 25% each) to 3 panels (300%, 33.33% each). Update `translateX` logic — remove the `"notes"` case, adjust percentages for `"activites"` and `"chrono-choice"`.
+Replace the counter with a **`Date.now()` wall-clock reference**:
 
-5. **Clean up imports**: Remove `Mic` and `PenLine` if no longer used elsewhere in the file (they're used in chrono-choice panel, so `PenLine` stays; check `Mic`).
+- Add a `startTimeRef = useRef<number>(Date.now())` and an `accumulatedRef = useRef<number>(0)` (to handle pause/resume).
+- On **start / resume**: set `startTimeRef.current = Date.now()`.
+- On **pause**: add `Date.now() - startTimeRef.current` to `accumulatedRef.current`.
+- The interval (kept at ~1 s for display refresh) computes:
+  ```
+  setSeconds(accumulatedRef.current + Math.floor((Date.now() - startTimeRef.current) / 1000))
+  ```
+- On **"Terminer"**: same formula for the final value.
 
-### No other files touched.
+This way, even if the interval is frozen for minutes during screen lock, the next tick after wake recalculates from the real clock and self-corrects instantly.
+
+**Changes scoped to ~15 lines** in `OutilsActiviteChrono.tsx`:
+- Replace `seconds` increment logic in the timer `useEffect` (lines 90-96)
+- Add two refs (`startTimeRef`, `accumulatedRef`)
+- Update pause toggle handler and `handleTerminer` to snapshot accumulated time
+
+No other file touched.
 
