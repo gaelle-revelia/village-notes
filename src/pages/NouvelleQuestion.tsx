@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useEnfantId } from "@/hooks/useEnfantId";
-import { useVocalRecording } from "@/hooks/useVocalRecording";
+import { useAudioRecorder } from "@/hooks/useAudioRecorder";
 import { supabase } from "@/integrations/supabase/client";
 
 type Intervenant = {
@@ -124,15 +124,11 @@ export default function NouvelleQuestion() {
   const [intervenants, setIntervenants] = useState<Intervenant[]>([]);
   const [loadingIntervenants, setLoadingIntervenants] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const [transcriptionError, setTranscriptionError] = useState<string | null>(null);
 
-  const {
-    isRecording,
-    isTranscribing,
-    error,
-    elapsedSeconds,
-    startRecording,
-    stopRecording,
-  } = useVocalRecording();
+  const { isRecording, elapsedSeconds, audioBlob, permissionDenied, start, stop, reset } =
+    useAudioRecorder();
 
   useEffect(() => {
     if (!enfantId) return;
@@ -196,6 +192,71 @@ export default function NouvelleQuestion() {
       });
   }, [enfantId]);
 
+  useEffect(() => {
+    if (!audioBlob) return;
+
+    let cancelled = false;
+
+    const transcribeAudio = async () => {
+      setIsTranscribing(true);
+      setTranscriptionError(null);
+
+      try {
+        const mimeType = audioBlob.type || "audio/webm";
+        const extension = mimeType.includes("mp4") || mimeType.includes("mpeg") ? "m4a" : "webm";
+        const audioPath = `synthesis/${crypto.randomUUID()}.${extension}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("audio-temp")
+          .upload(audioPath, audioBlob, { contentType: mimeType, upsert: false });
+
+        if (uploadError) throw uploadError;
+
+        const { data, error: fnError } = await supabase.functions.invoke("process-memo", {
+          body: { mode: "transcription_only", audio_path: audioPath },
+        });
+
+        if (fnError) throw fnError;
+
+        const transcription = data?.transcription?.trim() || "";
+        if (!transcription) {
+          throw new Error("Empty transcription");
+        }
+
+        if (cancelled) return;
+
+        setQuestion(transcription);
+        setMode("text");
+        toast({
+          title: "Question transcrite",
+          description: "Vous pouvez maintenant la relire avant de l'ajouter.",
+        });
+      } catch (err) {
+        console.error("Question transcription error:", err);
+
+        if (cancelled) return;
+
+        setTranscriptionError("Transcription échouée — réessaie ou utilise la saisie texte.");
+        toast({
+          title: "Transcription impossible",
+          description: "Réessaie ou passe en saisie texte.",
+          variant: "destructive",
+        });
+      } finally {
+        if (!cancelled) {
+          setIsTranscribing(false);
+          reset();
+        }
+      }
+    };
+
+    void transcribeAudio();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [audioBlob, reset, toast]);
+
   const filteredIntervenants = useMemo(() => {
     if (!searchQuery.trim()) return [];
     const query = normalize(searchQuery);
@@ -225,24 +286,19 @@ export default function NouvelleQuestion() {
     [intervenants, selectedIds]
   );
 
-  const permissionDenied = error === "Microphone non disponible — utilise la saisie texte.";
-
   const toggleIntervenant = (id: string) => {
     setSelectedIds((current) =>
       current.includes(id) ? current.filter((item) => item !== id) : [...current, id]
     );
   };
 
-  const handleStopRecording = async () => {
-    const transcription = await stopRecording();
-    if (transcription?.trim()) {
-      setQuestion(transcription.trim());
-      setMode("text");
-      toast({
-        title: "Question transcrite",
-        description: "Vous pouvez maintenant la relire avant de l'ajouter.",
-      });
-    }
+  const handleStartRecording = async () => {
+    setTranscriptionError(null);
+    await start();
+  };
+
+  const handleStopRecording = () => {
+    stop();
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -351,7 +407,7 @@ export default function NouvelleQuestion() {
                     )}
                     <button
                       type="button"
-                      onClick={isRecording ? handleStopRecording : startRecording}
+                      onClick={isRecording ? handleStopRecording : handleStartRecording}
                       disabled={isTranscribing}
                       className="relative z-10 flex h-24 w-24 items-center justify-center rounded-full text-primary-foreground shadow-lg transition-all disabled:cursor-wait disabled:opacity-70"
                       style={{
@@ -376,8 +432,8 @@ export default function NouvelleQuestion() {
                           ? "Posez votre question... Appuyez sur le bouton pour arrêter."
                           : "Appuyez sur le micro pour commencer l'enregistrement"}
                     </p>
-                    {error && !permissionDenied && (
-                      <p className="max-w-[280px] text-xs text-destructive">{error}</p>
+                    {transcriptionError && !permissionDenied && (
+                      <p className="max-w-[280px] text-xs text-destructive">{transcriptionError}</p>
                     )}
                   </div>
 
