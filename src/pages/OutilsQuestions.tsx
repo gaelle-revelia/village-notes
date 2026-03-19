@@ -1010,8 +1010,8 @@ export default function OutilsQuestions() {
         style={{
           bottom: 96,
           right: 20,
-          width: 56,
-          height: 56,
+          width: 46,
+          height: 46,
           borderRadius: "50%",
           background: "linear-gradient(135deg, #E8736A, #8B74E0)",
           boxShadow: "0 4px 16px rgba(139,116,224,0.35), 0 2px 6px rgba(232,115,106,0.25)",
