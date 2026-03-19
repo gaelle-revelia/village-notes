@@ -729,7 +729,45 @@ export default function OutilsQuestions() {
 
                     {/* answer — always visible in edit mode */}
                     <div className="space-y-1">
-                      <label className="text-xs font-medium text-muted-foreground">Réponse reçue</label>
+                      <div className="flex items-center gap-2">
+                        <label className="text-xs font-medium text-muted-foreground">Réponse reçue</label>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); handleAnswerMicTap(question.id); }}
+                          disabled={isAnswerTranscribing || (isAnswerRecording && answerRecordingTargetRef.current !== question.id)}
+                          className="flex items-center justify-center rounded-full transition-all shrink-0"
+                          style={{
+                            width: 36,
+                            height: 36,
+                            background: isAnswerRecording && answerRecordingTargetRef.current === question.id
+                              ? "hsl(var(--rouge-enregistrement, 4 68% 66%))"
+                              : "linear-gradient(135deg, #E8736A, #8B74E0)",
+                            color: "white",
+                            boxShadow: "0 2px 8px rgba(139,116,224,0.3)",
+                            opacity: (isAnswerTranscribing || (isAnswerRecording && answerRecordingTargetRef.current !== question.id)) ? 0.4 : 1,
+                            animation: isAnswerRecording && answerRecordingTargetRef.current === question.id ? "pulse 1.5s ease-in-out infinite" : "none",
+                          }}
+                        >
+                          {isAnswerTranscribing && answerRecordingTargetRef.current === question.id ? (
+                            <Loader2 size={16} className="animate-spin" />
+                          ) : isAnswerRecording && answerRecordingTargetRef.current === question.id ? (
+                            <Square size={14} fill="currentColor" />
+                          ) : (
+                            <Mic size={16} />
+                          )}
+                        </button>
+                        {isAnswerRecording && answerRecordingTargetRef.current === question.id && (
+                          <span className="text-[11px] font-mono text-muted-foreground">
+                            {Math.floor(answerElapsed / 60).toString().padStart(2, "0")}:{(answerElapsed % 60).toString().padStart(2, "0")}
+                          </span>
+                        )}
+                        {isAnswerTranscribing && answerRecordingTargetRef.current === question.id && (
+                          <span className="text-[11px] text-muted-foreground">Transcription...</span>
+                        )}
+                      </div>
+                      {answerVocalError && answerRecordingTargetRef.current === question.id && (
+                        <p className="text-[11px]" style={{ color: "#E8736A" }}>{answerVocalError}</p>
+                      )}
                       <textarea
                         value={draft.answer}
                         onChange={(e) => updateDraft(question.id, "answer", e.target.value)}
