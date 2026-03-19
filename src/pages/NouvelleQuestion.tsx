@@ -50,7 +50,7 @@ const MEMBER_PALETTES = [
   },
 ] as const;
 
-const glassHeader: React.CSSProperties = {
+const glassHeader: CSSProperties = {
   background: "hsl(var(--background) / 0.72)",
   backdropFilter: "blur(20px) saturate(1.5)",
   WebkitBackdropFilter: "blur(20px) saturate(1.5)",
