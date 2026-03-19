@@ -514,53 +514,6 @@ const Timeline = () => {
 
       <AddMemoSheet open={sheetOpen} onOpenChange={setSheetOpen} enfantId={enfantId} />
 
-      {/* Filter Drawer */}
-      <Drawer open={filterDrawerOpen} onOpenChange={setFilterDrawerOpen}>
-        <DrawerContent>
-          <DrawerHeader>
-            <DrawerTitle className="text-center" style={{ fontFamily: "'Fraunces', serif" }}>Afficher</DrawerTitle>
-          </DrawerHeader>
-          <div className="px-4 pb-4">
-            <div className="flex flex-wrap gap-2">
-              {FILTER_PILLS.map(pill => {
-                const isActive = activeFilters.has(pill.key);
-                return (
-                  <button
-                    key={pill.key}
-                    onClick={() => toggleFilter(pill.key)}
-                    style={{
-                      padding: "8px 16px",
-                      borderRadius: 20,
-                      fontSize: 13,
-                      fontWeight: 500,
-                      background: isActive ? pill.color : pill.bg,
-                      color: isActive ? "#FFFFFF" : pill.color,
-                      border: isActive ? `1.5px solid ${pill.color}` : `1.5px solid ${pill.border}`,
-                      transition: "all 0.2s ease",
-                    }}
-                  >
-                    {pill.label}
-                  </button>
-                );
-              })}
-            </div>
-            {isFilterActive && (
-              <button
-                onClick={() => setActiveFilters(new Set<FilterType>(["tous"]))}
-                className="w-full mt-4 py-2.5 text-sm font-medium"
-                style={{
-                  color: "#8B74E0",
-                  background: "rgba(139,116,224,0.08)",
-                  borderRadius: 12,
-                  border: "1px solid rgba(139,116,224,0.2)",
-                }}
-              >
-                Réinitialiser
-              </button>
-            )}
-          </div>
-        </DrawerContent>
-      </Drawer>
 
       <BottomNavBar />
     </div>
