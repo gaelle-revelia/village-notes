@@ -536,12 +536,14 @@ export default function OutilsQuestions() {
                     {/* question text */}
                     <div className="space-y-1">
                       <label className="text-xs font-medium text-muted-foreground">Question</label>
-                      <input
-                        type="text"
+                      <textarea
                         value={draft.text}
                         onChange={(e) => updateDraft(question.id, "text", e.target.value)}
                         onBlur={() => void flushAndSave(question.id)}
-                        className="h-10 w-full rounded-lg px-3 text-[15px] font-medium text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        onInput={(e) => { e.currentTarget.style.height = 'auto'; e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px'; }}
+                        ref={(el) => { if (el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; } }}
+                        rows={1}
+                        className="w-full resize-none overflow-hidden rounded-lg px-3 py-2 text-[15px] font-medium text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                         style={glassFieldStyle}
                         placeholder="Votre question"
                       />
