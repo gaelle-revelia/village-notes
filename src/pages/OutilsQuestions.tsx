@@ -222,7 +222,7 @@ export default function OutilsQuestions() {
     elapsedSeconds: answerElapsed,
     startRecording: startAnswerRecording,
     stopRecording: stopAnswerRecording,
-  } = useVocalRecording();
+  } = useVocalRecording("answer_reformulation");
   const answerRecordingTargetRef = useRef<string | null>(null);
 
   const handleAnswerMicTap = async (questionId: string) => {
