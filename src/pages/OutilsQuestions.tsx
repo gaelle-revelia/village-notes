@@ -207,6 +207,7 @@ export default function OutilsQuestions() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [drafts, setDrafts] = useState<Record<string, Draft>>({});
   const [pickerSearch, setPickerSearch] = useState("");
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [recentIds, setRecentIds] = useState<string[]>([]);
   const [filterPanelOpen, setFilterPanelOpen] = useState(false);
   const saveTimerRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
@@ -716,21 +717,42 @@ export default function OutilsQuestions() {
                       <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                     )}
 
-                    {/* Delete button */}
-                    <button
-                      type="button"
-                      className="w-full text-center text-destructive hover:underline mt-2"
-                      style={{ fontSize: 12 }}
-                      onClick={async (e) => {
-                        e.stopPropagation();
-                        if (!window.confirm("Confirmer la suppression ?")) return;
-                        await supabase.from("questions").delete().eq("id", question.id);
-                        setQuestions((prev) => prev.filter((q) => q.id !== question.id));
-                        setEditingId(null);
-                      }}
-                    >
-                      Supprimer cette question
-                    </button>
+                    {/* Delete */}
+                    {confirmDeleteId === question.id ? (
+                      <div className="flex items-center justify-center gap-3 mt-2" onClick={(e) => e.stopPropagation()}>
+                        <span className="text-muted-foreground" style={{ fontSize: 12 }}>Supprimer définitivement ?</span>
+                        <button
+                          type="button"
+                          className="text-muted-foreground hover:underline"
+                          style={{ fontSize: 12 }}
+                          onClick={() => setConfirmDeleteId(null)}
+                        >
+                          Annuler
+                        </button>
+                        <button
+                          type="button"
+                          className="text-destructive font-medium hover:underline"
+                          style={{ fontSize: 12 }}
+                          onClick={async () => {
+                            await supabase.from("questions").delete().eq("id", question.id);
+                            setQuestions((prev) => prev.filter((q) => q.id !== question.id));
+                            setEditingId(null);
+                            setConfirmDeleteId(null);
+                          }}
+                        >
+                          Supprimer
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        className="w-full text-center text-destructive hover:underline mt-2"
+                        style={{ fontSize: 12 }}
+                        onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(question.id); }}
+                      >
+                        Supprimer cette question
+                      </button>
+                    )}
                   </div>
                 ) : (
                   /* ─── COLLAPSED MODE ─── */
