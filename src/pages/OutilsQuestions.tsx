@@ -436,9 +436,19 @@ export default function OutilsQuestions() {
     const askedAt = nextStatus === "asked" ? new Date().toISOString() : null;
     setSavingId(question.id);
 
+    const payload: Record<string, unknown> = { status: nextStatus, asked_at: askedAt };
+
+    // Include answer draft when marking as asked
+    if (nextStatus === "asked") {
+      const draftAnswer = drafts[question.id]?.answer;
+      if (draftAnswer) {
+        payload.answer = draftAnswer;
+      }
+    }
+
     const { error } = await supabase
       .from("questions")
-      .update({ status: nextStatus, asked_at: askedAt })
+      .update(payload)
       .eq("id", question.id);
 
     if (error) {
@@ -451,8 +461,14 @@ export default function OutilsQuestions() {
       return;
     }
 
-    updateQuestionLocally(question.id, { status: nextStatus, asked_at: askedAt });
+    updateQuestionLocally(question.id, payload as Partial<QuestionItem>);
     setSavingId(null);
+
+    // Close card if it's the one being edited, then switch tab
+    if (editingId === question.id) {
+      void closeCard();
+    }
+    setActiveTab(nextStatus);
   };
 
   /* ── inline intervenant picker helpers ── */
@@ -649,21 +665,19 @@ export default function OutilsQuestions() {
                       ) : null}
                     </div>
 
-                    {/* answer (only when asked) */}
-                    {isAsked && (
-                      <div className="space-y-1">
-                        <label className="text-xs font-medium text-muted-foreground">Réponse reçue</label>
-                        <textarea
-                          value={draft.answer}
-                          onChange={(e) => updateDraft(question.id, "answer", e.target.value)}
-                          onBlur={() => void flushAndSave(question.id)}
-                          rows={3}
-                          className="w-full resize-none rounded-lg px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                          style={glassFieldStyle}
-                          placeholder="Ajouter la réponse reçue..."
-                        />
-                      </div>
-                    )}
+                    {/* answer — always visible in edit mode */}
+                    <div className="space-y-1">
+                      <label className="text-xs font-medium text-muted-foreground">Réponse reçue</label>
+                      <textarea
+                        value={draft.answer}
+                        onChange={(e) => updateDraft(question.id, "answer", e.target.value)}
+                        onBlur={() => void flushAndSave(question.id)}
+                        rows={3}
+                        className="w-full resize-none rounded-lg px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        style={glassFieldStyle}
+                        placeholder="Ajouter la réponse reçue..."
+                      />
+                    </div>
 
                     {/* date */}
                     {question.asked_at && (
