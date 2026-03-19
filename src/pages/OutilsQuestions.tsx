@@ -832,16 +832,8 @@ export default function OutilsQuestions() {
       </header>
 
       <main className="flex-1 px-4 pb-28 pt-4" onClick={handleMainClick}>
-        <div className="mb-4">
-          <button
-            type="button"
-            onClick={() => navigate("/nouvelle-question")}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-secondary px-4 py-3 text-sm font-medium text-secondary-foreground shadow-sm transition-transform active:scale-[0.98]"
-          >
-            <Plus size={18} />
-            Nouvelle question
-          </button>
-        </div>
+
+
 
         {loading ? (
           <div className="flex min-h-[320px] items-center justify-center">
