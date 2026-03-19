@@ -337,7 +337,7 @@ const OutilsSyntheseMdph = () => {
             <ChipGroup chips={Q4_CHIPS} selected={q4 ? [q4] : []} disabled={past(4)} onToggle={(c) => toggleSingle(c, q4, setQ4)} />
             <OrSeparator />
             <div className="mb-5 flex justify-end">
-              <Textarea placeholder="Précise si besoin..." value={q4Text} disabled={past(4)} onChange={(e) => { setQ4Text(e.target.value); if (e.target.value.trim()) setQ4(null); }} className="text-[14px] font-sans border-none italic placeholder:italic" style={{ ...glassCard, borderRadius: 14, minHeight: 70, maxWidth: "80%" }} />
+              <Textarea placeholder="Précise si besoin..." value={q4Text} disabled={past(4)} onChange={(e) => { setQ4Text(e.target.value); if (e.target.value.trim()) setQ4(null); }} className="text-[14px] font-sans border-none italic placeholder:italic" style={{ ...glassCard, borderRadius: 14, minHeight: 70, maxWidth: "80%" }} autoResize />
             </div>
           </>
         )}
