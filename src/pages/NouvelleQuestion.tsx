@@ -118,6 +118,7 @@ export default function NouvelleQuestion() {
   const [mode, setMode] = useState<"voice" | "text">("voice");
   const [questionDate, setQuestionDate] = useState(new Date());
   const [question, setQuestion] = useState("");
+  const [precisions, setPrecisions] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [recentIds, setRecentIds] = useState<string[]>([]);
@@ -213,32 +214,35 @@ export default function NouvelleQuestion() {
         if (uploadError) throw uploadError;
 
         const { data, error: fnError } = await supabase.functions.invoke("process-memo", {
-          body: { mode: "transcription_only", audio_path: audioPath },
+          body: { mode: "question_reformulation", audio_path: audioPath },
         });
 
         if (fnError) throw fnError;
 
-        const transcription = data?.transcription?.trim() || "";
-        if (!transcription) {
-          throw new Error("Empty transcription");
+        const reformulatedQuestion = data?.question?.trim() || "";
+        const reformulatedPrecisions = data?.precisions?.trim() || "";
+
+        if (!reformulatedQuestion) {
+          throw new Error("Empty reformulated question");
         }
 
         if (cancelled) return;
 
-        setQuestion(transcription);
+        setQuestion(reformulatedQuestion);
+        setPrecisions(reformulatedPrecisions);
         setMode("text");
         toast({
-          title: "Question transcrite",
+          title: "Question reformulée",
           description: "Vous pouvez maintenant la relire avant de l'ajouter.",
         });
       } catch (err) {
-        console.error("Question transcription error:", err);
+        console.error("Question reformulation error:", err);
 
         if (cancelled) return;
 
-        setTranscriptionError("Transcription échouée — réessaie ou utilise la saisie texte.");
+        setTranscriptionError("Reformulation échouée — réessaie ou utilise la saisie texte.");
         toast({
-          title: "Transcription impossible",
+          title: "Reformulation impossible",
           description: "Réessaie ou passe en saisie texte.",
           variant: "destructive",
         });
@@ -305,6 +309,7 @@ export default function NouvelleQuestion() {
     event.preventDefault();
 
     const trimmedQuestion = question.trim();
+    const trimmedPrecisions = precisions.trim();
     if (!trimmedQuestion || !user || !enfantId) return;
 
     setSubmitting(true);
@@ -313,6 +318,7 @@ export default function NouvelleQuestion() {
       parent_id: user.id,
       child_id: enfantId,
       text: trimmedQuestion,
+      precisions: trimmedPrecisions || null,
       linked_pro_ids: selectedIds,
       status: "to_ask",
     });
@@ -427,7 +433,7 @@ export default function NouvelleQuestion() {
                   <div className="space-y-2 text-center">
                     <p className="max-w-[250px] text-sm text-muted-foreground">
                       {isTranscribing
-                        ? "Transcription en cours..."
+                        ? "Reformulation en cours..."
                         : isRecording
                           ? "Posez votre question... Appuyez sur le bouton pour arrêter."
                           : "Appuyez sur le micro pour commencer l'enregistrement"}
@@ -464,6 +470,19 @@ export default function NouvelleQuestion() {
                   required
                   className="min-h-[180px] w-full rounded-xl resize-none"
                   autoFocus
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="question-precisions" className="text-sm font-medium text-foreground">
+                  Précisions complémentaires (optionnel)
+                </label>
+                <Textarea
+                  id="question-precisions"
+                  value={precisions}
+                  onChange={(event) => setPrecisions(event.target.value)}
+                  placeholder="Ajoutez un contexte utile si besoin"
+                  className="min-h-[120px] w-full rounded-xl resize-none"
                 />
               </div>
 
