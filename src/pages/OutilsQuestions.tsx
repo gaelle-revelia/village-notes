@@ -819,34 +819,108 @@ export default function OutilsQuestions() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-10 flex items-center gap-3 px-4 py-3" style={glassHeader}>
-        <button
-          type="button"
-          onClick={() => navigate("/outils")}
-          className="flex items-center gap-1 text-sm font-medium text-secondary"
-        >
-          <ArrowLeft size={18} />
-          <span>Retour</span>
-        </button>
-        <h1 className="flex-1 text-lg font-semibold text-foreground">Questions à poser</h1>
-        <button
-          type="button"
-          onClick={() => navigate("/nouvelle-question")}
-          className="flex items-center justify-center"
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: 12,
-            background: "hsl(var(--background) / 0.45)",
-            backdropFilter: "blur(12px) saturate(1.4)",
-            WebkitBackdropFilter: "blur(12px) saturate(1.4)",
-            border: "1px solid hsl(var(--background) / 0.65)",
-            boxShadow: "0 2px 8px hsl(var(--foreground) / 0.05), inset 0 1px 0 hsl(var(--background) / 0.7)",
-          }}
-          aria-label="Nouvelle question"
-        >
-          <Plus size={16} className="text-muted-foreground" />
-        </button>
+      <header className="sticky top-0 z-10 px-4" style={glassHeader}>
+        {/* Row 1: back + title + add */}
+        <div className="flex items-center gap-3 py-3">
+          <button
+            type="button"
+            onClick={() => navigate("/outils")}
+            className="flex items-center justify-center text-secondary"
+            aria-label="Retour"
+          >
+            <ArrowLeft size={18} />
+          </button>
+          <h1 className="flex-1 text-lg font-semibold text-foreground">Mes questions</h1>
+          <button
+            type="button"
+            onClick={() => navigate("/nouvelle-question")}
+            className="flex items-center justify-center"
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: 12,
+              background: "hsl(var(--background) / 0.45)",
+              backdropFilter: "blur(12px) saturate(1.4)",
+              WebkitBackdropFilter: "blur(12px) saturate(1.4)",
+              border: "1px solid hsl(var(--background) / 0.65)",
+              boxShadow: "0 2px 8px hsl(var(--foreground) / 0.05), inset 0 1px 0 hsl(var(--background) / 0.7)",
+            }}
+            aria-label="Nouvelle question"
+          >
+            <Plus size={16} className="text-muted-foreground" />
+          </button>
+        </div>
+
+        {/* Row 2: search field */}
+        <div className="relative pb-2">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" style={{ marginTop: -4 }} />
+          <input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Rechercher…"
+            className="w-full py-2 pl-9 pr-3 text-sm text-foreground outline-none placeholder:text-muted-foreground"
+            style={searchFieldStyle}
+          />
+        </div>
+
+        {/* Row 3: status chips */}
+        <div className="pb-2">
+          <p style={{ fontSize: 11, fontWeight: 500, color: "hsl(var(--muted-foreground))", marginBottom: 6 }}>Statut</p>
+          <div className="flex flex-wrap gap-2">
+            {([
+              { key: "all" as const, label: "Toutes" },
+              { key: "to_ask" as const, label: "À poser" },
+              { key: "asked" as const, label: "Posées" },
+            ]).map(({ key, label }) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setStatusFilter(key)}
+                className="px-3.5 py-1.5 rounded-[20px] text-xs font-medium transition-all"
+                style={statusFilter === key
+                  ? { background: "#8B74E0", color: "#fff", boxShadow: "0 2px 8px rgba(139,116,224,0.25)" }
+                  : { background: "rgba(255,255,255,0.52)", border: "1px solid rgba(255,255,255,0.72)", color: "#1E1A1A" }
+                }
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Row 4: specialty chips */}
+        {availableSpecialties.length > 1 && (
+          <div className="pb-3">
+            <p style={{ fontSize: 11, fontWeight: 500, color: "hsl(var(--muted-foreground))", marginBottom: 6 }}>Intervenant</p>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => setSpecFilter(null)}
+                className="px-3.5 py-1.5 rounded-[20px] text-xs font-medium transition-all"
+                style={specFilter === null
+                  ? { background: "#8B74E0", color: "#fff", boxShadow: "0 2px 8px rgba(139,116,224,0.25)" }
+                  : { background: "rgba(255,255,255,0.52)", border: "1px solid rgba(255,255,255,0.72)", color: "#1E1A1A" }
+                }
+              >
+                Toutes
+              </button>
+              {availableSpecialties.map((spec) => (
+                <button
+                  key={spec}
+                  type="button"
+                  onClick={() => setSpecFilter(specFilter === spec ? null : spec)}
+                  className="px-3.5 py-1.5 rounded-[20px] text-xs font-medium transition-all"
+                  style={specFilter === spec
+                    ? { background: "#8B74E0", color: "#fff", boxShadow: "0 2px 8px rgba(139,116,224,0.25)" }
+                    : { background: "rgba(255,255,255,0.52)", border: "1px solid rgba(255,255,255,0.72)", color: "#1E1A1A" }
+                  }
+                >
+                  {spec}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </header>
 
       <main ref={mainRef} className="flex-1 px-4 pb-28 pt-4" onClick={handleMainClick}>
@@ -861,9 +935,7 @@ export default function OutilsQuestions() {
             </p>
           </div>
         ) : (
-          <div className="space-y-4">
-            {/* Filter bar */}
-            <div className="space-y-3">
+          <div>
               {/* Status chips */}
               <div className="flex flex-wrap gap-2">
                 {([
