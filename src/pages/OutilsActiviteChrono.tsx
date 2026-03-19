@@ -122,6 +122,13 @@ export default function OutilsActiviteChrono() {
     setRunning(true);
   };
 
+  const togglePause = () => {
+    if (running) {
+      accumulatedRef.current += Math.floor((Date.now() - startTimeRef.current) / 1000);
+    }
+    setRunning((r) => !r);
+  };
+
   const handleSave = async () => {
     if (!user || !enfantId || !activite) return;
     setSaving(true);
