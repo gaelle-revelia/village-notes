@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Activity, CalendarDays, Share2, Sparkles, Wind } from "lucide-react";
+import { Activity, CalendarDays, Search, Share2, Sparkles, Wind } from "lucide-react";
 import BottomNavBar from "@/components/BottomNavBar";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { Button } from "@/components/ui/button";
@@ -32,6 +32,17 @@ const TOOLS = [
   { label: "Export", icon: Share2, route: null, active: false },
 ] as const;
 
+const GRADIENTS = [
+  "linear-gradient(135deg, #E8736A, #E8845A)",
+  "linear-gradient(135deg, #8B74E0, #5CA8D8)",
+  "linear-gradient(135deg, #44A882, #4E96C8)",
+  "linear-gradient(135deg, #E8A44A, #E8736A)",
+  "linear-gradient(135deg, #E8736A, #C85A8A)",
+  "linear-gradient(135deg, #8A9BAE, #6B7F94)",
+  "linear-gradient(135deg, #44A882, #8B74E0)",
+  "linear-gradient(135deg, #5CA8D8, #8B74E0)",
+] as const;
+
 const glassCard: React.CSSProperties = {
   background: "rgba(255,255,255,0.38)",
   backdropFilter: "blur(16px) saturate(1.6)",
@@ -41,6 +52,36 @@ const glassCard: React.CSSProperties = {
   boxShadow: "0 4px 24px rgba(139,116,224,0.08), 0 1px 4px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9)",
 };
 
+function getGradient(id: string) {
+  let hash = 0;
+  for (let i = 0; i < id.length; i += 1) {
+    hash = (hash * 31 + id.charCodeAt(i)) | 0;
+  }
+  return GRADIENTS[Math.abs(hash) % GRADIENTS.length];
+}
+
+function normalize(value: string) {
+  return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
+
+function HighlightMatch({ text, query }: { text: string; query: string }) {
+  if (!query) return <>{text}</>;
+
+  const normalizedText = normalize(text);
+  const normalizedQuery = normalize(query);
+  const index = normalizedText.indexOf(normalizedQuery);
+
+  if (index === -1) return <>{text}</>;
+
+  return (
+    <>
+      {text.slice(0, index)}
+      <span style={{ color: "#8B74E0", fontWeight: 600 }}>{text.slice(index, index + query.length)}</span>
+      {text.slice(index + query.length)}
+    </>
+  );
+}
+
 const OutilsScreen = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -49,6 +90,8 @@ const OutilsScreen = () => {
   const [open, setOpen] = useState(false);
   const [question, setQuestion] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [recentIds, setRecentIds] = useState<string[]>([]);
   const [intervenants, setIntervenants] = useState<Intervenant[]>([]);
   const [loadingIntervenants, setLoadingIntervenants] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -87,9 +130,58 @@ const OutilsScreen = () => {
     };
   }, [open, enfantId, toast]);
 
+  useEffect(() => {
+    if (!open || !enfantId) return;
+
+    supabase
+      .from("memos")
+      .select("intervenant_id, memo_date")
+      .not("intervenant_id", "is", null)
+      .not("enfant_id", "is", null)
+      .order("memo_date", { ascending: false })
+      .limit(20)
+      .then(({ data }) => {
+        if (!data) return;
+
+        const seen = new Set<string>();
+        const ids: string[] = [];
+
+        for (const memo of data) {
+          if (memo.intervenant_id && !seen.has(memo.intervenant_id)) {
+            seen.add(memo.intervenant_id);
+            ids.push(memo.intervenant_id);
+            if (ids.length >= 3) break;
+          }
+        }
+
+        setRecentIds(ids);
+      });
+  }, [open, enfantId]);
+
+  const filteredIntervenants = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const query = normalize(searchQuery);
+
+    return intervenants.filter((intervenant) =>
+      normalize(intervenant.nom).includes(query) ||
+      (intervenant.specialite && normalize(intervenant.specialite).includes(query))
+    );
+  }, [intervenants, searchQuery]);
+
+  const recentIntervenants = useMemo(() => {
+    if (recentIds.length > 0) {
+      return recentIds
+        .map((id) => intervenants.find((intervenant) => intervenant.id === id))
+        .filter(Boolean) as Intervenant[];
+    }
+
+    return intervenants.slice(0, 3);
+  }, [intervenants, recentIds]);
+
   const resetForm = () => {
     setQuestion("");
     setSelectedIds([]);
+    setSearchQuery("");
   };
 
   const toggleIntervenant = (id: string) => {
@@ -244,39 +336,66 @@ const OutilsScreen = () => {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label>Professionnels liés</Label>
-              <div className="max-h-56 space-y-2 overflow-y-auto rounded-md border border-input bg-background p-2">
-                {loadingIntervenants ? (
-                  <p className="px-2 py-3 text-sm text-muted-foreground">Chargement…</p>
-                ) : intervenants.length === 0 ? (
-                  <p className="px-2 py-3 text-sm text-muted-foreground">Aucun membre disponible.</p>
-                ) : (
-                  intervenants.map((intervenant) => {
-                    const selected = selectedIds.includes(intervenant.id);
+            <div className="space-y-3">
+              <Label htmlFor="question-intervenant-search">Choisir</Label>
 
-                    return (
-                      <button
-                        key={intervenant.id}
-                        type="button"
-                        onClick={() => toggleIntervenant(intervenant.id)}
-                        className="flex w-full items-start justify-between gap-3 rounded-md border border-input px-3 py-2 text-left transition-colors hover:bg-accent"
-                        aria-pressed={selected}
-                      >
-                        <div>
-                          <p className="text-sm font-medium text-foreground">{intervenant.nom}</p>
-                          {intervenant.specialite && (
-                            <p className="text-xs text-muted-foreground">{intervenant.specialite}</p>
-                          )}
-                        </div>
-                        <span className="text-xs font-medium text-muted-foreground">
-                          {selected ? "Sélectionné" : "Choisir"}
-                        </span>
-                      </button>
-                    );
-                  })
-                )}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  id="question-intervenant-search"
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  placeholder="Nom ou spécialité..."
+                  className="w-full pl-9 pr-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none"
+                  style={{
+                    background: "rgba(255,255,255,0.45)",
+                    backdropFilter: "blur(12px) saturate(1.4)",
+                    WebkitBackdropFilter: "blur(12px) saturate(1.4)",
+                    border: "1px solid rgba(255,255,255,0.65)",
+                    borderRadius: 12,
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.7)",
+                  }}
+                />
               </div>
+
+              {loadingIntervenants ? (
+                <p className="text-sm text-muted-foreground animate-pulse">Chargement...</p>
+              ) : intervenants.length === 0 ? (
+                <p className="text-xs text-muted-foreground">Aucun intervenant enregistré.</p>
+              ) : searchQuery.trim() ? (
+                <div className="space-y-1">
+                  <p className="px-1 text-xs text-muted-foreground">
+                    {filteredIntervenants.length} résultat{filteredIntervenants.length !== 1 ? "s" : ""}
+                  </p>
+                  {filteredIntervenants.map((intervenant) => (
+                    <IntervenantRow
+                      key={intervenant.id}
+                      intervenant={intervenant}
+                      query={searchQuery}
+                      selected={selectedIds.includes(intervenant.id)}
+                      onToggle={() => toggleIntervenant(intervenant.id)}
+                    />
+                  ))}
+                  {filteredIntervenants.length === 0 && (
+                    <p className="py-3 text-center text-xs text-muted-foreground">Aucun résultat</p>
+                  )}
+                </div>
+              ) : recentIntervenants.length > 0 ? (
+                <div className="space-y-1">
+                  <p className="px-1 text-xs font-medium text-muted-foreground" style={{ letterSpacing: "0.03em" }}>
+                    Récents
+                  </p>
+                  {recentIntervenants.map((intervenant) => (
+                    <IntervenantRow
+                      key={intervenant.id}
+                      intervenant={intervenant}
+                      query=""
+                      selected={selectedIds.includes(intervenant.id)}
+                      onToggle={() => toggleIntervenant(intervenant.id)}
+                    />
+                  ))}
+                </div>
+              ) : null}
             </div>
 
             <Button type="submit" className="w-full" disabled={submitting || !question.trim() || !user || !enfantId}>
@@ -290,5 +409,52 @@ const OutilsScreen = () => {
     </div>
   );
 };
+
+function IntervenantRow({
+  intervenant,
+  query,
+  selected,
+  onToggle,
+}: {
+  intervenant: Intervenant;
+  query: string;
+  selected: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors"
+      style={{
+        background: selected ? "rgba(139,116,224,0.08)" : "transparent",
+        border: selected ? "1px solid rgba(139,116,224,0.25)" : "1px solid transparent",
+      }}
+      aria-pressed={selected}
+    >
+      <div
+        className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
+        style={{ background: getGradient(intervenant.id) }}
+      >
+        {intervenant.nom.charAt(0).toUpperCase()}
+      </div>
+
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-medium text-foreground">
+          <HighlightMatch text={intervenant.nom} query={query} />
+        </p>
+        {intervenant.specialite && (
+          <p className="truncate text-xs text-muted-foreground">
+            <HighlightMatch text={intervenant.specialite} query={query} />
+          </p>
+        )}
+      </div>
+
+      <span className="text-xs font-medium" style={{ color: selected ? "#8B74E0" : "#9A9490" }}>
+        {selected ? "Sélectionné" : "Choisir"}
+      </span>
+    </button>
+  );
+}
 
 export default OutilsScreen;
