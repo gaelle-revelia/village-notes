@@ -831,7 +831,7 @@ export default function OutilsQuestions() {
         </button>
       </header>
 
-      <main className="flex-1 px-4 pb-28 pt-4" onClick={handleMainClick}>
+      <main ref={mainRef} className="flex-1 px-4 pb-28 pt-4" onClick={handleMainClick}>
 
 
 
