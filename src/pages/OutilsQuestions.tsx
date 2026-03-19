@@ -770,7 +770,7 @@ export default function OutilsQuestions() {
                     </div>
 
                     {question.precisions && (
-                      <p className="text-sm leading-5 text-muted-foreground line-clamp-2">{question.precisions}</p>
+                      <p style={{ fontSize: 13 }} className="leading-5 text-muted-foreground line-clamp-2">{question.precisions}</p>
                     )}
 
                     {linkedMembers.length > 0 && (
