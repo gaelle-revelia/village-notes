@@ -646,24 +646,6 @@ export default function OutilsQuestions() {
                             <p className="py-2 text-center text-xs text-muted-foreground">Aucun résultat</p>
                           )}
                         </div>
-                      ) : recentIntervenants.length > 0 ? (
-                        <div className="space-y-1">
-                          <p className="px-1 text-xs font-medium tracking-[0.03em] text-muted-foreground">Récents</p>
-                          {recentIntervenants.map((m) => (
-                            <IntervenantRow
-                              key={m.id}
-                              intervenant={m}
-                              query=""
-                              selected={draft.linked_pro_ids.includes(m.id)}
-                              onToggle={() => {
-                                const next = draft.linked_pro_ids.includes(m.id)
-                                  ? draft.linked_pro_ids.filter((id) => id !== m.id)
-                                  : [...draft.linked_pro_ids, m.id];
-                                updateDraft(question.id, "linked_pro_ids", next);
-                              }}
-                            />
-                          ))}
-                        </div>
                       ) : null}
                     </div>
 
