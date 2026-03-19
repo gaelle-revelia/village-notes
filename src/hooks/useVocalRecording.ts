@@ -10,7 +10,7 @@ interface UseVocalRecordingReturn {
   stopRecording: () => Promise<string | null>;
 }
 
-export function useVocalRecording(): UseVocalRecordingReturn {
+export function useVocalRecording(mode: string = "transcription_only"): UseVocalRecordingReturn {
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [error, setError] = useState<string | null>(null);
