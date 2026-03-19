@@ -839,24 +839,6 @@ export default function OutilsQuestions() {
             <ArrowLeft size={18} />
           </button>
           <h1 className="flex-1 text-lg font-semibold text-foreground">Mes questions</h1>
-          <button
-            type="button"
-            onClick={() => navigate("/nouvelle-question")}
-            className="flex items-center justify-center"
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: 12,
-              background: "hsl(var(--background) / 0.45)",
-              backdropFilter: "blur(12px) saturate(1.4)",
-              WebkitBackdropFilter: "blur(12px) saturate(1.4)",
-              border: "1px solid hsl(var(--background) / 0.65)",
-              boxShadow: "0 2px 8px hsl(var(--foreground) / 0.05), inset 0 1px 0 hsl(var(--background) / 0.7)",
-            }}
-            aria-label="Nouvelle question"
-          >
-            <Plus size={16} className="text-muted-foreground" />
-          </button>
         </div>
 
         {/* Row 2: filter button + search field */}
@@ -1019,6 +1001,25 @@ export default function OutilsQuestions() {
       </main>
 
       <BottomNavBar />
+
+      {/* FAB */}
+      <button
+        type="button"
+        onClick={() => navigate("/nouvelle-question")}
+        className="fixed z-20 flex items-center justify-center"
+        style={{
+          bottom: 96,
+          right: 20,
+          width: 56,
+          height: 56,
+          borderRadius: "50%",
+          background: "linear-gradient(135deg, #E8736A, #8B74E0)",
+          boxShadow: "0 4px 16px rgba(139,116,224,0.35), 0 2px 6px rgba(232,115,106,0.25)",
+        }}
+        aria-label="Nouvelle question"
+      >
+        <Plus size={22} className="text-white" />
+      </button>
     </div>
   );
 }
