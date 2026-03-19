@@ -27,6 +27,7 @@ export function TextInputView({ onSubmit, onSwitchToVoice }: TextInputViewProps)
         placeholder="Aujourd'hui, lors de la séance de kiné, on a travaillé sur..."
         className="min-h-[200px] rounded-xl resize-none"
         autoFocus
+        autoResize
       />
 
       <div className="space-y-3">

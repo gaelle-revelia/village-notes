@@ -326,6 +326,7 @@ const NouveauMemoVocal = () => {
                 placeholder="Décrivez la séance en quelques mots…"
                 className="min-h-[160px] rounded-xl resize-none"
                 autoFocus
+                autoResize
               />
               <Button
                 onClick={handleTextSubmit}

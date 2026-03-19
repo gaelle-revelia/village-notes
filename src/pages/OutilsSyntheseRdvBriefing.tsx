@@ -325,6 +325,7 @@ const OutilsSyntheseRdvBriefing = () => {
             onChange={(e) => { setFreeText(e.target.value); if (e.target.value.trim()) setSelectedIntervenant(null); }}
             className="text-[14px] font-sans border-none italic placeholder:italic"
             style={{ ...glassCard, borderRadius: 14, minHeight: 80, maxWidth: "75%" }}
+            autoResize
           />
         </div>
 

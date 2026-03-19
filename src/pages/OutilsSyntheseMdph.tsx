@@ -323,7 +323,7 @@ const OutilsSyntheseMdph = () => {
             <ChipGroup chips={Q3_CHIPS} selected={q3Chips} multi disabled={past(3)} onToggle={(c) => toggleMulti(c, q3Chips, setQ3Chips)} />
             <OrSeparator />
             <div className="mb-2 flex justify-end">
-              <Textarea placeholder="Précise si besoin..." value={q3Text} disabled={past(3)} onChange={(e) => setQ3Text(e.target.value)} className="text-[14px] font-sans border-none italic placeholder:italic" style={{ ...glassCard, borderRadius: 14, minHeight: 70, maxWidth: "80%" }} />
+              <Textarea placeholder="Précise si besoin..." value={q3Text} disabled={past(3)} onChange={(e) => setQ3Text(e.target.value)} className="text-[14px] font-sans border-none italic placeholder:italic" style={{ ...glassCard, borderRadius: 14, minHeight: 70, maxWidth: "80%" }} autoResize />
             </div>
             <WiredMicOrb disabled={past(3)} onTranscription={(text) => setQ3Text((prev) => prev ? prev + " " + text : text)} />
           </>
@@ -337,7 +337,7 @@ const OutilsSyntheseMdph = () => {
             <ChipGroup chips={Q4_CHIPS} selected={q4 ? [q4] : []} disabled={past(4)} onToggle={(c) => toggleSingle(c, q4, setQ4)} />
             <OrSeparator />
             <div className="mb-5 flex justify-end">
-              <Textarea placeholder="Précise si besoin..." value={q4Text} disabled={past(4)} onChange={(e) => { setQ4Text(e.target.value); if (e.target.value.trim()) setQ4(null); }} className="text-[14px] font-sans border-none italic placeholder:italic" style={{ ...glassCard, borderRadius: 14, minHeight: 70, maxWidth: "80%" }} />
+              <Textarea placeholder="Précise si besoin..." value={q4Text} disabled={past(4)} onChange={(e) => { setQ4Text(e.target.value); if (e.target.value.trim()) setQ4(null); }} className="text-[14px] font-sans border-none italic placeholder:italic" style={{ ...glassCard, borderRadius: 14, minHeight: 70, maxWidth: "80%" }} autoResize />
             </div>
           </>
         )}
@@ -350,7 +350,7 @@ const OutilsSyntheseMdph = () => {
             <ChipGroup chips={Q5_CHIPS} selected={q5Chips} multi disabled={past(5)} onToggle={(c) => toggleMulti(c, q5Chips, setQ5Chips)} />
             <OrSeparator />
             <div className="mb-2 flex justify-end">
-              <Textarea placeholder="Décris ton projet..." value={q5Text} disabled={past(5)} onChange={(e) => setQ5Text(e.target.value)} className="text-[14px] font-sans border-none italic placeholder:italic" style={{ ...glassCard, borderRadius: 14, minHeight: 70, maxWidth: "80%" }} />
+              <Textarea placeholder="Décris ton projet..." value={q5Text} disabled={past(5)} onChange={(e) => setQ5Text(e.target.value)} className="text-[14px] font-sans border-none italic placeholder:italic" style={{ ...glassCard, borderRadius: 14, minHeight: 70, maxWidth: "80%" }} autoResize />
             </div>
             <WiredMicOrb disabled={past(5)} onTranscription={(text) => setQ5Text((prev) => prev ? prev + " " + text : text)} />
           </>
@@ -364,7 +364,7 @@ const OutilsSyntheseMdph = () => {
             <WiredMicOrb disabled={past(6)} onTranscription={(text) => setQ6Text((prev) => prev ? prev + " " + text : text)} />
             <OrSeparator />
             <div className="mb-5 flex justify-end">
-              <Textarea placeholder="Ajoute ce que tu veux mettre en avant..." value={q6Text} disabled={past(6)} onChange={(e) => setQ6Text(e.target.value)} className="text-[14px] font-sans border-none italic placeholder:italic" style={{ ...glassCard, borderRadius: 14, minHeight: 70, maxWidth: "80%" }} />
+              <Textarea placeholder="Ajoute ce que tu veux mettre en avant..." value={q6Text} disabled={past(6)} onChange={(e) => setQ6Text(e.target.value)} className="text-[14px] font-sans border-none italic placeholder:italic" style={{ ...glassCard, borderRadius: 14, minHeight: 70, maxWidth: "80%" }} autoResize />
             </div>
           </>
         )}

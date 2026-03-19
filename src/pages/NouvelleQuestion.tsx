@@ -491,9 +491,10 @@ export default function NouvelleQuestion() {
                   value={precisions}
                   onChange={(event) => setPrecisions(event.target.value)}
                   placeholder="Ajoutez un contexte utile si besoin"
-                  rows={3}
+                  rows={1}
                   className="w-full rounded-xl resize-none"
                   style={glassFieldStyle}
+                  autoResize
                 />
               </div>
 
