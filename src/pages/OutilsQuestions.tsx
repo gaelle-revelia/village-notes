@@ -944,7 +944,7 @@ export default function OutilsQuestions() {
             </p>
           </div>
         ) : (
-          <div>
+          <div style={{ paddingBottom: 80 }}>
             {renderQuestionList(filteredQuestions, "Aucune question ne correspond aux filtres.")}
           </div>
         )}
