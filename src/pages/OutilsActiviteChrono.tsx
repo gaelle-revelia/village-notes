@@ -105,9 +105,14 @@ export default function OutilsActiviteChrono() {
   const unite = activite?.unite_distance || "m";
 
   const handleTerminer = () => {
+    if (running) {
+      accumulatedRef.current += Math.floor((Date.now() - startTimeRef.current) / 1000);
+    }
     setRunning(false);
     if (intervalRef.current) clearInterval(intervalRef.current);
-    setRecapDuration(formatTime(seconds));
+    const finalSeconds = accumulatedRef.current;
+    setSeconds(finalSeconds);
+    setRecapDuration(formatTime(finalSeconds));
     setRecapDistance(String(distance));
     setShowRecap(true);
   };
