@@ -354,11 +354,7 @@ const Timeline = () => {
         </div>
       </header>
 
-      <main
-        className="flex-1 px-4"
-        style={{ paddingBottom: 160 }}
-        onScroll={() => { if (filterPanelOpen) setFilterPanelOpen(false); }}
-      >
+      <main className="flex-1 px-4" style={{ paddingBottom: 160 }}>
         {loadingMemos ? (
           <div className="space-y-3 pt-4">
             {[1, 2, 3].map(i => (
