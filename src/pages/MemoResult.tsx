@@ -1309,13 +1309,13 @@ const MemoResult = () => {
           <div style={glassCard}>
             <p style={sectionLabel}>TITRE</p>
             {editingField === "resume" ?
-              <textarea
+              <Textarea
                 ref={resumeRef}
                 value={tempResume}
                 onChange={(e) => setTempResume(e.target.value)}
                 onBlur={saveResume}
-                rows={3}
-                className="w-full outline-none resize-none"
+                rows={1}
+                className="w-full outline-none resize-none min-h-0"
                 style={{
                   fontFamily: "'DM Sans', sans-serif",
                   fontSize: 15,
@@ -1325,7 +1325,8 @@ const MemoResult = () => {
                   border: "1px solid rgba(255,255,255,0.72)",
                   borderRadius: 8,
                   padding: "10px 12px"
-                }} /> :
+                }}
+                autoResize /> :
 
 
               <p
