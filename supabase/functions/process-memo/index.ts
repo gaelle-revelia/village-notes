@@ -335,7 +335,7 @@ serve(async (req) => {
     const body = await req.json();
     const { memo_id, mode, text_input, audio_path } = body;
 
-    if (mode === "transcription_only" || mode === "question_reformulation") {
+    if (mode === "transcription_only" || mode === "question_reformulation" || mode === "answer_reformulation") {
       if (!audio_path) {
         return jsonResponse({ error: `audio_path required for ${mode} mode` }, corsHeaders, 400);
       }
@@ -347,8 +347,13 @@ serve(async (req) => {
         return jsonResponse({ transcription }, corsHeaders);
       }
 
-      const reformulated = await reformulateQuestionFromTranscription(lovableApiKey, transcription);
-      return jsonResponse(reformulated, corsHeaders);
+      if (mode === "question_reformulation") {
+        const reformulated = await reformulateQuestionFromTranscription(lovableApiKey, transcription);
+        return jsonResponse(reformulated, corsHeaders);
+      }
+
+      const answer = await reformulateAnswerFromTranscription(lovableApiKey, transcription);
+      return jsonResponse({ answer }, corsHeaders);
     }
 
     if (!memo_id) {
