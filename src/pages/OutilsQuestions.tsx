@@ -208,6 +208,7 @@ export default function OutilsQuestions() {
   const [drafts, setDrafts] = useState<Record<string, Draft>>({});
   const [pickerSearch, setPickerSearch] = useState("");
   const [recentIds, setRecentIds] = useState<string[]>([]);
+  const [filterPanelOpen, setFilterPanelOpen] = useState(false);
   const saveTimerRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
   const mainRef = useRef<HTMLElement>(null);
 
