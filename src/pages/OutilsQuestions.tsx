@@ -1,8 +1,7 @@
 import { type CSSProperties, useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Loader2, Plus } from "lucide-react";
+import { ArrowLeft, Check, Loader2, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import BottomNavBar from "@/components/BottomNavBar";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/useAuth";
 import { useEnfantId } from "@/hooks/useEnfantId";
@@ -36,6 +35,20 @@ const glassCard: CSSProperties = {
   borderRadius: 16,
   boxShadow:
     "0 4px 24px hsl(var(--secondary) / 0.08), 0 1px 4px hsl(var(--foreground) / 0.06), inset 0 1px 0 hsl(var(--background) / 0.9)",
+};
+
+const answerBlockStyle: CSSProperties = {
+  background: "rgba(255,255,255,0.52)",
+  borderLeft: "2px solid #AFA9EC",
+  borderRadius: 8,
+  padding: "8px 12px",
+};
+
+const answerInputStyle: CSSProperties = {
+  background: "rgba(255,255,255,0.52)",
+  backdropFilter: "blur(16px) saturate(1.6)",
+  WebkitBackdropFilter: "blur(16px) saturate(1.6)",
+  border: "1px solid rgba(255,255,255,0.72)",
 };
 
 type QuestionStatus = "to_ask" | "asked";
@@ -88,7 +101,7 @@ export default function OutilsQuestions() {
   const [intervenantsById, setIntervenantsById] = useState<Record<string, Member>>({});
   const [activeTab, setActiveTab] = useState<QuestionStatus>("to_ask");
   const [answerDrafts, setAnswerDrafts] = useState<Record<string, string>>({});
-  const [expandedAnswerIds, setExpandedAnswerIds] = useState<Record<string, boolean>>({});
+  const [editingAnswerIds, setEditingAnswerIds] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<string | null>(null);
 
@@ -152,8 +165,8 @@ export default function OutilsQuestions() {
         return accumulator;
       }, {});
 
-      const initialExpanded = normalizedQuestions.reduce<Record<string, boolean>>((accumulator, item) => {
-        accumulator[item.id] = Boolean(item.answer) || item.status === "asked";
+      const initialEditing = normalizedQuestions.reduce<Record<string, boolean>>((accumulator, item) => {
+        accumulator[item.id] = false;
         return accumulator;
       }, {});
 
@@ -164,7 +177,7 @@ export default function OutilsQuestions() {
 
       setQuestions(normalizedQuestions);
       setAnswerDrafts(initialDrafts);
-      setExpandedAnswerIds(initialExpanded);
+      setEditingAnswerIds(initialEditing);
       setIntervenantsById(membersMap);
       setLoading(false);
     });
@@ -190,15 +203,14 @@ export default function OutilsQuestions() {
     );
   };
 
-  const handleMarkAsked = async (question: QuestionItem, checked: boolean | string) => {
-    if (checked !== true || question.status === "asked") return;
-
-    const askedAt = new Date().toISOString();
+  const handleMarkAsked = async (question: QuestionItem) => {
+    const nextStatus: QuestionStatus = question.status === "asked" ? "to_ask" : "asked";
+    const askedAt = nextStatus === "asked" ? new Date().toISOString() : null;
     setSavingId(question.id);
 
     const { error } = await supabase
       .from("questions")
-      .update({ status: "asked", asked_at: askedAt })
+      .update({ status: nextStatus, asked_at: askedAt })
       .eq("id", question.id);
 
     if (error) {
@@ -211,8 +223,10 @@ export default function OutilsQuestions() {
       return;
     }
 
-    updateQuestionLocally(question.id, { status: "asked", asked_at: askedAt });
-    setExpandedAnswerIds((current) => ({ ...current, [question.id]: true }));
+    updateQuestionLocally(question.id, { status: nextStatus, asked_at: askedAt });
+    if (nextStatus === "to_ask") {
+      setEditingAnswerIds((current) => ({ ...current, [question.id]: false }));
+    }
     setSavingId(null);
   };
 
@@ -236,6 +250,7 @@ export default function OutilsQuestions() {
     }
 
     updateQuestionLocally(questionId, { answer: answer || null });
+    setEditingAnswerIds((current) => ({ ...current, [questionId]: false }));
     toast({ title: "Réponse enregistrée" });
     setSavingId(null);
   };
@@ -252,96 +267,101 @@ export default function OutilsQuestions() {
     return (
       <div className="flex flex-col gap-3">
         {items.map((question) => {
-          const displayDate = question.status === "asked" ? question.asked_at ?? question.created_at : question.created_at;
           const linkedMembers = question.linked_pro_ids
             .map((memberId) => intervenantsById[memberId])
             .filter(Boolean);
           const answerValue = answerDrafts[question.id] ?? "";
           const isSaving = savingId === question.id;
-          const showAnswerField = expandedAnswerIds[question.id] || Boolean(question.answer);
+          const isAsked = question.status === "asked";
+          const isEditingAnswer = editingAnswerIds[question.id] || (!question.answer && isAsked);
 
           return (
-            <article key={question.id} className="flex flex-col gap-4 p-4" style={glassCard}>
-              <div className="flex items-start gap-3">
-                <div className="flex-1 space-y-3">
-                  <div className="flex items-start justify-between gap-3">
-                    <p className="text-[15px] font-medium leading-6 text-foreground">{question.text}</p>
-                    <div className="flex items-center gap-2 pt-0.5">
-                      {isSaving ? <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /> : null}
-                      <Checkbox
-                        checked={question.status === "asked"}
-                        disabled={isSaving}
-                        onCheckedChange={(checked) => void handleMarkAsked(question, checked)}
-                        aria-label={`Marquer la question ${question.text} comme posée`}
-                      />
-                    </div>
-                  </div>
-
-                  {linkedMembers.length > 0 ? (
-                    <div className="flex flex-wrap gap-2">
-                      {linkedMembers.map((member) => {
-                        const palette = getMemberPalette(member.id);
-                        return (
-                          <span
-                            key={member.id}
-                            className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium"
-                            style={{
-                              background: `hsl(${palette.accent} / 0.14)`,
-                              color: `hsl(${palette.accent})`,
-                              border: `1px solid hsl(${palette.accent} / 0.18)`,
-                            }}
-                          >
-                            {member.nom}
-                          </span>
-                        );
-                      })}
-                    </div>
-                  ) : null}
-
-                  <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
-                    <span>{question.status === "asked" ? "Posée le" : "Créée le"} {formatDate(displayDate)}</span>
-                    {question.status === "asked" ? (
-                      <button
-                        type="button"
-                        className="text-secondary underline-offset-4 hover:underline"
-                        onClick={() =>
-                          setExpandedAnswerIds((current) => ({ ...current, [question.id]: !showAnswerField }))
-                        }
-                      >
-                        {showAnswerField ? "Masquer la réponse" : "Ajouter une réponse"}
-                      </button>
-                    ) : null}
-                  </div>
-                </div>
+            <article key={question.id} className="flex items-start gap-3 p-4" style={glassCard}>
+              <div className="flex items-start pt-1">
+                <button
+                  type="button"
+                  disabled={isSaving}
+                  onClick={() => void handleMarkAsked(question)}
+                  aria-label={
+                    isAsked
+                      ? `Remettre la question ${question.text} dans À poser`
+                      : `Marquer la question ${question.text} comme posée`
+                  }
+                  className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full transition-opacity disabled:cursor-wait disabled:opacity-70"
+                  style={{
+                    border: isAsked ? "1.5px solid #7F77DD" : "1.5px solid hsl(var(--border))",
+                    background: isAsked ? "#7F77DD" : "transparent",
+                  }}
+                >
+                  {isAsked ? <Check className="h-3.5 w-3.5 text-white" strokeWidth={3} /> : null}
+                </button>
               </div>
 
-              {showAnswerField ? (
-                <div className="space-y-2">
-                  <label className="text-xs font-medium text-muted-foreground" htmlFor={`answer-${question.id}`}>
-                    Réponse facultative
-                  </label>
-                  <textarea
-                    id={`answer-${question.id}`}
-                    value={answerValue}
-                    onChange={(event) =>
-                      setAnswerDrafts((current) => ({ ...current, [question.id]: event.target.value }))
-                    }
-                    rows={3}
-                    placeholder="Ajouter une note ou la réponse reçue…"
-                    className="min-h-[88px] w-full rounded-xl border border-input bg-background/70 px-3 py-2 text-sm text-foreground outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
-                  />
-                  <div className="flex justify-end">
-                    <button
-                      type="button"
-                      onClick={() => void handleSaveAnswer(question.id)}
-                      disabled={isSaving}
-                      className="inline-flex items-center justify-center rounded-xl bg-secondary px-3 py-2 text-sm font-medium text-secondary-foreground transition-opacity disabled:opacity-50"
-                    >
-                      Enregistrer la réponse
-                    </button>
-                  </div>
+              <div className="min-w-0 flex-1 space-y-3">
+                <div className="flex items-start justify-between gap-3">
+                  <p className="text-[15px] font-medium leading-6 text-foreground">{question.text}</p>
+                  {isSaving ? <Loader2 className="mt-1 h-4 w-4 flex-shrink-0 animate-spin text-muted-foreground" /> : null}
                 </div>
-              ) : null}
+
+                {linkedMembers.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {linkedMembers.map((member) => {
+                      const palette = getMemberPalette(member.id);
+                      return (
+                        <span
+                          key={member.id}
+                          className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium"
+                          style={{
+                            background: `hsl(${palette.accent} / 0.14)`,
+                            color: `hsl(${palette.accent})`,
+                            border: `1px solid hsl(${palette.accent} / 0.18)`,
+                          }}
+                        >
+                          {member.nom}
+                        </span>
+                      );
+                    })}
+                  </div>
+                ) : null}
+
+                {question.asked_at ? (
+                  <div className="text-xs text-muted-foreground">Posée le {formatDate(question.asked_at)}</div>
+                ) : null}
+
+                {isAsked ? (
+                  isEditingAnswer ? (
+                    <input
+                      id={`answer-${question.id}`}
+                      type="text"
+                      value={answerValue}
+                      onChange={(event) =>
+                        setAnswerDrafts((current) => ({ ...current, [question.id]: event.target.value }))
+                      }
+                      onBlur={() => void handleSaveAnswer(question.id)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") {
+                          event.preventDefault();
+                          void handleSaveAnswer(question.id);
+                        }
+                      }}
+                      placeholder="Ajouter la réponse reçue..."
+                      className="h-10 w-full rounded-lg px-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      style={answerInputStyle}
+                    />
+                  ) : question.answer ? (
+                    <div style={answerBlockStyle}>
+                      <p className="whitespace-pre-wrap text-sm leading-6 text-foreground">{question.answer}</p>
+                      <button
+                        type="button"
+                        className="mt-1 text-xs text-secondary underline-offset-4 hover:underline"
+                        onClick={() => setEditingAnswerIds((current) => ({ ...current, [question.id]: true }))}
+                      >
+                        Modifier
+                      </button>
+                    </div>
+                  ) : null
+                ) : null}
+              </div>
             </article>
           );
         })}
