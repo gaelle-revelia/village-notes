@@ -436,9 +436,19 @@ export default function OutilsQuestions() {
     const askedAt = nextStatus === "asked" ? new Date().toISOString() : null;
     setSavingId(question.id);
 
+    const payload: Record<string, unknown> = { status: nextStatus, asked_at: askedAt };
+
+    // Include answer draft when marking as asked
+    if (nextStatus === "asked") {
+      const draftAnswer = drafts[question.id]?.answer;
+      if (draftAnswer) {
+        payload.answer = draftAnswer;
+      }
+    }
+
     const { error } = await supabase
       .from("questions")
-      .update({ status: nextStatus, asked_at: askedAt })
+      .update(payload)
       .eq("id", question.id);
 
     if (error) {
@@ -451,8 +461,14 @@ export default function OutilsQuestions() {
       return;
     }
 
-    updateQuestionLocally(question.id, { status: nextStatus, asked_at: askedAt });
+    updateQuestionLocally(question.id, payload as Partial<QuestionItem>);
     setSavingId(null);
+
+    // Close card if it's the one being edited, then switch tab
+    if (editingId === question.id) {
+      void closeCard();
+    }
+    setActiveTab(nextStatus);
   };
 
   /* ── inline intervenant picker helpers ── */
