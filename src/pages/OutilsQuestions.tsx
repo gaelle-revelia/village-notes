@@ -2,7 +2,6 @@ import { type CSSProperties, useCallback, useEffect, useMemo, useRef, useState }
 import { ArrowLeft, Check, Loader2, Plus, Search, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import BottomNavBar from "@/components/BottomNavBar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/useAuth";
 import { useEnfantId } from "@/hooks/useEnfantId";
 import { useToast } from "@/hooks/use-toast";
@@ -198,7 +197,9 @@ export default function OutilsQuestions() {
 
   const [questions, setQuestions] = useState<QuestionItem[]>([]);
   const [intervenantsById, setIntervenantsById] = useState<Record<string, Member>>({});
-  const [activeTab, setActiveTab] = useState<QuestionStatus>("to_ask");
+  const [statusFilter, setStatusFilter] = useState<"all" | "to_ask" | "asked">("all");
+  const [specFilter, setSpecFilter] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<string | null>(null);
 
@@ -340,15 +341,34 @@ export default function OutilsQuestions() {
     [intervenantsById],
   );
 
-  const questionsToAsk = useMemo(
-    () => questions.filter((q) => q.status === "to_ask"),
-    [questions],
-  );
+  const availableSpecialties = useMemo(() => {
+    const specs = new Set<string>();
+    for (const q of questions) {
+      for (const pid of q.linked_pro_ids) {
+        const m = intervenantsById[pid];
+        if (m?.specialite) specs.add(m.specialite);
+      }
+    }
+    return Array.from(specs).sort();
+  }, [questions, intervenantsById]);
 
-  const askedQuestions = useMemo(
-    () => questions.filter((q) => q.status === "asked"),
-    [questions],
-  );
+  const filteredQuestions = useMemo(() => {
+    return questions.filter((q) => {
+      if (statusFilter !== "all" && q.status !== statusFilter) return false;
+      if (specFilter) {
+        const hasSpec = q.linked_pro_ids.some((id) => intervenantsById[id]?.specialite === specFilter);
+        if (!hasSpec) return false;
+      }
+      if (searchQuery.trim()) {
+        const n = normalize(searchQuery);
+        const matchText = normalize(q.text).includes(n);
+        const matchPrec = q.precisions && normalize(q.precisions).includes(n);
+        const matchAnswer = q.answer && normalize(q.answer).includes(n);
+        if (!matchText && !matchPrec && !matchAnswer) return false;
+      }
+      return true;
+    });
+  }, [questions, statusFilter, specFilter, searchQuery, intervenantsById]);
 
   /* ── save helpers ── */
 
@@ -478,11 +498,10 @@ export default function OutilsQuestions() {
     updateQuestionLocally(question.id, payload as Partial<QuestionItem>);
     setSavingId(null);
 
-    // Close card if it's the one being edited, then switch tab
+    // Close card if it's the one being edited
     if (editingId === question.id) {
       void closeCard();
     }
-    setActiveTab(nextStatus);
   };
 
   /* ── inline intervenant picker helpers ── */
@@ -571,7 +590,10 @@ export default function OutilsQuestions() {
               <article
                 data-question-id={question.id}
                 className="p-4 transition-all"
-                style={glassCard}
+                style={{
+                  ...glassCard,
+                  ...(isAsked ? { borderLeft: "3px solid #8B74E0" } : {}),
+                }}
                 onClick={() => !isExpanded && void openCard(question.id)}
                 role={isExpanded ? undefined : "button"}
                 tabIndex={isExpanded ? undefined : 0}
@@ -740,21 +762,7 @@ export default function OutilsQuestions() {
                   /* ─── COLLAPSED MODE ─── */
                   <div className="space-y-2">
                     <div className="flex items-start justify-between gap-2">
-                      <div className="flex items-start gap-2 min-w-0 flex-1">
-                        {/* inline checkbox */}
-                        <button
-                          type="button"
-                          disabled={isSaving}
-                          onClick={(e) => { e.stopPropagation(); void handleMarkAsked(question); }}
-                          aria-label={isAsked ? "Remettre dans À poser" : "Marquer comme posée"}
-                          className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full transition-opacity disabled:cursor-wait disabled:opacity-70"
-                          style={{
-                            border: isAsked ? "1.5px solid #7F77DD" : "1.5px solid hsl(var(--border))",
-                            background: isAsked ? "#7F77DD" : "transparent",
-                          }}
-                        >
-                          {isAsked ? <Check className="h-3 w-3 text-white" strokeWidth={3} /> : null}
-                        </button>
+                      <div className="min-w-0 flex-1">
                         <p className="text-[15px] font-medium leading-6 text-foreground">{question.text}</p>
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0">
@@ -842,9 +850,6 @@ export default function OutilsQuestions() {
       </header>
 
       <main ref={mainRef} className="flex-1 px-4 pb-28 pt-4" onClick={handleMainClick}>
-
-
-
         {loading ? (
           <div className="flex min-h-[320px] items-center justify-center">
             <span className="text-sm text-muted-foreground">Chargement…</span>
@@ -856,18 +861,78 @@ export default function OutilsQuestions() {
             </p>
           </div>
         ) : (
-          <Tabs value={activeTab} onValueChange={(value) => isQuestionStatus(value) && setActiveTab(value)}>
-            <TabsList className="grid w-full grid-cols-2 rounded-2xl bg-muted/80 p-1">
-              <TabsTrigger value="to_ask" className="rounded-xl">À poser</TabsTrigger>
-              <TabsTrigger value="asked" className="rounded-xl">Posées</TabsTrigger>
-            </TabsList>
-            <TabsContent value="to_ask" className="mt-4">
-              {renderQuestionList(questionsToAsk, "Aucune question en attente pour le moment.")}
-            </TabsContent>
-            <TabsContent value="asked" className="mt-4">
-              {renderQuestionList(askedQuestions, "Aucune question marquée comme posée pour le moment.")}
-            </TabsContent>
-          </Tabs>
+          <div className="space-y-4">
+            {/* Filter bar */}
+            <div className="space-y-3">
+              {/* Status chips */}
+              <div className="flex flex-wrap gap-2">
+                {([
+                  { key: "all" as const, label: "Toutes" },
+                  { key: "to_ask" as const, label: "À poser" },
+                  { key: "asked" as const, label: "Posées" },
+                ]).map(({ key, label }) => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setStatusFilter(key)}
+                    className="px-3.5 py-1.5 rounded-[20px] text-xs font-medium transition-all"
+                    style={statusFilter === key
+                      ? { background: "#8B74E0", color: "#fff", boxShadow: "0 2px 8px rgba(139,116,224,0.25)" }
+                      : { background: "rgba(255,255,255,0.52)", border: "1px solid rgba(255,255,255,0.72)", color: "#1E1A1A" }
+                    }
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Specialty chips */}
+              {availableSpecialties.length > 1 && (
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setSpecFilter(null)}
+                    className="px-3.5 py-1.5 rounded-[20px] text-xs font-medium transition-all"
+                    style={specFilter === null
+                      ? { background: "#8B74E0", color: "#fff", boxShadow: "0 2px 8px rgba(139,116,224,0.25)" }
+                      : { background: "rgba(255,255,255,0.52)", border: "1px solid rgba(255,255,255,0.72)", color: "#1E1A1A" }
+                    }
+                  >
+                    Toutes
+                  </button>
+                  {availableSpecialties.map((spec) => (
+                    <button
+                      key={spec}
+                      type="button"
+                      onClick={() => setSpecFilter(specFilter === spec ? null : spec)}
+                      className="px-3.5 py-1.5 rounded-[20px] text-xs font-medium transition-all"
+                      style={specFilter === spec
+                        ? { background: "#8B74E0", color: "#fff", boxShadow: "0 2px 8px rgba(139,116,224,0.25)" }
+                        : { background: "rgba(255,255,255,0.52)", border: "1px solid rgba(255,255,255,0.72)", color: "#1E1A1A" }
+                      }
+                    >
+                      {spec}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Search field */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Rechercher…"
+                  className="w-full py-2 pl-9 pr-3 text-sm text-foreground outline-none placeholder:text-muted-foreground"
+                  style={searchFieldStyle}
+                />
+              </div>
+            </div>
+
+            {/* Question list */}
+            {renderQuestionList(filteredQuestions, "Aucune question ne correspond aux filtres.")}
+          </div>
         )}
       </main>
 
