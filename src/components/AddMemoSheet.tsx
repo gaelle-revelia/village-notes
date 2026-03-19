@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  NotebookPen, PenLine, FileText, Pin, Activity,
+  Mic, PenLine, FileText, Sparkles, Activity,
   Timer, ChevronRight, ChevronLeft, X, MessageCircleQuestion,
 } from "lucide-react";
 import { icons } from "lucide-react";
@@ -115,31 +115,36 @@ export default function AddMemoSheet({ open, onOpenChange, enfantId }: Props) {
               {/* === Main panel === */}
               <nav className="w-full px-2 pb-4 pt-1" style={{ flex: "0 0 33.33%" }}>
                 <MenuItem
-                  icon={<NotebookPen className="h-5 w-5" />}
+                  icon={<Mic size={18} />}
+                  color="#8B74E0"
                   label="Note de rendez-vous"
                   description="Ce qui s'est passé en séance"
                   onClick={() => go("/nouveau-memo-vocal")}
                 />
                 <MenuItem
-                  icon={<FileText className="h-5 w-5" />}
+                  icon={<FileText size={18} />}
+                  color="#888780"
                   label="Document"
                   description="Compte-rendu, ordonnance, courrier"
                   onClick={() => go("/nouveau-document")}
                 />
                 <MenuItem
-                  icon={<Pin className="h-5 w-5" />}
+                  icon={<Sparkles size={18} />}
+                  color="#EF9F27"
                   label="Événement"
                   description="Petite victoire, moment dont je veux me souvenir"
                   onClick={() => go("/nouvel-evenement")}
                 />
                 <MenuItem
-                  icon={<Activity className="h-5 w-5" />}
+                  icon={<Activity size={18} />}
+                  color="#E8736A"
                   label="Activité"
                   description="Motilo, temps sur le ventre, exercice..."
                   onClick={() => setView("activites")}
                 />
                 <MenuItem
-                  icon={<MessageCircleQuestion className="h-5 w-5" />}
+                  icon={<MessageCircleQuestion size={18} />}
+                  color="#1D9E75"
                   label="Question à poser"
                   description="Ce que je veux demander au pro"
                   onClick={() => go("/nouvelle-question")}
@@ -238,13 +243,18 @@ export default function AddMemoSheet({ open, onOpenChange, enfantId }: Props) {
   );
 }
 
-function MenuItem({ icon, label, description, onClick }: { icon: React.ReactNode; label: string; description?: string; onClick: () => void }) {
+function MenuItem({ icon, color, label, description, onClick }: { icon: React.ReactNode; color: string; label: string; description?: string; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
       className="flex w-full items-center gap-4 rounded-xl px-4 py-3 text-left hover:bg-muted transition-colors"
     >
-      <span className="text-muted-foreground">{icon}</span>
+      <div
+        className="flex items-center justify-center shrink-0"
+        style={{ width: 32, height: 32, borderRadius: 8, backgroundColor: `${color}26`, color }}
+      >
+        {icon}
+      </div>
       <div className="flex-1 min-w-0">
         <span className="font-semibold text-foreground text-[15px] block">{label}</span>
         {description && (
