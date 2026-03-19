@@ -113,11 +113,11 @@ export default function AddMemoSheet({ open, onOpenChange, enfantId }: Props) {
               }}
             >
               {/* === Main panel === */}
-              <nav className="w-full px-2 pb-4 pt-1" style={{ flex: "0 0 25%" }}>
+              <nav className="w-full px-2 pb-4 pt-1" style={{ flex: "0 0 33.33%" }}>
                 <MenuItem
                   icon={<NotebookPen className="h-5 w-5" />}
                   label="Note de rendez-vous"
-                  onClick={() => setView("notes")}
+                  onClick={() => go("/nouveau-memo-vocal")}
                 />
                 <MenuItem
                   icon={<MessageCircleQuestion className="h-5 w-5" />}
@@ -138,21 +138,6 @@ export default function AddMemoSheet({ open, onOpenChange, enfantId }: Props) {
                   icon={<Activity className="h-5 w-5" />}
                   label="Activité"
                   onClick={() => setView("activites")}
-                />
-              </nav>
-
-              {/* === Notes sub-menu === */}
-              <nav className="w-full px-2 pb-4 pt-1" style={{ flex: "0 0 25%" }}>
-                <BackHeader label="Note de rendez-vous" onBack={() => setView("main")} />
-                <MenuItem
-                  icon={<Mic className="h-5 w-5" />}
-                  label="Note vocale"
-                  onClick={() => go("/nouveau-memo-vocal")}
-                />
-                <MenuItem
-                  icon={<PenLine className="h-5 w-5" />}
-                  label="Note écrite"
-                  onClick={() => go("/nouvelle-note")}
                 />
               </nav>
 
