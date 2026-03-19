@@ -241,7 +241,7 @@ export default function OutilsActiviteChrono() {
             {/* Controls */}
             <div className="flex items-center gap-5 mt-8">
               <button
-                onClick={() => setRunning((r) => !r)}
+                onClick={togglePause}
                 className="flex items-center justify-center"
                 style={{
                   width: 56,
