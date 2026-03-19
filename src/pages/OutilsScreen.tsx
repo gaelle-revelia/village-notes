@@ -64,7 +64,7 @@ const OutilsScreen = () => {
         <ProfileAvatar />
       </header>
 
-      <main className="flex-1 px-4 pb-24 pt-6">
+      <main className="flex-1 px-4 pb-24 pt-6" style={{ paddingTop: 80 }}>
         <div className="grid grid-cols-2 gap-3">
           {TOOLS.map((tool) => {
             const Icon = tool.icon;
