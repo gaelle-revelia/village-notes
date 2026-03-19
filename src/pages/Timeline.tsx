@@ -94,6 +94,13 @@ const Timeline = () => {
   });
   const bottomRef = useRef<HTMLDivElement>(null);
 
+  // Close filter panel on scroll
+  useEffect(() => {
+    const handleScroll = () => setFilterPanelOpen(false);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
 
   useEffect(() => {
     if (!user) return;
