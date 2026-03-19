@@ -1,6 +1,6 @@
 import { type CSSProperties } from "react";
 import { useNavigate } from "react-router-dom";
-import { Activity, CalendarDays, Share2, Sparkles, Wind } from "lucide-react";
+import { Activity, CalendarDays, MessageCircleQuestion, Share2, Sparkles, Wind } from "lucide-react";
 import BottomNavBar from "@/components/BottomNavBar";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { useEnfantId } from "@/hooks/useEnfantId";
 const TOOLS = [
   { label: "Suivi d'activités", icon: Activity, route: "/outils/activites", active: true },
   { label: "Synthèse magique", icon: Sparkles, route: "/outils/synthese", active: true },
+  { label: "Questions à poser", icon: MessageCircleQuestion, route: "/outils/questions", active: true },
   {
     label: "Cohérence cardiaque",
     subtitle: "Respiration guidée",
