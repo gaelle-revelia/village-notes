@@ -9,7 +9,12 @@ const allowedOrigins = [
 const AI_GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const AI_MODEL = "google/gemini-3-flash-preview";
 const QUESTION_REFORMULATION_PROMPT =
-  "Tu es un assistant qui aide des parents d'enfants en situation de handicap. À partir de cette transcription, formule une question principale courte et claire (max 15 mots), et si nécessaire des précisions complémentaires (max 2 phrases). Réponds uniquement en JSON: { question: '...', precisions: '...' }";
+  `Tu es un assistant qui aide des parents d'enfants en situation de handicap. À partir de cette transcription, formule :
+
+1. Une question principale courte et directe (max 10 mots, comme si le parent la posait à voix haute)
+2. Si nécessaire, des précisions complémentaires en 1-2 phrases courtes, dans les mots du parent — sans formulations génériques comme "il s'agit de savoir" ou "dans le cadre de"
+
+Réponds uniquement en JSON: { "question": "...", "precisions": "..." }`;
 
 function getCorsHeaders(req: Request) {
   const origin = req.headers.get("origin") || "";
