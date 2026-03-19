@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Activity, CalendarDays, Search, Share2, Sparkles, Wind } from "lucide-react";
+import { Activity, CalendarDays, Search, Share2, Sparkles, Wind, X } from "lucide-react";
 import BottomNavBar from "@/components/BottomNavBar";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { Button } from "@/components/ui/button";
@@ -178,6 +178,13 @@ const OutilsScreen = () => {
     return intervenants.slice(0, 3);
   }, [intervenants, recentIds]);
 
+  const selectedIntervenants = useMemo(
+    () => selectedIds
+      .map((id) => intervenants.find((intervenant) => intervenant.id === id))
+      .filter(Boolean) as Intervenant[],
+    [intervenants, selectedIds]
+  );
+
   const resetForm = () => {
     setQuestion("");
     setSelectedIds([]);
@@ -338,6 +345,33 @@ const OutilsScreen = () => {
 
             <div className="space-y-3">
               <Label htmlFor="question-intervenant-search">Choisir</Label>
+
+              {selectedIntervenants.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {selectedIntervenants.map((intervenant) => (
+                    <div
+                      key={intervenant.id}
+                      className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1.5 text-sm text-primary"
+                    >
+                      <div
+                        className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-[11px] font-semibold text-white"
+                        style={{ background: getGradient(intervenant.id) }}
+                      >
+                        {intervenant.nom.charAt(0).toUpperCase()}
+                      </div>
+                      <span className="max-w-[140px] truncate font-medium">{intervenant.nom}</span>
+                      <button
+                        type="button"
+                        onClick={() => toggleIntervenant(intervenant.id)}
+                        className="inline-flex h-5 w-5 items-center justify-center rounded-full text-primary/80 transition-colors hover:bg-primary/10 hover:text-primary"
+                        aria-label={`Retirer ${intervenant.nom}`}
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
 
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
