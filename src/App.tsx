@@ -57,6 +57,7 @@ const AppRoutes = () => {
       <Route path="/outils/activites/:id/chrono" element={<OutilsActiviteChrono />} />
       <Route path="/outils/activites/:id/manuel" element={<OutilsActiviteManuel />} />
       <Route path="/outils/synthese" element={<OutilsSynthese />} />
+      <Route path="/outils/questions" element={<OutilsQuestions />} />
       <Route path="/outils/synthese/pick-me-up" element={<OutilsSynthesePickMeUp />} />
       <Route path="/outils/synthese/mdph" element={<OutilsSyntheseMdph />} />
       <Route path="/outils/synthese/rdv" element={<OutilsSyntheseRdv />} />
