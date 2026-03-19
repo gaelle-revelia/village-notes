@@ -468,7 +468,7 @@ export default function NouvelleQuestion() {
                   onChange={(event) => setQuestion(event.target.value)}
                   placeholder="Écrivez votre question ici"
                   required
-                  className="min-h-[180px] w-full rounded-xl resize-none"
+                  className="min-h-[88px] w-full rounded-xl resize-none"
                   autoFocus
                 />
               </div>
