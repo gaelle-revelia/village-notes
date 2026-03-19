@@ -1,91 +1,58 @@
 
 
-## Plan: Inline-editable question cards in OutilsQuestions.tsx
+## Plan: Add `autoResize` prop to Textarea + apply to 21 fields
 
-**Constraint**: Do not modify `NouvelleQuestion.tsx` in this pass.
+### 1. Modify `src/components/ui/textarea.tsx`
 
-### Summary
-Each question card becomes tappable to expand into inline edit mode. One card editable at a time. Auto-save on blur with 800ms debounce. Switching cards force-saves the current one first. Intervenant picker is duplicated inline (not extracted from NouvelleQuestion in this pass).
+Add `autoResize?: boolean` to the props interface. When true:
+- Attach an `onInput` handler that resets height then sets it to `scrollHeight`
+- Merge with any existing `onInput` from props
+- Add `overflow-y: hidden` and `resize: none` classes
+- Use a callback ref (merged with forwarded ref) to set initial height on mount
 
-### Files changed
-
-| File | Action |
-|---|---|
-| `src/pages/OutilsQuestions.tsx` | Major rewrite of card rendering + new state + inline picker |
-
-### State changes
-
-- Remove `editingAnswerIds` state
-- Add `editingId: string | null` — which card is expanded
-- Add `drafts: Record<string, { text: string; precisions: string; linked_pro_ids: string[]; answer: string }>` — per-card editable fields
-- Add `saveTimerRef = useRef<Record<string, NodeJS.Timeout>>({})` — debounce timers keyed by `questionId:field`
-- Add `searchQuery: string` state for the inline intervenant picker (reset when switching cards)
-- Fetch `precisions` column in the questions query (currently missing)
-- Add `precisions: string | null` to `QuestionItem` type
-
-### Data flow
-
-1. On fetch, initialize `drafts` from question data (text, precisions, linked_pro_ids, answer)
-2. On card tap (outside checkbox): if another card is open, flush its pending saves immediately, then set `editingId` to tapped card
-3. On field change: update `drafts[id][field]`, start 800ms debounce timer
-4. On field blur: clear debounce timer, save immediately via `supabase.from("questions").update(...)` + `updateQuestionLocally`
-5. On click outside all cards (on `<main>`): flush pending saves, set `editingId = null`
-
-### Save function
-
-```text
-flushAndSave(questionId):
-  - clear all timers for that questionId
-  - compare drafts[questionId] vs questions[questionId]
-  - if any field changed, do single update call with all changed fields
-  - updateQuestionLocally with new values
-
-debouncedFieldChange(questionId, field, value):
-  - update drafts state
-  - clear existing timer for questionId:field
-  - set new 800ms timer that calls saveField(questionId, field, value)
+```
+interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+  autoResize?: boolean;
+}
 ```
 
-### Card rendering (collapsed vs expanded)
+### 2. Apply `autoResize` to all 21 fields
 
-**Collapsed** (default — same as current, plus precisions):
-- Circular checkbox (left) + question text (font-medium) + pro pills + precisions (muted text) + date
-- Entire card clickable to expand (except checkbox)
+Files using `<Textarea>` component — just add `autoResize`:
 
-**Expanded** (`editingId === question.id`):
-- Circular checkbox still functional on the left
-- Fields stacked vertically in the content area:
-  1. `<input type="text">` for question text — glass style, font-medium
-  2. `<textarea rows={3}>` for precisions — glass style
-  3. Inline intervenant multi-select (search + list + selected chips) — duplicated from NouvelleQuestion's `IntervenantSelection` / `IntervenantRow` pattern, using the same styles and `MEMBER_PALETTES`
-  4. Answer input/block — only when `status === "asked"`, same glass input style, save on blur/enter
+| File | Field(s) |
+|---|---|
+| `NouvelEvenement.tsx` | Description |
+| `NouvelleQuestion.tsx` | Précisions |
+| `NouveauMemoVocal.tsx` | Text input |
+| `TextInputView.tsx` | Text input |
+| `OutilsActiviteChrono.tsx` | Notes |
+| `OutilsActiviteManuel.tsx` | Notes |
+| `PreciserBlocDrawer.tsx` | Precision input |
+| `OutilsSyntheseMdph.tsx` | Q3, Q4, Q5, Q6 textareas |
+| `OutilsSyntheseTransmission.tsx` | Section answer textarea (×6, single JSX) |
+| `OutilsSynthesePickMeUp.tsx` | Free text |
+| `OutilsSyntheseRdvBriefing.tsx` | Free text |
+| `MemberDetailPanel.tsx` | Notes libres |
+| `VillageSettings.tsx` | Notes |
 
-### Inline intervenant picker (duplicated in OutilsQuestions)
+Files using raw `<textarea>` — convert to `<Textarea autoResize>`:
 
-Since we cannot touch NouvelleQuestion.tsx, we duplicate the following locally in OutilsQuestions.tsx:
-- `normalize()` function (already exists as used in NouvelleQuestion)
-- `HighlightMatch` component
-- `IntervenantSelection` component (adapted: uses `intervenantsById` converted to array, `recentIds` fetched from memos)
-- `IntervenantRow` component
-- `searchFieldStyle` constant
-- `MEMBER_PALETTES` already exists but needs `avatar` field added
+| File | Field(s) |
+|---|---|
+| `NouvelleNote.tsx` | Note text (currently raw `<textarea rows={5}>`) |
+| `MemoResult.tsx` | actNote, resume, details, à retenir (4 raw textareas) |
 
-The picker will:
-- Show selected pro chips with X buttons
-- Show search input
-- Show filtered results or recent intervenants
-- Toggle updates `drafts[questionId].linked_pro_ids` and triggers debounced save
+### 3. Files NOT touched
+- `OutilsQuestions.tsx` — already has inline auto-resize logic (keep as-is)
+- Auth forms, Waitlist.tsx — excluded
+- `CarteProgressionOnboarding.tsx`, `AxeDetail.tsx` — not in audit list
 
-### Fetching recent intervenants
+### Technical details
 
-Add a new `useEffect` that fetches the 3 most recent `intervenant_id` values from `memos` (same pattern as NouvelleQuestion lines 175-201). Store in `recentIds: string[]` state.
-
-### Cleanup
-
-- `useEffect` cleanup clears all pending timeouts from `saveTimerRef`
-- Convert `intervenantsById` record to array via `useMemo` for the picker's filtering logic
-
-### Click-outside handling
-
-Attach `onClick` on `<main>` element. If `editingId` is set and click target is not inside `[data-question-id="${editingId}"]`, flush saves and close.
+The `Textarea` component will:
+1. Destructure `autoResize` and `onInput` from props
+2. Use `useCallback` ref that merges with forwarded `ref` to set initial height
+3. Wrap `onInput`: reset height to `'auto'`, set to `scrollHeight + 'px'`, then call original `onInput`
+4. When `autoResize`, add `overflow-hidden resize-none` to className
 
