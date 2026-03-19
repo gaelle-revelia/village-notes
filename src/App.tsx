@@ -10,6 +10,7 @@ import Onboarding from "./pages/Onboarding";
 import ResetPassword from "./pages/ResetPassword";
 
 import NouveauMemoVocal from "./pages/NouveauMemoVocal";
+import NouvelleQuestion from "./pages/NouvelleQuestion";
 import NouvelleNote from "./pages/NouvelleNote";
 import NouveauDocument from "./pages/NouveauDocument";
 import NouvelEvenement from "./pages/NouvelEvenement";
@@ -67,6 +68,7 @@ const AppRoutes = () => {
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/record" element={<Navigate to="/nouveau-memo-vocal" replace />} />
       <Route path="/nouveau-memo-vocal" element={<NouveauMemoVocal />} />
+      <Route path="/nouvelle-question" element={<NouvelleQuestion />} />
       <Route path="/nouvelle-note" element={<NouvelleNote />} />
       <Route path="/nouveau-document" element={<NouveauDocument />} />
       <Route path="/nouvel-evenement" element={<NouvelEvenement />} />
