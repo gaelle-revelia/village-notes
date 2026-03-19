@@ -1,34 +1,46 @@
 
 
-## Findings
+## Analysis
 
-### 1. File
-All chrono logic lives in **`src/pages/OutilsActiviteChrono.tsx`** — no custom hook.
+### 1. Current Timeline filter (Drawer)
+- **State**: `filterDrawerOpen` (boolean), toggled by filter button (`setFilterDrawerOpen(true)`) at line 267
+- **Component**: `<Drawer>` from `@/components/ui/drawer` (lines 480-525) — a bottom sheet overlay
+- **Content**: Wraps the same `FILTER_PILLS` chips + a "Réinitialiser" button
+- **Imports**: `Drawer`, `DrawerContent`, `DrawerHeader`, `DrawerTitle` (lines 13-18)
 
-### 2. Current approach (broken)
-Line 92: `setInterval(() => setSeconds((s) => s + 1), 1000)`
+### 2. OutilsQuestions slide-down pattern
+- **State**: `filterPanelOpen` (boolean), toggled via `setFilterPanelOpen((v) => !v)` on the filter button
+- **Technique**: A plain `<div>` with `maxHeight: filterPanelOpen ? 300 : 0` + `transition: "max-height 0.25s ease"` + `overflow: hidden` — no overlay, no portal, inline in the page flow below the search bar
+- **Button style**: Same 42×42 glass button, background changes when open
 
-This is a **counter-based** timer: it increments `seconds` state by 1 every interval tick. When the phone screen locks, the browser suspends JS timers, so ticks are lost and the displayed time falls behind real elapsed time.
+### 3. Minimal changes in Timeline.tsx
 
-### 3. Minimal fix
+**Remove:**
+- `Drawer`, `DrawerContent`, `DrawerHeader`, `DrawerTitle` imports (lines 13-18)
+- The entire `<Drawer>` block (lines 479-525)
 
-Replace the counter with a **`Date.now()` wall-clock reference**:
+**Rename state:**
+- `filterDrawerOpen` → `filterPanelOpen` (cosmetic, for consistency)
 
-- Add a `startTimeRef = useRef<number>(Date.now())` and an `accumulatedRef = useRef<number>(0)` (to handle pause/resume).
-- On **start / resume**: set `startTimeRef.current = Date.now()`.
-- On **pause**: add `Date.now() - startTimeRef.current` to `accumulatedRef.current`.
-- The interval (kept at ~1 s for display refresh) computes:
-  ```
-  setSeconds(accumulatedRef.current + Math.floor((Date.now() - startTimeRef.current) / 1000))
-  ```
-- On **"Terminer"**: same formula for the final value.
+**Modify filter button** (line 267):
+- Change `onClick` from `setFilterDrawerOpen(true)` to `setFilterPanelOpen(v => !v)` (toggle instead of open-only)
+- Adjust button background to reflect open state like OutilsQuestions
 
-This way, even if the interval is frozen for minutes during screen lock, the next tick after wake recalculates from the real clock and self-corrects instantly.
+**Add slide-down div** right after the search bar row (after line ~330), inside the sticky header:
+```tsx
+<div style={{
+  overflow: "hidden",
+  maxHeight: filterPanelOpen ? 300 : 0,
+  transition: "max-height 0.25s ease",
+}}>
+  <div className="flex flex-wrap gap-2 pt-2">
+    {/* existing FILTER_PILLS.map — unchanged */}
+  </div>
+  {isFilterActive && (
+    /* existing Réinitialiser button — unchanged */
+  )}
+</div>
+```
 
-**Changes scoped to ~15 lines** in `OutilsActiviteChrono.tsx`:
-- Replace `seconds` increment logic in the timer `useEffect` (lines 90-96)
-- Add two refs (`startTimeRef`, `accumulatedRef`)
-- Update pause toggle handler and `handleTerminer` to snapshot accumulated time
-
-No other file touched.
+**Total**: ~30 lines changed, filter chips and toggle logic stay identical.
 
