@@ -39,7 +39,7 @@ interface Activite {
   unite_distance: string | null;
 }
 
-type View = "main" | "notes" | "activites" | "chrono-choice";
+type View = "main" | "activites" | "chrono-choice";
 
 interface Props {
   open: boolean;
