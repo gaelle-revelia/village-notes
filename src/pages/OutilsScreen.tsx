@@ -105,27 +105,37 @@ const OutilsScreen = () => {
                     strokeWidth={2}
                   />
                 </div>
-                <span
+                <div
                   style={{
-                    fontSize: 13,
-                    fontWeight: 500,
-                    lineHeight: 1.3,
-                    color: tool.active ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))",
+                    minHeight: 48,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
                   }}
                 >
-                  {tool.label}
-                </span>
-                <span
-                  style={{
-                    fontSize: 10,
-                    lineHeight: 1.3,
-                    marginTop: 2,
-                    color: "hsl(var(--muted-foreground))",
-                    visibility: (tool as any).subtitle ? "visible" : "hidden",
-                  }}
-                >
-                  {(tool as any).subtitle || "\u00A0"}
-                </span>
+                  <span
+                    style={{
+                      fontSize: 13,
+                      fontWeight: 500,
+                      lineHeight: 1.3,
+                      color: tool.active ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))",
+                    }}
+                  >
+                    {tool.label}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: 10,
+                      lineHeight: 1.3,
+                      marginTop: 2,
+                      color: "hsl(var(--muted-foreground))",
+                      visibility: (tool as any).subtitle ? "visible" : "hidden",
+                    }}
+                  >
+                    {(tool as any).subtitle || "\u00A0"}
+                  </span>
+                </div>
               </button>
             );
           })}
