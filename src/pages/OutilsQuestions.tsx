@@ -208,6 +208,7 @@ export default function OutilsQuestions() {
   const [pickerSearch, setPickerSearch] = useState("");
   const [recentIds, setRecentIds] = useState<string[]>([]);
   const saveTimerRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+  const mainRef = useRef<HTMLElement>(null);
 
   // cleanup timers on unmount
   useEffect(() => {
@@ -216,6 +217,15 @@ export default function OutilsQuestions() {
       Object.values(timers).forEach(clearTimeout);
     };
   }, []);
+
+  // Scroll to bottom on initial load
+  useEffect(() => {
+    if (!loading && questions.length > 0) {
+      requestAnimationFrame(() => {
+        window.scrollTo({ top: document.body.scrollHeight, behavior: "instant" as ScrollBehavior });
+      });
+    }
+  }, [loading, questions.length]);
 
   /* ── fetch questions + intervenants ── */
 
@@ -831,7 +841,7 @@ export default function OutilsQuestions() {
         </button>
       </header>
 
-      <main className="flex-1 px-4 pb-28 pt-4" onClick={handleMainClick}>
+      <main ref={mainRef} className="flex-1 px-4 pb-28 pt-4" onClick={handleMainClick}>
 
 
 
