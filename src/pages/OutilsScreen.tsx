@@ -81,11 +81,12 @@ const OutilsScreen = () => {
                 key={tool.label}
                 disabled={!tool.active}
                 onClick={() => tool.route && navigate(tool.route)}
-                className="relative flex min-h-[140px] flex-col items-center justify-center gap-3 p-5 text-center transition-transform active:scale-[0.97]"
+                className="relative flex min-h-[140px] flex-col items-center p-5 text-center transition-transform active:scale-[0.97]"
                 style={{
                   ...glassCard,
                   opacity: tool.active ? 1 : 0.5,
                   cursor: tool.active ? "pointer" : "default",
+                  justifyContent: "center",
                 }}
               >
                 {!tool.active && (
@@ -100,8 +101,11 @@ const OutilsScreen = () => {
                   </span>
                 )}
                 <div
-                  className="flex h-11 w-11 items-center justify-center rounded-xl"
+                  className="flex items-center justify-center rounded-xl"
                   style={{
+                    width: 44,
+                    height: 44,
+                    marginBottom: 10,
                     background: tool.active
                       ? (tool as any).iconBg || "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)))"
                       : "hsl(210 18% 61% / 0.15)",
@@ -118,19 +122,26 @@ const OutilsScreen = () => {
                   />
                 </div>
                 <span
-                  className="text-[13px] font-sans font-medium leading-tight"
-                  style={{ color: tool.active ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))" }}
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 500,
+                    lineHeight: 1.3,
+                    color: tool.active ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))",
+                  }}
                 >
                   {tool.label}
                 </span>
-                {"subtitle" in tool && tool.subtitle && (
-                  <span
-                    className="mt-[-2px] text-[10px] font-sans font-normal leading-tight"
-                    style={{ color: "hsl(var(--muted-foreground))" }}
-                  >
-                    {tool.subtitle}
-                  </span>
-                )}
+                <span
+                  style={{
+                    fontSize: 10,
+                    lineHeight: 1.3,
+                    marginTop: 2,
+                    color: "hsl(var(--muted-foreground))",
+                    visibility: (tool as any).subtitle ? "visible" : "hidden",
+                  }}
+                >
+                  {(tool as any).subtitle || "\u00A0"}
+                </span>
               </button>
             );
           })}
