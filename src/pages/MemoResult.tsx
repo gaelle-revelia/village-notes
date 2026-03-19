@@ -1349,14 +1349,14 @@ const MemoResult = () => {
           <div style={glassCard}>
             <p style={sectionLabel}>{isTextQuick ? "VOTRE NOTE" : "DÉTAILS"}</p>
             {editingField === "details" ?
-              <textarea
+              <Textarea
                 ref={detailsRef}
                 value={tempDetails}
                 onChange={(e) => setTempDetails(e.target.value)}
                 onBlur={saveDetails}
-                rows={4}
+                rows={1}
                 placeholder={isTextQuick ? "Modifier votre note..." : "Un élément par ligne..."}
-                className="w-full outline-none resize-none placeholder:text-[#9A9490]"
+                className="w-full outline-none resize-none placeholder:text-[#9A9490] min-h-0"
                 style={{
                   fontFamily: "'DM Sans', sans-serif",
                   fontSize: 15,
@@ -1366,7 +1366,8 @@ const MemoResult = () => {
                   border: "1px solid rgba(255,255,255,0.72)",
                   borderRadius: 8,
                   padding: "10px 12px"
-                }} /> :
+                }}
+                autoResize /> :
 
 
               <div
