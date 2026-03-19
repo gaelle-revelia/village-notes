@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { Activity, CalendarDays, MessageCircleQuestion, Share2, Sparkles, Wind } from "lucide-react";
 import BottomNavBar from "@/components/BottomNavBar";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
-import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useEnfantId } from "@/hooks/useEnfantId";
 
@@ -66,17 +65,6 @@ const OutilsScreen = () => {
       </header>
 
       <main className="flex-1 px-4 pb-24 pt-6">
-        <div className="mb-4">
-          <Button
-            type="button"
-            onClick={() => navigate("/nouvelle-question")}
-            disabled={!user || !enfantId}
-            className="w-full"
-          >
-            Nouvelle question
-          </Button>
-        </div>
-
         <div className="grid grid-cols-2 gap-3">
           {TOOLS.map((tool) => {
             const Icon = tool.icon;
