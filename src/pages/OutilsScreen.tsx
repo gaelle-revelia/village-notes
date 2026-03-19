@@ -108,11 +108,9 @@ const OutilsScreen = () => {
                 </div>
                 <div
                   style={{
-                    minHeight: 48,
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
-                    justifyContent: "center",
                   }}
                 >
                   <span
