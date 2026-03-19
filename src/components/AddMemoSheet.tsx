@@ -82,7 +82,7 @@ export default function AddMemoSheet({ open, onOpenChange, enfantId }: Props) {
 
   const domain = (d: string) => DOMAIN_CONFIG[d] ?? DOMAIN_CONFIG["Médical"];
 
-  const translateX = view === "main" ? "0%" : view === "notes" ? "-25%" : view === "activites" ? "-50%" : "-75%";
+  const translateX = view === "main" ? "0%" : view === "activites" ? "-33.33%" : "-66.66%";
 
   return (
     <>
