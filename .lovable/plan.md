@@ -1,58 +1,33 @@
 
 
-## Plan: Add `autoResize` prop to Textarea + apply to 21 fields
+## Plan: Always show "Réponse reçue" + checkbox switches tab
 
-### 1. Modify `src/components/ui/textarea.tsx`
+### Changes in `src/pages/OutilsQuestions.tsx` only
 
-Add `autoResize?: boolean` to the props interface. When true:
-- Attach an `onInput` handler that resets height then sets it to `scrollHeight`
-- Merge with any existing `onInput` from props
-- Add `overflow-y: hidden` and `resize: none` classes
-- Use a callback ref (merged with forwarded ref) to set initial height on mount
+#### 1. "Réponse reçue" always visible in edit mode
 
-```
-interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
-  autoResize?: boolean;
-}
-```
+Around line 653, remove the `{isAsked && (` conditional wrapping the answer field block. The `<div className="space-y-1">` with the label "Réponse reçue" and the textarea will render whenever a card is expanded, regardless of status.
 
-### 2. Apply `autoResize` to all 21 fields
+#### 2. Checkbox saves answer draft + switches to "Posées" tab
 
-Files using `<Textarea>` component — just add `autoResize`:
+In `handleMarkAsked` (line 434):
+- When toggling **to "asked"**: also include the answer draft from `drafts[question.id]?.answer` in the update payload (if non-empty)
+- After successful save, call `setActiveTab("asked")`
+- Close the card via `closeCard()` (flush saves first) so it doesn't remain expanded in the wrong tab
 
-| File | Field(s) |
-|---|---|
-| `NouvelEvenement.tsx` | Description |
-| `NouvelleQuestion.tsx` | Précisions |
-| `NouveauMemoVocal.tsx` | Text input |
-| `TextInputView.tsx` | Text input |
-| `OutilsActiviteChrono.tsx` | Notes |
-| `OutilsActiviteManuel.tsx` | Notes |
-| `PreciserBlocDrawer.tsx` | Precision input |
-| `OutilsSyntheseMdph.tsx` | Q3, Q4, Q5, Q6 textareas |
-| `OutilsSyntheseTransmission.tsx` | Section answer textarea (×6, single JSX) |
-| `OutilsSynthesePickMeUp.tsx` | Free text |
-| `OutilsSyntheseRdvBriefing.tsx` | Free text |
-| `MemberDetailPanel.tsx` | Notes libres |
-| `VillageSettings.tsx` | Notes |
-
-Files using raw `<textarea>` — convert to `<Textarea autoResize>`:
-
-| File | Field(s) |
-|---|---|
-| `NouvelleNote.tsx` | Note text (currently raw `<textarea rows={5}>`) |
-| `MemoResult.tsx` | actNote, resume, details, à retenir (4 raw textareas) |
-
-### 3. Files NOT touched
-- `OutilsQuestions.tsx` — already has inline auto-resize logic (keep as-is)
-- Auth forms, Waitlist.tsx — excluded
-- `CarteProgressionOnboarding.tsx`, `AxeDetail.tsx` — not in audit list
+When toggling **back to "to_ask"** (unchecking): switch tab to `setActiveTab("to_ask")` for consistency.
 
 ### Technical details
 
-The `Textarea` component will:
-1. Destructure `autoResize` and `onInput` from props
-2. Use `useCallback` ref that merges with forwarded `ref` to set initial height
-3. Wrap `onInput`: reset height to `'auto'`, set to `scrollHeight + 'px'`, then call original `onInput`
-4. When `autoResize`, add `overflow-hidden resize-none` to className
+**handleMarkAsked** changes:
+```text
+- Build update payload: { status, asked_at }
+- If nextStatus === "asked" and drafts[question.id]?.answer is truthy,
+  add answer to payload
+- After success: updateQuestionLocally with full payload
+- setActiveTab(nextStatus)
+- If editingId === question.id, close card
+```
+
+**Answer field**: Remove `{isAsked && (` wrapper and its closing `)}` around the answer block (~line 653 and ~665).
 
