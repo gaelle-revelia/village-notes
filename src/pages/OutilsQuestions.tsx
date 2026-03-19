@@ -458,11 +458,18 @@ export default function OutilsQuestions() {
   /* ── click outside ── */
 
   const handleMainClick = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    // Close filter panel on outside click
+    if (filterPanelOpen) {
+      const target = e.target as HTMLElement;
+      if (!target.closest("[data-filter-header]")) {
+        setFilterPanelOpen(false);
+      }
+    }
     if (!editingId) return;
     const target = e.target as HTMLElement;
     if (target.closest(`[data-question-id="${editingId}"]`)) return;
     void closeCard();
-  }, [editingId, closeCard]);
+  }, [editingId, closeCard, filterPanelOpen]);
 
   /* ── toggle asked/to_ask ── */
 
