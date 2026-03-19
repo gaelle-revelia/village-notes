@@ -1,7 +1,28 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Activity, Sparkles, CalendarDays, Share2, Wind } from "lucide-react";
+import { Activity, CalendarDays, Share2, Sparkles, Wind } from "lucide-react";
 import BottomNavBar from "@/components/BottomNavBar";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useEnfantId } from "@/hooks/useEnfantId";
+import { useToast } from "@/hooks/use-toast";
+
+type Intervenant = {
+  id: string;
+  nom: string;
+  specialite: string | null;
+};
 
 const TOOLS = [
   { label: "Suivi d'activités", icon: Activity, route: "/outils/activites", active: true },
@@ -22,6 +43,101 @@ const glassCard: React.CSSProperties = {
 
 const OutilsScreen = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { enfantId } = useEnfantId();
+  const { toast } = useToast();
+  const [open, setOpen] = useState(false);
+  const [question, setQuestion] = useState("");
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [intervenants, setIntervenants] = useState<Intervenant[]>([]);
+  const [loadingIntervenants, setLoadingIntervenants] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!open || !enfantId) return;
+
+    let cancelled = false;
+    setLoadingIntervenants(true);
+
+    supabase
+      .from("intervenants")
+      .select("id, nom, specialite")
+      .eq("enfant_id", enfantId)
+      .eq("actif", true)
+      .order("nom")
+      .then(({ data, error }) => {
+        if (cancelled) return;
+
+        if (error) {
+          toast({
+            title: "Impossible de charger les membres du village",
+            description: "Réessayez dans un instant.",
+            variant: "destructive",
+          });
+          setIntervenants([]);
+        } else {
+          setIntervenants(data ?? []);
+        }
+
+        setLoadingIntervenants(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [open, enfantId, toast]);
+
+  const resetForm = () => {
+    setQuestion("");
+    setSelectedIds([]);
+  };
+
+  const toggleIntervenant = (id: string) => {
+    setSelectedIds((current) =>
+      current.includes(id) ? current.filter((item) => item !== id) : [...current, id]
+    );
+  };
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    setOpen(nextOpen);
+    if (!nextOpen) {
+      resetForm();
+    }
+  };
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const trimmedQuestion = question.trim();
+    if (!trimmedQuestion || !user || !enfantId) return;
+
+    setSubmitting(true);
+
+    const { error } = await supabase.from("questions").insert({
+      parent_id: user.id,
+      child_id: enfantId,
+      text: trimmedQuestion,
+      linked_pro_ids: selectedIds,
+      status: "to_ask",
+    });
+
+    setSubmitting(false);
+
+    if (error) {
+      toast({
+        title: "Impossible d'ajouter la question",
+        description: "Réessayez dans un instant.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    handleOpenChange(false);
+    toast({
+      title: "Question ajoutée",
+      description: "Votre question a bien été enregistrée.",
+    });
+  };
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -39,6 +155,17 @@ const OutilsScreen = () => {
       </header>
 
       <main className="flex-1 px-4 pt-6 pb-24">
+        <div className="mb-4">
+          <Button
+            type="button"
+            onClick={() => setOpen(true)}
+            disabled={!user || !enfantId}
+            className="w-full"
+          >
+            Nouvelle question
+          </Button>
+        </div>
+
         <div className="grid grid-cols-2 gap-3">
           {TOOLS.map((tool) => {
             const Icon = tool.icon;
@@ -94,6 +221,70 @@ const OutilsScreen = () => {
           })}
         </div>
       </main>
+
+      <Dialog open={open} onOpenChange={handleOpenChange}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Nouvelle question</DialogTitle>
+            <DialogDescription>
+              Ajoutez une question à poser à un ou plusieurs membres du village.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="question-text">Votre question</Label>
+              <Textarea
+                id="question-text"
+                value={question}
+                onChange={(event) => setQuestion(event.target.value)}
+                placeholder="Écrivez votre question ici"
+                required
+                className="min-h-28 w-full ml-0"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Professionnels liés</Label>
+              <div className="max-h-56 space-y-2 overflow-y-auto rounded-md border border-input bg-background p-2">
+                {loadingIntervenants ? (
+                  <p className="px-2 py-3 text-sm text-muted-foreground">Chargement…</p>
+                ) : intervenants.length === 0 ? (
+                  <p className="px-2 py-3 text-sm text-muted-foreground">Aucun membre disponible.</p>
+                ) : (
+                  intervenants.map((intervenant) => {
+                    const selected = selectedIds.includes(intervenant.id);
+
+                    return (
+                      <button
+                        key={intervenant.id}
+                        type="button"
+                        onClick={() => toggleIntervenant(intervenant.id)}
+                        className="flex w-full items-start justify-between gap-3 rounded-md border border-input px-3 py-2 text-left transition-colors hover:bg-accent"
+                        aria-pressed={selected}
+                      >
+                        <div>
+                          <p className="text-sm font-medium text-foreground">{intervenant.nom}</p>
+                          {intervenant.specialite && (
+                            <p className="text-xs text-muted-foreground">{intervenant.specialite}</p>
+                          )}
+                        </div>
+                        <span className="text-xs font-medium text-muted-foreground">
+                          {selected ? "Sélectionné" : "Choisir"}
+                        </span>
+                      </button>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+
+            <Button type="submit" className="w-full" disabled={submitting || !question.trim() || !user || !enfantId}>
+              {submitting ? "Ajout…" : "Ajouter"}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       <BottomNavBar />
     </div>
