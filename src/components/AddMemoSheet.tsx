@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   NotebookPen, Mic, PenLine, FileText, Pin, Activity,
-  Timer, ChevronRight, ChevronLeft, X,
+  Timer, ChevronRight, ChevronLeft, X, MessageCircleQuestion,
 } from "lucide-react";
 import { icons } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -118,6 +118,11 @@ export default function AddMemoSheet({ open, onOpenChange, enfantId }: Props) {
                   icon={<NotebookPen className="h-5 w-5" />}
                   label="Note de rendez-vous"
                   onClick={() => setView("notes")}
+                />
+                <MenuItem
+                  icon={<MessageCircleQuestion className="h-5 w-5" />}
+                  label="Question à poser"
+                  onClick={() => go("/nouvelle-question")}
                 />
                 <MenuItem
                   icon={<FileText className="h-5 w-5" />}
