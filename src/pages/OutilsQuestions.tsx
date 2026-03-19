@@ -827,7 +827,7 @@ export default function OutilsQuestions() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-10 px-4" style={glassHeader}>
+      <header data-filter-header className="sticky top-0 z-10 px-4" style={glassHeader}>
         {/* Row 1: back + title + add */}
         <div className="flex items-center gap-3 py-3">
           <button
@@ -859,76 +859,135 @@ export default function OutilsQuestions() {
           </button>
         </div>
 
-        {/* Row 2: search field */}
-        <div className="relative pb-2">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" style={{ marginTop: -4 }} />
-          <input
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Rechercher…"
-            className="w-full py-2 pl-9 pr-3 text-sm text-foreground outline-none placeholder:text-muted-foreground"
-            style={searchFieldStyle}
-          />
-        </div>
-
-        {/* Row 3: status chips */}
-        <div className="pb-2">
-          <p style={{ fontSize: 11, fontWeight: 500, color: "hsl(var(--muted-foreground))", marginBottom: 6 }}>Statut</p>
-          <div className="flex flex-wrap gap-2">
-            {([
-              { key: "all" as const, label: "Toutes" },
-              { key: "to_ask" as const, label: "À poser" },
-              { key: "asked" as const, label: "Posées" },
-            ]).map(({ key, label }) => (
-              <button
-                key={key}
-                type="button"
-                onClick={() => setStatusFilter(key)}
-                className="px-3.5 py-1.5 rounded-[20px] text-xs font-medium transition-all"
-                style={statusFilter === key
-                  ? { background: "#8B74E0", color: "#fff", boxShadow: "0 2px 8px rgba(139,116,224,0.25)" }
-                  : { background: "rgba(255,255,255,0.52)", border: "1px solid rgba(255,255,255,0.72)", color: "#1E1A1A" }
-                }
-              >
-                {label}
-              </button>
-            ))}
+        {/* Row 2: filter button + search field */}
+        <div className="flex items-center gap-2 pb-2">
+          <button
+            type="button"
+            onClick={() => setFilterPanelOpen((v) => !v)}
+            className="relative flex flex-shrink-0 items-center justify-center"
+            style={{
+              width: 42,
+              height: 42,
+              borderRadius: 14,
+              background: filterPanelOpen ? "hsl(var(--background) / 0.6)" : "hsl(var(--background) / 0.45)",
+              backdropFilter: "blur(12px) saturate(1.4)",
+              WebkitBackdropFilter: "blur(12px) saturate(1.4)",
+              border: "1px solid hsl(var(--background) / 0.65)",
+              boxShadow: "0 2px 8px hsl(var(--foreground) / 0.05), inset 0 1px 0 hsl(var(--background) / 0.7)",
+            }}
+            aria-label="Filtrer"
+          >
+            <SlidersHorizontal
+              size={16}
+              style={{ color: (statusFilter !== "all" || specFilter !== null) ? "#8B74E0" : "#9A9490" }}
+            />
+            {(statusFilter !== "all" || specFilter !== null) && (
+              <span
+                className="absolute"
+                style={{
+                  top: 8,
+                  right: 8,
+                  width: 7,
+                  height: 7,
+                  borderRadius: "50%",
+                  background: "#8B74E0",
+                }}
+              />
+            )}
+          </button>
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Rechercher…"
+              className="w-full py-2 pl-9 pr-3 text-sm text-foreground outline-none placeholder:text-muted-foreground"
+              style={searchFieldStyle}
+            />
           </div>
         </div>
 
-        {/* Row 4: specialty chips */}
-        {availableSpecialties.length > 1 && (
-          <div className="pb-3">
-            <p style={{ fontSize: 11, fontWeight: 500, color: "hsl(var(--muted-foreground))", marginBottom: 6 }}>Intervenant</p>
+        {/* Collapsible filter panel */}
+        <div
+          style={{
+            overflow: "hidden",
+            maxHeight: filterPanelOpen ? 300 : 0,
+            transition: "max-height 0.25s ease",
+          }}
+        >
+          {/* Status chips */}
+          <div className="pb-2">
+            <p style={{ fontSize: 11, fontWeight: 500, color: "hsl(var(--muted-foreground))", marginBottom: 6 }}>Statut</p>
             <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => setSpecFilter(null)}
-                className="px-3.5 py-1.5 rounded-[20px] text-xs font-medium transition-all"
-                style={specFilter === null
-                  ? { background: "#8B74E0", color: "#fff", boxShadow: "0 2px 8px rgba(139,116,224,0.25)" }
-                  : { background: "rgba(255,255,255,0.52)", border: "1px solid rgba(255,255,255,0.72)", color: "#1E1A1A" }
-                }
-              >
-                Toutes
-              </button>
-              {availableSpecialties.map((spec) => (
+              {([
+                { key: "all" as const, label: "Toutes" },
+                { key: "to_ask" as const, label: "À poser" },
+                { key: "asked" as const, label: "Posées" },
+              ]).map(({ key, label }) => (
                 <button
-                  key={spec}
+                  key={key}
                   type="button"
-                  onClick={() => setSpecFilter(specFilter === spec ? null : spec)}
+                  onClick={() => setStatusFilter(key)}
                   className="px-3.5 py-1.5 rounded-[20px] text-xs font-medium transition-all"
-                  style={specFilter === spec
+                  style={statusFilter === key
                     ? { background: "#8B74E0", color: "#fff", boxShadow: "0 2px 8px rgba(139,116,224,0.25)" }
                     : { background: "rgba(255,255,255,0.52)", border: "1px solid rgba(255,255,255,0.72)", color: "#1E1A1A" }
                   }
                 >
-                  {spec}
+                  {label}
                 </button>
               ))}
             </div>
           </div>
-        )}
+
+          {/* Specialty chips */}
+          {availableSpecialties.length > 1 && (
+            <div className="pb-2">
+              <p style={{ fontSize: 11, fontWeight: 500, color: "hsl(var(--muted-foreground))", marginBottom: 6 }}>Intervenant</p>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => setSpecFilter(null)}
+                  className="px-3.5 py-1.5 rounded-[20px] text-xs font-medium transition-all"
+                  style={specFilter === null
+                    ? { background: "#8B74E0", color: "#fff", boxShadow: "0 2px 8px rgba(139,116,224,0.25)" }
+                    : { background: "rgba(255,255,255,0.52)", border: "1px solid rgba(255,255,255,0.72)", color: "#1E1A1A" }
+                  }
+                >
+                  Toutes
+                </button>
+                {availableSpecialties.map((spec) => (
+                  <button
+                    key={spec}
+                    type="button"
+                    onClick={() => setSpecFilter(specFilter === spec ? null : spec)}
+                    className="px-3.5 py-1.5 rounded-[20px] text-xs font-medium transition-all"
+                    style={specFilter === spec
+                      ? { background: "#8B74E0", color: "#fff", boxShadow: "0 2px 8px rgba(139,116,224,0.25)" }
+                      : { background: "rgba(255,255,255,0.52)", border: "1px solid rgba(255,255,255,0.72)", color: "#1E1A1A" }
+                    }
+                  >
+                    {spec}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Reset button */}
+          {(statusFilter !== "all" || specFilter !== null) && (
+            <div className="pb-2 flex justify-end">
+              <button
+                type="button"
+                onClick={() => { setStatusFilter("all"); setSpecFilter(null); }}
+                className="text-xs font-medium"
+                style={{ color: "#8B74E0" }}
+              >
+                Réinitialiser
+              </button>
+            </div>
+          )}
+        </div>
       </header>
 
       <main ref={mainRef} className="flex-1 px-4 pb-28 pt-4" onClick={handleMainClick}>
