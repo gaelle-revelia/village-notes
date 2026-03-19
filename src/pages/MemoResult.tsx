@@ -978,10 +978,10 @@ const MemoResult = () => {
                     {feedbackIcon("note")}
                   </div>
                   {editingField === "actNote" ?
-                  <textarea
+                   <Textarea
                     defaultValue={noteText || ""}
                     autoFocus
-                    rows={3}
+                    rows={1}
                     onBlur={(e) => {
                       const val = e.target.value.trim();
                       setEditingField(null);
@@ -993,7 +993,7 @@ const MemoResult = () => {
                         (e.target as HTMLTextAreaElement).blur();
                       }
                     }}
-                    className="w-full outline-none resize-none"
+                    className="w-full outline-none resize-none min-h-0"
                     style={{
                       fontFamily: "'DM Sans', sans-serif",
                       fontSize: 15,
@@ -1003,7 +1003,8 @@ const MemoResult = () => {
                       border: "1px solid rgba(255,255,255,0.72)",
                       borderRadius: 8,
                       padding: "10px 12px"
-                    }} /> :
+                    }}
+                    autoResize /> :
 
 
                   <div
