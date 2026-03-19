@@ -462,13 +462,14 @@ export default function NouvelleQuestion() {
                 <label htmlFor="question-text" className="text-sm font-medium text-foreground">
                   Votre question
                 </label>
-                <Textarea
+                <input
                   id="question-text"
+                  type="text"
                   value={question}
                   onChange={(event) => setQuestion(event.target.value)}
                   placeholder="Écrivez votre question ici"
                   required
-                  className="min-h-[88px] w-full rounded-xl resize-none"
+                  className="h-12 w-full rounded-xl border border-input bg-background px-3 py-2 text-base font-medium text-foreground outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   autoFocus
                 />
               </div>
@@ -482,7 +483,8 @@ export default function NouvelleQuestion() {
                   value={precisions}
                   onChange={(event) => setPrecisions(event.target.value)}
                   placeholder="Ajoutez un contexte utile si besoin"
-                  className="min-h-[120px] w-full rounded-xl resize-none"
+                  rows={3}
+                  className="w-full rounded-xl resize-none"
                 />
               </div>
 
