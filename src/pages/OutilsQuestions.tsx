@@ -471,46 +471,8 @@ export default function OutilsQuestions() {
     void closeCard();
   }, [editingId, closeCard, filterPanelOpen]);
 
-  /* ── toggle asked/to_ask ── */
 
-  const handleMarkAsked = async (question: QuestionItem) => {
-    const nextStatus: QuestionStatus = question.status === "asked" ? "to_ask" : "asked";
-    const askedAt = nextStatus === "asked" ? new Date().toISOString() : null;
-    setSavingId(question.id);
 
-    const payload: Record<string, unknown> = { status: nextStatus, asked_at: askedAt };
-
-    // Include answer draft when marking as asked
-    if (nextStatus === "asked") {
-      const draftAnswer = drafts[question.id]?.answer;
-      if (draftAnswer) {
-        payload.answer = draftAnswer;
-      }
-    }
-
-    const { error } = await supabase
-      .from("questions")
-      .update(payload)
-      .eq("id", question.id);
-
-    if (error) {
-      toast({
-        title: "Impossible de mettre à jour la question",
-        description: "Réessayez dans un instant.",
-        variant: "destructive",
-      });
-      setSavingId(null);
-      return;
-    }
-
-    updateQuestionLocally(question.id, payload as Partial<QuestionItem>);
-    setSavingId(null);
-
-    // Close card if it's the one being edited
-    if (editingId === question.id) {
-      void closeCard();
-    }
-  };
 
   /* ── inline intervenant picker helpers ── */
 
