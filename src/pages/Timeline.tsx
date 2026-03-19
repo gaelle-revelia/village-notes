@@ -10,12 +10,6 @@ import { MemoCard, getDomainsFromTags } from "@/components/memo/MemoCard";
 import AddMemoSheet from "@/components/AddMemoSheet";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer";
 
 type FilterType = "tous" | "rdv" | "activites" | "documents" | "evenements";
 
