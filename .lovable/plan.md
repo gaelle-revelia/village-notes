@@ -1,91 +1,40 @@
 
 
-## Plan: Unified list with filter bar (replace tabs + checkbox)
+## Plan: Filter button + collapsible panel (matching Timeline pattern)
 
-### Summary
+### Current state
 
-Remove the two-tab layout and collapsed-card checkbox. Replace with a single list of all questions, a filter bar (status chips + specialty chips + text search), and a purple left border for "Posée" cards. Status changes remain inside the expanded edit mode only.
+The sticky header in OutilsQuestions has 4 rows: title bar, search field, status chips, specialty chips — all permanently visible. The main Timeline uses a `SlidersHorizontal` filter button next to the search field that opens a `<Drawer>` (bottom sheet).
 
-### 1. REMOVE
+### Approach
 
-- **Tabs**: Remove `<Tabs>`, `<TabsList>`, `<TabsTrigger>`, `<TabsContent>` from the page layout (~lines 859-870). Remove the `Tabs` import.
-- **`activeTab` state**: Remove `activeTab` / `setActiveTab`. Remove `setActiveTab(nextStatus)` call in `handleMarkAsked`.
-- **`questionsToAsk` / `askedQuestions` memos**: Remove — no longer needed.
-- **Collapsed-card checkbox**: Remove the circular checkbox button from the collapsed view (~lines 745-757). The timeline dot already conveys status visually.
+Instead of a bottom Drawer (which feels heavy for just a few chips), use a **collapsible panel** that slides down below the search row — toggled by the filter button. This is simpler and feels more inline. A click-outside handler or re-tap closes it.
 
-### 2. ADD — filter bar below sticky header
+### Changes — `src/pages/OutilsQuestions.tsx` only
 
-New state variables:
-- `statusFilter: "all" | "to_ask" | "asked"` (default `"all"`)
-- `specFilter: string | null` (default `null`)
-- `searchQuery: string` (default `""`)
+**1. Header restructure — keep only 2 rows in sticky header:**
+- Row 1: back arrow + title + "+" button (unchanged)
+- Row 2: filter button + search field (same layout as Timeline.tsx lines 264-315)
 
-**Derive available specialties** from linked intervenants across all questions:
-```ts
-const availableSpecialties = useMemo(() => {
-  const specs = new Set<string>();
-  for (const q of questions) {
-    for (const pid of q.linked_pro_ids) {
-      const m = intervenantsById[pid];
-      if (m?.specialite) specs.add(m.specialite);
-    }
-  }
-  return Array.from(specs).sort();
-}, [questions, intervenantsById]);
-```
+**2. Add filter button** (left of search, same as Timeline):
+- Import `SlidersHorizontal` from lucide-react
+- Add `filterPanelOpen` boolean state
+- Button: 42×42px, borderRadius 14, glass style, toggles `filterPanelOpen`
+- Active indicator: purple dot (7px) when `statusFilter !== "all"` or `specFilter !== null`
+- Icon color: `#8B74E0` when active, `#9A9490` when inactive
 
-**Filter bar UI** (below header, above timeline):
-```text
-┌─ Status chips ──────────────────────────────┐
-│  [Toutes]  [À poser]  [Posées]              │
-├─ Specialty chips (if >1) ───────────────────┤
-│  [Toutes]  [Kiné]  [Ergo]  [Ortho]  …      │
-├─ Search field ──────────────────────────────┤
-│  🔍 Rechercher…                             │
-└─────────────────────────────────────────────┘
-```
+**3. Collapsible filter panel** — rendered inside the header, below Row 2:
+- Wrapped in a `div` with `overflow: hidden`, `maxHeight` animated between 0 and a generous value (e.g. 300px), `transition: max-height 0.25s ease`
+- Contains existing Row 3 (Statut label + chips) and Row 4 (Intervenant label + chips)
+- Add a "Réinitialiser" button at bottom when any filter is active (same as Timeline drawer)
 
-Chip style matches Mon Village: active = `bg-[#8B74E0] text-white shadow-md`, inactive = `bg-[rgba(255,255,255,0.52)] border border-[rgba(255,255,255,0.72)] text-[#1E1A1A]`, `px-3.5 py-1.5 rounded-[20px] text-xs font-medium`.
+**4. Close on outside click:**
+- When `filterPanelOpen` is true and user taps outside the header, close it
+- Reuse the existing `handleMainClick` pattern or add a simple check
 
-**Filtered questions memo**:
-```ts
-const filteredQuestions = useMemo(() => {
-  return questions.filter(q => {
-    if (statusFilter !== "all" && q.status !== statusFilter) return false;
-    if (specFilter) {
-      const hasSpec = q.linked_pro_ids.some(id => intervenantsById[id]?.specialite === specFilter);
-      if (!hasSpec) return false;
-    }
-    if (searchQuery.trim()) {
-      const n = normalize(searchQuery);
-      const matchText = normalize(q.text).includes(n);
-      const matchPrec = q.precisions && normalize(q.precisions).includes(n);
-      const matchAnswer = q.answer && normalize(q.answer).includes(n);
-      if (!matchText && !matchPrec && !matchAnswer) return false;
-    }
-    return true;
-  });
-}, [questions, statusFilter, specFilter, searchQuery, intervenantsById]);
-```
+**5. Remove** rows 3 and 4 from always-visible header — they move into the collapsible panel.
 
-### 3. VISUAL STATUS on cards (replaces checkbox)
-
-**"Posée" cards** get a purple left border:
-- Add `borderLeft: "3px solid #8B74E0"` to the `glassCard` style for cards where `status === "asked"`
-
-**"À poser" cards**: normal style (no left border), empty dot on timeline (already implemented)
-
-**"Réponse enregistrée" indicator**: already exists, no change needed.
-
-### 4. Status toggle inside expanded card only
-
-The existing checkbox in expanded mode (~lines 584-598) stays untouched. When toggled, `handleMarkAsked` saves the status change but no longer calls `setActiveTab` (removed). The card stays visible in the unified list (its visual style updates immediately via local state).
-
-### Technical changes — single file: `src/pages/OutilsQuestions.tsx`
-
-**Remove**: `activeTab` state, `questionsToAsk`/`askedQuestions` memos, `Tabs`/`TabsList`/`TabsTrigger`/`TabsContent` imports and JSX, `setActiveTab` calls, collapsed-card checkbox block.
-
-**Add**: `statusFilter`/`specFilter`/`searchQuery` state, `availableSpecialties` memo, `filteredQuestions` memo, filter bar JSX between header and timeline, conditional `borderLeft` on cards.
-
-**Modify**: `renderQuestionList` receives `filteredQuestions` directly. Page layout calls it once instead of twice via tabs.
+### No changes to:
+- Filter logic (`statusFilter`, `specFilter`, `searchQuery`, `filteredQuestions`)
+- Card layout, edit mode, or any other component
 
