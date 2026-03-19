@@ -16,6 +16,7 @@ import NouveauDocument from "./pages/NouveauDocument";
 import NouvelEvenement from "./pages/NouvelEvenement";
 import MemoResult from "./pages/MemoResult";
 import OutilsActiviteChrono from "./pages/OutilsActiviteChrono";
+import OutilsQuestions from "./pages/OutilsQuestions";
 import OutilsActiviteManuel from "./pages/OutilsActiviteManuel";
 import ProfileSettings from "./pages/ProfileSettings";
 import VillageSettings from "./pages/VillageSettings";
