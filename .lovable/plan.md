@@ -1,66 +1,91 @@
 
 
-## Plan: Timeline layout for Questions + Answer indicator
+## Plan: Unified list with filter bar (replace tabs + checkbox)
 
-### 1. Collapsed card — timeline layout
+### Summary
 
-Replace the current `flex flex-col gap-3` list in `renderQuestionList` with a timeline structure matching the main timeline:
+Remove the two-tab layout and collapsed-card checkbox. Replace with a single list of all questions, a filter bar (status chips + specialty chips + text search), and a purple left border for "Posée" cards. Status changes remain inside the expanded edit mode only.
 
-```text
-┌─ relative container, paddingLeft: 44 ─────────────────┐
-│ ┌─ absolute vertical line (left:16, width:1.5) ──┐    │
-│ │  gradient corail→lavande→menthe                │    │
-│ └────────────────────────────────────────────────┘    │
-│                                                       │
-│  ● ─── [card] ──────────────────────────────────────  │
-│  ○ ─── [card] ──────────────────────────────────────  │
-│  ● ─── [card] ──────────────────────────────────────  │
-└───────────────────────────────────────────────────────┘
-```
+### 1. REMOVE
 
-**Dot logic:**
-- **Filled purple** (`#8B74E0`, 11px) → status `"asked"` OR has non-empty answer
-- **Empty circle** (border `#8A9BAE`, 11px, transparent bg) → `"to_ask"` without answer
+- **Tabs**: Remove `<Tabs>`, `<TabsList>`, `<TabsTrigger>`, `<TabsContent>` from the page layout (~lines 859-870). Remove the `Tabs` import.
+- **`activeTab` state**: Remove `activeTab` / `setActiveTab`. Remove `setActiveTab(nextStatus)` call in `handleMarkAsked`.
+- **`questionsToAsk` / `askedQuestions` memos**: Remove — no longer needed.
+- **Collapsed-card checkbox**: Remove the circular checkbox button from the collapsed view (~lines 745-757). The timeline dot already conveys status visually.
 
-**Card changes (collapsed only):**
-- Remove the checkbox from the left — the dot replaces it visually (checkbox moves inside card or stays as-is per "do not touch edit mode")
-- Actually: keep the checkbox inside the card content area, just restructure the outer wrapper to use the timeline dot layout
-- Add **date top-right** of card: `format(created_at, "d MMM", { locale: fr })` → e.g. "14 mars", text 11px, muted color
-- **Précisions**: add `line-clamp-2` (2-line truncation with ellipsis)
+### 2. ADD — filter bar below sticky header
 
-### 2. Answer indicator on collapsed cards
+New state variables:
+- `statusFilter: "all" | "to_ask" | "asked"` (default `"all"`)
+- `specFilter: string | null` (default `null`)
+- `searchQuery: string` (default `""`)
 
-When `question.answer` is non-empty (regardless of status), render at the bottom of the collapsed card:
-
-```tsx
-<div className="flex items-center gap-1.5">
-  <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#7F77DD' }} />
-  <span style={{ fontSize: 11, fontWeight: 500, color: '#534AB7' }}>Réponse enregistrée</span>
-</div>
-```
-
-### 3. Expanded card in timeline
-
-When a card is expanded, it keeps its current edit UI but sits inside the same timeline layout (dot + left padding). The dot for expanded cards follows the same filled/empty logic.
-
-### Technical changes — `src/pages/OutilsQuestions.tsx` only
-
-**`formatDate` helper**: Add a short variant (no year) → `formatShortDate`:
+**Derive available specialties** from linked intervenants across all questions:
 ```ts
-function formatShortDate(value: string) {
-  return new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short" }).format(new Date(value));
-}
+const availableSpecialties = useMemo(() => {
+  const specs = new Set<string>();
+  for (const q of questions) {
+    for (const pid of q.linked_pro_ids) {
+      const m = intervenantsById[pid];
+      if (m?.specialite) specs.add(m.specialite);
+    }
+  }
+  return Array.from(specs).sort();
+}, [questions, intervenantsById]);
 ```
 
-**`renderQuestionList`** (lines 504-742):
-- Outer wrapper: `relative`, `paddingLeft: 44`
-- Add absolute vertical line div (same gradient as Timeline.tsx)
-- Each item wrapper: `relative`, `marginBottom: 16`
-- Add absolute dot div at `left: -32`, `marginTop: 13`
-- Keep `<article>` with `glassCard` style but remove `flex items-start gap-3` (checkbox no longer at left)
-- Move checkbox inline within the card content (at the end of the first line, or keep it where the user can still tap it)
-- Collapsed: add date top-right, truncate précisions, add answer indicator
-- Expanded: unchanged edit UI
+**Filter bar UI** (below header, above timeline):
+```text
+┌─ Status chips ──────────────────────────────┐
+│  [Toutes]  [À poser]  [Posées]              │
+├─ Specialty chips (if >1) ───────────────────┤
+│  [Toutes]  [Kiné]  [Ergo]  [Ortho]  …      │
+├─ Search field ──────────────────────────────┤
+│  🔍 Rechercher…                             │
+└─────────────────────────────────────────────┘
+```
 
-**Keeping the checkbox accessible**: Move it to the right side of the question text row in collapsed mode (small circular check button). In expanded mode it stays as-is.
+Chip style matches Mon Village: active = `bg-[#8B74E0] text-white shadow-md`, inactive = `bg-[rgba(255,255,255,0.52)] border border-[rgba(255,255,255,0.72)] text-[#1E1A1A]`, `px-3.5 py-1.5 rounded-[20px] text-xs font-medium`.
+
+**Filtered questions memo**:
+```ts
+const filteredQuestions = useMemo(() => {
+  return questions.filter(q => {
+    if (statusFilter !== "all" && q.status !== statusFilter) return false;
+    if (specFilter) {
+      const hasSpec = q.linked_pro_ids.some(id => intervenantsById[id]?.specialite === specFilter);
+      if (!hasSpec) return false;
+    }
+    if (searchQuery.trim()) {
+      const n = normalize(searchQuery);
+      const matchText = normalize(q.text).includes(n);
+      const matchPrec = q.precisions && normalize(q.precisions).includes(n);
+      const matchAnswer = q.answer && normalize(q.answer).includes(n);
+      if (!matchText && !matchPrec && !matchAnswer) return false;
+    }
+    return true;
+  });
+}, [questions, statusFilter, specFilter, searchQuery, intervenantsById]);
+```
+
+### 3. VISUAL STATUS on cards (replaces checkbox)
+
+**"Posée" cards** get a purple left border:
+- Add `borderLeft: "3px solid #8B74E0"` to the `glassCard` style for cards where `status === "asked"`
+
+**"À poser" cards**: normal style (no left border), empty dot on timeline (already implemented)
+
+**"Réponse enregistrée" indicator**: already exists, no change needed.
+
+### 4. Status toggle inside expanded card only
+
+The existing checkbox in expanded mode (~lines 584-598) stays untouched. When toggled, `handleMarkAsked` saves the status change but no longer calls `setActiveTab` (removed). The card stays visible in the unified list (its visual style updates immediately via local state).
+
+### Technical changes — single file: `src/pages/OutilsQuestions.tsx`
+
+**Remove**: `activeTab` state, `questionsToAsk`/`askedQuestions` memos, `Tabs`/`TabsList`/`TabsTrigger`/`TabsContent` imports and JSX, `setActiveTab` calls, collapsed-card checkbox block.
+
+**Add**: `statusFilter`/`specFilter`/`searchQuery` state, `availableSpecialties` memo, `filteredQuestions` memo, filter bar JSX between header and timeline, conditional `borderLeft` on cards.
+
+**Modify**: `renderQuestionList` receives `filteredQuestions` directly. Page layout calls it once instead of twice via tabs.
 
