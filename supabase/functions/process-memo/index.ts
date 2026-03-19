@@ -6,6 +6,11 @@ const allowedOrigins = [
   "https://thevillage-app.lovable.app",
 ];
 
+const AI_GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
+const AI_MODEL = "google/gemini-3-flash-preview";
+const QUESTION_REFORMULATION_PROMPT =
+  "Tu es un assistant qui aide des parents d'enfants en situation de handicap. À partir de cette transcription, formule une question principale courte et claire (max 15 mots), et si nécessaire des précisions complémentaires (max 2 phrases). Réponds uniquement en JSON: { question: '...', precisions: '...' }";
+
 function getCorsHeaders(req: Request) {
   const origin = req.headers.get("origin") || "";
   const isLovablePreview =
@@ -18,6 +23,33 @@ function getCorsHeaders(req: Request) {
     "Access-Control-Allow-Headers":
       "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
   };
+}
+
+class HttpError extends Error {
+  status: number;
+
+  constructor(status: number, message: string) {
+    super(message);
+    this.name = "HttpError";
+    this.status = status;
+  }
+}
+
+function jsonResponse(body: unknown, corsHeaders: Record<string, string>, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
+
+function cleanJsonResponse(rawContent: string) {
+  return rawContent.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
+}
+
+function toBase64(arrayBuffer: ArrayBuffer) {
+  return btoa(
+    new Uint8Array(arrayBuffer).reduce((data, byte) => data + String.fromCharCode(byte), "")
+  );
 }
 
 async function detectPepites(
@@ -40,14 +72,14 @@ async function detectPepites(
 
     const axesFormatted = axes.map((a: any) => `- ID: ${a.id} | Label: ${a.label}`).join("\n");
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch(AI_GATEWAY_URL, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${lovableApiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: AI_MODEL,
         messages: [
           {
             role: "system",
@@ -72,8 +104,7 @@ Interdit : pronostic, diagnostic, comparaison à des normes.`,
 
     const result = await response.json();
     const rawContent = result.choices?.[0]?.message?.content || "";
-    const cleaned = rawContent.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
-    const parsed = JSON.parse(cleaned);
+    const parsed = JSON.parse(cleanJsonResponse(rawContent));
     const axeIds: string[] = Array.isArray(parsed.axe_ids) ? parsed.axe_ids.slice(0, 2) : [];
 
     const validAxeIds = axes.map((a: any) => a.id);
@@ -88,6 +119,143 @@ Interdit : pronostic, diagnostic, comparaison à des normes.`,
   }
 }
 
+async function transcribeTempAudio(
+  supabase: any,
+  lovableApiKey: string,
+  audioPath: string,
+): Promise<string> {
+  let shouldDeleteAudio = false;
+
+  try {
+    const { data: audioData, error: downloadError } = await supabase.storage
+      .from("audio-temp")
+      .download(audioPath);
+
+    if (downloadError || !audioData) {
+      throw new HttpError(500, "Failed to download audio: " + downloadError?.message);
+    }
+
+    shouldDeleteAudio = true;
+
+    const base64Audio = toBase64(await audioData.arrayBuffer());
+    const transcribeResponse = await fetch(AI_GATEWAY_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${lovableApiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: AI_MODEL,
+        messages: [
+          {
+            role: "system",
+            content:
+              "Transcris fidèlement ce message audio en français. Retourne uniquement le texte transcrit, sans ponctuation excessive, sans mise en forme, sans commentaire.",
+          },
+          {
+            role: "user",
+            content: [
+              { type: "input_audio", input_audio: { data: base64Audio, format: "wav" } },
+              { type: "text", text: "Transcris cet enregistrement vocal en français." },
+            ],
+          },
+        ],
+      }),
+    });
+
+    if (!transcribeResponse.ok) {
+      const errText = await transcribeResponse.text();
+      console.error("Transcription error:", transcribeResponse.status, errText);
+
+      if (transcribeResponse.status === 429) {
+        throw new HttpError(429, "Rate limit exceeded. Please try again later.");
+      }
+      if (transcribeResponse.status === 402) {
+        throw new HttpError(402, "AI credits exhausted.");
+      }
+
+      throw new HttpError(500, "Transcription failed");
+    }
+
+    const transcribeResult = await transcribeResponse.json();
+    const transcription = transcribeResult.choices?.[0]?.message?.content?.trim();
+
+    if (!transcription) {
+      throw new HttpError(500, "Transcription failed");
+    }
+
+    return transcription;
+  } finally {
+    if (shouldDeleteAudio) {
+      const { error: removeError } = await supabase.storage.from("audio-temp").remove([audioPath]);
+      if (removeError) {
+        console.error("Failed to delete temp audio:", removeError.message);
+      }
+    }
+  }
+}
+
+async function reformulateQuestionFromTranscription(
+  lovableApiKey: string,
+  transcription: string,
+): Promise<{ question: string; precisions: string | null }> {
+  const reformulationResponse = await fetch(AI_GATEWAY_URL, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${lovableApiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: AI_MODEL,
+      messages: [
+        {
+          role: "system",
+          content: QUESTION_REFORMULATION_PROMPT,
+        },
+        {
+          role: "user",
+          content: `Transcription : ${transcription}`,
+        },
+      ],
+    }),
+  });
+
+  if (!reformulationResponse.ok) {
+    const errText = await reformulationResponse.text();
+    console.error("Question reformulation error:", reformulationResponse.status, errText);
+
+    if (reformulationResponse.status === 429) {
+      throw new HttpError(429, "Rate limit exceeded. Please try again later.");
+    }
+    if (reformulationResponse.status === 402) {
+      throw new HttpError(402, "AI credits exhausted.");
+    }
+
+    throw new HttpError(500, "Question reformulation failed");
+  }
+
+  const reformulationResult = await reformulationResponse.json();
+  const rawContent = reformulationResult.choices?.[0]?.message?.content || "";
+
+  try {
+    const parsed = JSON.parse(cleanJsonResponse(rawContent));
+    const question = typeof parsed.question === "string" ? parsed.question.trim() : "";
+    const precisions = typeof parsed.precisions === "string" ? parsed.precisions.trim() : "";
+
+    if (!question) {
+      throw new Error("Missing question in reformulation response");
+    }
+
+    return {
+      question,
+      precisions: precisions || null,
+    };
+  } catch (error) {
+    console.error("Question reformulation JSON parse failed:", rawContent, error);
+    throw new HttpError(500, "Question reformulation failed");
+  }
+}
+
 serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
@@ -95,13 +263,9 @@ serve(async (req) => {
   }
 
   try {
-    // Auth check
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return jsonResponse({ error: "Unauthorized" }, corsHeaders, 401);
     }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -112,118 +276,41 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    // Verify user
     const supabaseAuth = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
       global: { headers: { Authorization: authHeader } },
     });
     const token = authHeader.replace("Bearer ", "");
     const { data: claimsData, error: claimsError } = await supabaseAuth.auth.getClaims(token);
     if (claimsError || !claimsData?.claims) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return jsonResponse({ error: "Unauthorized" }, corsHeaders, 401);
     }
     const userId = claimsData.claims.sub as string;
 
     const body = await req.json();
     const { memo_id, mode, text_input, audio_path } = body;
 
-    // --- transcription_only mode: no memo interaction ---
-    if (mode === "transcription_only") {
+    if (mode === "transcription_only" || mode === "question_reformulation") {
       if (!audio_path) {
-        return new Response(JSON.stringify({ error: "audio_path required for transcription_only mode" }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return jsonResponse({ error: `audio_path required for ${mode} mode` }, corsHeaders, 400);
       }
 
       const supabase = createClient(supabaseUrl, supabaseServiceKey);
+      const transcription = await transcribeTempAudio(supabase, lovableApiKey, audio_path);
 
-      const { data: audioData, error: downloadError } = await supabase.storage
-        .from("audio-temp")
-        .download(audio_path);
-
-      if (downloadError || !audioData) {
-        return new Response(JSON.stringify({ error: "Failed to download audio: " + downloadError?.message }), {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+      if (mode === "transcription_only") {
+        return jsonResponse({ transcription }, corsHeaders);
       }
 
-      const arrayBuffer = await audioData.arrayBuffer();
-      const base64Audio = btoa(
-        new Uint8Array(arrayBuffer).reduce((data, byte) => data + String.fromCharCode(byte), "")
-      );
-
-      const transcribeResponse = await fetch(
-        "https://ai.gateway.lovable.dev/v1/chat/completions",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${lovableApiKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model: "google/gemini-3-flash-preview",
-            messages: [
-              {
-                role: "system",
-                content: "Transcris fidèlement ce message audio en français. Retourne uniquement le texte transcrit, sans ponctuation excessive, sans mise en forme, sans commentaire.",
-              },
-              {
-                role: "user",
-                content: [
-                  { type: "input_audio", input_audio: { data: base64Audio, format: "wav" } },
-                  { type: "text", text: "Transcris cet enregistrement vocal en français." },
-                ],
-              },
-            ],
-          }),
-        }
-      );
-
-      // Delete audio immediately
-      await supabase.storage.from("audio-temp").remove([audio_path]);
-
-      if (!transcribeResponse.ok) {
-        const errText = await transcribeResponse.text();
-        console.error("Transcription error:", transcribeResponse.status, errText);
-        if (transcribeResponse.status === 429) {
-          return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again later." }), {
-            status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
-        }
-        if (transcribeResponse.status === 402) {
-          return new Response(JSON.stringify({ error: "AI credits exhausted." }), {
-            status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
-        }
-        return new Response(JSON.stringify({ error: "Transcription failed" }), {
-          status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      const transcribeResult = await transcribeResponse.json();
-      const transcription = transcribeResult.choices?.[0]?.message?.content || "";
-
-      return new Response(
-        JSON.stringify({ transcription }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      const reformulated = await reformulateQuestionFromTranscription(lovableApiKey, transcription);
+      return jsonResponse(reformulated, corsHeaders);
     }
 
     if (!memo_id) {
-      return new Response(JSON.stringify({ error: "memo_id required" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return jsonResponse({ error: "memo_id required" }, corsHeaders, 400);
     }
 
-    // Use service role for DB operations
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Verify memo belongs to user
     const { data: memo, error: memoError } = await supabase
       .from("memos")
       .select("*")
@@ -232,10 +319,7 @@ serve(async (req) => {
       .single();
 
     if (memoError || !memo) {
-      return new Response(JSON.stringify({ error: "Memo not found" }), {
-        status: 404,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return jsonResponse({ error: "Memo not found" }, corsHeaders, 404);
     }
 
     let transcription = "";
@@ -243,7 +327,6 @@ serve(async (req) => {
     if (mode === "text" || mode === "text_quick") {
       transcription = text_input || "";
     } else {
-      // Voice mode: download from audio-temp bucket and transcribe
       await supabase
         .from("memos")
         .update({ processing_status: "transcribing" })
@@ -262,67 +345,51 @@ serve(async (req) => {
         throw new Error("Failed to download audio: " + downloadError?.message);
       }
 
-      // Convert to base64
-      const arrayBuffer = await audioData.arrayBuffer();
-      const base64Audio = btoa(
-        new Uint8Array(arrayBuffer).reduce((data, byte) => data + String.fromCharCode(byte), "")
-      );
+      const base64Audio = toBase64(await audioData.arrayBuffer());
+      const transcribeResponse = await fetch(AI_GATEWAY_URL, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${lovableApiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: AI_MODEL,
+          messages: [
+            {
+              role: "system",
+              content:
+                "Tu es un transcripteur français expert. Transcris fidèlement l'audio en français. Retourne UNIQUEMENT la transcription, sans commentaire ni formatage.",
+            },
+            {
+              role: "user",
+              content: [
+                {
+                  type: "input_audio",
+                  input_audio: { data: base64Audio, format: "wav" },
+                },
+                {
+                  type: "text",
+                  text: "Transcris cet enregistrement vocal en français.",
+                },
+              ],
+            },
+          ],
+        }),
+      });
 
-      // Transcribe with Gemini (multimodal)
-      const transcribeResponse = await fetch(
-        "https://ai.gateway.lovable.dev/v1/chat/completions",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${lovableApiKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model: "google/gemini-3-flash-preview",
-            messages: [
-              {
-                role: "system",
-                content:
-                  "Tu es un transcripteur français expert. Transcris fidèlement l'audio en français. Retourne UNIQUEMENT la transcription, sans commentaire ni formatage.",
-              },
-              {
-                role: "user",
-                content: [
-                  {
-                    type: "input_audio",
-                    input_audio: { data: base64Audio, format: "wav" },
-                  },
-                  {
-                    type: "text",
-                    text: "Transcris cet enregistrement vocal en français.",
-                  },
-                ],
-              },
-            ],
-          }),
-        }
-      );
-
-    if (!transcribeResponse.ok) {
+      if (!transcribeResponse.ok) {
         const errText = await transcribeResponse.text();
         console.error("Transcription error:", transcribeResponse.status, errText);
 
-        // Always delete audio file on error to prevent orphaned files
         await supabase.storage.from("audio-temp").remove([storagePath]);
 
         if (transcribeResponse.status === 429) {
           await supabase.from("memos").update({ processing_status: "error" }).eq("id", memo_id);
-          return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again later." }), {
-            status: 429,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
+          return jsonResponse({ error: "Rate limit exceeded. Please try again later." }, corsHeaders, 429);
         }
         if (transcribeResponse.status === 402) {
           await supabase.from("memos").update({ processing_status: "error" }).eq("id", memo_id);
-          return new Response(JSON.stringify({ error: "AI credits exhausted. Please add credits." }), {
-            status: 402,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
+          return jsonResponse({ error: "AI credits exhausted. Please add credits." }, corsHeaders, 402);
         }
 
         await supabase.from("memos").update({ processing_status: "error" }).eq("id", memo_id);
@@ -332,17 +399,14 @@ serve(async (req) => {
       const transcribeResult = await transcribeResponse.json();
       transcription = transcribeResult.choices?.[0]?.message?.content || "";
 
-      // Delete audio file immediately after successful transcription
       await supabase.storage.from("audio-temp").remove([storagePath]);
     }
 
-    // Save transcription and update status
     await supabase
       .from("memos")
       .update({ transcription_raw: transcription, processing_status: "structuring" })
       .eq("id", memo_id);
 
-    // Fetch child & intervenant info for context
     const { data: enfant } = memo.enfant_id
       ? await supabase.from("enfants").select("prenom, diagnostic_label").eq("id", memo.enfant_id).single()
       : { data: null };
@@ -351,7 +415,6 @@ serve(async (req) => {
       ? await supabase.from("intervenants").select("nom, specialite").eq("id", memo.intervenant_id).single()
       : { data: null };
 
-    // Fetch lexique for contextual correction
     const { data: lexiqueEntries } = memo.enfant_id
       ? await supabase
           .from("enfant_lexique")
@@ -373,45 +436,40 @@ serve(async (req) => {
           .join("\n")
       : null;
 
-    // --- text_quick: simplified AI call for quick notes ---
     if (mode === "text_quick") {
-      const quickResponse = await fetch(
-        "https://ai.gateway.lovable.dev/v1/chat/completions",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${lovableApiKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model: "google/gemini-3-flash-preview",
-            messages: [
-              {
-                role: "system",
-                content: `Tu es un assistant qui résume des notes de parents d'enfants en rééducation.
+      const quickResponse = await fetch(AI_GATEWAY_URL, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${lovableApiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: AI_MODEL,
+          messages: [
+            {
+              role: "system",
+              content: `Tu es un assistant qui résume des notes de parents d'enfants en rééducation.
 Réponds UNIQUEMENT avec un objet JSON valide : { "resume": "..." }. Aucun texte autour.
 Le résumé doit être factuel, 5 à 8 mots, format [Contexte] — [fait principal].
 Jamais de diagnostic, commentaire éditorial ou jargon médical.
 ${enfant?.prenom ? `Prénom de l'enfant : ${enfant.prenom} (ne jamais modifier l'orthographe)` : ""}
 ${intervenant ? `Intervenant : ${intervenant.nom}${intervenant.specialite ? ` — ${intervenant.specialite}` : ""}` : ""}
 ${lexiqueFormatted ? `Lexique contextuel :\n${lexiqueFormatted}` : ""}`,
-              },
-              {
-                role: "user",
-                content: `Note du parent : "${transcription}"\n\nGénère le résumé JSON.`,
-              },
-            ],
-          }),
-        }
-      );
+            },
+            {
+              role: "user",
+              content: `Note du parent : "${transcription}"\n\nGénère le résumé JSON.`,
+            },
+          ],
+        }),
+      });
 
       let resume = transcription.substring(0, 60);
       if (quickResponse.ok) {
         const quickResult = await quickResponse.json();
         const rawContent = quickResult.choices?.[0]?.message?.content || "";
         try {
-          const cleaned = rawContent.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
-          const parsed = JSON.parse(cleaned);
+          const parsed = JSON.parse(cleanJsonResponse(rawContent));
           if (parsed.resume) resume = parsed.resume;
         } catch {
           console.error("text_quick JSON parse failed, using fallback");
@@ -446,21 +504,18 @@ ${lexiqueFormatted ? `Lexique contextuel :\n${lexiqueFormatted}` : ""}`,
       );
     }
 
-    // Structure with Gemini using tool calling
-    const structureResponse = await fetch(
-      "https://ai.gateway.lovable.dev/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${lovableApiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "google/gemini-3-flash-preview",
-          messages: [
-            {
-              role: "system",
-              content: `Tu es un assistant organisationnel pour parents d'enfants en rééducation. Tu reçois la transcription brute d'une note vocale.
+    const structureResponse = await fetch(AI_GATEWAY_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${lovableApiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: AI_MODEL,
+        messages: [
+          {
+            role: "system",
+            content: `Tu es un assistant organisationnel pour parents d'enfants en rééducation. Tu reçois la transcription brute d'une note vocale.
 
 ━━━ RÈGLES ABSOLUES ━━━
 JAMAIS :
@@ -490,58 +545,57 @@ Pour chaque variante détectée, examine le contexte complet :
 - En cas de doute → NE PAS corriger
 
 ${lexiqueFormatted}` : "(aucun lexique pour cet enfant)"}`,
-            },
-            {
-              role: "user",
-              content: `Voici la transcription d'un mémo vocal d'un parent après une séance :\n\n"${transcription}"\n\nStructure cette note.`,
-            },
-          ],
-          tools: [
-            {
-              type: "function",
-              function: {
-                name: "structure_memo",
-                description: "Structure a parent's memo into organized sections",
-                parameters: {
-                  type: "object",
-                  properties: {
-                    resume: {
-                      type: "string",
-                      description: "Titre factuel 5 à 8 mots. Format : [Contexte] — [fait]. Ex: \"Kiné — appui ventral travaillé au sol\". Aucun adjectif évaluatif. Aucun commentaire.",
-                    },
-                    details: {
-                      type: "array",
-                      items: { type: "string" },
-                      maxItems: 5,
-                      description: "Observations factuelles du parent. 1 fait par item. Mots exacts du parent. Zéro commentaire éditorial.",
-                    },
-                    a_retenir: {
-                      type: "array",
-                      items: { type: "string" },
-                      maxItems: 3,
-                      description: "Points d'attention, axes de travail à la maison, rappels pour le prochain RDV. Uniquement si mentionnés par le parent. Formulation actionnable. Null si rien de mentionné.",
-                    },
-                    tags: {
-                      type: "array",
-                      items: { type: "string" },
-                      maxItems: 4,
-                      description: "Domaine ou intervenant détecté. Exemples : Kiné, Psychomot, Ergo, Moteur, Sensoriel, Cognitif, Bien-être, Médical, Parent.",
-                    },
-                    intervenant_detected: {
-                      type: ["string", "null"],
-                      description: "Nom exact de l'intervenant selon contexte et lexique. Null si non mentionné.",
-                    },
+          },
+          {
+            role: "user",
+            content: `Voici la transcription d'un mémo vocal d'un parent après une séance :\n\n"${transcription}"\n\nStructure cette note.`,
+          },
+        ],
+        tools: [
+          {
+            type: "function",
+            function: {
+              name: "structure_memo",
+              description: "Structure a parent's memo into organized sections",
+              parameters: {
+                type: "object",
+                properties: {
+                  resume: {
+                    type: "string",
+                    description: "Titre factuel 5 à 8 mots. Format : [Contexte] — [fait]. Ex: \"Kiné — appui ventral travaillé au sol\". Aucun adjectif évaluatif. Aucun commentaire.",
                   },
-                  required: ["resume", "details", "tags"],
-                  additionalProperties: false,
+                  details: {
+                    type: "array",
+                    items: { type: "string" },
+                    maxItems: 5,
+                    description: "Observations factuelles du parent. 1 fait par item. Mots exacts du parent. Zéro commentaire éditorial.",
+                  },
+                  a_retenir: {
+                    type: "array",
+                    items: { type: "string" },
+                    maxItems: 3,
+                    description: "Points d'attention, axes de travail à la maison, rappels pour le prochain RDV. Uniquement si mentionnés par le parent. Formulation actionnable. Null si rien de mentionné.",
+                  },
+                  tags: {
+                    type: "array",
+                    items: { type: "string" },
+                    maxItems: 4,
+                    description: "Domaine ou intervenant détecté. Exemples : Kiné, Psychomot, Ergo, Moteur, Sensoriel, Cognitif, Bien-être, Médical, Parent.",
+                  },
+                  intervenant_detected: {
+                    type: ["string", "null"],
+                    description: "Nom exact de l'intervenant selon contexte et lexique. Null si non mentionné.",
+                  },
                 },
+                required: ["resume", "details", "tags"],
+                additionalProperties: false,
               },
             },
-          ],
-          tool_choice: { type: "function", function: { name: "structure_memo" } },
-        }),
-      }
-    );
+          },
+        ],
+        tool_choice: { type: "function", function: { name: "structure_memo" } },
+      }),
+    });
 
     if (!structureResponse.ok) {
       console.error("Structuration error:", structureResponse.status, await structureResponse.text());
@@ -561,7 +615,6 @@ ${lexiqueFormatted}` : "(aucun lexique pour cet enfant)"}`,
       }
     }
 
-    // Update memo with final result
     await supabase
       .from("memos")
       .update({
@@ -583,6 +636,10 @@ ${lexiqueFormatted}` : "(aucun lexique pour cet enfant)"}`,
       }
     );
   } catch (error) {
+    if (error instanceof HttpError) {
+      return jsonResponse({ error: error.message }, corsHeaders, error.status);
+    }
+
     console.error("process-memo error:", error);
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
