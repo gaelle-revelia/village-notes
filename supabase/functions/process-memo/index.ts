@@ -16,6 +16,9 @@ const QUESTION_REFORMULATION_PROMPT =
 
 Réponds uniquement en JSON: { "question": "...", "precisions": "..." }`;
 
+const ANSWER_REFORMULATION_PROMPT =
+  `Tu aides des parents d'enfants en situation de handicap à noter les réponses de leurs professionnels de santé. Reformule cette transcription en une réponse claire et directe, en 1 à 3 phrases courtes. Garde les termes médicaux importants. Réponds uniquement avec le texte reformulé, sans JSON, sans introduction.`;
+
 function getCorsHeaders(req: Request) {
   const origin = req.headers.get("origin") || "";
   const isLovablePreview =
