@@ -258,7 +258,7 @@ const Timeline = () => {
           <div className="flex items-center gap-2">
             {/* Filter button */}
             <button
-              onClick={() => setFilterDrawerOpen(true)}
+              onClick={() => setFilterPanelOpen(v => !v)}
               className="relative flex-shrink-0 flex items-center justify-center"
               style={{
                 width: 42,
