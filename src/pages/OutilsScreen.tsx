@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { Activity, CalendarDays, MessageCircleQuestion, Share2, Sparkles, Wind } from "lucide-react";
 import BottomNavBar from "@/components/BottomNavBar";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useEnfantId } from "@/hooks/useEnfantId";
 
