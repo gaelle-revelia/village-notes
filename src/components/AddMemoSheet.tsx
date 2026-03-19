@@ -107,7 +107,7 @@ export default function AddMemoSheet({ open, onOpenChange, enfantId }: Props) {
             <div
               style={{
                 display: "flex",
-                width: "400%",
+                width: "300%",
                 transform: `translateX(${translateX})`,
                 transition: "transform 0.3s ease",
               }}
