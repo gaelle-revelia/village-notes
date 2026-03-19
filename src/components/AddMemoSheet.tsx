@@ -243,13 +243,18 @@ export default function AddMemoSheet({ open, onOpenChange, enfantId }: Props) {
   );
 }
 
-function MenuItem({ icon, label, description, onClick }: { icon: React.ReactNode; label: string; description?: string; onClick: () => void }) {
+function MenuItem({ icon, color, label, description, onClick }: { icon: React.ReactNode; color: string; label: string; description?: string; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
       className="flex w-full items-center gap-4 rounded-xl px-4 py-3 text-left hover:bg-muted transition-colors"
     >
-      <span className="text-muted-foreground">{icon}</span>
+      <div
+        className="flex items-center justify-center shrink-0"
+        style={{ width: 32, height: 32, borderRadius: 8, backgroundColor: `${color}26`, color }}
+      >
+        {icon}
+      </div>
       <div className="flex-1 min-w-0">
         <span className="font-semibold text-foreground text-[15px] block">{label}</span>
         {description && (
