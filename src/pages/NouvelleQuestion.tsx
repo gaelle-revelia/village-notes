@@ -58,7 +58,7 @@ const glassHeader: CSSProperties = {
   boxShadow: "0 2px 12px hsl(var(--foreground) / 0.05)",
 };
 
-const glassCard: React.CSSProperties = {
+const glassCard: CSSProperties = {
   background: "hsl(var(--background) / 0.38)",
   backdropFilter: "blur(16px) saturate(1.6)",
   WebkitBackdropFilter: "blur(16px) saturate(1.6)",
