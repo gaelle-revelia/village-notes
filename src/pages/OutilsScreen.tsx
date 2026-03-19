@@ -65,12 +65,14 @@ const OutilsScreen = () => {
                 key={tool.label}
                 disabled={!tool.active}
                 onClick={() => tool.route && navigate(tool.route)}
-                className="relative flex min-h-[140px] flex-col items-center p-5 text-center transition-transform active:scale-[0.97]"
+                className="relative flex flex-col items-center text-center transition-transform active:scale-[0.97]"
                 style={{
                   ...glassCard,
+                  height: 160,
+                  padding: "16px 12px",
+                  justifyContent: "space-evenly",
                   opacity: tool.active ? 1 : 0.5,
                   cursor: tool.active ? "pointer" : "default",
-                  justifyContent: "center",
                 }}
               >
                 {!tool.active && (
