@@ -88,10 +88,13 @@ export default function OutilsActiviteChrono() {
       });
   }, [id]);
 
-  // Timer
+  // Timer — wall-clock based so it self-corrects after screen wake
   useEffect(() => {
     if (running && !showRecap) {
-      intervalRef.current = setInterval(() => setSeconds((s) => s + 1), 1000);
+      startTimeRef.current = Date.now();
+      intervalRef.current = setInterval(() => {
+        setSeconds(accumulatedRef.current + Math.floor((Date.now() - startTimeRef.current) / 1000));
+      }, 1000);
     }
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
