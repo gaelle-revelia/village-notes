@@ -84,7 +84,7 @@ const Timeline = () => {
   const [loadingMemos, setLoadingMemos] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
+  const [filterPanelOpen, setFilterPanelOpen] = useState(false);
   const [activeFilters, setActiveFilters] = useState<Set<FilterType>>(() => {
     try {
       const saved = sessionStorage.getItem("timeline_filters");
