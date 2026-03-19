@@ -471,46 +471,8 @@ export default function OutilsQuestions() {
     void closeCard();
   }, [editingId, closeCard, filterPanelOpen]);
 
-  /* ── toggle asked/to_ask ── */
 
-  const handleMarkAsked = async (question: QuestionItem) => {
-    const nextStatus: QuestionStatus = question.status === "asked" ? "to_ask" : "asked";
-    const askedAt = nextStatus === "asked" ? new Date().toISOString() : null;
-    setSavingId(question.id);
 
-    const payload: Record<string, unknown> = { status: nextStatus, asked_at: askedAt };
-
-    // Include answer draft when marking as asked
-    if (nextStatus === "asked") {
-      const draftAnswer = drafts[question.id]?.answer;
-      if (draftAnswer) {
-        payload.answer = draftAnswer;
-      }
-    }
-
-    const { error } = await supabase
-      .from("questions")
-      .update(payload)
-      .eq("id", question.id);
-
-    if (error) {
-      toast({
-        title: "Impossible de mettre à jour la question",
-        description: "Réessayez dans un instant.",
-        variant: "destructive",
-      });
-      setSavingId(null);
-      return;
-    }
-
-    updateQuestionLocally(question.id, payload as Partial<QuestionItem>);
-    setSavingId(null);
-
-    // Close card if it's the one being edited
-    if (editingId === question.id) {
-      void closeCard();
-    }
-  };
 
   /* ── inline intervenant picker helpers ── */
 
@@ -610,22 +572,9 @@ export default function OutilsQuestions() {
                 {isExpanded && draft ? (
                   /* ─── EXPANDED MODE ─── */
                   <div className="space-y-4" onClick={(e) => e.stopPropagation()}>
-                    {/* checkbox row */}
+                    {/* question label */}
                     <div className="flex items-center justify-between">
                       <label className="text-xs font-medium text-muted-foreground">Question</label>
-                      <button
-                        type="button"
-                        disabled={isSaving}
-                        onClick={(e) => { e.stopPropagation(); void handleMarkAsked(question); }}
-                        aria-label={isAsked ? "Remettre dans À poser" : "Marquer comme posée"}
-                        className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full transition-opacity disabled:cursor-wait disabled:opacity-70"
-                        style={{
-                          border: isAsked ? "1.5px solid #7F77DD" : "1.5px solid hsl(var(--border))",
-                          background: isAsked ? "#7F77DD" : "transparent",
-                        }}
-                      >
-                        {isAsked ? <Check className="h-3.5 w-3.5 text-white" strokeWidth={3} /> : null}
-                      </button>
                     </div>
 
                     {/* question text */}
