@@ -1,46 +1,48 @@
 
 
-## Analysis
+## Plan : Ajouter le mode `answer_reformulation` (Option A)
 
-### 1. Current Timeline filter (Drawer)
-- **State**: `filterDrawerOpen` (boolean), toggled by filter button (`setFilterDrawerOpen(true)`) at line 267
-- **Component**: `<Drawer>` from `@/components/ui/drawer` (lines 480-525) — a bottom sheet overlay
-- **Content**: Wraps the same `FILTER_PILLS` chips + a "Réinitialiser" button
-- **Imports**: `Drawer`, `DrawerContent`, `DrawerHeader`, `DrawerTitle` (lines 13-18)
+### Résumé
+Ajouter un mode `answer_reformulation` dans l'Edge Function `process-memo` qui transcrit l'audio puis reformule la réponse en texte clair (1-3 phrases). Modifier le hook `useVocalRecording` pour accepter un mode paramétrable et adapter `OutilsQuestions.tsx` pour utiliser ce nouveau mode.
 
-### 2. OutilsQuestions slide-down pattern
-- **State**: `filterPanelOpen` (boolean), toggled via `setFilterPanelOpen((v) => !v)` on the filter button
-- **Technique**: A plain `<div>` with `maxHeight: filterPanelOpen ? 300 : 0` + `transition: "max-height 0.25s ease"` + `overflow: hidden` — no overlay, no portal, inline in the page flow below the search bar
-- **Button style**: Same 42×42 glass button, background changes when open
+### Fichiers modifiés (3)
 
-### 3. Minimal changes in Timeline.tsx
+**1. `supabase/functions/process-memo/index.ts`**
+- Ajouter une constante `ANSWER_REFORMULATION_PROMPT` avec le prompt fourni
+- Ajouter une fonction `reformulateAnswerFromTranscription(apiKey, transcription)` — même structure que `reformulateQuestionFromTranscription` mais retourne du texte brut (pas de JSON parsing), juste `content.trim()`
+- Dans le handler (ligne 297), ajouter `"answer_reformulation"` à la condition existante → après transcription, appeler la nouvelle fonction et retourner `{ answer: string }`
 
-**Remove:**
-- `Drawer`, `DrawerContent`, `DrawerHeader`, `DrawerTitle` imports (lines 13-18)
-- The entire `<Drawer>` block (lines 479-525)
+**2. `src/hooks/useVocalRecording.ts`**
+- Accepter un paramètre optionnel `mode` (défaut: `"transcription_only"`)
+- Passer ce `mode` dans le body de `supabase.functions.invoke("process-memo", { body: { mode, audio_path } })`
+- Lire `data.answer || data.transcription` pour le résultat retourné
 
-**Rename state:**
-- `filterDrawerOpen` → `filterPanelOpen` (cosmetic, for consistency)
+**3. `src/pages/OutilsQuestions.tsx`**
+- Passer `"answer_reformulation"` au hook : `useVocalRecording("answer_reformulation")`
+- Aucun autre changement nécessaire — le texte retourné par `stopAnswerRecording()` sera déjà reformulé
 
-**Modify filter button** (line 267):
-- Change `onClick` from `setFilterDrawerOpen(true)` to `setFilterPanelOpen(v => !v)` (toggle instead of open-only)
-- Adjust button background to reflect open state like OutilsQuestions
+### Détail technique — Edge Function
 
-**Add slide-down div** right after the search bar row (after line ~330), inside the sticky header:
-```tsx
-<div style={{
-  overflow: "hidden",
-  maxHeight: filterPanelOpen ? 300 : 0,
-  transition: "max-height 0.25s ease",
-}}>
-  <div className="flex flex-wrap gap-2 pt-2">
-    {/* existing FILTER_PILLS.map — unchanged */}
-  </div>
-  {isFilterActive && (
-    /* existing Réinitialiser button — unchanged */
-  )}
-</div>
+```text
+Nouvelle fonction (~25 lignes) :
+reformulateAnswerFromTranscription(apiKey, transcription)
+  → fetch AI_GATEWAY_URL avec prompt texte brut
+  → if !ok: handle 429/402/500
+  → return choices[0].message.content.trim()
+
+Handler branching (ligne 297) :
+  if (mode === "transcription_only" || mode === "question_reformulation" || mode === "answer_reformulation")
+    → transcription = transcribeTempAudio(...)
+    → if "transcription_only": return { transcription }
+    → if "question_reformulation": return reformulateQuestion(...)
+    → if "answer_reformulation": return { answer: reformulateAnswer(...) }
 ```
 
-**Total**: ~30 lines changed, filter chips and toggle logic stay identical.
+### Détail technique — Hook
+
+```text
+export function useVocalRecording(mode = "transcription_only")
+  → invoke body: { mode, audio_path }
+  → resolve(data?.answer || data?.transcription || "")
+```
 
