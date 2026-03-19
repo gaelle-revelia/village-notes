@@ -1425,14 +1425,14 @@ const MemoResult = () => {
             <div style={glassCard}>
             <p style={sectionLabel}>À RETENIR</p>
             {editingField === "suggestions" ?
-              <textarea
+              <Textarea
                 ref={suggestionsRef}
                 value={tempSuggestions}
                 onChange={(e) => setTempSuggestions(e.target.value)}
                 onBlur={saveSuggestions}
-                rows={3}
+                rows={1}
                 placeholder="Un élément par ligne..."
-                className="w-full outline-none resize-none placeholder:text-[#9A9490]"
+                className="w-full outline-none resize-none placeholder:text-[#9A9490] min-h-0"
                 style={{
                   fontFamily: "'DM Sans', sans-serif",
                   fontSize: 15,
@@ -1442,7 +1442,8 @@ const MemoResult = () => {
                   border: "1px solid rgba(255,255,255,0.72)",
                   borderRadius: 8,
                   padding: "10px 12px"
-                }} /> :
+                }}
+                autoResize /> :
 
 
               <div
