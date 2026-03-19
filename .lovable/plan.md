@@ -1,58 +1,86 @@
 
+What I confirmed
 
-## Plan: "Préciser ce bloc" — refine_block mode + PreciserBlocDrawer
+1. NouvelleQuestion.tsx already uses the existing `process-memo` edge function
+- `NouvelleQuestion.tsx` imports `useVocalRecording`.
+- When the user stops recording, `handleStopRecording()` calls `await stopRecording()`.
+- `stopRecording()` is implemented inside `useVocalRecording`, and that hook does this exact flow:
+  1. Stops `MediaRecorder`
+  2. Builds an audio `Blob`
+  3. Rejects recordings shorter than 10s
+  4. Uploads the blob to storage bucket `audio-temp` under `synthesis/${uuid}.webm`
+  5. Calls `supabase.functions.invoke("process-memo", { body: { mode: "transcription_only", audio_path } })`
+  6. Reads `data?.transcription`
+  7. Returns that transcription to `NouvelleQuestion.tsx`
+- Back in `NouvelleQuestion.tsx`, if transcription is non-empty:
+  - it sets `question`
+  - switches `mode` to `"text"`
+  - shows the “Question transcrite” toast
 
-### Part 1 — Edge function: add `refine_block` mode
+Conclusion: the hypothesis is false. `NouvelleQuestion.tsx` does already use `process-memo`, via `useVocalRecording`.
 
-In `supabase/functions/generate-synthesis/index.ts`, add a new branch:
+2. What NouveauMemoVocal.tsx does
+- `NouveauMemoVocal.tsx` does not use `useVocalRecording`; it uses `useAudioRecorder`.
+- Its flow is different and more complete:
+  1. `useAudioRecorder` records locally and exposes `audioBlob`
+  2. On `audioBlob`, `processMemo(audioBlob)` runs
+  3. It creates a `memos` row first
+  4. Uploads audio to `audio-temp` at `${user.id}/${memo.id}.webm`
+  5. Calls `process-memo` with:
+     - `memo_id`
+     - `mode: "voice"`
+  6. The edge function then:
+     - downloads the uploaded audio
+     - transcribes it
+     - continues memo structuring
+     - updates DB status fields
 
-- Parse `bloc_id`, `bloc_title`, `bloc_content`, `precision`, `cas_usage`, `synthese_id` from body
-- Fetch enfant `prenom` + `sexe` (reuse existing pattern)
-- System prompt: regenerate only this block, integrate precision naturally, keep tone/length, no invention, return `{ "content": "..." }`
-- User message: bloc_title + bloc_content + precision + prenom + pronouns
-- Update `syntheses` row: read `contenu` JSON, find bloc by `bloc_id`, replace content, write back
-- Return `{ bloc_id, content }`
+Working reference summary:
+- `NouvelleQuestion` = transcription-only flow through `process-memo`
+- `NouveauMemoVocal` = full memo-processing flow through `process-memo`
 
-### Part 2 — Create PreciserBlocDrawer component
+3. Minimal fix to align NouvelleQuestion with the working edge-function flow
+Cleanest minimal fix:
+- Do not replace the edge function.
+- Keep `process-memo`.
+- Unify the client-side recording strategy by making `NouvelleQuestion.tsx` use the same recording/upload pattern as the working screens.
 
-New file: `src/components/synthese/PreciserBlocDrawer.tsx`
+Recommended minimal implementation
+- Replace `useVocalRecording` in `NouvelleQuestion.tsx` with `useAudioRecorder`
+- After recording stops and `audioBlob` is available:
+  - upload blob to `audio-temp`
+  - invoke `process-memo` with `mode: "transcription_only"` and `audio_path`
+  - set the returned transcription into `question`
+- This keeps question creation logic unchanged and only swaps the recording/transcription client path
 
-**Props:** `isOpen`, `onClose`, `bloc: { id, title, content, cas_usage }`, `enfantId`, `syntheseId`, `onBlockUpdated: (blocId: string, newContent: string) => void`
+Why this is the minimal safe fix
+- No DB schema change
+- No edge-function change
+- No question submission change
+- Only one page changes
+- It reuses the same recorder behavior already working elsewhere in the app
 
-**UI structure (top to bottom):**
+Important diagnosis
+- If transcription is failing today, the likely issue is not “NouvelleQuestion doesn’t use `process-memo`”.
+- The likely problem is inside the `useVocalRecording` path itself:
+  - browser/media recorder differences
+  - upload path/content-type mismatch
+  - returned transcription being empty
+  - short-recording guard (<10s)
+- So the smallest practical fix is to stop depending on `useVocalRecording` for this page and route the page through the same recorder flow already proven in `NouveauMemoVocal`.
 
-1. **DrawerTitle:** "✏️ Préciser ce bloc"
-2. **Current content preview:**
-   - Label: "Ce bloc actuellement :" — DM Sans 12px, color `#9A9490`
-   - Glass card showing `bloc.content`, `line-clamp-3` by default
-   - If content exceeds 3 lines, show a "voir tout" toggle (DM Sans 12px, color `#8B74E0`) that expands/collapses the card
-   - State: `expanded` boolean, toggles between `line-clamp-3` and full display
-3. **Textarea:** placeholder "Ajoute ta précision ici..."
-4. **WiredMicOrb:** voice input appends to textarea
-5. **CTA:** "Régénérer ce bloc →" gradient button, disabled if textarea empty, pulses during loading
+Planned change set if implemented next
+1. Update `NouvelleQuestion.tsx` only
+2. Replace `useVocalRecording` usage with `useAudioRecorder`
+3. Add a small local `transcribeAudio(blob)` helper in the page
+4. Upload to `audio-temp`
+5. Call `process-memo` in `transcription_only` mode
+6. Preserve current UX:
+   - same mic button
+   - same switch to text mode after success
+   - same toast behavior
+   - same question form submission
 
-**On submit:** invoke `generate-synthesis` with `type: "refine_block"`, on success call `onBlockUpdated`, close drawer, toast success.
-
-### Part 3 — Wire buttons in all 3 result pages
-
-**Transmission** (`OutilsSyntheseTransmission.tsx`):
-- State: `refineBloc`, `syntheseId`
-- ResultCard "Préciser ce bloc" → opens drawer with bloc data
-- `onBlockUpdated` → update `generatedBlocks` in place
-
-**MDPH** (`OutilsSyntheseMdph.tsx`):
-- Same pattern with ThematicBlock buttons
-
-**Pick-me-up** (`OutilsSynthesePickMeUp.tsx`):
-- Single block ("narrative"), add "Préciser ce bloc" button, same drawer
-
-### Files changed
-
-| File | Action |
-|---|---|
-| `supabase/functions/generate-synthesis/index.ts` | Add `refine_block` branch |
-| `src/components/synthese/PreciserBlocDrawer.tsx` | Create |
-| `src/pages/OutilsSyntheseTransmission.tsx` | Wire drawer |
-| `src/pages/OutilsSyntheseMdph.tsx` | Wire drawer |
-| `src/pages/OutilsSynthesePickMeUp.tsx` | Wire drawer |
-
+Net result
+- `NouvelleQuestion` would still use `process-memo`
+- But it would use the same proven recording pipeline style as `NouveauMemoVocal`, which is the best minimal fix
