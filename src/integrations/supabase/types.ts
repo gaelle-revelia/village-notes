@@ -467,6 +467,7 @@ export type Database = {
           id: string
           linked_pro_ids: string[]
           parent_id: string
+          precisions: string | null
           show_in_timeline: boolean
           status: string
           text: string
@@ -479,6 +480,7 @@ export type Database = {
           id?: string
           linked_pro_ids?: string[]
           parent_id: string
+          precisions?: string | null
           show_in_timeline?: boolean
           status?: string
           text: string
@@ -491,6 +493,7 @@ export type Database = {
           id?: string
           linked_pro_ids?: string[]
           parent_id?: string
+          precisions?: string | null
           show_in_timeline?: boolean
           status?: string
           text?: string
