@@ -435,7 +435,7 @@ export default function NouvelleQuestion() {
                           <button
                             type="button"
                             onClick={() => toggleIntervenant(intervenant.id)}
-                            className="inline-flex h-5 w-5 items-center justify-center rounded-full transition-colors hover:bg-black/5"
+                            className="inline-flex h-5 w-5 items-center justify-center rounded-full transition-colors hover:bg-foreground/5"
                             aria-label={`Retirer ${intervenant.nom}`}
                           >
                             <X className="h-3.5 w-3.5" />

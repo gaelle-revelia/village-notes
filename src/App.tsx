@@ -68,6 +68,7 @@ const AppRoutes = () => {
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/record" element={<Navigate to="/nouveau-memo-vocal" replace />} />
       <Route path="/nouveau-memo-vocal" element={<NouveauMemoVocal />} />
+      <Route path="/nouvelle-question" element={<NouvelleQuestion />} />
       <Route path="/nouvelle-note" element={<NouvelleNote />} />
       <Route path="/nouveau-document" element={<NouveauDocument />} />
       <Route path="/nouvel-evenement" element={<NouvelEvenement />} />
