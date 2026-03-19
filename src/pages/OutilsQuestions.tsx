@@ -715,6 +715,22 @@ export default function OutilsQuestions() {
                     {isSaving && (
                       <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                     )}
+
+                    {/* Delete button */}
+                    <button
+                      type="button"
+                      className="w-full text-center text-destructive hover:underline mt-2"
+                      style={{ fontSize: 12 }}
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        if (!window.confirm("Confirmer la suppression ?")) return;
+                        await supabase.from("questions").delete().eq("id", question.id);
+                        setQuestions((prev) => prev.filter((q) => q.id !== question.id));
+                        setEditingId(null);
+                      }}
+                    >
+                      Supprimer cette question
+                    </button>
                   </div>
                 ) : (
                   /* ─── COLLAPSED MODE ─── */
