@@ -220,9 +220,9 @@ export default function OutilsQuestions() {
 
   // Scroll to bottom on initial load
   useEffect(() => {
-    if (!loading && questions.length > 0 && mainRef.current) {
+    if (!loading && questions.length > 0) {
       requestAnimationFrame(() => {
-        mainRef.current?.scrollTo({ top: mainRef.current.scrollHeight, behavior: "instant" as ScrollBehavior });
+        window.scrollTo({ top: document.body.scrollHeight, behavior: "instant" as ScrollBehavior });
       });
     }
   }, [loading, questions.length]);
