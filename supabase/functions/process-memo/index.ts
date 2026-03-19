@@ -264,6 +264,44 @@ async function reformulateQuestionFromTranscription(
   }
 }
 
+async function reformulateAnswerFromTranscription(
+  lovableApiKey: string,
+  transcription: string,
+): Promise<string> {
+  const response = await fetch(AI_GATEWAY_URL, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${lovableApiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: AI_MODEL,
+      messages: [
+        { role: "system", content: ANSWER_REFORMULATION_PROMPT },
+        { role: "user", content: `Transcription : ${transcription}` },
+      ],
+    }),
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    console.error("Answer reformulation error:", response.status, errText);
+
+    if (response.status === 429) {
+      throw new HttpError(429, "Rate limit exceeded. Please try again later.");
+    }
+    if (response.status === 402) {
+      throw new HttpError(402, "AI credits exhausted.");
+    }
+
+    throw new HttpError(500, "Answer reformulation failed");
+  }
+
+  const result = await response.json();
+  const content = result.choices?.[0]?.message?.content || "";
+  return content.trim();
+}
+
 serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
