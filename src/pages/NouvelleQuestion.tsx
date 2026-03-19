@@ -1,6 +1,7 @@
 import { type CSSProperties, useEffect, useMemo, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { ArrowLeft, Keyboard, Mic, Search, Square, X } from "lucide-react";
+import { MemoDatePicker } from "@/components/memo/MemoDatePicker";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
@@ -115,6 +116,7 @@ export default function NouvelleQuestion() {
   const { toast } = useToast();
 
   const [mode, setMode] = useState<"voice" | "text">("voice");
+  const [questionDate, setQuestionDate] = useState(new Date());
   const [question, setQuestion] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -302,7 +304,22 @@ export default function NouvelleQuestion() {
       </header>
 
       <main className="flex-1 px-4 py-6">
-        <div className="mx-auto max-w-[400px] space-y-8">
+        <div className="mx-auto max-w-[400px] space-y-6">
+          <MemoDatePicker date={questionDate} onDateChange={setQuestionDate} />
+
+          <IntervenantSelection
+            loadingIntervenants={loadingIntervenants}
+            intervenants={intervenants}
+            filteredIntervenants={filteredIntervenants}
+            recentIntervenants={recentIntervenants}
+            selectedIntervenants={selectedIntervenants}
+            selectedIds={selectedIds}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            onToggleIntervenant={toggleIntervenant}
+            label="Pour quel intervenant ?"
+          />
+
           {mode === "voice" ? (
             <section className="space-y-8 pt-4">
               {permissionDenied ? (
@@ -314,7 +331,7 @@ export default function NouvelleQuestion() {
                   <p className="text-sm text-muted-foreground">
                     L'accès au microphone a été refusé. Vous pouvez saisir votre question en texte.
                   </p>
-                  <Button onClick={() => setMode("text")} className="rounded-xl">
+                  <Button type="button" onClick={() => setMode("text")} className="rounded-xl">
                     <Keyboard className="mr-2 h-4 w-4" />
                     Saisir en texte
                   </Button>
@@ -376,22 +393,9 @@ export default function NouvelleQuestion() {
                   )}
                 </div>
               )}
-
-              <IntervenantSelection
-                loadingIntervenants={loadingIntervenants}
-                intervenants={intervenants}
-                filteredIntervenants={filteredIntervenants}
-                recentIntervenants={recentIntervenants}
-                selectedIntervenants={selectedIntervenants}
-                selectedIds={selectedIds}
-                searchQuery={searchQuery}
-                onSearchChange={setSearchQuery}
-                onToggleIntervenant={toggleIntervenant}
-                label="Pour quel intervenant ?"
-              />
             </section>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6 pt-2">
               <div className="space-y-2">
                 <label htmlFor="question-text" className="text-sm font-medium text-foreground">
                   Votre question
@@ -402,23 +406,10 @@ export default function NouvelleQuestion() {
                   onChange={(event) => setQuestion(event.target.value)}
                   placeholder="Écrivez votre question ici"
                   required
-                  className="min-h-[180px] w-full ml-0 rounded-xl resize-none"
+                  className="min-h-[180px] w-full rounded-xl resize-none"
                   autoFocus
                 />
               </div>
-
-              <IntervenantSelection
-                loadingIntervenants={loadingIntervenants}
-                intervenants={intervenants}
-                filteredIntervenants={filteredIntervenants}
-                recentIntervenants={recentIntervenants}
-                selectedIntervenants={selectedIntervenants}
-                selectedIds={selectedIds}
-                searchQuery={searchQuery}
-                onSearchChange={setSearchQuery}
-                onToggleIntervenant={toggleIntervenant}
-                label="Choisir"
-              />
 
               <div className="space-y-3 pt-2">
                 <Button
