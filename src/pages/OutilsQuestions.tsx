@@ -237,7 +237,7 @@ export default function OutilsQuestions() {
         .select("id, text, precisions, linked_pro_ids, status, answer, created_at, asked_at")
         .eq("parent_id", user.id)
         .eq("child_id", enfantId)
-        .order("created_at", { ascending: false }),
+        .order("created_at", { ascending: true }),
       supabase
         .from("intervenants")
         .select("id, nom, specialite")
