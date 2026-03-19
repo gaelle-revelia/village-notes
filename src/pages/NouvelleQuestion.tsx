@@ -68,7 +68,7 @@ const glassCard: CSSProperties = {
     "0 4px 24px hsl(var(--secondary) / 0.08), 0 1px 4px hsl(var(--foreground) / 0.06), inset 0 1px 0 hsl(var(--background) / 0.9)",
 };
 
-const searchFieldStyle: React.CSSProperties = {
+const searchFieldStyle: CSSProperties = {
   background: "hsl(var(--background) / 0.45)",
   backdropFilter: "blur(12px) saturate(1.4)",
   WebkitBackdropFilter: "blur(12px) saturate(1.4)",
