@@ -323,7 +323,7 @@ const OutilsSyntheseMdph = () => {
             <ChipGroup chips={Q3_CHIPS} selected={q3Chips} multi disabled={past(3)} onToggle={(c) => toggleMulti(c, q3Chips, setQ3Chips)} />
             <OrSeparator />
             <div className="mb-2 flex justify-end">
-              <Textarea placeholder="Précise si besoin..." value={q3Text} disabled={past(3)} onChange={(e) => setQ3Text(e.target.value)} className="text-[14px] font-sans border-none italic placeholder:italic" style={{ ...glassCard, borderRadius: 14, minHeight: 70, maxWidth: "80%" }} />
+              <Textarea placeholder="Précise si besoin..." value={q3Text} disabled={past(3)} onChange={(e) => setQ3Text(e.target.value)} className="text-[14px] font-sans border-none italic placeholder:italic" style={{ ...glassCard, borderRadius: 14, minHeight: 70, maxWidth: "80%" }} autoResize />
             </div>
             <WiredMicOrb disabled={past(3)} onTranscription={(text) => setQ3Text((prev) => prev ? prev + " " + text : text)} />
           </>
