@@ -133,12 +133,19 @@ export default function OutilsQuestions() {
         return;
       }
 
-      const normalizedQuestions = (questionsResult.data ?? [])
-        .filter((item) => isQuestionStatus(item.status))
-        .map((item) => ({
-          ...item,
+      const normalizedQuestions: QuestionItem[] = (questionsResult.data ?? []).flatMap((item) => {
+        if (!isQuestionStatus(item.status)) return [];
+
+        return [{
+          id: item.id,
+          text: item.text,
           linked_pro_ids: Array.isArray(item.linked_pro_ids) ? item.linked_pro_ids : [],
-        }));
+          status: item.status,
+          answer: item.answer,
+          created_at: item.created_at,
+          asked_at: item.asked_at,
+        }];
+      });
 
       const initialDrafts = normalizedQuestions.reduce<Record<string, string>>((accumulator, item) => {
         accumulator[item.id] = item.answer ?? "";
