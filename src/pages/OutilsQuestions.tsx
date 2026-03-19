@@ -776,10 +776,20 @@ export default function OutilsQuestions() {
                         <p className="text-[11px]" style={{ color: "#E8736A" }}>{answerVocalError}</p>
                       )}
                       <textarea
+                        ref={(el) => {
+                          if (el) {
+                            el.style.height = "auto";
+                            el.style.height = el.scrollHeight + "px";
+                          }
+                        }}
                         value={draft.answer}
-                        onChange={(e) => updateDraft(question.id, "answer", e.target.value)}
+                        onChange={(e) => {
+                          updateDraft(question.id, "answer", e.target.value);
+                          e.target.style.height = "auto";
+                          e.target.style.height = e.target.scrollHeight + "px";
+                        }}
                         onBlur={() => void flushAndSave(question.id)}
-                        rows={3}
+                        rows={2}
                         className="w-full resize-none rounded-lg px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                         style={glassFieldStyle}
                         placeholder="Ajouter la réponse reçue..."
