@@ -7,9 +7,17 @@ import { useAuth } from "@/hooks/useAuth";
 import { useEnfantId } from "@/hooks/useEnfantId";
 
 const TOOLS = [
-  { label: "Suivi d'activités", icon: Activity, route: "/outils/activites", active: true },
-  { label: "Synthèse magique", icon: Sparkles, route: "/outils/synthese", active: true },
-  { label: "Questions à poser", icon: MessageCircleQuestion, route: "/outils/questions", active: true },
+  { label: "Suivi d'activités", subtitle: "Motilo, Tummy time, exercices", icon: Activity, route: "/outils/activites", active: true },
+  { label: "Synthèse magique", subtitle: "Dossiers et synthèses", icon: Sparkles, route: "/outils/synthese", active: true },
+  {
+    label: "Questions à poser",
+    subtitle: "Préparer les rendez-vous",
+    icon: MessageCircleQuestion,
+    route: "/outils/questions",
+    active: true,
+    iconBg: "rgba(29,158,117,0.15)",
+    iconColor: "#1D9E75",
+  },
   {
     label: "Cohérence cardiaque",
     subtitle: "Respiration guidée",
