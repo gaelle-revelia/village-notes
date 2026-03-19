@@ -7,26 +7,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { useEnfantId } from "@/hooks/useEnfantId";
 
 const TOOLS = [
-  { label: "Suivi d'activités", subtitle: "Motilo, Tummy time, exercices", icon: Activity, route: "/outils/activites", active: true },
-  { label: "Synthèse magique", subtitle: "Dossiers et synthèses", icon: Sparkles, route: "/outils/synthese", active: true },
-  {
-    label: "Questions à poser",
-    subtitle: "Préparer les rendez-vous",
-    icon: MessageCircleQuestion,
-    route: "/outils/questions",
-    active: true,
-    iconBg: "rgba(29,158,117,0.15)",
-    iconColor: "#1D9E75",
-  },
-  {
-    label: "Cohérence cardiaque",
-    subtitle: "Respiration guidée",
-    icon: Wind,
-    route: "/outils/coherence",
-    active: true,
-    iconBg: "linear-gradient(135deg, hsl(37 78% 60%), hsl(4 68% 66%))",
-    iconColor: "hsl(0 0% 100%)",
-  },
+  { label: "Suivi d'activités", subtitle: "Motilo, Tummy time, exercices", icon: Activity, route: "/outils/activites", active: true, iconBg: "rgba(232,115,106,0.15)", iconColor: "#E8736A" },
+  { label: "Synthèse magique", subtitle: "Dossiers et synthèses", icon: Sparkles, route: "/outils/synthese", active: true, iconBg: "rgba(139,116,224,0.15)", iconColor: "#8B74E0" },
+  { label: "Questions à poser", subtitle: "Préparer les rendez-vous", icon: MessageCircleQuestion, route: "/outils/questions", active: true, iconBg: "rgba(29,158,117,0.15)", iconColor: "#1D9E75" },
+  { label: "Cohérence cardiaque", subtitle: "Respiration guidée", icon: Wind, route: "/outils/coherence", active: true, iconBg: "rgba(239,159,39,0.15)", iconColor: "#EF9F27" },
   { label: "Planning", icon: CalendarDays, route: null, active: false },
   { label: "Export", icon: Share2, route: null, active: false },
 ] as const;
