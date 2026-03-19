@@ -350,7 +350,7 @@ const OutilsSyntheseMdph = () => {
             <ChipGroup chips={Q5_CHIPS} selected={q5Chips} multi disabled={past(5)} onToggle={(c) => toggleMulti(c, q5Chips, setQ5Chips)} />
             <OrSeparator />
             <div className="mb-2 flex justify-end">
-              <Textarea placeholder="Décris ton projet..." value={q5Text} disabled={past(5)} onChange={(e) => setQ5Text(e.target.value)} className="text-[14px] font-sans border-none italic placeholder:italic" style={{ ...glassCard, borderRadius: 14, minHeight: 70, maxWidth: "80%" }} />
+              <Textarea placeholder="Décris ton projet..." value={q5Text} disabled={past(5)} onChange={(e) => setQ5Text(e.target.value)} className="text-[14px] font-sans border-none italic placeholder:italic" style={{ ...glassCard, borderRadius: 14, minHeight: 70, maxWidth: "80%" }} autoResize />
             </div>
             <WiredMicOrb disabled={past(5)} onTranscription={(text) => setQ5Text((prev) => prev ? prev + " " + text : text)} />
           </>
