@@ -225,7 +225,7 @@ export default function OutilsQuestions() {
   } = useVocalRecording();
   const answerRecordingTargetRef = useRef<string | null>(null);
 
-  const handleAnswerMicTap = useCallback(async (questionId: string) => {
+  const handleAnswerMicTap = async (questionId: string) => {
     if (isAnswerTranscribing) return;
     if (isAnswerRecording) {
       const text = await stopAnswerRecording();
@@ -238,15 +238,22 @@ export default function OutilsQuestions() {
           const appended = current ? `${current}\n${text}` : text;
           return { ...prev, [qid]: { ...d, answer: appended } };
         });
-        // trigger save
-        setTimeout(() => flushAndSave(qid), 100);
+        // save after state update
+        setQuestions((qs) => {
+          const q = qs.find((qq) => qq.id === qid);
+          if (q) {
+            const updatedAnswer = (drafts[qid]?.answer || "") + (drafts[qid]?.answer ? "\n" : "") + text;
+            supabase.from("questions").update({ answer: updatedAnswer }).eq("id", qid).then(() => {});
+          }
+          return qs;
+        });
       }
       answerRecordingTargetRef.current = null;
     } else {
       answerRecordingTargetRef.current = questionId;
       await startAnswerRecording();
     }
-  }, [isAnswerRecording, isAnswerTranscribing, startAnswerRecording, stopAnswerRecording]);
+  };
 
   // cleanup timers on unmount
   useEffect(() => {
