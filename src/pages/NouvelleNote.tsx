@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useEnfantId } from "@/hooks/useEnfantId";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Textarea } from "@/components/ui/textarea";
 import { MemoDatePicker } from "@/components/memo/MemoDatePicker";
 import { IntervenantSearchPicker } from "@/components/memo/IntervenantSearchPicker";
 import { Button } from "@/components/ui/button";
