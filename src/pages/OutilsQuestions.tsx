@@ -506,7 +506,18 @@ export default function OutilsQuestions() {
     }
 
     return (
-      <div className="flex flex-col gap-3">
+      <div className="relative" style={{ paddingLeft: 44 }}>
+        {/* Vertical timeline line */}
+        <div
+          className="absolute top-0 bottom-0"
+          style={{
+            left: 16,
+            width: 1.5,
+            background: "linear-gradient(180deg, rgba(232,115,106,0.4) 0%, rgba(139,116,224,0.4) 50%, rgba(68,168,130,0.3) 100%)",
+            borderRadius: 2,
+          }}
+        />
+
         {items.map((question) => {
           const isExpanded = editingId === question.id;
           const draft = drafts[question.id];
@@ -515,59 +526,80 @@ export default function OutilsQuestions() {
             .filter(Boolean);
           const isSaving = savingId === question.id;
           const isAsked = question.status === "asked";
+          const hasFill = isAsked || !!question.answer;
+
+          const dotStyle: React.CSSProperties = hasFill
+            ? {
+                left: -32,
+                marginTop: 18,
+                width: 11,
+                height: 11,
+                borderRadius: "50%",
+                background: "#8B74E0",
+                boxShadow: "0 0 0 3px rgba(139,116,224,0.24)",
+                zIndex: 1,
+              }
+            : {
+                left: -32,
+                marginTop: 18,
+                width: 11,
+                height: 11,
+                borderRadius: "50%",
+                background: "rgba(255,255,255,0.7)",
+                backdropFilter: "blur(4px)",
+                WebkitBackdropFilter: "blur(4px)",
+                border: "2.5px solid #8A9BAE",
+                boxShadow: "0 0 0 3px rgba(138,155,174,0.16)",
+                zIndex: 1,
+              };
 
           return (
-            <article
-              key={question.id}
-              data-question-id={question.id}
-              className="flex items-start gap-3 p-4 transition-all"
-              style={glassCard}
-              onClick={() => !isExpanded && void openCard(question.id)}
-              role={isExpanded ? undefined : "button"}
-              tabIndex={isExpanded ? undefined : 0}
-              onKeyDown={!isExpanded ? (e) => { if (e.key === "Enter") void openCard(question.id); } : undefined}
-            >
-              {/* checkbox */}
-              <div className="flex items-start pt-1">
-                <button
-                  type="button"
-                  disabled={isSaving}
-                  onClick={(e) => { e.stopPropagation(); void handleMarkAsked(question); }}
-                  aria-label={
-                    isAsked
-                      ? `Remettre la question dans À poser`
-                      : `Marquer la question comme posée`
-                  }
-                  className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full transition-opacity disabled:cursor-wait disabled:opacity-70"
-                  style={{
-                    border: isAsked ? "1.5px solid #7F77DD" : "1.5px solid hsl(var(--border))",
-                    background: isAsked ? "#7F77DD" : "transparent",
-                  }}
-                >
-                  {isAsked ? <Check className="h-3.5 w-3.5 text-white" strokeWidth={3} /> : null}
-                </button>
-              </div>
+            <div key={question.id} className="relative" style={{ marginBottom: 16 }}>
+              {/* Timeline dot */}
+              <div className="absolute" style={dotStyle} />
 
-              {/* content */}
-              <div className="min-w-0 flex-1 space-y-3">
+              <article
+                data-question-id={question.id}
+                className="p-4 transition-all"
+                style={glassCard}
+                onClick={() => !isExpanded && void openCard(question.id)}
+                role={isExpanded ? undefined : "button"}
+                tabIndex={isExpanded ? undefined : 0}
+                onKeyDown={!isExpanded ? (e) => { if (e.key === "Enter") void openCard(question.id); } : undefined}
+              >
                 {isExpanded && draft ? (
                   /* ─── EXPANDED MODE ─── */
                   <div className="space-y-4" onClick={(e) => e.stopPropagation()}>
-                    {/* question text */}
-                    <div className="space-y-1">
+                    {/* checkbox row */}
+                    <div className="flex items-center justify-between">
                       <label className="text-xs font-medium text-muted-foreground">Question</label>
-                      <textarea
-                        value={draft.text}
-                        onChange={(e) => updateDraft(question.id, "text", e.target.value)}
-                        onBlur={() => void flushAndSave(question.id)}
-                        onInput={(e) => { e.currentTarget.style.height = 'auto'; e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px'; }}
-                        ref={(el) => { if (el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; } }}
-                        rows={1}
-                        className="w-full resize-none overflow-hidden rounded-lg px-3 py-2 text-[15px] font-medium text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                        style={glassFieldStyle}
-                        placeholder="Votre question"
-                      />
+                      <button
+                        type="button"
+                        disabled={isSaving}
+                        onClick={(e) => { e.stopPropagation(); void handleMarkAsked(question); }}
+                        aria-label={isAsked ? "Remettre dans À poser" : "Marquer comme posée"}
+                        className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full transition-opacity disabled:cursor-wait disabled:opacity-70"
+                        style={{
+                          border: isAsked ? "1.5px solid #7F77DD" : "1.5px solid hsl(var(--border))",
+                          background: isAsked ? "#7F77DD" : "transparent",
+                        }}
+                      >
+                        {isAsked ? <Check className="h-3.5 w-3.5 text-white" strokeWidth={3} /> : null}
+                      </button>
                     </div>
+
+                    {/* question text */}
+                    <textarea
+                      value={draft.text}
+                      onChange={(e) => updateDraft(question.id, "text", e.target.value)}
+                      onBlur={() => void flushAndSave(question.id)}
+                      onInput={(e) => { e.currentTarget.style.height = 'auto'; e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px'; }}
+                      ref={(el) => { if (el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; } }}
+                      rows={1}
+                      className="w-full resize-none overflow-hidden rounded-lg px-3 py-2 text-[15px] font-medium text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      style={glassFieldStyle}
+                      placeholder="Votre question"
+                    />
 
                     {/* precisions */}
                     <div className="space-y-1">
@@ -696,14 +728,35 @@ export default function OutilsQuestions() {
                   </div>
                 ) : (
                   /* ─── COLLAPSED MODE ─── */
-                  <>
-                    <div className="flex items-start justify-between gap-3">
-                      <p className="text-[15px] font-medium leading-6 text-foreground">{question.text}</p>
-                      {isSaving && <Loader2 className="mt-1 h-4 w-4 flex-shrink-0 animate-spin text-muted-foreground" />}
+                  <div className="space-y-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-start gap-2 min-w-0 flex-1">
+                        {/* inline checkbox */}
+                        <button
+                          type="button"
+                          disabled={isSaving}
+                          onClick={(e) => { e.stopPropagation(); void handleMarkAsked(question); }}
+                          aria-label={isAsked ? "Remettre dans À poser" : "Marquer comme posée"}
+                          className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full transition-opacity disabled:cursor-wait disabled:opacity-70"
+                          style={{
+                            border: isAsked ? "1.5px solid #7F77DD" : "1.5px solid hsl(var(--border))",
+                            background: isAsked ? "#7F77DD" : "transparent",
+                          }}
+                        >
+                          {isAsked ? <Check className="h-3 w-3 text-white" strokeWidth={3} /> : null}
+                        </button>
+                        <p className="text-[15px] font-medium leading-6 text-foreground">{question.text}</p>
+                      </div>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        {isSaving && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+                        <span style={{ fontSize: 11, color: "#9A9490", whiteSpace: "nowrap" }}>
+                          {formatShortDate(question.created_at)}
+                        </span>
+                      </div>
                     </div>
 
                     {question.precisions && (
-                      <p className="text-sm leading-5 text-muted-foreground">{question.precisions}</p>
+                      <p className="text-sm leading-5 text-muted-foreground line-clamp-2">{question.precisions}</p>
                     )}
 
                     {linkedMembers.length > 0 && (
@@ -727,19 +780,17 @@ export default function OutilsQuestions() {
                       </div>
                     )}
 
-                    {question.asked_at && (
-                      <div className="text-xs text-muted-foreground">Posée le {formatDate(question.asked_at)}</div>
-                    )}
-
-                    {isAsked && question.answer && (
-                      <div style={answerBlockStyle}>
-                        <p className="whitespace-pre-wrap text-sm leading-6 text-foreground">{question.answer}</p>
+                    {/* Answer indicator */}
+                    {question.answer && (
+                      <div className="flex items-center gap-1.5 pt-1">
+                        <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#7F77DD" }} />
+                        <span style={{ fontSize: 11, fontWeight: 500, color: "#534AB7" }}>Réponse enregistrée</span>
                       </div>
                     )}
-                  </>
+                  </div>
                 )}
-              </div>
-            </article>
+              </article>
+            </div>
           );
         })}
       </div>
