@@ -1,5 +1,5 @@
-import { type CSSProperties, useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Check, Loader2, Plus } from "lucide-react";
+import { type CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ArrowLeft, Check, Loader2, Plus, Search, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import BottomNavBar from "@/components/BottomNavBar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,15 +8,17 @@ import { useEnfantId } from "@/hooks/useEnfantId";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
+/* ─────────────── palettes & styles ─────────────── */
+
 const MEMBER_PALETTES = [
-  { accent: "4 68% 66%" },
-  { accent: "258 58% 67%" },
-  { accent: "155 42% 47%" },
-  { accent: "37 78% 60%" },
-  { accent: "332 50% 57%" },
-  { accent: "210 18% 61%" },
-  { accent: "155 42% 47%" },
-  { accent: "201 62% 60%" },
+  { avatar: "linear-gradient(135deg, hsl(4 68% 66%), hsl(18 76% 63%))", accent: "4 68% 66%" },
+  { avatar: "linear-gradient(135deg, hsl(258 58% 67%), hsl(201 62% 60%))", accent: "258 58% 67%" },
+  { avatar: "linear-gradient(135deg, hsl(155 42% 47%), hsl(205 52% 55%))", accent: "155 42% 47%" },
+  { avatar: "linear-gradient(135deg, hsl(37 78% 60%), hsl(4 68% 66%))", accent: "37 78% 60%" },
+  { avatar: "linear-gradient(135deg, hsl(4 68% 66%), hsl(332 50% 57%))", accent: "332 50% 57%" },
+  { avatar: "linear-gradient(135deg, hsl(210 18% 61%), hsl(211 28% 49%))", accent: "210 18% 61%" },
+  { avatar: "linear-gradient(135deg, hsl(155 42% 47%), hsl(258 58% 67%))", accent: "155 42% 47%" },
+  { avatar: "linear-gradient(135deg, hsl(201 62% 60%), hsl(258 58% 67%))", accent: "201 62% 60%" },
 ] as const;
 
 const glassHeader: CSSProperties = {
@@ -37,6 +39,23 @@ const glassCard: CSSProperties = {
     "0 4px 24px hsl(var(--secondary) / 0.08), 0 1px 4px hsl(var(--foreground) / 0.06), inset 0 1px 0 hsl(var(--background) / 0.9)",
 };
 
+const glassFieldStyle: CSSProperties = {
+  background: "rgba(255,255,255,0.52)",
+  backdropFilter: "blur(16px) saturate(1.6)",
+  WebkitBackdropFilter: "blur(16px) saturate(1.6)",
+  border: "1px solid rgba(255,255,255,0.72)",
+};
+
+const searchFieldStyle: CSSProperties = {
+  background: "hsl(var(--background) / 0.45)",
+  backdropFilter: "blur(12px) saturate(1.4)",
+  WebkitBackdropFilter: "blur(12px) saturate(1.4)",
+  border: "1px solid hsl(var(--background) / 0.65)",
+  borderRadius: 12,
+  boxShadow:
+    "0 2px 8px hsl(var(--foreground) / 0.05), inset 0 1px 0 hsl(var(--background) / 0.7)",
+};
+
 const answerBlockStyle: CSSProperties = {
   background: "rgba(255,255,255,0.52)",
   borderLeft: "2px solid #AFA9EC",
@@ -44,18 +63,14 @@ const answerBlockStyle: CSSProperties = {
   padding: "8px 12px",
 };
 
-const answerInputStyle: CSSProperties = {
-  background: "rgba(255,255,255,0.52)",
-  backdropFilter: "blur(16px) saturate(1.6)",
-  WebkitBackdropFilter: "blur(16px) saturate(1.6)",
-  border: "1px solid rgba(255,255,255,0.72)",
-};
+/* ─────────────── types ─────────────── */
 
 type QuestionStatus = "to_ask" | "asked";
 
 type QuestionItem = {
   id: string;
   text: string;
+  precisions: string | null;
   linked_pro_ids: string[];
   status: QuestionStatus;
   answer: string | null;
@@ -69,6 +84,15 @@ type Member = {
   specialite: string | null;
 };
 
+type Draft = {
+  text: string;
+  precisions: string;
+  linked_pro_ids: string[];
+  answer: string;
+};
+
+/* ─────────────── helpers ─────────────── */
+
 function getMemberPalette(id: string) {
   let hash = 0;
   for (let index = 0; index < id.length; index += 1) {
@@ -79,7 +103,6 @@ function getMemberPalette(id: string) {
 
 function formatDate(value: string | null) {
   if (!value) return "";
-
   return new Intl.DateTimeFormat("fr-FR", {
     day: "numeric",
     month: "short",
@@ -91,6 +114,78 @@ function isQuestionStatus(value: string): value is QuestionStatus {
   return value === "to_ask" || value === "asked";
 }
 
+function normalize(value: string) {
+  return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
+
+/* ─────────────── sub-components ─────────────── */
+
+function HighlightMatch({ text, query }: { text: string; query: string }) {
+  if (!query) return <>{text}</>;
+  const nText = normalize(text);
+  const nQuery = normalize(query);
+  const idx = nText.indexOf(nQuery);
+  if (idx === -1) return <>{text}</>;
+  return (
+    <>
+      {text.slice(0, idx)}
+      <span className="font-semibold text-secondary">{text.slice(idx, idx + query.length)}</span>
+      {text.slice(idx + query.length)}
+    </>
+  );
+}
+
+function IntervenantRow({
+  intervenant,
+  query,
+  selected,
+  onToggle,
+}: {
+  intervenant: Member;
+  query: string;
+  selected: boolean;
+  onToggle: () => void;
+}) {
+  const palette = getMemberPalette(intervenant.id);
+  return (
+    <button
+      type="button"
+      onClick={(e) => { e.stopPropagation(); onToggle(); }}
+      className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors"
+      style={{
+        background: selected ? `hsl(${palette.accent} / 0.08)` : "transparent",
+        border: selected ? `1px solid hsl(${palette.accent} / 0.25)` : "1px solid transparent",
+      }}
+      aria-pressed={selected}
+    >
+      <div
+        className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
+        style={{ background: palette.avatar }}
+      >
+        {intervenant.nom.charAt(0).toUpperCase()}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-medium text-foreground">
+          <HighlightMatch text={intervenant.nom} query={query} />
+        </p>
+        {intervenant.specialite && (
+          <p className="truncate text-xs text-muted-foreground">
+            <HighlightMatch text={intervenant.specialite} query={query} />
+          </p>
+        )}
+      </div>
+      <span
+        className="text-xs font-medium"
+        style={{ color: selected ? `hsl(${palette.accent})` : "hsl(var(--muted-foreground))" }}
+      >
+        {selected ? "✓" : "Choisir"}
+      </span>
+    </button>
+  );
+}
+
+/* ─────────────── main component ─────────────── */
+
 export default function OutilsQuestions() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
@@ -100,14 +195,28 @@ export default function OutilsQuestions() {
   const [questions, setQuestions] = useState<QuestionItem[]>([]);
   const [intervenantsById, setIntervenantsById] = useState<Record<string, Member>>({});
   const [activeTab, setActiveTab] = useState<QuestionStatus>("to_ask");
-  const [answerDrafts, setAnswerDrafts] = useState<Record<string, string>>({});
-  const [editingAnswerIds, setEditingAnswerIds] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<string | null>(null);
 
+  // inline-edit state
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [drafts, setDrafts] = useState<Record<string, Draft>>({});
+  const [pickerSearch, setPickerSearch] = useState("");
+  const [recentIds, setRecentIds] = useState<string[]>([]);
+  const saveTimerRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+
+  // cleanup timers on unmount
+  useEffect(() => {
+    const timers = saveTimerRef.current;
+    return () => {
+      Object.values(timers).forEach(clearTimeout);
+    };
+  }, []);
+
+  /* ── fetch questions + intervenants ── */
+
   useEffect(() => {
     if (authLoading || enfantLoading) return;
-
     if (!user || !enfantId) {
       setQuestions([]);
       setIntervenantsById({});
@@ -121,7 +230,7 @@ export default function OutilsQuestions() {
     Promise.all([
       supabase
         .from("questions")
-        .select("id, text, linked_pro_ids, status, answer, created_at, asked_at")
+        .select("id, text, precisions, linked_pro_ids, status, answer, created_at, asked_at")
         .eq("parent_id", user.id)
         .eq("child_id", enfantId)
         .order("created_at", { ascending: false }),
@@ -148,10 +257,10 @@ export default function OutilsQuestions() {
 
       const normalizedQuestions: QuestionItem[] = (questionsResult.data ?? []).flatMap((item) => {
         if (!isQuestionStatus(item.status)) return [];
-
         return [{
           id: item.id,
           text: item.text,
+          precisions: item.precisions ?? null,
           linked_pro_ids: Array.isArray(item.linked_pro_ids) ? item.linked_pro_ids : [],
           status: item.status,
           answer: item.answer,
@@ -160,48 +269,167 @@ export default function OutilsQuestions() {
         }];
       });
 
-      const initialDrafts = normalizedQuestions.reduce<Record<string, string>>((accumulator, item) => {
-        accumulator[item.id] = item.answer ?? "";
-        return accumulator;
-      }, {});
+      const initDrafts: Record<string, Draft> = {};
+      for (const q of normalizedQuestions) {
+        initDrafts[q.id] = {
+          text: q.text,
+          precisions: q.precisions ?? "",
+          linked_pro_ids: [...q.linked_pro_ids],
+          answer: q.answer ?? "",
+        };
+      }
 
-      const initialEditing = normalizedQuestions.reduce<Record<string, boolean>>((accumulator, item) => {
-        accumulator[item.id] = false;
-        return accumulator;
-      }, {});
-
-      const membersMap = (intervenantsResult.data ?? []).reduce<Record<string, Member>>((accumulator, member) => {
-        accumulator[member.id] = member;
-        return accumulator;
+      const membersMap = (intervenantsResult.data ?? []).reduce<Record<string, Member>>((acc, m) => {
+        acc[m.id] = m;
+        return acc;
       }, {});
 
       setQuestions(normalizedQuestions);
-      setAnswerDrafts(initialDrafts);
-      setEditingAnswerIds(initialEditing);
+      setDrafts(initDrafts);
       setIntervenantsById(membersMap);
       setLoading(false);
     });
 
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [authLoading, enfantId, enfantLoading, toast, user]);
 
+  /* ── fetch recent intervenant ids ── */
+
+  useEffect(() => {
+    if (!enfantId) return;
+    supabase
+      .from("memos")
+      .select("intervenant_id, memo_date")
+      .not("intervenant_id", "is", null)
+      .not("enfant_id", "is", null)
+      .order("memo_date", { ascending: false })
+      .limit(20)
+      .then(({ data }) => {
+        if (!data) return;
+        const seen = new Set<string>();
+        const ids: string[] = [];
+        for (const memo of data) {
+          if (memo.intervenant_id && !seen.has(memo.intervenant_id)) {
+            seen.add(memo.intervenant_id);
+            ids.push(memo.intervenant_id);
+            if (ids.length >= 3) break;
+          }
+        }
+        setRecentIds(ids);
+      });
+  }, [enfantId]);
+
+  /* ── derived data ── */
+
+  const intervenantsArray = useMemo(
+    () => Object.values(intervenantsById),
+    [intervenantsById],
+  );
+
   const questionsToAsk = useMemo(
-    () => questions.filter((question) => question.status === "to_ask"),
+    () => questions.filter((q) => q.status === "to_ask"),
     [questions],
   );
 
   const askedQuestions = useMemo(
-    () => questions.filter((question) => question.status === "asked"),
+    () => questions.filter((q) => q.status === "asked"),
     [questions],
   );
 
-  const updateQuestionLocally = (questionId: string, updates: Partial<QuestionItem>) => {
+  /* ── save helpers ── */
+
+  const updateQuestionLocally = useCallback((questionId: string, updates: Partial<QuestionItem>) => {
     setQuestions((current) =>
-      current.map((question) => (question.id === questionId ? { ...question, ...updates } : question)),
+      current.map((q) => (q.id === questionId ? { ...q, ...updates } : q)),
     );
-  };
+  }, []);
+
+  const flushAndSave = useCallback(async (questionId: string) => {
+    // clear all pending timers for this question
+    for (const key of Object.keys(saveTimerRef.current)) {
+      if (key.startsWith(questionId)) {
+        clearTimeout(saveTimerRef.current[key]);
+        delete saveTimerRef.current[key];
+      }
+    }
+
+    const draft = drafts[questionId];
+    const question = questions.find((q) => q.id === questionId);
+    if (!draft || !question) return;
+
+    const updates: Record<string, unknown> = {};
+    if (draft.text.trim() && draft.text.trim() !== question.text) updates.text = draft.text.trim();
+    if ((draft.precisions.trim() || null) !== (question.precisions ?? null))
+      updates.precisions = draft.precisions.trim() || null;
+    if (JSON.stringify(draft.linked_pro_ids) !== JSON.stringify(question.linked_pro_ids))
+      updates.linked_pro_ids = draft.linked_pro_ids;
+    if ((draft.answer.trim() || null) !== (question.answer ?? null))
+      updates.answer = draft.answer.trim() || null;
+
+    if (Object.keys(updates).length === 0) return;
+
+    const { error } = await supabase
+      .from("questions")
+      .update(updates)
+      .eq("id", questionId);
+
+    if (error) {
+      toast({
+        title: "Impossible d'enregistrer les modifications",
+        description: "Réessayez dans un instant.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    updateQuestionLocally(questionId, updates as Partial<QuestionItem>);
+  }, [drafts, questions, toast, updateQuestionLocally]);
+
+  const scheduleSave = useCallback((questionId: string, field: string) => {
+    const key = `${questionId}:${field}`;
+    if (saveTimerRef.current[key]) clearTimeout(saveTimerRef.current[key]);
+    saveTimerRef.current[key] = setTimeout(() => {
+      delete saveTimerRef.current[key];
+      void flushAndSave(questionId);
+    }, 800);
+  }, [flushAndSave]);
+
+  const updateDraft = useCallback((questionId: string, field: keyof Draft, value: string | string[]) => {
+    setDrafts((prev) => ({
+      ...prev,
+      [questionId]: { ...prev[questionId], [field]: value },
+    }));
+    scheduleSave(questionId, field);
+  }, [scheduleSave]);
+
+  /* ── card open / close ── */
+
+  const openCard = useCallback(async (questionId: string) => {
+    if (editingId && editingId !== questionId) {
+      await flushAndSave(editingId);
+    }
+    setPickerSearch("");
+    setEditingId(questionId);
+  }, [editingId, flushAndSave]);
+
+  const closeCard = useCallback(async () => {
+    if (editingId) {
+      await flushAndSave(editingId);
+    }
+    setEditingId(null);
+    setPickerSearch("");
+  }, [editingId, flushAndSave]);
+
+  /* ── click outside ── */
+
+  const handleMainClick = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    if (!editingId) return;
+    const target = e.target as HTMLElement;
+    if (target.closest(`[data-question-id="${editingId}"]`)) return;
+    void closeCard();
+  }, [editingId, closeCard]);
+
+  /* ── toggle asked/to_ask ── */
 
   const handleMarkAsked = async (question: QuestionItem) => {
     const nextStatus: QuestionStatus = question.status === "asked" ? "to_ask" : "asked";
@@ -224,36 +452,29 @@ export default function OutilsQuestions() {
     }
 
     updateQuestionLocally(question.id, { status: nextStatus, asked_at: askedAt });
-    if (nextStatus === "to_ask") {
-      setEditingAnswerIds((current) => ({ ...current, [question.id]: false }));
-    }
     setSavingId(null);
   };
 
-  const handleSaveAnswer = async (questionId: string) => {
-    setSavingId(questionId);
-    const answer = (answerDrafts[questionId] ?? "").trim();
+  /* ── inline intervenant picker helpers ── */
 
-    const { error } = await supabase
-      .from("questions")
-      .update({ answer: answer || null })
-      .eq("id", questionId);
+  const filteredIntervenants = useMemo(() => {
+    if (!pickerSearch.trim()) return [];
+    const q = normalize(pickerSearch);
+    return intervenantsArray.filter(
+      (m) => normalize(m.nom).includes(q) || (m.specialite && normalize(m.specialite).includes(q)),
+    );
+  }, [intervenantsArray, pickerSearch]);
 
-    if (error) {
-      toast({
-        title: "Impossible d'enregistrer la réponse",
-        description: "Réessayez dans un instant.",
-        variant: "destructive",
-      });
-      setSavingId(null);
-      return;
+  const recentIntervenants = useMemo(() => {
+    if (recentIds.length > 0) {
+      return recentIds
+        .map((id) => intervenantsById[id])
+        .filter(Boolean) as Member[];
     }
+    return intervenantsArray.slice(0, 3);
+  }, [intervenantsArray, recentIds, intervenantsById]);
 
-    updateQuestionLocally(questionId, { answer: answer || null });
-    setEditingAnswerIds((current) => ({ ...current, [questionId]: false }));
-    toast({ title: "Réponse enregistrée" });
-    setSavingId(null);
-  };
+  /* ─────────────── render question list ─────────────── */
 
   const renderQuestionList = (items: QuestionItem[], emptyLabel: string) => {
     if (items.length === 0) {
@@ -267,25 +488,35 @@ export default function OutilsQuestions() {
     return (
       <div className="flex flex-col gap-3">
         {items.map((question) => {
-          const linkedMembers = question.linked_pro_ids
-            .map((memberId) => intervenantsById[memberId])
+          const isExpanded = editingId === question.id;
+          const draft = drafts[question.id];
+          const linkedMembers = (draft?.linked_pro_ids ?? question.linked_pro_ids)
+            .map((mid) => intervenantsById[mid])
             .filter(Boolean);
-          const answerValue = answerDrafts[question.id] ?? "";
           const isSaving = savingId === question.id;
           const isAsked = question.status === "asked";
-          const isEditingAnswer = editingAnswerIds[question.id] || (!question.answer && isAsked);
 
           return (
-            <article key={question.id} className="flex items-start gap-3 p-4" style={glassCard}>
+            <article
+              key={question.id}
+              data-question-id={question.id}
+              className="flex items-start gap-3 p-4 transition-all"
+              style={glassCard}
+              onClick={() => !isExpanded && void openCard(question.id)}
+              role={isExpanded ? undefined : "button"}
+              tabIndex={isExpanded ? undefined : 0}
+              onKeyDown={!isExpanded ? (e) => { if (e.key === "Enter") void openCard(question.id); } : undefined}
+            >
+              {/* checkbox */}
               <div className="flex items-start pt-1">
                 <button
                   type="button"
                   disabled={isSaving}
-                  onClick={() => void handleMarkAsked(question)}
+                  onClick={(e) => { e.stopPropagation(); void handleMarkAsked(question); }}
                   aria-label={
                     isAsked
-                      ? `Remettre la question ${question.text} dans À poser`
-                      : `Marquer la question ${question.text} comme posée`
+                      ? `Remettre la question dans À poser`
+                      : `Marquer la question comme posée`
                   }
                   className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full transition-opacity disabled:cursor-wait disabled:opacity-70"
                   style={{
@@ -297,70 +528,212 @@ export default function OutilsQuestions() {
                 </button>
               </div>
 
+              {/* content */}
               <div className="min-w-0 flex-1 space-y-3">
-                <div className="flex items-start justify-between gap-3">
-                  <p className="text-[15px] font-medium leading-6 text-foreground">{question.text}</p>
-                  {isSaving ? <Loader2 className="mt-1 h-4 w-4 flex-shrink-0 animate-spin text-muted-foreground" /> : null}
-                </div>
-
-                {linkedMembers.length > 0 ? (
-                  <div className="flex flex-wrap gap-2">
-                    {linkedMembers.map((member) => {
-                      const palette = getMemberPalette(member.id);
-                      return (
-                        <span
-                          key={member.id}
-                          className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium"
-                          style={{
-                            background: `hsl(${palette.accent} / 0.14)`,
-                            color: `hsl(${palette.accent})`,
-                            border: `1px solid hsl(${palette.accent} / 0.18)`,
-                          }}
-                        >
-                          {member.nom}
-                        </span>
-                      );
-                    })}
-                  </div>
-                ) : null}
-
-                {question.asked_at ? (
-                  <div className="text-xs text-muted-foreground">Posée le {formatDate(question.asked_at)}</div>
-                ) : null}
-
-                {isAsked ? (
-                  isEditingAnswer ? (
-                    <input
-                      id={`answer-${question.id}`}
-                      type="text"
-                      value={answerValue}
-                      onChange={(event) =>
-                        setAnswerDrafts((current) => ({ ...current, [question.id]: event.target.value }))
-                      }
-                      onBlur={() => void handleSaveAnswer(question.id)}
-                      onKeyDown={(event) => {
-                        if (event.key === "Enter") {
-                          event.preventDefault();
-                          void handleSaveAnswer(question.id);
-                        }
-                      }}
-                      placeholder="Ajouter la réponse reçue..."
-                      className="h-10 w-full rounded-lg px-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                      style={answerInputStyle}
-                    />
-                  ) : question.answer ? (
-                    <div style={answerBlockStyle}>
-                      <p className="whitespace-pre-wrap text-sm leading-6 text-foreground">{question.answer}</p>
-                      <button
-                        type="button"
-                        className="mt-1 text-xs text-secondary underline-offset-4 hover:underline"
-                        onClick={() => setEditingAnswerIds((current) => ({ ...current, [question.id]: true }))}
-                      >
-                        Modifier
-                      </button>
+                {isExpanded && draft ? (
+                  /* ─── EXPANDED MODE ─── */
+                  <div className="space-y-4" onClick={(e) => e.stopPropagation()}>
+                    {/* question text */}
+                    <div className="space-y-1">
+                      <label className="text-xs font-medium text-muted-foreground">Question</label>
+                      <input
+                        type="text"
+                        value={draft.text}
+                        onChange={(e) => updateDraft(question.id, "text", e.target.value)}
+                        onBlur={() => void flushAndSave(question.id)}
+                        className="h-10 w-full rounded-lg px-3 text-[15px] font-medium text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        style={glassFieldStyle}
+                        placeholder="Votre question"
+                      />
                     </div>
-                  ) : null
-                ) : null}
+
+                    {/* precisions */}
+                    <div className="space-y-1">
+                      <label className="text-xs font-medium text-muted-foreground">Précisions</label>
+                      <textarea
+                        value={draft.precisions}
+                        onChange={(e) => updateDraft(question.id, "precisions", e.target.value)}
+                        onBlur={() => void flushAndSave(question.id)}
+                        rows={3}
+                        className="w-full resize-none rounded-lg px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        style={glassFieldStyle}
+                        placeholder="Contexte complémentaire (optionnel)"
+                      />
+                    </div>
+
+                    {/* intervenants inline picker */}
+                    <div className="space-y-2">
+                      <label className="text-xs font-medium text-muted-foreground">Intervenants</label>
+
+                      {/* selected chips */}
+                      {linkedMembers.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {linkedMembers.map((member) => {
+                            const palette = getMemberPalette(member.id);
+                            return (
+                              <div
+                                key={member.id}
+                                className="inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-xs"
+                                style={{
+                                  backgroundColor: `hsl(${palette.accent} / 0.14)`,
+                                  borderColor: `hsl(${palette.accent} / 0.32)`,
+                                  color: `hsl(${palette.accent})`,
+                                }}
+                              >
+                                <div
+                                  className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-[9px] font-semibold text-white"
+                                  style={{ background: palette.avatar }}
+                                >
+                                  {member.nom.charAt(0).toUpperCase()}
+                                </div>
+                                <span className="max-w-[100px] truncate font-medium">{member.nom}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const next = draft.linked_pro_ids.filter((id) => id !== member.id);
+                                    updateDraft(question.id, "linked_pro_ids", next);
+                                  }}
+                                  className="inline-flex h-4 w-4 items-center justify-center rounded-full transition-colors hover:bg-foreground/5"
+                                  aria-label={`Retirer ${member.nom}`}
+                                >
+                                  <X className="h-3 w-3" />
+                                </button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+
+                      {/* search */}
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <input
+                          value={pickerSearch}
+                          onChange={(e) => setPickerSearch(e.target.value)}
+                          placeholder="Nom ou spécialité..."
+                          className="w-full py-2 pl-9 pr-3 text-sm text-foreground outline-none placeholder:text-muted-foreground"
+                          style={searchFieldStyle}
+                        />
+                      </div>
+
+                      {/* results */}
+                      {intervenantsArray.length === 0 ? (
+                        <p className="text-xs text-muted-foreground">Aucun membre enregistré.</p>
+                      ) : pickerSearch.trim() ? (
+                        <div className="space-y-1">
+                          <p className="px-1 text-xs text-muted-foreground">
+                            {filteredIntervenants.length} résultat{filteredIntervenants.length !== 1 ? "s" : ""}
+                          </p>
+                          {filteredIntervenants.map((m) => (
+                            <IntervenantRow
+                              key={m.id}
+                              intervenant={m}
+                              query={pickerSearch}
+                              selected={draft.linked_pro_ids.includes(m.id)}
+                              onToggle={() => {
+                                const next = draft.linked_pro_ids.includes(m.id)
+                                  ? draft.linked_pro_ids.filter((id) => id !== m.id)
+                                  : [...draft.linked_pro_ids, m.id];
+                                updateDraft(question.id, "linked_pro_ids", next);
+                              }}
+                            />
+                          ))}
+                          {filteredIntervenants.length === 0 && (
+                            <p className="py-2 text-center text-xs text-muted-foreground">Aucun résultat</p>
+                          )}
+                        </div>
+                      ) : recentIntervenants.length > 0 ? (
+                        <div className="space-y-1">
+                          <p className="px-1 text-xs font-medium tracking-[0.03em] text-muted-foreground">Récents</p>
+                          {recentIntervenants.map((m) => (
+                            <IntervenantRow
+                              key={m.id}
+                              intervenant={m}
+                              query=""
+                              selected={draft.linked_pro_ids.includes(m.id)}
+                              onToggle={() => {
+                                const next = draft.linked_pro_ids.includes(m.id)
+                                  ? draft.linked_pro_ids.filter((id) => id !== m.id)
+                                  : [...draft.linked_pro_ids, m.id];
+                                updateDraft(question.id, "linked_pro_ids", next);
+                              }}
+                            />
+                          ))}
+                        </div>
+                      ) : null}
+                    </div>
+
+                    {/* answer (only when asked) */}
+                    {isAsked && (
+                      <div className="space-y-1">
+                        <label className="text-xs font-medium text-muted-foreground">Réponse reçue</label>
+                        <textarea
+                          value={draft.answer}
+                          onChange={(e) => updateDraft(question.id, "answer", e.target.value)}
+                          onBlur={() => void flushAndSave(question.id)}
+                          rows={3}
+                          className="w-full resize-none rounded-lg px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                          style={glassFieldStyle}
+                          placeholder="Ajouter la réponse reçue..."
+                        />
+                      </div>
+                    )}
+
+                    {/* date */}
+                    {question.asked_at && (
+                      <div className="text-xs text-muted-foreground">
+                        Posée le {formatDate(question.asked_at)}
+                      </div>
+                    )}
+
+                    {isSaving && (
+                      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                    )}
+                  </div>
+                ) : (
+                  /* ─── COLLAPSED MODE ─── */
+                  <>
+                    <div className="flex items-start justify-between gap-3">
+                      <p className="text-[15px] font-medium leading-6 text-foreground">{question.text}</p>
+                      {isSaving && <Loader2 className="mt-1 h-4 w-4 flex-shrink-0 animate-spin text-muted-foreground" />}
+                    </div>
+
+                    {question.precisions && (
+                      <p className="text-sm leading-5 text-muted-foreground">{question.precisions}</p>
+                    )}
+
+                    {linkedMembers.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {linkedMembers.map((member) => {
+                          const palette = getMemberPalette(member.id);
+                          return (
+                            <span
+                              key={member.id}
+                              className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium"
+                              style={{
+                                background: `hsl(${palette.accent} / 0.14)`,
+                                color: `hsl(${palette.accent})`,
+                                border: `1px solid hsl(${palette.accent} / 0.18)`,
+                              }}
+                            >
+                              {member.nom}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {question.asked_at && (
+                      <div className="text-xs text-muted-foreground">Posée le {formatDate(question.asked_at)}</div>
+                    )}
+
+                    {isAsked && question.answer && (
+                      <div style={answerBlockStyle}>
+                        <p className="whitespace-pre-wrap text-sm leading-6 text-foreground">{question.answer}</p>
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
             </article>
           );
@@ -368,6 +741,8 @@ export default function OutilsQuestions() {
       </div>
     );
   };
+
+  /* ─────────────── page layout ─────────────── */
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -383,7 +758,7 @@ export default function OutilsQuestions() {
         <h1 className="text-lg font-semibold text-foreground">Questions à poser</h1>
       </header>
 
-      <main className="flex-1 px-4 pb-28 pt-4">
+      <main className="flex-1 px-4 pb-28 pt-4" onClick={handleMainClick}>
         <div className="mb-4">
           <button
             type="button"
