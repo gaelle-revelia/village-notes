@@ -103,9 +103,7 @@ const OutilsScreen = () => {
                   className="flex h-11 w-11 items-center justify-center rounded-xl"
                   style={{
                     background: tool.active
-                      ? "iconBg" in tool && tool.iconBg
-                        ? tool.iconBg
-                        : "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)))"
+                      ? (tool as any).iconBg || "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)))"
                       : "hsl(210 18% 61% / 0.15)",
                   }}
                 >
@@ -113,9 +111,7 @@ const OutilsScreen = () => {
                     size={22}
                     color={
                       tool.active
-                        ? "iconColor" in tool && tool.iconColor
-                          ? tool.iconColor
-                          : "hsl(var(--primary-foreground))"
+                        ? (tool as any).iconColor || "hsl(var(--primary-foreground))"
                         : "hsl(210 18% 61%)"
                     }
                     strokeWidth={2}
