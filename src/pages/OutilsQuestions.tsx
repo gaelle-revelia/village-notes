@@ -665,21 +665,19 @@ export default function OutilsQuestions() {
                       ) : null}
                     </div>
 
-                    {/* answer (only when asked) */}
-                    {isAsked && (
-                      <div className="space-y-1">
-                        <label className="text-xs font-medium text-muted-foreground">Réponse reçue</label>
-                        <textarea
-                          value={draft.answer}
-                          onChange={(e) => updateDraft(question.id, "answer", e.target.value)}
-                          onBlur={() => void flushAndSave(question.id)}
-                          rows={3}
-                          className="w-full resize-none rounded-lg px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                          style={glassFieldStyle}
-                          placeholder="Ajouter la réponse reçue..."
-                        />
-                      </div>
-                    )}
+                    {/* answer — always visible in edit mode */}
+                    <div className="space-y-1">
+                      <label className="text-xs font-medium text-muted-foreground">Réponse reçue</label>
+                      <textarea
+                        value={draft.answer}
+                        onChange={(e) => updateDraft(question.id, "answer", e.target.value)}
+                        onBlur={() => void flushAndSave(question.id)}
+                        rows={3}
+                        className="w-full resize-none rounded-lg px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        style={glassFieldStyle}
+                        placeholder="Ajouter la réponse reçue..."
+                      />
+                    </div>
 
                     {/* date */}
                     {question.asked_at && (
