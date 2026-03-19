@@ -72,6 +72,8 @@ export default function OutilsActiviteChrono() {
   const [recapDuration, setRecapDuration] = useState("");
   const [recapDistance, setRecapDistance] = useState("");
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const startTimeRef = useRef<number>(Date.now());
+  const accumulatedRef = useRef<number>(0);
 
   // Fetch activite
   useEffect(() => {
@@ -86,10 +88,13 @@ export default function OutilsActiviteChrono() {
       });
   }, [id]);
 
-  // Timer
+  // Timer — wall-clock based so it self-corrects after screen wake
   useEffect(() => {
     if (running && !showRecap) {
-      intervalRef.current = setInterval(() => setSeconds((s) => s + 1), 1000);
+      startTimeRef.current = Date.now();
+      intervalRef.current = setInterval(() => {
+        setSeconds(accumulatedRef.current + Math.floor((Date.now() - startTimeRef.current) / 1000));
+      }, 1000);
     }
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
@@ -100,9 +105,14 @@ export default function OutilsActiviteChrono() {
   const unite = activite?.unite_distance || "m";
 
   const handleTerminer = () => {
+    if (running) {
+      accumulatedRef.current += Math.floor((Date.now() - startTimeRef.current) / 1000);
+    }
     setRunning(false);
     if (intervalRef.current) clearInterval(intervalRef.current);
-    setRecapDuration(formatTime(seconds));
+    const finalSeconds = accumulatedRef.current;
+    setSeconds(finalSeconds);
+    setRecapDuration(formatTime(finalSeconds));
     setRecapDistance(String(distance));
     setShowRecap(true);
   };
@@ -110,6 +120,13 @@ export default function OutilsActiviteChrono() {
   const handleReprendre = () => {
     setShowRecap(false);
     setRunning(true);
+  };
+
+  const togglePause = () => {
+    if (running) {
+      accumulatedRef.current += Math.floor((Date.now() - startTimeRef.current) / 1000);
+    }
+    setRunning((r) => !r);
   };
 
   const handleSave = async () => {
@@ -224,7 +241,7 @@ export default function OutilsActiviteChrono() {
             {/* Controls */}
             <div className="flex items-center gap-5 mt-8">
               <button
-                onClick={() => setRunning((r) => !r)}
+                onClick={togglePause}
                 className="flex items-center justify-center"
                 style={{
                   width: 56,
