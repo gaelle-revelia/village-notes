@@ -75,7 +75,7 @@ const NouvelEvenement = () => {
 
           <div className="space-y-1.5">
             <Label>Description (optionnel)</Label>
-            <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Détails de l'événement…" className="min-h-[120px] rounded-xl resize-none" />
+            <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Détails de l'événement…" className="min-h-[120px] rounded-xl resize-none" autoResize />
           </div>
 
           <Button onClick={handleSave} disabled={!title.trim() || saving} className="w-full rounded-xl h-12 text-base">

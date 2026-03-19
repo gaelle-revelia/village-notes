@@ -497,8 +497,9 @@ export default function VillageSettings() {
                     onChange={(e) => setNewNotes(e.target.value)}
                     placeholder="Infos complémentaires…"
                     className="bg-[rgba(255,255,255,0.6)] border-[rgba(255,255,255,0.72)] text-[#1E1A1A] resize-none"
-                    rows={2}
+                    rows={1}
                     maxLength={500}
+                    autoResize
                   />
                 </div>
               </>

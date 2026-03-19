@@ -164,12 +164,13 @@ const NouvelleNote = () => {
             <label className="text-sm font-medium text-foreground block mb-2">
               Votre note
             </label>
-            <textarea
+            <Textarea
               value={text}
               onChange={(e) => setText(e.target.value)}
               placeholder="Décrivez ce que vous avez observé, entendu ou retenu..."
-              rows={5}
-              className="w-full text-[15px] text-foreground leading-relaxed placeholder:text-muted-foreground border-none outline-none resize-none bg-transparent"
+              rows={1}
+              className="w-full text-[15px] text-foreground leading-relaxed placeholder:text-muted-foreground border-none outline-none resize-none bg-transparent min-h-0"
+              autoResize
             />
           </div>
         </div>

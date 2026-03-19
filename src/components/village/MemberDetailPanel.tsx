@@ -247,8 +247,9 @@ export default function MemberDetailPanel({
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Ajouter..."
                   className="bg-white/30 border-white/50 placeholder:italic placeholder:text-[#9A9490] text-sm text-[#1E1A1A] resize-none"
-                  rows={3}
+                  rows={1}
                   maxLength={500}
+                  autoResize
                 />
               </FieldBlock>
             </>

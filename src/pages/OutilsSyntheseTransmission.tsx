@@ -308,6 +308,7 @@ const OutilsSyntheseTransmission = () => {
             onChange={(e) => !isPast && updateAnswer(idx, e.target.value)}
             className="text-[14px] font-sans border-none italic placeholder:italic"
             style={{ ...glassCard, borderRadius: 14, minHeight: 70, maxWidth: "80%" }}
+            autoResize
           />
         </div>
       </>

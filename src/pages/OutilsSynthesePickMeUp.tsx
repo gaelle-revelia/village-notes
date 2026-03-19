@@ -429,7 +429,8 @@ const OutilsSynthesePickMeUp = () => {
               if (e.target.value.trim()) setSelectedEmotion(null);
             }}
             className="text-[14px] font-sans border-none italic placeholder:italic"
-            style={{ ...glassCard, borderRadius: 14, minHeight: 80, maxWidth: "75%" }} />
+            style={{ ...glassCard, borderRadius: 14, minHeight: 80, maxWidth: "75%" }}
+            autoResize />
           
         </div>
 

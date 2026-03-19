@@ -111,6 +111,7 @@ export default function PreciserBlocDrawer({ isOpen, onClose, bloc, enfantId, sy
             onChange={(e) => setPrecision(e.target.value)}
             className="text-[14px] font-sans border-none italic placeholder:italic w-full"
             style={{ ...glassCard, borderRadius: 14, minHeight: 80 }}
+            autoResize
           />
 
           {/* Voice input */}

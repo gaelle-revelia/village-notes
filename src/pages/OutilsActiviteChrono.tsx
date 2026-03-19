@@ -346,6 +346,7 @@ export default function OutilsActiviteChrono() {
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Comment s'est passée la séance ?"
                 className="bg-white/50 border-white/60 rounded-xl text-sm min-h-[80px]"
+                autoResize
               />
 
               <button
