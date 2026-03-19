@@ -72,6 +72,8 @@ export default function OutilsActiviteChrono() {
   const [recapDuration, setRecapDuration] = useState("");
   const [recapDistance, setRecapDistance] = useState("");
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const startTimeRef = useRef<number>(Date.now());
+  const accumulatedRef = useRef<number>(0);
 
   // Fetch activite
   useEffect(() => {
