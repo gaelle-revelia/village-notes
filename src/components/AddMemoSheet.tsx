@@ -120,6 +120,11 @@ export default function AddMemoSheet({ open, onOpenChange, enfantId }: Props) {
                   onClick={() => setView("notes")}
                 />
                 <MenuItem
+                  icon={<MessageCircleQuestion className="h-5 w-5" />}
+                  label="Question à poser"
+                  onClick={() => go("/nouvelle-question")}
+                />
+                <MenuItem
                   icon={<FileText className="h-5 w-5" />}
                   label="Document"
                   onClick={() => go("/nouveau-document")}
