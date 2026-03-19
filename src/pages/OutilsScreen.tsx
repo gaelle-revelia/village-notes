@@ -91,7 +91,6 @@ const OutilsScreen = () => {
                   style={{
                     width: 44,
                     height: 44,
-                    marginBottom: 10,
                     background: tool.active
                       ? (tool as any).iconBg || "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)))"
                       : "hsl(210 18% 61% / 0.15)",
