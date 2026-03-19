@@ -10,12 +10,6 @@ import { MemoCard, getDomainsFromTags } from "@/components/memo/MemoCard";
 import AddMemoSheet from "@/components/AddMemoSheet";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer";
 
 type FilterType = "tous" | "rdv" | "activites" | "documents" | "evenements";
 
@@ -90,7 +84,7 @@ const Timeline = () => {
   const [loadingMemos, setLoadingMemos] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
+  const [filterPanelOpen, setFilterPanelOpen] = useState(false);
   const [activeFilters, setActiveFilters] = useState<Set<FilterType>>(() => {
     try {
       const saved = sessionStorage.getItem("timeline_filters");
@@ -264,7 +258,7 @@ const Timeline = () => {
           <div className="flex items-center gap-2">
             {/* Filter button */}
             <button
-              onClick={() => setFilterDrawerOpen(true)}
+              onClick={() => setFilterPanelOpen(v => !v)}
               className="relative flex-shrink-0 flex items-center justify-center"
               style={{
                 width: 42,
@@ -314,6 +308,50 @@ const Timeline = () => {
             </div>
           </div>
         )}
+        {/* Slide-down filter panel */}
+        <div style={{
+          overflow: "hidden",
+          maxHeight: filterPanelOpen ? 300 : 0,
+          transition: "max-height 0.25s ease",
+        }}>
+          <div className="flex flex-wrap gap-2 pt-2">
+            {FILTER_PILLS.map(pill => {
+              const isActive = activeFilters.has(pill.key);
+              return (
+                <button
+                  key={pill.key}
+                  onClick={() => toggleFilter(pill.key)}
+                  style={{
+                    padding: "8px 16px",
+                    borderRadius: 20,
+                    fontSize: 13,
+                    fontWeight: 500,
+                    background: isActive ? pill.color : pill.bg,
+                    color: isActive ? "#FFFFFF" : pill.color,
+                    border: isActive ? `1.5px solid ${pill.color}` : `1.5px solid ${pill.border}`,
+                    transition: "all 0.2s ease",
+                  }}
+                >
+                  {pill.label}
+                </button>
+              );
+            })}
+          </div>
+          {isFilterActive && (
+            <button
+              onClick={() => setActiveFilters(new Set<FilterType>(["tous"]))}
+              className="w-full mt-3 py-2.5 text-sm font-medium"
+              style={{
+                color: "#8B74E0",
+                background: "rgba(139,116,224,0.08)",
+                borderRadius: 12,
+                border: "1px solid rgba(139,116,224,0.2)",
+              }}
+            >
+              Réinitialiser
+            </button>
+          )}
+        </div>
       </header>
 
       <main className="flex-1 px-4" style={{ paddingBottom: 160 }}>
@@ -476,53 +514,6 @@ const Timeline = () => {
 
       <AddMemoSheet open={sheetOpen} onOpenChange={setSheetOpen} enfantId={enfantId} />
 
-      {/* Filter Drawer */}
-      <Drawer open={filterDrawerOpen} onOpenChange={setFilterDrawerOpen}>
-        <DrawerContent>
-          <DrawerHeader>
-            <DrawerTitle className="text-center" style={{ fontFamily: "'Fraunces', serif" }}>Afficher</DrawerTitle>
-          </DrawerHeader>
-          <div className="px-4 pb-4">
-            <div className="flex flex-wrap gap-2">
-              {FILTER_PILLS.map(pill => {
-                const isActive = activeFilters.has(pill.key);
-                return (
-                  <button
-                    key={pill.key}
-                    onClick={() => toggleFilter(pill.key)}
-                    style={{
-                      padding: "8px 16px",
-                      borderRadius: 20,
-                      fontSize: 13,
-                      fontWeight: 500,
-                      background: isActive ? pill.color : pill.bg,
-                      color: isActive ? "#FFFFFF" : pill.color,
-                      border: isActive ? `1.5px solid ${pill.color}` : `1.5px solid ${pill.border}`,
-                      transition: "all 0.2s ease",
-                    }}
-                  >
-                    {pill.label}
-                  </button>
-                );
-              })}
-            </div>
-            {isFilterActive && (
-              <button
-                onClick={() => setActiveFilters(new Set<FilterType>(["tous"]))}
-                className="w-full mt-4 py-2.5 text-sm font-medium"
-                style={{
-                  color: "#8B74E0",
-                  background: "rgba(139,116,224,0.08)",
-                  borderRadius: 12,
-                  border: "1px solid rgba(139,116,224,0.2)",
-                }}
-              >
-                Réinitialiser
-              </button>
-            )}
-          </div>
-        </DrawerContent>
-      </Drawer>
 
       <BottomNavBar />
     </div>
