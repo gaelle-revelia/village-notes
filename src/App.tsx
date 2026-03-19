@@ -10,6 +10,7 @@ import Onboarding from "./pages/Onboarding";
 import ResetPassword from "./pages/ResetPassword";
 
 import NouveauMemoVocal from "./pages/NouveauMemoVocal";
+import NouvelleQuestion from "./pages/NouvelleQuestion";
 import NouvelleNote from "./pages/NouvelleNote";
 import NouveauDocument from "./pages/NouveauDocument";
 import NouvelEvenement from "./pages/NouvelEvenement";
