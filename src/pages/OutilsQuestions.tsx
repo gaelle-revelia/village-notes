@@ -355,7 +355,8 @@ export default function OutilsQuestions() {
 
   const filteredQuestions = useMemo(() => {
     return questions.filter((q) => {
-      if (statusFilter !== "all" && q.status !== statusFilter) return false;
+      if (statusFilter === "to_ask" && q.answer && q.answer.trim() !== "") return false;
+      if (statusFilter === "asked" && (!q.answer || q.answer.trim() === "")) return false;
       if (specFilter) {
         const hasSpec = q.linked_pro_ids.some((id) => intervenantsById[id]?.specialite === specFilter);
         if (!hasSpec) return false;
