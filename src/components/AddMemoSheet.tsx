@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import {
   Mic, PenLine, FileText, Sparkles, Activity,
   Timer, ChevronRight, ChevronLeft, X, MessageCircleQuestion,
-  Clock, CalendarDays, Bell,
 } from "lucide-react";
 import { icons } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -40,7 +39,7 @@ interface Activite {
   unite_distance: string | null;
 }
 
-type View = "main" | "activites" | "chrono-choice" | "avenir";
+type View = "main" | "activites" | "chrono-choice";
 
 interface Props {
   open: boolean;
@@ -83,7 +82,7 @@ export default function AddMemoSheet({ open, onOpenChange, enfantId }: Props) {
 
   const domain = (d: string) => DOMAIN_CONFIG[d] ?? DOMAIN_CONFIG["Médical"];
 
-  const translateX = view === "main" ? "0%" : view === "activites" ? "-25%" : view === "chrono-choice" ? "-50%" : "-75%";
+  const translateX = view === "main" ? "0%" : view === "activites" ? "-33.333%" : "-66.666%";
 
   return (
     <>
@@ -108,13 +107,13 @@ export default function AddMemoSheet({ open, onOpenChange, enfantId }: Props) {
             <div
               style={{
                 display: "flex",
-                width: "400%",
+                width: "300%",
                 transform: `translateX(${translateX})`,
                 transition: "transform 0.3s ease",
               }}
             >
               {/* === Main panel === */}
-              <nav className="w-full px-2 pb-4 pt-1" style={{ flex: "0 0 25%" }}>
+              <nav className="w-full px-2 pb-4 pt-1" style={{ flex: "0 0 33.333%" }}>
                 <MenuItem
                   icon={<Mic size={18} />}
                   color="#8B74E0"
@@ -144,16 +143,16 @@ export default function AddMemoSheet({ open, onOpenChange, enfantId }: Props) {
                   onClick={() => setView("activites")}
                 />
                 <MenuItem
-                  icon={<Clock size={18} />}
-                  color="#8B74E0"
-                  label="À venir"
-                  description="RDV à préparer, rappel, question à poser"
-                  onClick={() => setView("avenir")}
+                  icon={<MessageCircleQuestion size={18} />}
+                  color="#1D9E75"
+                  label="Question à poser"
+                  description="Ce que je veux demander au pro"
+                  onClick={() => go("/nouvelle-question?type=question")}
                 />
               </nav>
 
               {/* === Activites sub-menu === */}
-              <div className="w-full px-2 pb-4 pt-1" style={{ flex: "0 0 25%" }}>
+              <div className="w-full px-2 pb-4 pt-1" style={{ flex: "0 0 33.333%" }}>
                 <BackHeader label="Activité" onBack={() => setView("main")} />
                 {loadingActivites ? (
                   <div className="flex items-center justify-center py-6">
@@ -205,7 +204,7 @@ export default function AddMemoSheet({ open, onOpenChange, enfantId }: Props) {
               </div>
 
               {/* === Chrono/Manuel choice === */}
-              <div className="w-full px-2 pb-4 pt-1" style={{ flex: "0 0 25%" }}>
+              <div className="w-full px-2 pb-4 pt-1" style={{ flex: "0 0 33.333%" }}>
                 <BackHeader label={selectedActivite?.nom || "Activité"} onBack={() => setView("activites")} />
                 <div className="flex flex-col gap-3 mt-1">
                   <button
@@ -235,32 +234,6 @@ export default function AddMemoSheet({ open, onOpenChange, enfantId }: Props) {
                     </div>
                   </button>
                 </div>
-              </div>
-
-              {/* === À venir sub-menu === */}
-              <div className="w-full px-2 pb-4 pt-1" style={{ flex: "0 0 25%" }}>
-                <BackHeader label="À venir" onBack={() => setView("main")} />
-                <MenuItem
-                  icon={<CalendarDays size={18} />}
-                  color="#8B74E0"
-                  label="Rendez-vous"
-                  description="Préparer un RDV à venir"
-                  onClick={() => go("/nouvelle-question?type=rdv")}
-                />
-                <MenuItem
-                  icon={<Bell size={18} />}
-                  color="#E8A44A"
-                  label="Rappel"
-                  description="Ne pas oublier de faire quelque chose"
-                  onClick={() => go("/nouvelle-question?type=rappel")}
-                />
-                <MenuItem
-                  icon={<MessageCircleQuestion size={18} />}
-                  color="#44A882"
-                  label="Question"
-                  description="Ce que je veux demander au pro"
-                  onClick={() => go("/nouvelle-question?type=question")}
-                />
               </div>
             </div>
           </div>
