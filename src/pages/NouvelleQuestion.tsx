@@ -122,6 +122,7 @@ export default function NouvelleQuestion() {
   const { enfantId, loading: enfantLoading } = useEnfantId();
   const { toast } = useToast();
 
+  const [type, setType] = useState<"rdv" | "rappel" | "question">("question");
   const [mode, setMode] = useState<"voice" | "text">("voice");
   const [questionDate, setQuestionDate] = useState(new Date());
   const [question, setQuestion] = useState("");
