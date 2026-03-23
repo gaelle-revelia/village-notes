@@ -209,6 +209,7 @@ export default function OutilsQuestions() {
   const [statusFilter, setStatusFilter] = useState<"all" | "to_ask" | "asked">("all");
   const [specFilter, setSpecFilter] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [typeFilter, setTypeFilter] = useState<"all" | "rdv" | "rappel" | "question">("all");
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<string | null>(null);
 
