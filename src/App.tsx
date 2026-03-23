@@ -42,6 +42,7 @@ import PolitiqueConfidentialite from "./pages/PolitiqueConfidentialite";
 import Waitlist from "./pages/Waitlist";
 import AVenirDetail from "./pages/AVenirDetail";
 import VillageProFiche from "./pages/VillageProFiche";
+import VillageProEdit from "./pages/VillageProEdit";
 
 const queryClient = new QueryClient();
 
