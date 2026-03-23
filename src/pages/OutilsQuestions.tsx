@@ -963,7 +963,42 @@ export default function OutilsQuestions() {
           <h1 style={{ fontFamily: "Fraunces, serif", fontSize: 28, fontWeight: 700 }} className="text-foreground">À venir</h1>
           <ProfileAvatar />
         </div>
-        {/* Type filter chips */}
+        {/* Tab row */}
+        <div style={{
+          display: "flex",
+          background: "rgba(255,255,255,0.45)",
+          borderRadius: 12,
+          padding: 3,
+          marginBottom: 8,
+        }}>
+          {([
+            { key: "ouvertes" as const, label: "Ouvertes" },
+            { key: "archives" as const, label: "Archives" },
+          ]).map(({ key, label }) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setActiveTab(key)}
+              style={{
+                flex: 1,
+                padding: "6px 0",
+                borderRadius: 10,
+                fontSize: 13,
+                fontWeight: activeTab === key ? 500 : 400,
+                color: activeTab === key ? "#534AB7" : "#9A9490",
+                background: activeTab === key ? "#fff" : "transparent",
+                boxShadow: activeTab === key ? "0 1px 4px rgba(139,116,224,0.15)" : "none",
+                border: "none",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        {/* Type filter chips — only for ouvertes tab */}
+        {activeTab === "ouvertes" && (
         <div className="flex gap-2 overflow-x-auto pb-2" style={{ scrollbarWidth: "none" }}>
           {([
             { key: "all" as const, label: "Tout" },
