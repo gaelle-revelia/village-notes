@@ -145,6 +145,17 @@ export default function NouvelleQuestion() {
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [transcriptionError, setTranscriptionError] = useState<string | null>(null);
 
+  const [dueDate, setDueDate] = useState<Date | null>(null);
+  const [isApproximate, setIsApproximate] = useState(type === "rappel");
+  const [approxMonth, setApproxMonth] = useState(new Date().getMonth());
+  const [approxYear, setApproxYear] = useState(new Date().getFullYear());
+
+  const MONTHS = [
+    "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+    "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre",
+  ];
+  const [transcriptionError, setTranscriptionError] = useState<string | null>(null);
+
   const { isRecording, elapsedSeconds, audioBlob, permissionDenied, start, stop, reset } =
     useAudioRecorder();
 
