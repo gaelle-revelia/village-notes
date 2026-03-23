@@ -571,7 +571,7 @@ export default function VillageSettings() {
             if (!editTarget.email || !enfantId || !user) return;
             const inferredRole = inferRole(editTarget.specialite ?? "");
             const { error } = await supabase.functions.invoke("invite-member", {
-              body: { email: editTarget.email, role: inferredRole, enfant_id: enfantId, redirect_url: "https://thevillage-app.lovable.app/onboarding-invite" },
+              body: { email: editTarget.email, role: inferredRole, enfant_id: enfantId, redirect_url: "https://the-village.app/onboarding-invite" },
             });
             if (error) {
               toast({ title: "Erreur", description: "L'invitation n'a pas pu être renvoyée.", variant: "destructive" });
