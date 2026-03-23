@@ -1,4 +1,6 @@
 import { type CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 import { ArrowLeft, Check, Loader2, Mic, Plus, Search, SlidersHorizontal, Square, X } from "lucide-react";
 import { useVocalRecording } from "@/hooks/useVocalRecording";
 import { useNavigate } from "react-router-dom";
@@ -210,6 +212,8 @@ export default function OutilsQuestions() {
   const [specFilter, setSpecFilter] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<"all" | "rdv" | "rappel" | "question">("all");
+  const [activeTab, setActiveTab] = useState<"ouvertes" | "archives">("ouvertes");
+  const [archivedQuestions, setArchivedQuestions] = useState<QuestionItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<string | null>(null);
 
@@ -367,7 +371,39 @@ export default function OutilsQuestions() {
     return () => { cancelled = true; };
   }, [authLoading, enfantId, enfantLoading, toast, user]);
 
-  /* ── fetch recent intervenant ids ── */
+  // Fetch archived questions
+  useEffect(() => {
+    if (activeTab !== "archives" || !user || !enfantId) return;
+    supabase
+      .from("questions")
+      .select("id, text, precisions, linked_pro_ids, status, answer, created_at, asked_at, type, due_date, is_approximate_date, linked_rdv_id, archived_at")
+      .eq("parent_id", user.id)
+      .eq("child_id", enfantId)
+      .not("archived_at", "is", null)
+      .order("archived_at", { ascending: false })
+      .then(({ data }) => {
+        if (!data) { setArchivedQuestions([]); return; }
+        setArchivedQuestions(data.flatMap((item) => {
+          if (!isQuestionStatus(item.status)) return [];
+          return [{
+            id: item.id,
+            text: item.text,
+            precisions: item.precisions ?? null,
+            linked_pro_ids: Array.isArray(item.linked_pro_ids) ? item.linked_pro_ids : [],
+            status: item.status,
+            answer: item.answer,
+            created_at: item.created_at,
+            asked_at: item.asked_at,
+            type: (item.type as QuestionType) ?? "question",
+            due_date: item.due_date ?? null,
+            is_approximate_date: item.is_approximate_date ?? false,
+            linked_rdv_id: item.linked_rdv_id ?? null,
+            archived_at: item.archived_at ?? null,
+          }];
+        }));
+      });
+  }, [activeTab, user, enfantId]);
+
 
   useEffect(() => {
     if (!enfantId) return;
@@ -927,7 +963,42 @@ export default function OutilsQuestions() {
           <h1 style={{ fontFamily: "Fraunces, serif", fontSize: 28, fontWeight: 700 }} className="text-foreground">À venir</h1>
           <ProfileAvatar />
         </div>
-        {/* Type filter chips */}
+        {/* Tab row */}
+        <div style={{
+          display: "flex",
+          background: "rgba(255,255,255,0.45)",
+          borderRadius: 12,
+          padding: 3,
+          marginBottom: 8,
+        }}>
+          {([
+            { key: "ouvertes" as const, label: "Ouvertes" },
+            { key: "archives" as const, label: "Archives" },
+          ]).map(({ key, label }) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setActiveTab(key)}
+              style={{
+                flex: 1,
+                padding: "6px 0",
+                borderRadius: 10,
+                fontSize: 13,
+                fontWeight: activeTab === key ? 500 : 400,
+                color: activeTab === key ? "#534AB7" : "#9A9490",
+                background: activeTab === key ? "#fff" : "transparent",
+                boxShadow: activeTab === key ? "0 1px 4px rgba(139,116,224,0.15)" : "none",
+                border: "none",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        {/* Type filter chips — only for ouvertes tab */}
+        {activeTab === "ouvertes" && (<>
         <div className="flex gap-2 overflow-x-auto pb-2" style={{ scrollbarWidth: "none" }}>
           {([
             { key: "all" as const, label: "Tout" },
@@ -1089,6 +1160,7 @@ export default function OutilsQuestions() {
             </div>
           )}
         </div>
+        </>)}
       </header>
 
       <main ref={mainRef} className="flex-1 px-4 pb-28 pt-4" onClick={handleMainClick}>
@@ -1101,6 +1173,96 @@ export default function OutilsQuestions() {
             <p className="max-w-[280px] text-sm text-muted-foreground">
               Connectez-vous et sélectionnez un enfant pour retrouver vos questions.
             </p>
+          </div>
+        ) : activeTab === "archives" ? (
+          <div style={{ paddingBottom: 48 }}>
+            {archivedQuestions.length === 0 ? (
+              <div className="flex items-center justify-center py-16">
+                <p style={{ color: "#9A9490", fontSize: 14 }}>Aucune boucle archivée</p>
+              </div>
+            ) : (() => {
+              const monthLabelStyle: CSSProperties = {
+                fontSize: 11,
+                fontWeight: 600,
+                color: "#9A9490",
+                letterSpacing: "0.04em",
+                textTransform: "uppercase" as const,
+                marginTop: 14,
+                marginBottom: 8,
+              };
+
+              // Group by month from archived_at
+              const groups = new Map<string, QuestionItem[]>();
+              for (const q of archivedQuestions) {
+                const d = new Date(q.archived_at!);
+                const key = `${d.getFullYear()}-${String(d.getMonth()).padStart(2, "0")}`;
+                if (!groups.has(key)) groups.set(key, []);
+                groups.get(key)!.push(q);
+              }
+
+              return Array.from(groups.entries()).map(([key, items]) => {
+                const [y, m] = key.split("-");
+                const label = format(new Date(Number(y), Number(m), 1), "MMMM yyyy", { locale: fr }).toUpperCase();
+                return (
+                  <div key={key}>
+                    <p style={monthLabelStyle}>{label}</p>
+                    <div className="relative" style={{ paddingLeft: 44 }}>
+                      <div
+                        className="absolute top-0 bottom-0"
+                        style={{
+                          left: 16,
+                          width: 1.5,
+                          background: "linear-gradient(180deg, rgba(154,148,144,0.2) 0%, rgba(154,148,144,0.1) 100%)",
+                          borderRadius: 2,
+                        }}
+                      />
+                      {items.map((q) => {
+                        const typeBadge = q.type === "rdv" ? "RDV" : q.type === "rappel" ? "Rappel" : "Question";
+                        return (
+                          <div key={q.id} className="relative" style={{ marginBottom: 12, opacity: 0.6 }}>
+                            <div
+                              className="absolute"
+                              style={{
+                                left: -32,
+                                marginTop: 14,
+                                width: 11,
+                                height: 11,
+                                borderRadius: "50%",
+                                background: "rgba(255,255,255,0.7)",
+                                border: "2px solid #9A9490",
+                                zIndex: 1,
+                              }}
+                            />
+                            <div style={{
+                              ...glassCard,
+                              padding: "12px 14px",
+                            }}>
+                              <div className="flex items-center gap-2 mb-1">
+                                <span style={{
+                                  fontSize: 10,
+                                  fontWeight: 500,
+                                  color: "#9A9490",
+                                  background: "rgba(154,148,144,0.1)",
+                                  padding: "2px 8px",
+                                  borderRadius: 8,
+                                }}>{typeBadge}</span>
+                              </div>
+                              <p style={{
+                                fontSize: 14,
+                                fontWeight: 500,
+                                color: "#1E1A1A",
+                                textDecoration: "line-through",
+                                lineHeight: 1.4,
+                              }}>{q.text}</p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              });
+            })()}
           </div>
         ) : (
           <div style={{ paddingBottom: 48 }}>
