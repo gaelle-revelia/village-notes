@@ -46,10 +46,13 @@ const glassHeader: CSSProperties = {
 };
 
 const glassCard: CSSProperties = {
-  background: "rgba(255,255,255,0.85)",
-  border: "1px solid rgba(255,255,255,0.9)",
-  borderRadius: 14,
+  background: "rgba(255,255,255,0.38)",
+  backdropFilter: "blur(16px) saturate(1.6)",
+  WebkitBackdropFilter: "blur(16px) saturate(1.6)",
+  border: "1px solid rgba(255,255,255,0.85)",
+  borderRadius: 16,
   padding: "12px 14px",
+  boxShadow: "0 4px 24px rgba(139,116,224,0.08), 0 1px 4px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9)",
 };
 
 const sectionLabel: CSSProperties = {
