@@ -337,7 +337,7 @@ export default function AVenirDetail() {
         {item.type === "rdv" && (
           <>
             {/* Titre */}
-            <div style={glassCard} className="p-4 space-y-2">
+            <div style={glassCard} className="space-y-2">
               <p style={sectionLabel}>TITRE</p>
               <textarea
                 value={draftText}
@@ -352,7 +352,7 @@ export default function AVenirDetail() {
             </div>
 
             {/* Date */}
-            <div style={glassCard} className="p-4 space-y-2">
+            <div style={glassCard} className="space-y-2">
               <p style={sectionLabel}>DATE</p>
               <MemoDatePicker
                 date={item.due_date ? new Date(item.due_date) : new Date()}
@@ -361,7 +361,7 @@ export default function AVenirDetail() {
             </div>
 
             {/* Professionnel */}
-            <div style={glassCard} className="p-4 space-y-2">
+            <div style={glassCard} className="space-y-2">
               <p style={sectionLabel}>PROFESSIONNEL</p>
               <IntervenantSearchPicker
                 enfantId={enfantId}
@@ -376,7 +376,7 @@ export default function AVenirDetail() {
         {item.type === "rappel" && (
           <>
             {/* Titre */}
-            <div style={glassCard} className="p-4 space-y-2">
+            <div style={glassCard} className="space-y-2">
               <p style={sectionLabel}>TITRE</p>
               <textarea
                 value={draftText}
@@ -391,7 +391,7 @@ export default function AVenirDetail() {
             </div>
 
             {/* Date + approx toggle */}
-            <div style={glassCard} className="p-4 space-y-3">
+            <div style={glassCard} className="space-y-3">
               <p style={sectionLabel}>DATE</p>
               <div className="flex items-center gap-2 mb-2">
                 <button
@@ -425,7 +425,7 @@ export default function AVenirDetail() {
             </div>
 
             {/* Professionnel */}
-            <div style={glassCard} className="p-4 space-y-2">
+            <div style={glassCard} className="space-y-2">
               <p style={sectionLabel}>PROFESSIONNEL</p>
               <IntervenantSearchPicker
                 enfantId={enfantId}
@@ -435,7 +435,7 @@ export default function AVenirDetail() {
             </div>
 
             {/* Précisions */}
-            <div style={glassCard} className="p-4 space-y-2">
+            <div style={glassCard} className="space-y-2">
               <div className="flex items-center justify-between">
                 <p style={sectionLabel}>PRÉCISIONS</p>
                 <MicButton field="precisions" />
@@ -462,7 +462,7 @@ export default function AVenirDetail() {
         {item.type === "question" && (
           <>
             {/* Question */}
-            <div style={glassCard} className="p-4 space-y-2">
+            <div style={glassCard} className="space-y-2">
               <div className="flex items-center justify-between">
                 <p style={sectionLabel}>QUESTION</p>
                 <MicButton field="text" />
@@ -481,7 +481,7 @@ export default function AVenirDetail() {
             </div>
 
             {/* Précisions */}
-            <div style={glassCard} className="p-4 space-y-2">
+            <div style={glassCard} className="space-y-2">
               <div className="flex items-center justify-between">
                 <p style={sectionLabel}>PRÉCISIONS</p>
                 <MicButton field="precisions" />
@@ -503,7 +503,7 @@ export default function AVenirDetail() {
             </div>
 
             {/* Professionnel */}
-            <div style={glassCard} className="p-4 space-y-2">
+            <div style={glassCard} className="space-y-2">
               <p style={sectionLabel}>PROFESSIONNEL</p>
               <IntervenantSearchPicker
                 enfantId={enfantId}
@@ -513,7 +513,7 @@ export default function AVenirDetail() {
             </div>
 
             {/* Réponse reçue */}
-            <div style={glassCard} className="p-4 space-y-2">
+            <div style={glassCard} className="space-y-2">
               <div className="flex items-center justify-between">
                 <p style={sectionLabel}>RÉPONSE REÇUE</p>
                 <MicButton field="answer" />
