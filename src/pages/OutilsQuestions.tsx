@@ -624,7 +624,7 @@ export default function OutilsQuestions() {
       const dayLabel = new Intl.DateTimeFormat("fr-FR", {
         weekday: "long", day: "numeric", month: "long"
       }).format(d);
-      const dayStr = dayLabel.charAt(0).toUpperCase() + dayLabel.slice(1);
+      const dayStr = dayLabel;
       const isUrgent = d <= in7days;
 
       if (question.type === "rappel" && isUrgent) {
