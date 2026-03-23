@@ -364,17 +364,55 @@ export default function NouvelleQuestion() {
       <header className="sticky top-0 z-10 flex items-center gap-3 px-4 py-3" style={glassHeader}>
         <button
           type="button"
-          onClick={() => navigate("/timeline")}
+          onClick={() => navigate("/a-venir")}
           className="text-muted-foreground transition-colors hover:text-foreground"
-          aria-label="Retour à la timeline"
+          aria-label="Retour"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <h1 className="text-xl font-semibold text-card-foreground">Nouvelle question</h1>
+        <h1 className="text-xl font-semibold text-card-foreground">Nouveau</h1>
       </header>
 
       <main className="flex-1 px-4 py-6">
         <div className="mx-auto max-w-[400px] space-y-6">
+          {/* Type selector */}
+          <div className="grid grid-cols-3 gap-3">
+            {([
+              { value: "rdv" as const, emoji: "📅", label: "RDV" },
+              { value: "rappel" as const, emoji: "🔔", label: "Rappel" },
+              { value: "question" as const, emoji: "❓", label: "Question" },
+            ]).map((item) => {
+              const isActive = type === item.value;
+              return (
+                <button
+                  key={item.value}
+                  type="button"
+                  onClick={() => setType(item.value)}
+                  style={{
+                    background: isActive ? "rgba(139,116,224,0.1)" : "rgba(255,255,255,0.52)",
+                    border: isActive ? "1.5px solid #8B74E0" : "1px solid rgba(255,255,255,0.72)",
+                    borderRadius: 14,
+                    padding: "12px 8px",
+                    textAlign: "center",
+                    cursor: "pointer",
+                  }}
+                >
+                  <div style={{ fontSize: 24 }}>{item.emoji}</div>
+                  <div
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 500,
+                      color: isActive ? "#534AB7" : "#9A9490",
+                      marginTop: 4,
+                    }}
+                  >
+                    {item.label}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
           <MemoDatePicker date={questionDate} onDateChange={setQuestionDate} />
 
           <IntervenantSelection
