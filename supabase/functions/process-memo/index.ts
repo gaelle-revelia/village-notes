@@ -223,7 +223,23 @@ async function reformulateQuestionFromTranscription(
   lovableApiKey: string,
   transcription: string,
   prompt: string = QUESTION_REFORMULATION_PROMPT,
+  context?: {
+    childPrenom?: string | null;
+    intervenantsNoms?: string[];
+    lexiqueFormatted?: string | null;
+  },
 ): Promise<{ question: string; precisions: string | null }> {
+  let contextStr = "";
+  if (context?.childPrenom) {
+    contextStr += `\nPrénom de l'enfant : ${context.childPrenom} (orthographe exacte, ne jamais modifier)`;
+  }
+  if (context?.intervenantsNoms?.length) {
+    contextStr += `\nIntervenants du Village : ${context.intervenantsNoms.join(", ")} (orthographes exactes)`;
+  }
+  if (context?.lexiqueFormatted) {
+    contextStr += `\nLexique phonétique :\n${context.lexiqueFormatted}`;
+  }
+
   const reformulationResponse = await fetch(AI_GATEWAY_URL, {
     method: "POST",
     headers: {
@@ -239,7 +255,7 @@ async function reformulateQuestionFromTranscription(
         },
         {
           role: "user",
-          content: `Transcription : ${transcription}`,
+          content: `Transcription : ${transcription}${contextStr}`,
         },
       ],
     }),
@@ -350,7 +366,7 @@ serve(async (req) => {
     const userId = claimsData.claims.sub as string;
 
     const body = await req.json();
-    const { memo_id, mode, text_input, audio_path, boucle_type } = body;
+    const { memo_id, mode, text_input, audio_path, boucle_type, child_id } = body;
 
     if (mode === "transcription_only" || mode === "question_reformulation" || mode === "answer_reformulation") {
       if (!audio_path) {
@@ -369,7 +385,54 @@ serve(async (req) => {
           boucle_type === "rdv" ? RDV_REFORMULATION_PROMPT :
           boucle_type === "rappel" ? RAPPEL_REFORMULATION_PROMPT :
           QUESTION_REFORMULATION_PROMPT;
-        const reformulated = await reformulateQuestionFromTranscription(lovableApiKey, transcription, reformulationPrompt);
+
+        const supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
+
+        let childPrenom: string | null = null;
+        let intervenantsNoms: string[] = [];
+        let lexiqueFormattedCtx: string | null = null;
+
+        if (child_id) {
+          const { data: enfant } = await supabaseClient
+            .from("enfants")
+            .select("prenom")
+            .eq("id", child_id)
+            .single();
+          childPrenom = enfant?.prenom ?? null;
+
+          const { data: intervenants } = await supabaseClient
+            .from("intervenants")
+            .select("nom, specialite")
+            .eq("enfant_id", child_id)
+            .eq("actif", true);
+          intervenantsNoms = (intervenants ?? []).map((i: any) =>
+            i.specialite ? `${i.nom} (${i.specialite})` : i.nom
+          );
+
+          const { data: lexiqueEntries } = await supabaseClient
+            .from("enfant_lexique")
+            .select("mot_transcrit, mot_correct")
+            .eq("enfant_id", child_id);
+
+          if (lexiqueEntries?.length) {
+            const grouped = lexiqueEntries.reduce((acc: Record<string, string[]>, entry: any) => {
+              if (!acc[entry.mot_correct]) acc[entry.mot_correct] = [];
+              acc[entry.mot_correct].push(entry.mot_transcrit);
+              return acc;
+            }, {} as Record<string, string[]>);
+            lexiqueFormattedCtx = Object.entries(grouped)
+              .map(([correct, variants]) =>
+                `"${(variants as string[]).join('", "')}" → "${correct}"`)
+              .join("\n");
+          }
+        }
+
+        const reformulated = await reformulateQuestionFromTranscription(
+          lovableApiKey,
+          transcription,
+          reformulationPrompt,
+          { childPrenom, intervenantsNoms, lexiqueFormatted: lexiqueFormattedCtx },
+        );
         return jsonResponse(reformulated, corsHeaders);
       }
 

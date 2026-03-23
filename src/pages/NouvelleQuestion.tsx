@@ -200,7 +200,7 @@ export default function NouvelleQuestion() {
         if (uploadError) throw uploadError;
 
         const { data, error: fnError } = await supabase.functions.invoke("process-memo", {
-          body: { mode: "question_reformulation", audio_path: audioPath, boucle_type: type },
+          body: { mode: "question_reformulation", audio_path: audioPath, boucle_type: type, child_id: enfantId },
         });
 
         if (fnError) throw fnError;
