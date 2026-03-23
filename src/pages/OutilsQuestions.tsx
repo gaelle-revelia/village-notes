@@ -1174,6 +1174,96 @@ export default function OutilsQuestions() {
               Connectez-vous et sélectionnez un enfant pour retrouver vos questions.
             </p>
           </div>
+        ) : activeTab === "archives" ? (
+          <div style={{ paddingBottom: 48 }}>
+            {archivedQuestions.length === 0 ? (
+              <div className="flex items-center justify-center py-16">
+                <p style={{ color: "#9A9490", fontSize: 14 }}>Aucune boucle archivée</p>
+              </div>
+            ) : (() => {
+              const monthLabelStyle: CSSProperties = {
+                fontSize: 11,
+                fontWeight: 600,
+                color: "#9A9490",
+                letterSpacing: "0.04em",
+                textTransform: "uppercase" as const,
+                marginTop: 14,
+                marginBottom: 8,
+              };
+
+              // Group by month from archived_at
+              const groups = new Map<string, QuestionItem[]>();
+              for (const q of archivedQuestions) {
+                const d = new Date(q.archived_at!);
+                const key = `${d.getFullYear()}-${String(d.getMonth()).padStart(2, "0")}`;
+                if (!groups.has(key)) groups.set(key, []);
+                groups.get(key)!.push(q);
+              }
+
+              return Array.from(groups.entries()).map(([key, items]) => {
+                const [y, m] = key.split("-");
+                const label = format(new Date(Number(y), Number(m), 1), "MMMM yyyy", { locale: fr }).toUpperCase();
+                return (
+                  <div key={key}>
+                    <p style={monthLabelStyle}>{label}</p>
+                    <div className="relative" style={{ paddingLeft: 44 }}>
+                      <div
+                        className="absolute top-0 bottom-0"
+                        style={{
+                          left: 16,
+                          width: 1.5,
+                          background: "linear-gradient(180deg, rgba(154,148,144,0.2) 0%, rgba(154,148,144,0.1) 100%)",
+                          borderRadius: 2,
+                        }}
+                      />
+                      {items.map((q) => {
+                        const typeBadge = q.type === "rdv" ? "RDV" : q.type === "rappel" ? "Rappel" : "Question";
+                        return (
+                          <div key={q.id} className="relative" style={{ marginBottom: 12, opacity: 0.6 }}>
+                            <div
+                              className="absolute"
+                              style={{
+                                left: -32,
+                                marginTop: 14,
+                                width: 11,
+                                height: 11,
+                                borderRadius: "50%",
+                                background: "rgba(255,255,255,0.7)",
+                                border: "2px solid #9A9490",
+                                zIndex: 1,
+                              }}
+                            />
+                            <div style={{
+                              ...glassCard,
+                              padding: "12px 14px",
+                            }}>
+                              <div className="flex items-center gap-2 mb-1">
+                                <span style={{
+                                  fontSize: 10,
+                                  fontWeight: 500,
+                                  color: "#9A9490",
+                                  background: "rgba(154,148,144,0.1)",
+                                  padding: "2px 8px",
+                                  borderRadius: 8,
+                                }}>{typeBadge}</span>
+                              </div>
+                              <p style={{
+                                fontSize: 14,
+                                fontWeight: 500,
+                                color: "#1E1A1A",
+                                textDecoration: "line-through",
+                                lineHeight: 1.4,
+                              }}>{q.text}</p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              });
+            })()}
+          </div>
         ) : (
           <div style={{ paddingBottom: 48 }}>
             {(() => {
