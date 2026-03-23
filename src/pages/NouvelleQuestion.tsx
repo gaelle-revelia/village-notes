@@ -463,7 +463,7 @@ export default function NouvelleQuestion() {
                     {type === "rdv" ? "Dicter le RDV" : type === "rappel" ? "Dicter le rappel" : "Dicter la question"}
                   </div>
                   <div style={{ fontSize: 11, color: "#9A9490" }}>
-                    L'IA remplit le titre et les précisions
+                    The Village structure automatiquement
                   </div>
                 </div>
               )}

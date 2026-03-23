@@ -724,7 +724,7 @@ function SlideMemos() {
             lineHeight: 1.4,
           }}
         >
-          <span style={{ color: "#8B74E0", fontWeight: 500 }}>Résumé IA : </span>
+          <span style={{ color: "#8B74E0", fontWeight: 500 }}>Résumé : </span>
           Belle progression sur le retournement.
         </p>
       </GlassCard>
@@ -1264,7 +1264,7 @@ export default function OnboardingInvite() {
           {
             label: "02 — Les mémos",
             title: "Capturer l'essentiel en quelques secondes",
-            description: "Après une séance, dictez vos observations à voix haute. L'IA structure et résume automatiquement.",
+            description: "Après une séance, dictez vos observations à voix haute. The Village structure et résume automatiquement.",
             illustration: <SlideMemos />,
           },
         ]
