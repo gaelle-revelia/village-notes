@@ -986,7 +986,7 @@ export default function OutilsQuestions() {
                       {items.map((q) => {
                         const typeBadge = q.type === "rdv" ? "RDV" : q.type === "rappel" ? "Rappel" : "Question";
                         return (
-                          <div key={q.id} className="relative" style={{ marginBottom: 12, opacity: 0.6 }}>
+                          <div key={q.id} className="relative cursor-pointer" style={{ marginBottom: 12, opacity: 0.6 }} onClick={() => navigate(`/a-venir/${q.id}`)}>
                             <div
                               className="absolute"
                               style={{
