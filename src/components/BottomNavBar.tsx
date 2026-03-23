@@ -35,7 +35,7 @@ const BottomNavBar = () => {
       }}
     >
       {tabs.map((tab) => {
-        const active = location.pathname === tab.path;
+        const active = location.pathname === tab.path || location.pathname.startsWith(tab.path + "/");
         return (
           <button
             key={tab.path}
