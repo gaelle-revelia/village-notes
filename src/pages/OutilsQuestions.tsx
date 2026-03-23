@@ -413,6 +413,7 @@ export default function OutilsQuestions() {
 
   const filteredQuestions = useMemo(() => {
     return questions.filter((q) => {
+      if (typeFilter !== "all" && q.type !== typeFilter) return false;
       if (statusFilter === "to_ask" && q.answer && q.answer.trim() !== "") return false;
       if (statusFilter === "asked" && (!q.answer || q.answer.trim() === "")) return false;
       if (specFilter) {
@@ -428,7 +429,7 @@ export default function OutilsQuestions() {
       }
       return true;
     });
-  }, [questions, statusFilter, specFilter, searchQuery, intervenantsById]);
+  }, [questions, statusFilter, specFilter, searchQuery, intervenantsById, typeFilter]);
 
   /* ── save helpers ── */
 
