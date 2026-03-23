@@ -16,6 +16,22 @@ const QUESTION_REFORMULATION_PROMPT =
 
 Réponds uniquement en JSON: { "question": "...", "precisions": "..." }`;
 
+const RDV_REFORMULATION_PROMPT =
+  `Tu aides des parents d'enfants en situation de handicap à noter leurs rendez-vous à venir. À partir de cette transcription, formule :
+
+1. Un titre court et direct pour le RDV (max 8 mots, ex: "RDV kiné — bilan motricité" ou "Préparer consultation Dr Mensah")
+2. Si nécessaire, des précisions complémentaires en 1-2 phrases courtes dans les mots du parent
+
+Réponds uniquement en JSON: { "question": "...", "precisions": "..." }`;
+
+const RAPPEL_REFORMULATION_PROMPT =
+  `Tu aides des parents d'enfants en situation de handicap à noter leurs rappels et actions à faire. À partir de cette transcription, formule :
+
+1. Un titre court et direct pour le rappel (max 8 mots, ex: "Relancer hôpital Bordeaux" ou "Envoyer dossier MDPH") — jamais sous forme de question, toujours sous forme d'action
+2. Si nécessaire, des précisions complémentaires en 1-2 phrases courtes dans les mots du parent
+
+Réponds uniquement en JSON: { "question": "...", "precisions": "..." }`;
+
 const ANSWER_REFORMULATION_PROMPT =
   `Tu aides des parents d'enfants en situation de handicap à noter les réponses de leurs professionnels de santé. Reformule cette transcription en une réponse claire et directe, en 1 à 3 phrases courtes. Garde les termes médicaux importants. Réponds uniquement avec le texte reformulé, sans JSON, sans introduction.`;
 
