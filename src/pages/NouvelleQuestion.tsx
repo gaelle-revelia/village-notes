@@ -445,7 +445,7 @@ export default function NouvelleQuestion() {
             })}
           </div>
 
-          <MemoDatePicker date={questionDate} onDateChange={setQuestionDate} />
+          {/* Date field removed — now inside text form */}
 
           <IntervenantSelection
             loadingIntervenants={loadingIntervenants}
