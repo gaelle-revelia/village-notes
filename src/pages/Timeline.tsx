@@ -13,12 +13,12 @@ import { fr } from "date-fns/locale";
 
 type FilterType = "tous" | "rdv" | "activites" | "documents" | "evenements";
 
-const FILTER_PILLS: { key: FilterType; label: string; color: string; bg: string; border: string }[] = [
-  { key: "tous", label: "Tous", color: "#8B74E0", bg: "rgba(139,116,224,0.06)", border: "rgba(139,116,224,0.3)" },
-  { key: "rdv", label: "Rendez-vous", color: "#5CA8D8", bg: "rgba(92,168,216,0.06)", border: "rgba(92,168,216,0.3)" },
-  { key: "activites", label: "Activités", color: "#E8736A", bg: "rgba(232,115,106,0.06)", border: "rgba(232,115,106,0.3)" },
-  { key: "documents", label: "Documents", color: "#44A882", bg: "rgba(68,168,130,0.06)", border: "rgba(68,168,130,0.3)" },
-  { key: "evenements", label: "Événements", color: "#E8A44A", bg: "rgba(232,164,74,0.06)", border: "rgba(232,164,74,0.3)" },
+const FILTER_PILLS: { key: FilterType; label: string }[] = [
+  { key: "tous", label: "Tous" },
+  { key: "rdv", label: "Rendez-vous" },
+  { key: "activites", label: "Activités" },
+  { key: "documents", label: "Documents" },
+  { key: "evenements", label: "Événements" },
 ];
 
 function memoMatchesFilter(type: string | undefined, filter: FilterType): boolean {
