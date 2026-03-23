@@ -105,7 +105,7 @@ export default function VillageProFiche() {
 
       {/* Contact row */}
       <div className="flex gap-2.5 mb-6">
-        {hasTel && (
+        {hasTel ? (
           <a
             href={`tel:${member.telephone!.trim()}`}
             className={`${glassCard} flex-1 flex flex-col items-center gap-1.5 py-3 px-2 text-center`}
@@ -113,8 +113,16 @@ export default function VillageProFiche() {
             <Phone className="w-[18px] h-[18px] text-[#44A882]" />
             <span className="text-xs font-medium text-[#1E1A1A]">Appeler</span>
           </a>
+        ) : (
+          <button
+            onClick={() => navigate(`/village/${member.id}/edit`)}
+            className={`${glassCard} flex-1 flex flex-col items-center gap-1.5 py-3 px-2 text-center`}
+          >
+            <Phone className="w-[18px] h-[18px] text-[#9A9490]" />
+            <span className="text-xs font-medium text-[#9A9490]">Ajouter</span>
+          </button>
         )}
-        {hasEmail && (
+        {hasEmail ? (
           <a
             href={`mailto:${member.email!.trim()}`}
             className={`${glassCard} flex-1 flex flex-col items-center gap-1.5 py-3 px-2 text-center`}
@@ -122,12 +130,20 @@ export default function VillageProFiche() {
             <Mail className="w-[18px] h-[18px] text-[#8B74E0]" />
             <span className="text-xs font-medium text-[#1E1A1A]">Email</span>
           </a>
+        ) : (
+          <button
+            onClick={() => navigate(`/village/${member.id}/edit`)}
+            className={`${glassCard} flex-1 flex flex-col items-center gap-1.5 py-3 px-2 text-center`}
+          >
+            <Mail className="w-[18px] h-[18px] text-[#9A9490]" />
+            <span className="text-xs font-medium text-[#9A9490]">Ajouter</span>
+          </button>
         )}
         <button
           onClick={() => navigate(`/village/${member.id}/edit`)}
           className={`${glassCard} flex-1 flex flex-col items-center gap-1.5 py-3 px-2 text-center`}
         >
-          <Pencil className="w-[18px] h-[18px] text-[#9A9490]" />
+          <Pencil className="w-[18px] h-[18px] text-[#534AB7]" />
           <span className="text-xs font-medium text-[#1E1A1A]">Éditer</span>
         </button>
       </div>
