@@ -308,7 +308,7 @@ export default function OutilsQuestions() {
         .eq("parent_id", user.id)
         .eq("child_id", enfantId)
         .is("archived_at", null)
-        .order("created_at", { ascending: true }),
+        .order("due_date", { ascending: true, nullsFirst: false }),
       supabase
         .from("intervenants")
         .select("id, nom, specialite")
