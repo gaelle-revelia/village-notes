@@ -328,9 +328,20 @@ export default function VillageProFiche() {
               + Nouvelle question
             </button>
           ) : (
-            questionList.map((item, i) =>
-              renderItem(item, "#44A882", i === questionList.length - 1, questionBadge(item))
-            )
+            <>
+              {(questionExpanded ? questionList : questionList.slice(0, 3)).map((item, i, arr) =>
+                renderItem(item, "#44A882", i === arr.length - 1 && (questionExpanded || questionList.length <= 3), questionBadge(item))
+              )}
+              {questionList.length > 3 && (
+                <button
+                  onClick={() => setQuestionExpanded(!questionExpanded)}
+                  className="w-full text-center py-1.5"
+                  style={{ fontSize: 11, color: questionExpanded ? "#9A9490" : "#8B74E0" }}
+                >
+                  {questionExpanded ? "Replier" : `Voir ${questionList.length - 3} de plus`}
+                </button>
+              )}
+            </>
           )}
         </div>
       </div>
