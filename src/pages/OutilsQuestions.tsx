@@ -209,6 +209,7 @@ export default function OutilsQuestions() {
   const [statusFilter, setStatusFilter] = useState<"all" | "to_ask" | "asked">("all");
   const [specFilter, setSpecFilter] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [typeFilter, setTypeFilter] = useState<"all" | "rdv" | "rappel" | "question">("all");
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<string | null>(null);
 
@@ -412,6 +413,7 @@ export default function OutilsQuestions() {
 
   const filteredQuestions = useMemo(() => {
     return questions.filter((q) => {
+      if (typeFilter !== "all" && q.type !== typeFilter) return false;
       if (statusFilter === "to_ask" && q.answer && q.answer.trim() !== "") return false;
       if (statusFilter === "asked" && (!q.answer || q.answer.trim() === "")) return false;
       if (specFilter) {
@@ -427,7 +429,7 @@ export default function OutilsQuestions() {
       }
       return true;
     });
-  }, [questions, statusFilter, specFilter, searchQuery, intervenantsById]);
+  }, [questions, statusFilter, specFilter, searchQuery, intervenantsById, typeFilter]);
 
   /* ── save helpers ── */
 
@@ -925,6 +927,28 @@ export default function OutilsQuestions() {
           <h1 style={{ fontFamily: "Fraunces, serif", fontSize: 28, fontWeight: 700 }} className="text-foreground">À venir</h1>
           <ProfileAvatar />
         </div>
+        {/* Type filter chips */}
+        <div className="flex gap-2 overflow-x-auto pb-2" style={{ scrollbarWidth: "none" }}>
+          {([
+            { key: "all" as const, label: "Tout" },
+            { key: "rdv" as const, label: "Rendez-vous" },
+            { key: "rappel" as const, label: "Rappels" },
+            { key: "question" as const, label: "Questions" },
+          ]).map(({ key, label }) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setTypeFilter(key)}
+              className="px-3.5 py-1.5 rounded-[20px] text-xs font-medium transition-all whitespace-nowrap flex-shrink-0"
+              style={typeFilter === key
+                ? { background: "#8B74E0", color: "#fff", boxShadow: "0 2px 8px rgba(139,116,224,0.25)" }
+                : { background: "rgba(255,255,255,0.52)", border: "1px solid rgba(255,255,255,0.72)", color: "#1E1A1A" }
+              }
+            >
+              {label}
+            </button>
+          ))}
+        </div>
 
         {/* Row 2: filter button + search field */}
         <div className="flex items-center gap-2 pb-2">
@@ -1080,7 +1104,52 @@ export default function OutilsQuestions() {
           </div>
         ) : (
           <div style={{ paddingBottom: 48 }}>
-            {renderQuestionList(filteredQuestions, "Aucune question ne correspond aux filtres.")}
+            {(() => {
+              const today = new Date();
+              const in7days = new Date(today);
+              in7days.setDate(today.getDate() + 7);
+
+              const aTraiter = filteredQuestions.filter(q => q.due_date && new Date(q.due_date) <= in7days);
+              const planifiees = filteredQuestions.filter(q => q.due_date && new Date(q.due_date) > in7days);
+              const sansDate = filteredQuestions.filter(q => !q.due_date);
+
+              if (aTraiter.length === 0 && planifiees.length === 0 && sansDate.length === 0) {
+                return renderQuestionList([], "Aucune question ne correspond aux filtres.");
+              }
+
+              const sectionLabelStyle: CSSProperties = {
+                fontSize: 11,
+                fontWeight: 600,
+                color: "#9A9490",
+                letterSpacing: "0.05em",
+                textTransform: "uppercase" as const,
+                marginTop: 16,
+                marginBottom: 8,
+              };
+
+              return (
+                <>
+                  {aTraiter.length > 0 && (
+                    <>
+                      <p style={sectionLabelStyle}>À traiter</p>
+                      {renderQuestionList(aTraiter, "")}
+                    </>
+                  )}
+                  {planifiees.length > 0 && (
+                    <>
+                      <p style={sectionLabelStyle}>Planifiées</p>
+                      {renderQuestionList(planifiees, "")}
+                    </>
+                  )}
+                  {sansDate.length > 0 && (
+                    <>
+                      <p style={sectionLabelStyle}>Sans date</p>
+                      {renderQuestionList(sansDate, "")}
+                    </>
+                  )}
+                </>
+              );
+            })()}
           </div>
         )}
       </main>
