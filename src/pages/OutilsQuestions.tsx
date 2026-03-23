@@ -927,6 +927,28 @@ export default function OutilsQuestions() {
           <h1 style={{ fontFamily: "Fraunces, serif", fontSize: 28, fontWeight: 700 }} className="text-foreground">À venir</h1>
           <ProfileAvatar />
         </div>
+        {/* Type filter chips */}
+        <div className="flex gap-2 overflow-x-auto pb-2" style={{ scrollbarWidth: "none" }}>
+          {([
+            { key: "all" as const, label: "Tout" },
+            { key: "rdv" as const, label: "Rendez-vous" },
+            { key: "rappel" as const, label: "Rappels" },
+            { key: "question" as const, label: "Questions" },
+          ]).map(({ key, label }) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setTypeFilter(key)}
+              className="px-3.5 py-1.5 rounded-[20px] text-xs font-medium transition-all whitespace-nowrap flex-shrink-0"
+              style={typeFilter === key
+                ? { background: "#8B74E0", color: "#fff", boxShadow: "0 2px 8px rgba(139,116,224,0.25)" }
+                : { background: "rgba(255,255,255,0.52)", border: "1px solid rgba(255,255,255,0.72)", color: "#1E1A1A" }
+              }
+            >
+              {label}
+            </button>
+          ))}
+        </div>
 
         {/* Row 2: filter button + search field */}
         <div className="flex items-center gap-2 pb-2">
