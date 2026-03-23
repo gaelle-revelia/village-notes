@@ -268,7 +268,7 @@ export default function VillageSettings() {
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => navigate("/selena")}
           className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/30 transition"
         >
           <ArrowLeft className="w-5 h-5 text-[#1E1A1A]" />
