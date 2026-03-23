@@ -1032,7 +1032,7 @@ export default function OutilsQuestions() {
                         }}
                       />
                       {items.map((q) => {
-                        const typeBadge = q.type === "rdv" ? "RDV" : q.type === "rappel" ? "Rappel" : "Question";
+                        const meta = getMetaLine(q);
                         return (
                           <div key={q.id} className="relative cursor-pointer" style={{ marginBottom: 12, opacity: 0.6 }} onClick={() => navigate(`/a-venir/${q.id}`)}>
                             <div
@@ -1052,23 +1052,39 @@ export default function OutilsQuestions() {
                               ...glassCard,
                               padding: "12px 14px",
                             }}>
-                              <div className="flex items-center gap-2 mb-1">
-                                <span style={{
-                                  fontSize: 10,
+                              <div className="flex items-start justify-between gap-2">
+                                <p style={{
+                                  fontSize: 14,
                                   fontWeight: 500,
-                                  color: "#9A9490",
-                                  background: "rgba(154,148,144,0.1)",
-                                  padding: "2px 8px",
-                                  borderRadius: 8,
-                                }}>{typeBadge}</span>
+                                  color: "#1E1A1A",
+                                  lineHeight: 1.4,
+                                  flex: 1,
+                                  minWidth: 0,
+                                }}>{q.text}</p>
+                                <span
+                                  className="rounded-full px-2.5 py-0.5 text-[10px] font-medium flex-shrink-0"
+                                  style={{
+                                    background: TYPE_BADGE_CONFIG[q.type].bg,
+                                    color: TYPE_BADGE_CONFIG[q.type].color,
+                                  }}
+                                >
+                                  {TYPE_BADGE_CONFIG[q.type].label}
+                                </span>
                               </div>
                               <p style={{
-                                fontSize: 14,
-                                fontWeight: 500,
-                                color: "#1E1A1A",
-                                textDecoration: "line-through",
-                                lineHeight: 1.4,
-                              }}>{q.text}</p>
+                                fontSize: 12,
+                                color: meta.color,
+                                marginTop: 2,
+                                fontWeight: meta.color === "#E8A44A" ? 500 : 400,
+                              }}>
+                                {meta.text}
+                              </p>
+                              {q.answer && q.answer.trim() !== "" && (
+                                <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 5 }}>
+                                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#8B74E0", flexShrink: 0 }} />
+                                  <span style={{ fontSize: 11, color: "#8B74E0", fontWeight: 500 }}>Réponse enregistrée</span>
+                                </div>
+                              )}
                             </div>
                           </div>
                         );
