@@ -599,6 +599,51 @@ export default function OutilsQuestions() {
 
   /* ─────────────── render question list ─────────────── */
 
+  const getMetaLine = (question: QuestionItem) => {
+    const proName = question.linked_pro_ids[0]
+      ? intervenantsById[question.linked_pro_ids[0]]?.nom
+      : null;
+
+    if (question.due_date) {
+      const d = new Date(question.due_date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const in7days = new Date(today);
+      in7days.setDate(today.getDate() + 7);
+
+      if (question.is_approximate_date) {
+        const label = new Intl.DateTimeFormat("fr-FR", {
+          month: "long", year: "numeric"
+        }).format(d);
+        return {
+          text: label.charAt(0).toUpperCase() + label.slice(1),
+          color: "#9A9490"
+        };
+      }
+
+      const dayLabel = new Intl.DateTimeFormat("fr-FR", {
+        weekday: "short", day: "numeric", month: "long"
+      }).format(d);
+      const dayStr = dayLabel.charAt(0).toUpperCase() + dayLabel.slice(1);
+      const isUrgent = d <= in7days;
+
+      if (question.type === "rappel" && isUrgent) {
+        const text = proName
+          ? `D'ici le ${dayStr} · ${proName}`
+          : `D'ici le ${dayStr}`;
+        return { text, color: "#E8A44A" };
+      }
+
+      const text = proName
+        ? `Le ${dayStr} · ${proName}`
+        : `Le ${dayStr}`;
+      return { text, color: isUrgent ? "#E8A44A" : "#9A9490" };
+    }
+
+    if (proName) return { text: `Pour ${proName}`, color: "#9A9490" };
+    return { text: "Pas de date fixe", color: "#C4C0BC" };
+  };
+
   const renderQuestionList = (items: QuestionItem[], emptyLabel: string) => {
     if (items.length === 0) {
       return (
