@@ -929,7 +929,7 @@ export default function OutilsQuestions() {
           >
             <ArrowLeft size={18} />
           </button>
-          <h1 className="flex-1 text-lg font-semibold text-foreground">Mes questions</h1>
+          <h1 className="flex-1 text-lg font-semibold text-foreground">À venir</h1>
         </div>
 
         {/* Row 2: filter button + search field */}
