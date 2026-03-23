@@ -1,5 +1,5 @@
 import { type CSSProperties, useEffect, useMemo, useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Keyboard, Mic, Search, Square, X } from "lucide-react";
 import { MemoDatePicker } from "@/components/memo/MemoDatePicker";
 import { Button } from "@/components/ui/button";
@@ -118,11 +118,16 @@ function HighlightMatch({ text, query }: { text: string; query: string }) {
 
 export default function NouvelleQuestion() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user, loading: authLoading } = useAuth();
   const { enfantId, loading: enfantLoading } = useEnfantId();
   const { toast } = useToast();
 
-  const [type, setType] = useState<"rdv" | "rappel" | "question">("question");
+  const validTypes = ["rdv", "rappel", "question"] as const;
+  const paramType = searchParams.get("type") as typeof validTypes[number] | null;
+  const [type, setType] = useState<"rdv" | "rappel" | "question">(
+    paramType && validTypes.includes(paramType) ? paramType : "question"
+  );
   const [mode, setMode] = useState<"voice" | "text">("voice");
   const [questionDate, setQuestionDate] = useState(new Date());
   const [question, setQuestion] = useState("");
