@@ -308,7 +308,7 @@ export default function OutilsQuestions() {
         .eq("parent_id", user.id)
         .eq("child_id", enfantId)
         .is("archived_at", null)
-        .order("created_at", { ascending: true }),
+        .order("due_date", { ascending: true, nullsFirst: false }),
       supabase
         .from("intervenants")
         .select("id, nom, specialite")
@@ -676,7 +676,7 @@ export default function OutilsQuestions() {
                       <div className="flex items-center gap-2 flex-shrink-0">
                         {isSaving && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
                         <span style={{ fontSize: 11, color: "#9A9490", whiteSpace: "nowrap" }}>
-                          {formatShortDate(question.created_at)}
+                          {question.due_date ? formatShortDate(question.due_date) : formatShortDate(question.created_at)}
                         </span>
                       </div>
                     </div>
