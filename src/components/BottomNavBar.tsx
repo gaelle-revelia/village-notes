@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { Home, Heart, Wrench, Clock } from "lucide-react";
+import { Home, Heart, Wrench, SunMedium } from "lucide-react";
 import { useEnfantPrenom } from "@/hooks/useEnfantPrenom";
 import { useEnfantId } from "@/hooks/useEnfantId";
 
@@ -12,7 +12,7 @@ const BottomNavBar = () => {
   const allTabs = [
     { icon: Home, label: "Accueil", path: "/timeline" },
     { icon: Heart, label: prenom || "Enfant", path: "/selena" },
-    { icon: Clock, label: "À venir", path: "/a-venir" },
+    { icon: SunMedium, label: "À venir", path: "/a-venir" },
     { icon: Wrench, label: "Outils", path: "/outils" },
   ];
 
