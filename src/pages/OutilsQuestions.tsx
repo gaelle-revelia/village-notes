@@ -1094,7 +1094,7 @@ export default function OutilsQuestions() {
       {/* FAB */}
       <button
         type="button"
-        onClick={() => navigate("/nouvelle-question")}
+        onClick={() => setFabOpen(true)}
         className="fixed z-20 flex items-center justify-center"
         style={{
           bottom: 96,
@@ -1109,6 +1109,49 @@ export default function OutilsQuestions() {
       >
         <Plus size={22} className="text-white" />
       </button>
+
+      <Dialog open={fabOpen} onOpenChange={setFabOpen}>
+        <DialogContent
+          hideClose
+          className="w-[85vw] max-w-md rounded-2xl border-none shadow-xl p-0 gap-0 [&~[data-state]]:bg-black/40"
+          style={{ overflow: "hidden" }}
+        >
+          <DialogHeader className="flex flex-row items-center justify-end px-4 pt-3 pb-0">
+            <DialogTitle className="sr-only">Nouveau</DialogTitle>
+            <button
+              onClick={() => setFabOpen(false)}
+              className="rounded-full p-1 hover:bg-muted transition-colors text-muted-foreground"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </DialogHeader>
+          <nav className="px-2 pb-4 pt-1">
+            {([
+              { icon: <CalendarDays size={18} />, color: "#8B74E0", label: "Rendez-vous", description: "Préparer un RDV à venir", type: "rdv" },
+              { icon: <Bell size={18} />, color: "#E8A44A", label: "Rappel", description: "Ne pas oublier de faire quelque chose", type: "rappel" },
+              { icon: <MessageCircleQuestion size={18} />, color: "#44A882", label: "Question", description: "Ce que je veux demander au pro", type: "question" },
+            ] as const).map((item) => (
+              <button
+                key={item.type}
+                onClick={() => { setFabOpen(false); navigate(`/nouvelle-question?type=${item.type}`); }}
+                className="flex w-full items-center gap-4 rounded-xl px-4 py-3 text-left hover:bg-muted transition-colors"
+              >
+                <div
+                  className="flex items-center justify-center shrink-0"
+                  style={{ width: 32, height: 32, borderRadius: 8, backgroundColor: `${item.color}26`, color: item.color }}
+                >
+                  {item.icon}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <span className="font-semibold text-foreground text-[15px] block">{item.label}</span>
+                  <span className="text-muted-foreground block" style={{ fontSize: 11 }}>{item.description}</span>
+                </div>
+                <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground" />
+              </button>
+            ))}
+          </nav>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
