@@ -998,7 +998,7 @@ export default function OutilsQuestions() {
           ))}
         </div>
         {/* Type filter chips — only for ouvertes tab */}
-        {activeTab === "ouvertes" && (
+        {activeTab === "ouvertes" && (<>
         <div className="flex gap-2 overflow-x-auto pb-2" style={{ scrollbarWidth: "none" }}>
           {([
             { key: "all" as const, label: "Tout" },
