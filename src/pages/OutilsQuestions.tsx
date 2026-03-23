@@ -660,244 +660,12 @@ export default function OutilsQuestions() {
                   ...glassCard,
                   ...(isAsked ? { borderLeft: "3px solid #8B74E0" } : {}),
                 }}
-                onClick={() => !isExpanded && void openCard(question.id)}
-                role={isExpanded ? undefined : "button"}
-                tabIndex={isExpanded ? undefined : 0}
-                onKeyDown={!isExpanded ? (e) => { if (e.key === "Enter") void openCard(question.id); } : undefined}
+                onClick={() => navigate(`/a-venir/${question.id}`)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === "Enter") navigate(`/a-venir/${question.id}`); }}
               >
-                {isExpanded && draft ? (
-                  /* ─── EXPANDED MODE ─── */
-                  <div className="space-y-4" onClick={(e) => e.stopPropagation()}>
-                    {/* question label */}
-                    <div className="flex items-center justify-between">
-                      <label className="text-xs font-medium text-muted-foreground">Question</label>
-                    </div>
-
-                    {/* question text */}
-                    <textarea
-                      value={draft.text}
-                      onChange={(e) => updateDraft(question.id, "text", e.target.value)}
-                      onBlur={() => void flushAndSave(question.id)}
-                      onInput={(e) => { e.currentTarget.style.height = 'auto'; e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px'; }}
-                      ref={(el) => { if (el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; } }}
-                      rows={1}
-                      className="w-full resize-none overflow-hidden rounded-lg px-3 py-2 text-[15px] font-medium text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                      style={glassFieldStyle}
-                      placeholder="Votre question"
-                    />
-
-                    {/* precisions */}
-                    <div className="space-y-1">
-                      <label className="text-xs font-medium text-muted-foreground">Précisions</label>
-                      <textarea
-                        value={draft.precisions}
-                        onChange={(e) => updateDraft(question.id, "precisions", e.target.value)}
-                        onBlur={() => void flushAndSave(question.id)}
-                        onInput={(e) => { e.currentTarget.style.height = 'auto'; e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px'; }}
-                        ref={(el) => { if (el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; } }}
-                        rows={1}
-                        className="w-full resize-none overflow-hidden rounded-lg px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                        style={glassFieldStyle}
-                        placeholder="Contexte complémentaire (optionnel)"
-                      />
-                    </div>
-
-                    {/* intervenants inline picker */}
-                    <div className="space-y-2">
-                      <label className="text-xs font-medium text-muted-foreground">Intervenants</label>
-
-                      {/* selected chips */}
-                      {linkedMembers.length > 0 && (
-                        <div className="flex flex-wrap gap-2">
-                          {linkedMembers.map((member) => {
-                            const palette = getMemberPalette(member.id);
-                            return (
-                              <div
-                                key={member.id}
-                                className="inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-xs"
-                                style={{
-                                  backgroundColor: `hsl(${palette.accent} / 0.14)`,
-                                  borderColor: `hsl(${palette.accent} / 0.32)`,
-                                  color: `hsl(${palette.accent})`,
-                                }}
-                              >
-                                <div
-                                  className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-[9px] font-semibold text-white"
-                                  style={{ background: palette.avatar }}
-                                >
-                                  {member.nom.charAt(0).toUpperCase()}
-                                </div>
-                                <span className="max-w-[100px] truncate font-medium">{member.nom}</span>
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    const next = draft.linked_pro_ids.filter((id) => id !== member.id);
-                                    updateDraft(question.id, "linked_pro_ids", next);
-                                  }}
-                                  className="inline-flex h-4 w-4 items-center justify-center rounded-full transition-colors hover:bg-foreground/5"
-                                  aria-label={`Retirer ${member.nom}`}
-                                >
-                                  <X className="h-3 w-3" />
-                                </button>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
-
-                      {/* search */}
-                      <div className="relative">
-                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                        <input
-                          value={pickerSearch}
-                          onChange={(e) => setPickerSearch(e.target.value)}
-                          placeholder="Nom ou spécialité..."
-                          className="w-full py-2 pl-9 pr-3 text-sm text-foreground outline-none placeholder:text-muted-foreground"
-                          style={searchFieldStyle}
-                        />
-                      </div>
-
-                      {/* results */}
-                      {intervenantsArray.length === 0 ? (
-                        <p className="text-xs text-muted-foreground">Aucun membre enregistré.</p>
-                      ) : pickerSearch.trim() ? (
-                        <div className="space-y-1">
-                          <p className="px-1 text-xs text-muted-foreground">
-                            {filteredIntervenants.length} résultat{filteredIntervenants.length !== 1 ? "s" : ""}
-                          </p>
-                          {filteredIntervenants.map((m) => (
-                            <IntervenantRow
-                              key={m.id}
-                              intervenant={m}
-                              query={pickerSearch}
-                              selected={draft.linked_pro_ids.includes(m.id)}
-                              onToggle={() => {
-                                const next = draft.linked_pro_ids.includes(m.id)
-                                  ? draft.linked_pro_ids.filter((id) => id !== m.id)
-                                  : [...draft.linked_pro_ids, m.id];
-                                updateDraft(question.id, "linked_pro_ids", next);
-                              }}
-                            />
-                          ))}
-                          {filteredIntervenants.length === 0 && (
-                            <p className="py-2 text-center text-xs text-muted-foreground">Aucun résultat</p>
-                          )}
-                        </div>
-                      ) : null}
-                    </div>
-
-                    {/* answer — always visible in edit mode */}
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <label className="text-xs font-medium text-muted-foreground">Réponse reçue</label>
-                        <button
-                          type="button"
-                          onClick={(e) => { e.stopPropagation(); handleAnswerMicTap(question.id); }}
-                          disabled={isAnswerTranscribing || (isAnswerRecording && answerRecordingTargetRef.current !== question.id)}
-                          className="flex items-center justify-center rounded-full transition-all shrink-0"
-                          style={{
-                            width: 36,
-                            height: 36,
-                            background: isAnswerRecording && answerRecordingTargetRef.current === question.id
-                              ? "hsl(var(--rouge-enregistrement, 4 68% 66%))"
-                              : "linear-gradient(135deg, #E8736A, #8B74E0)",
-                            color: "white",
-                            boxShadow: "0 2px 8px rgba(139,116,224,0.3)",
-                            opacity: (isAnswerTranscribing || (isAnswerRecording && answerRecordingTargetRef.current !== question.id)) ? 0.4 : 1,
-                            animation: isAnswerRecording && answerRecordingTargetRef.current === question.id ? "pulse 1.5s ease-in-out infinite" : "none",
-                          }}
-                        >
-                          {isAnswerTranscribing && answerRecordingTargetRef.current === question.id ? (
-                            <Loader2 size={16} className="animate-spin" />
-                          ) : isAnswerRecording && answerRecordingTargetRef.current === question.id ? (
-                            <Square size={14} fill="currentColor" />
-                          ) : (
-                            <Mic size={16} />
-                          )}
-                        </button>
-                        {isAnswerRecording && answerRecordingTargetRef.current === question.id && (
-                          <span className="text-[11px] font-mono text-muted-foreground">
-                            {Math.floor(answerElapsed / 60).toString().padStart(2, "0")}:{(answerElapsed % 60).toString().padStart(2, "0")}
-                          </span>
-                        )}
-                        {isAnswerTranscribing && answerRecordingTargetRef.current === question.id && (
-                          <span className="text-[11px] text-muted-foreground">Transcription...</span>
-                        )}
-                      </div>
-                      {answerVocalError && answerRecordingTargetRef.current === question.id && (
-                        <p className="text-[11px]" style={{ color: "#E8736A" }}>{answerVocalError}</p>
-                      )}
-                      <textarea
-                        ref={(el) => {
-                          if (el) {
-                            el.style.height = "auto";
-                            el.style.height = el.scrollHeight + "px";
-                          }
-                        }}
-                        value={draft.answer}
-                        onChange={(e) => {
-                          updateDraft(question.id, "answer", e.target.value);
-                          e.target.style.height = "auto";
-                          e.target.style.height = e.target.scrollHeight + "px";
-                        }}
-                        onBlur={() => void flushAndSave(question.id)}
-                        rows={2}
-                        className="w-full resize-none rounded-lg px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                        style={glassFieldStyle}
-                        placeholder="Ajouter la réponse reçue..."
-                      />
-                    </div>
-
-                    {/* date */}
-                    {question.asked_at && (
-                      <div className="text-xs text-muted-foreground">
-                        Posée le {formatDate(question.asked_at)}
-                      </div>
-                    )}
-
-                    {isSaving && (
-                      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                    )}
-
-                    {/* Delete */}
-                    {confirmDeleteId === question.id ? (
-                      <div className="flex items-center justify-center gap-3 mt-2" onClick={(e) => e.stopPropagation()}>
-                        <span className="text-muted-foreground" style={{ fontSize: 12 }}>Supprimer définitivement ?</span>
-                        <button
-                          type="button"
-                          className="text-muted-foreground hover:underline"
-                          style={{ fontSize: 12 }}
-                          onClick={() => setConfirmDeleteId(null)}
-                        >
-                          Annuler
-                        </button>
-                        <button
-                          type="button"
-                          className="text-destructive font-medium hover:underline"
-                          style={{ fontSize: 12 }}
-                          onClick={async () => {
-                            await supabase.from("questions").delete().eq("id", question.id);
-                            setQuestions((prev) => prev.filter((q) => q.id !== question.id));
-                            setEditingId(null);
-                            setConfirmDeleteId(null);
-                          }}
-                        >
-                          Supprimer
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        type="button"
-                        className="w-full text-center text-destructive hover:underline mt-2"
-                        style={{ fontSize: 12 }}
-                        onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(question.id); }}
-                      >
-                        Supprimer cette question
-                      </button>
-                    )}
-                  </div>
-                ) : (
-                  /* ─── COLLAPSED MODE ─── */
+                {/* ─── COLLAPSED MODE ─── */}
                   <div className="space-y-2">
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0 flex-1">
@@ -944,7 +712,6 @@ export default function OutilsQuestions() {
                       </div>
                     )}
                   </div>
-                )}
               </article>
             </div>
           );
@@ -1219,7 +986,7 @@ export default function OutilsQuestions() {
                       {items.map((q) => {
                         const typeBadge = q.type === "rdv" ? "RDV" : q.type === "rappel" ? "Rappel" : "Question";
                         return (
-                          <div key={q.id} className="relative" style={{ marginBottom: 12, opacity: 0.6 }}>
+                          <div key={q.id} className="relative cursor-pointer" style={{ marginBottom: 12, opacity: 0.6 }} onClick={() => navigate(`/a-venir/${q.id}`)}>
                             <div
                               className="absolute"
                               style={{

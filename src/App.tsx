@@ -40,6 +40,7 @@ import PlaceholderScreen from "./components/PlaceholderScreen";
 import NotFound from "./pages/NotFound";
 import PolitiqueConfidentialite from "./pages/PolitiqueConfidentialite";
 import Waitlist from "./pages/Waitlist";
+import AVenirDetail from "./pages/AVenirDetail";
 
 const queryClient = new QueryClient();
 
@@ -67,6 +68,7 @@ const AppRoutes = () => {
       <Route path="/outils/coherence" element={<OutilsCoherence />} />
       <Route path="/explorer" element={<ExplorerScreen />} />
       <Route path="/a-venir" element={<OutilsQuestions />} />
+      <Route path="/a-venir/:id" element={<AVenirDetail />} />
       <Route path="/onboarding" element={<Onboarding />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/record" element={<Navigate to="/nouveau-memo-vocal" replace />} />
