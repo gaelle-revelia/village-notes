@@ -322,7 +322,7 @@ export default function VillageProFiche() {
           </div>
           {questionList.length === 0 ? (
             <button
-              onClick={() => navigate(`/a-venir/nouvelle?type=question&pro_id=${member.id}`)}
+              onClick={() => navigate(`/nouvelle-question?type=question&pro_id=${member.id}`)}
               className="w-full text-center text-sm text-[#8B74E0] font-medium py-2"
             >
               + Nouvelle question
