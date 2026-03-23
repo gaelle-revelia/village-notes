@@ -752,11 +752,10 @@ export default function OutilsQuestions() {
                       );
                     })()}
 
-                    {/* Answer indicator */}
-                    {question.answer && (
-                      <div className="flex items-center gap-1.5 pt-1">
-                        <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#7F77DD" }} />
-                        <span style={{ fontSize: 11, fontWeight: 500, color: "#534AB7" }}>Réponse enregistrée</span>
+                    {question.answer && question.answer.trim() !== "" && (
+                      <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 5 }}>
+                        <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#8B74E0", flexShrink: 0 }} />
+                        <span style={{ fontSize: 11, color: "#8B74E0", fontWeight: 500 }}>Réponse enregistrée</span>
                       </div>
                     )}
                   </div>
