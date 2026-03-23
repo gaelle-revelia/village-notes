@@ -41,6 +41,7 @@ import NotFound from "./pages/NotFound";
 import PolitiqueConfidentialite from "./pages/PolitiqueConfidentialite";
 import Waitlist from "./pages/Waitlist";
 import AVenirDetail from "./pages/AVenirDetail";
+import VillageProFiche from "./pages/VillageProFiche";
 
 const queryClient = new QueryClient();
 
@@ -80,6 +81,7 @@ const AppRoutes = () => {
       <Route path="/memo-result/:id" element={<MemoResult />} />
       <Route path="/profil" element={<ProfileSettings />} />
       <Route path="/village" element={<VillageSettings />} />
+      <Route path="/village/:id" element={<VillageProFiche />} />
       <Route path="/enfant" element={<ChildProfile />} />
       <Route path="/parametres" element={<AppSettings />} />
       <Route path="/onboarding-invite" element={<OnboardingInvite />} />
