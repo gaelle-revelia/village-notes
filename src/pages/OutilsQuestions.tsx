@@ -1113,6 +1113,7 @@ export default function OutilsQuestions() {
       <Dialog open={fabOpen} onOpenChange={setFabOpen}>
         <DialogContent
           hideClose
+          aria-describedby={undefined}
           className="w-[85vw] max-w-md rounded-2xl border-none shadow-xl p-0 gap-0 [&~[data-state]]:bg-black/40"
           style={{ overflow: "hidden" }}
         >
