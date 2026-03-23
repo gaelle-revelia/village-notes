@@ -405,6 +405,7 @@ export default function NouvelleQuestion() {
             </p>
           ) : (
             <div
+              onClick={!isTranscribing ? (isRecording ? handleStopRecording : handleStartRecording) : undefined}
               style={{
                 background: isRecording
                   ? "rgba(232,115,106,0.15)"
@@ -417,6 +418,7 @@ export default function NouvelleQuestion() {
                 display: "flex",
                 alignItems: "center",
                 gap: 10,
+                cursor: isTranscribing ? "wait" : "pointer",
               }}
             >
               <button
