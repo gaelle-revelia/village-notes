@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Phone, Mail, Pencil, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { getAvatarGradient } from "@/lib/avatar";
 
 type Intervenant = {
   id: string;
