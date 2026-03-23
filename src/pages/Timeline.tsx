@@ -250,6 +250,7 @@ const Timeline = () => {
     <div className="flex min-h-screen flex-col">
       {/* Header */}
       <header
+        ref={headerRef}
         className="sticky top-0 z-10 px-4 space-y-3"
         style={{
           paddingTop: 20,
