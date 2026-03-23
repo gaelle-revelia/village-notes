@@ -78,6 +78,7 @@ export default function VillageSettings() {
   const [members, setMembers] = useState<Intervenant[]>([]);
   const [loading, setLoading] = useState(true);
   const [pendingInvites, setPendingInvites] = useState<Record<string, boolean>>({});
+  const [openCounts, setOpenCounts] = useState<Record<string, number>>({});
 
   // Add dialog
   const [addOpen, setAddOpen] = useState(false);
