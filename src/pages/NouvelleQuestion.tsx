@@ -118,11 +118,16 @@ function HighlightMatch({ text, query }: { text: string; query: string }) {
 
 export default function NouvelleQuestion() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user, loading: authLoading } = useAuth();
   const { enfantId, loading: enfantLoading } = useEnfantId();
   const { toast } = useToast();
 
-  const [type, setType] = useState<"rdv" | "rappel" | "question">("question");
+  const validTypes = ["rdv", "rappel", "question"] as const;
+  const paramType = searchParams.get("type") as typeof validTypes[number] | null;
+  const [type, setType] = useState<"rdv" | "rappel" | "question">(
+    paramType && validTypes.includes(paramType) ? paramType : "question"
+  );
   const [mode, setMode] = useState<"voice" | "text">("voice");
   const [questionDate, setQuestionDate] = useState(new Date());
   const [question, setQuestion] = useState("");
