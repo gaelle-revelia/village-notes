@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Phone, Mail, Pencil } from "lucide-react";
+import { ArrowLeft, Phone, Mail, Pencil, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 type Intervenant = {
@@ -12,6 +12,15 @@ type Intervenant = {
   email: string | null;
   structure: string | null;
   notes: string | null;
+};
+
+type QuestionRow = {
+  id: string;
+  text: string;
+  type: string;
+  due_date: string | null;
+  archived_at: string | null;
+  answer: string | null;
 };
 
 function getAvatarGradient(specialite: string | null, type: string): string {
@@ -32,14 +41,31 @@ function getAvatarGradient(specialite: string | null, type: string): string {
 const glassCard =
   "bg-[rgba(255,255,255,0.52)] backdrop-blur-[16px] backdrop-saturate-[1.6] border border-[rgba(255,255,255,0.72)] rounded-2xl shadow-[0_4px_16px_rgba(0,0,0,0.07),0_1px_3px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.8)]";
 
+function formatShortDate(dateStr: string): string {
+  const d = new Date(dateStr + "T00:00:00");
+  return d.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+}
+
+function isWithin3Days(dateStr: string): boolean {
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  const d = new Date(dateStr + "T00:00:00");
+  const diff = d.getTime() - now.getTime();
+  return diff >= 0 && diff <= 3 * 24 * 60 * 60 * 1000;
+}
+
 export default function VillageProFiche() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const [member, setMember] = useState<Intervenant | null>(null);
   const [loading, setLoading] = useState(true);
+  const [rdvList, setRdvList] = useState<QuestionRow[]>([]);
+  const [questionList, setQuestionList] = useState<QuestionRow[]>([]);
 
   useEffect(() => {
     if (!id) return;
+
+    // Fetch member
     supabase
       .from("intervenants")
       .select("id, nom, specialite, type, telephone, email, structure, notes")
@@ -48,6 +74,19 @@ export default function VillageProFiche() {
       .then(({ data }) => {
         setMember(data ?? null);
         setLoading(false);
+      });
+
+    // Fetch questions linked to this pro
+    supabase
+      .from("questions")
+      .select("id, text, type, due_date, archived_at, answer")
+      .contains("linked_pro_ids", [id])
+      .order("archived_at", { ascending: true, nullsFirst: true })
+      .order("due_date", { ascending: true, nullsFirst: false })
+      .then(({ data }) => {
+        const rows = (data ?? []) as QuestionRow[];
+        setRdvList(rows.filter((r) => r.type === "rdv"));
+        setQuestionList(rows.filter((r) => r.type === "question" || r.type === "rappel"));
       });
   }, [id]);
 
@@ -72,6 +111,82 @@ export default function VillageProFiche() {
 
   const hasTel = !!member.telephone?.trim();
   const hasEmail = !!member.email?.trim();
+
+  const renderItem = (
+    item: QuestionRow,
+    dotColor: string,
+    isLast: boolean,
+    badgeNode: React.ReactNode
+  ) => {
+    const isArchived = !!item.archived_at;
+    return (
+      <button
+        key={item.id}
+        onClick={() => navigate(`/a-venir/${item.id}`)}
+        className="flex items-center gap-2.5 py-2 w-full text-left"
+        style={!isLast ? { borderBottom: "1px solid rgba(139,116,224,0.07)" } : undefined}
+      >
+        <div
+          className="shrink-0"
+          style={{
+            width: 8,
+            height: 8,
+            borderRadius: "50%",
+            background: isArchived ? "transparent" : dotColor,
+            border: isArchived ? "2px solid #C4C0BC" : "none",
+          }}
+        />
+        <span
+          className="flex-1 text-sm min-w-0 truncate"
+          style={{
+            color: isArchived ? "#9A9490" : "#1E1A1A",
+            textDecoration: isArchived ? "line-through" : "none",
+          }}
+        >
+          {item.text}
+        </span>
+        {item.due_date && (
+          <span className="shrink-0 text-[11px] text-[#9A9490]">
+            {formatShortDate(item.due_date)}
+          </span>
+        )}
+        {badgeNode}
+      </button>
+    );
+  };
+
+  const rdvBadge = (item: QuestionRow) => {
+    if (item.archived_at) {
+      return (
+        <span className="shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded-[5px]" style={{ background: "#F1EFE8", color: "#888780" }}>
+          Fait
+        </span>
+      );
+    }
+    if (item.due_date && isWithin3Days(item.due_date)) {
+      return (
+        <span className="shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded-[5px]" style={{ background: "#FAEEDA", color: "#854F0B" }}>
+          Bientôt
+        </span>
+      );
+    }
+    return null;
+  };
+
+  const questionBadge = (item: QuestionRow) => {
+    if (item.archived_at) {
+      return (
+        <span className="shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded-[5px]" style={{ background: "#F1EFE8", color: "#888780" }}>
+          Réponse
+        </span>
+      );
+    }
+    return (
+      <span className="shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded-[5px]" style={{ background: "#E1F5EE", color: "#0F6E56" }}>
+        Ouverte
+      </span>
+    );
+  };
 
   return (
     <div className="min-h-screen px-4 pt-4 pb-24">
@@ -148,20 +263,62 @@ export default function VillageProFiche() {
         </button>
       </div>
 
-      {/* Placeholder sections */}
+      {/* Sections */}
       <div className="flex flex-col gap-3">
+        {/* Rendez-vous */}
         <div className={`${glassCard} px-4 py-4`}>
-          <h2 className="font-['Fraunces'] text-base font-semibold text-[#1E1A1A] mb-1">
-            Rendez-vous
-          </h2>
-          <p className="text-sm text-[#9A9490]">Bientôt disponible</p>
+          <div className="flex items-center justify-between mb-2.5">
+            <span className="text-[11px] font-semibold text-[#9A9490] uppercase tracking-wide">
+              Rendez-vous
+            </span>
+            <button
+              onClick={() => navigate(`/a-venir/nouvelle?type=rdv&pro_id=${member.id}`)}
+              className="flex items-center gap-1 text-[11px] font-medium text-[#8B74E0]"
+            >
+              <Plus className="w-3 h-3" />
+              Nouveau
+            </button>
+          </div>
+          {rdvList.length === 0 ? (
+            <button
+              onClick={() => navigate(`/a-venir/nouvelle?type=rdv&pro_id=${member.id}`)}
+              className="w-full text-center text-sm text-[#8B74E0] font-medium py-2"
+            >
+              + Nouveau RDV
+            </button>
+          ) : (
+            rdvList.map((item, i) =>
+              renderItem(item, "#8B74E0", i === rdvList.length - 1, rdvBadge(item))
+            )
+          )}
         </div>
 
+        {/* Questions */}
         <div className={`${glassCard} px-4 py-4`}>
-          <h2 className="font-['Fraunces'] text-base font-semibold text-[#1E1A1A] mb-1">
-            Questions
-          </h2>
-          <p className="text-sm text-[#9A9490]">Bientôt disponible</p>
+          <div className="flex items-center justify-between mb-2.5">
+            <span className="text-[11px] font-semibold text-[#9A9490] uppercase tracking-wide">
+              Questions
+            </span>
+            <button
+              onClick={() => navigate(`/a-venir/nouvelle?type=question&pro_id=${member.id}`)}
+              className="flex items-center gap-1 text-[11px] font-medium text-[#8B74E0]"
+            >
+              <Plus className="w-3 h-3" />
+              Nouvelle
+            </button>
+          </div>
+          {questionList.length === 0 ? (
+            <button
+              onClick={() => navigate(`/a-venir/nouvelle?type=question&pro_id=${member.id}`)}
+              className="w-full text-center text-sm text-[#8B74E0] font-medium py-2"
+            >
+              + Nouvelle question
+            </button>
+          ) : (
+            questionList.map((item, i) =>
+              renderItem(item, "#44A882", i === questionList.length - 1, questionBadge(item))
+            )
+          )}
         </div>
       </div>
     </div>
