@@ -338,8 +338,18 @@ export default function NouvelleQuestion() {
     const trimmedQuestion = question.trim();
     const trimmedPrecisions = precisions.trim();
     if (!trimmedQuestion || !user || !enfantId) return;
+    if (type === "rdv" && !dueDate) return;
 
     setSubmitting(true);
+
+    const computedDueDate =
+      type === "question"
+        ? null
+        : isApproximate && type === "rappel"
+          ? `${approxYear}-${String(approxMonth + 1).padStart(2, "0")}-01`
+          : dueDate
+            ? format(dueDate, "yyyy-MM-dd")
+            : null;
 
     const { error: insertError } = await supabase.from("questions").insert({
       parent_id: user.id,
@@ -348,13 +358,17 @@ export default function NouvelleQuestion() {
       precisions: trimmedPrecisions || null,
       linked_pro_ids: selectedIds,
       status: "to_ask",
+      type,
+      due_date: computedDueDate,
+      is_approximate_date: type === "rappel" && isApproximate,
+      archived_at: null,
     });
 
     setSubmitting(false);
 
     if (insertError) {
       toast({
-        title: "Impossible d'ajouter la question",
+        title: "Impossible d'ajouter",
         description: "Réessayez dans un instant.",
         variant: "destructive",
       });
@@ -362,10 +376,9 @@ export default function NouvelleQuestion() {
     }
 
     toast({
-      title: "Question ajoutée",
-      description: "Votre question a bien été enregistrée.",
+      title: type === "rdv" ? "RDV ajouté" : type === "rappel" ? "Rappel ajouté" : "Question ajoutée",
     });
-    navigate("/outils");
+    navigate("/a-venir");
   };
 
   if (authLoading || enfantLoading) {
