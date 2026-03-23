@@ -67,6 +67,8 @@ const answerBlockStyle: CSSProperties = {
 
 type QuestionStatus = "to_ask" | "asked";
 
+type QuestionType = "rdv" | "rappel" | "question";
+
 type QuestionItem = {
   id: string;
   text: string;
@@ -76,6 +78,11 @@ type QuestionItem = {
   answer: string | null;
   created_at: string;
   asked_at: string | null;
+  type: QuestionType;
+  due_date: string | null;
+  is_approximate_date: boolean;
+  linked_rdv_id: string | null;
+  archived_at: string | null;
 };
 
 type Member = {
