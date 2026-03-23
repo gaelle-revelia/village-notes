@@ -364,7 +364,11 @@ serve(async (req) => {
       }
 
       if (mode === "question_reformulation") {
-        const reformulated = await reformulateQuestionFromTranscription(lovableApiKey, transcription);
+        const reformulationPrompt =
+          boucle_type === "rdv" ? RDV_REFORMULATION_PROMPT :
+          boucle_type === "rappel" ? RAPPEL_REFORMULATION_PROMPT :
+          QUESTION_REFORMULATION_PROMPT;
+        const reformulated = await reformulateQuestionFromTranscription(lovableApiKey, transcription, reformulationPrompt);
         return jsonResponse(reformulated, corsHeaders);
       }
 
