@@ -996,38 +996,27 @@ export default function OutilsQuestions() {
                 return (
                   <div key={key}>
                     <p style={monthLabelStyle}>{label}</p>
-                    <div className="relative" style={{ paddingLeft: 44 }}>
-                      <div
-                        className="absolute top-0 bottom-0"
-                        style={{
-                          left: 16,
-                          width: 1.5,
-                          background: "linear-gradient(180deg, rgba(154,148,144,0.2) 0%, rgba(154,148,144,0.1) 100%)",
-                          borderRadius: 2,
-                        }}
-                      />
+                    <div>
                       {items.map((q) => {
                         const meta = getMetaLine(q);
                         return (
-                          <div key={q.id} className="relative cursor-pointer" style={{ marginBottom: 12, opacity: 0.6 }} onClick={() => navigate(`/a-venir/${q.id}`)}>
-                            <div
-                              className="absolute"
-                              style={{
-                                left: -32,
-                                marginTop: 14,
-                                width: 11,
-                                height: 11,
-                                borderRadius: "50%",
-                                background: "rgba(255,255,255,0.7)",
-                                border: "2px solid #9A9490",
-                                zIndex: 1,
-                              }}
-                            />
+                          <div key={q.id} className="cursor-pointer" style={{ marginBottom: 12, opacity: 0.6 }} onClick={() => navigate(`/a-venir/${q.id}`)}>
                             <div style={{
                               ...glassCard,
                               padding: "12px 14px",
                             }}>
-                              <div className="flex items-start justify-between gap-2">
+                              <div className="flex items-start gap-2">
+                                <div
+                                  style={{
+                                    width: 8,
+                                    height: 8,
+                                    borderRadius: "50%",
+                                    flexShrink: 0,
+                                    marginTop: 3,
+                                    background: "transparent",
+                                    border: "2px solid #C4C0BC",
+                                  }}
+                                />
                                 <p style={{
                                   fontSize: 14,
                                   fontWeight: 500,
