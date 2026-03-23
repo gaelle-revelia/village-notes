@@ -132,7 +132,7 @@ export default function NouvelleQuestion() {
   const [type, setType] = useState<"rdv" | "rappel" | "question">(
     paramType && validTypes.includes(paramType) ? paramType : "question"
   );
-  const [mode, setMode] = useState<"voice" | "text">("voice");
+  const [mode, setMode] = useState<"voice" | "text">(type === "question" ? "voice" : "text");
   const [questionDate, setQuestionDate] = useState(new Date());
   const [question, setQuestion] = useState("");
   const [precisions, setPrecisions] = useState("");
