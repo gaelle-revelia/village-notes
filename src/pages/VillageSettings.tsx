@@ -402,7 +402,7 @@ export default function VillageSettings() {
                     whiteSpace: "nowrap",
                   }}
                 >
-                  {openCounts[m.id] === 1 ? "1 ouverte" : `${openCounts[m.id]} ouvertes`}
+                  {`${openCounts[m.id]} en cours`}
                 </span>
               )}
               <ChevronRight className="w-4 h-4 text-[#9A9490] shrink-0" />
