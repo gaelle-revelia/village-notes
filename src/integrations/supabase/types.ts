@@ -461,42 +461,57 @@ export type Database = {
       questions: {
         Row: {
           answer: string | null
+          archived_at: string | null
           asked_at: string | null
           child_id: string
           created_at: string
+          due_date: string | null
           id: string
+          is_approximate_date: boolean
           linked_pro_ids: string[]
+          linked_rdv_id: string | null
           parent_id: string
           precisions: string | null
           show_in_timeline: boolean
           status: string
           text: string
+          type: string
         }
         Insert: {
           answer?: string | null
+          archived_at?: string | null
           asked_at?: string | null
           child_id: string
           created_at?: string
+          due_date?: string | null
           id?: string
+          is_approximate_date?: boolean
           linked_pro_ids?: string[]
+          linked_rdv_id?: string | null
           parent_id: string
           precisions?: string | null
           show_in_timeline?: boolean
           status?: string
           text: string
+          type?: string
         }
         Update: {
           answer?: string | null
+          archived_at?: string | null
           asked_at?: string | null
           child_id?: string
           created_at?: string
+          due_date?: string | null
           id?: string
+          is_approximate_date?: boolean
           linked_pro_ids?: string[]
+          linked_rdv_id?: string | null
           parent_id?: string
           precisions?: string | null
           show_in_timeline?: boolean
           status?: string
           text?: string
+          type?: string
         }
         Relationships: [
           {
@@ -504,6 +519,13 @@ export type Database = {
             columns: ["child_id"]
             isOneToOne: false
             referencedRelation: "enfants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "questions_linked_rdv_id_fkey"
+            columns: ["linked_rdv_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
             referencedColumns: ["id"]
           },
         ]
