@@ -168,7 +168,7 @@ export function IntervenantSearchPicker({ enfantId, value, onChange }: Intervena
         <input
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder={selectedIntervenant ? "Changer d'intervenant…" : "Nom ou spécialité…"}
+          placeholder={selectedIntervenant ? "Ajouter un intervenant…" : "Nom ou spécialité…"}
           className="w-full pl-9 pr-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none"
           style={{
             background: "rgba(255,255,255,0.45)",
