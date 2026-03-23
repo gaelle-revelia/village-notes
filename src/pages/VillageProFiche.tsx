@@ -61,6 +61,8 @@ export default function VillageProFiche() {
   const [loading, setLoading] = useState(true);
   const [rdvList, setRdvList] = useState<QuestionRow[]>([]);
   const [questionList, setQuestionList] = useState<QuestionRow[]>([]);
+  const [rdvExpanded, setRdvExpanded] = useState(false);
+  const [questionExpanded, setQuestionExpanded] = useState(false);
 
   useEffect(() => {
     if (!id) return;
