@@ -128,6 +128,21 @@ export default function VillageSettings() {
       map[inv.email.toLowerCase()] = true;
     });
     setPendingInvites(map);
+
+    // Fetch open questions to count per pro
+    const { data: openQuestions } = await supabase
+      .from("questions")
+      .select("id, linked_pro_ids")
+      .eq("child_id", enfantId)
+      .is("archived_at", null);
+    const counts: Record<string, number> = {};
+    (openQuestions ?? []).forEach((q: any) => {
+      const ids: string[] = q.linked_pro_ids ?? [];
+      ids.forEach((pid: string) => {
+        counts[pid] = (counts[pid] || 0) + 1;
+      });
+    });
+    setOpenCounts(counts);
   };
 
   useEffect(() => {
