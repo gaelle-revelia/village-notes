@@ -86,32 +86,7 @@ function getDomainColor(tag: string): string {
 }
 
 // --- Intervenant avatar system ---
-const SPECIALITE_AVATARS: Record<string, {icon: typeof Activity;gradient: string;}> = {
-  kiné: { icon: Activity, gradient: "linear-gradient(135deg, #E8736A, #E8845A)" },
-  kinésithérapeute: { icon: Activity, gradient: "linear-gradient(135deg, #E8736A, #E8845A)" },
-  psychomotric: { icon: Brain, gradient: "linear-gradient(135deg, #8B74E0, #5CA8D8)" },
-  ergothérapeute: { icon: Hand, gradient: "linear-gradient(135deg, #44A882, #4E96C8)" },
-  ergo: { icon: Hand, gradient: "linear-gradient(135deg, #44A882, #4E96C8)" },
-  parent: { icon: Heart, gradient: "linear-gradient(135deg, #E8736A, #C85A8A)" },
-  famille: { icon: Heart, gradient: "linear-gradient(135deg, #E8736A, #C85A8A)" },
-  papa: { icon: Heart, gradient: "linear-gradient(135deg, #E8736A, #C85A8A)" },
-  maman: { icon: Heart, gradient: "linear-gradient(135deg, #E8736A, #C85A8A)" },
-  "grand-parents": { icon: Heart, gradient: "linear-gradient(135deg, #E8736A, #C85A8A)" },
-  parrain: { icon: Heart, gradient: "linear-gradient(135deg, #E8736A, #C85A8A)" },
-  marraine: { icon: Heart, gradient: "linear-gradient(135deg, #E8736A, #C85A8A)" },
-  médecin: { icon: Stethoscope, gradient: "linear-gradient(135deg, #8A9BAE, #6B7F94)" },
-  mpr: { icon: Stethoscope, gradient: "linear-gradient(135deg, #8A9BAE, #6B7F94)" },
-  orthophoniste: { icon: MessageCircle, gradient: "linear-gradient(135deg, #44A882, #4E96C8)" },
-  piscine: { icon: Waves, gradient: "linear-gradient(135deg, #44A882, #4E96C8)" }
-};
-
-function getSpecialiteAvatar(specialite: string | null): {icon: typeof Activity;gradient: string;} {
-  const s = (specialite || "").toLowerCase();
-  for (const [key, val] of Object.entries(SPECIALITE_AVATARS)) {
-    if (s.includes(key)) return val;
-  }
-  return { icon: User, gradient: "linear-gradient(135deg, #8A9BAE, #6B7F94)" };
-}
+// getSpecialiteAvatar imported from @/lib/avatar
 
 // --- Styles ---
 const glassCard: React.CSSProperties = {
