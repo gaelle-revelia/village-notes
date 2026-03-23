@@ -68,6 +68,7 @@ const AppRoutes = () => {
       <Route path="/outils/coherence" element={<OutilsCoherence />} />
       <Route path="/explorer" element={<ExplorerScreen />} />
       <Route path="/a-venir" element={<OutilsQuestions />} />
+      <Route path="/a-venir/:id" element={<AVenirDetail />} />
       <Route path="/onboarding" element={<Onboarding />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/record" element={<Navigate to="/nouveau-memo-vocal" replace />} />
