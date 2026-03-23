@@ -1176,7 +1176,7 @@ const MemoResult = () => {
                     <button
                       onClick={() => {
                         if (signedFileUrl) {
-                          console.log("[Document] Opening signed URL:", signedFileUrl);
+                          
                           const opened = window.open(signedFileUrl, '_blank', 'noopener,noreferrer');
                           if (!opened) {
                             fetch(signedFileUrl).
