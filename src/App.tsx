@@ -40,6 +40,7 @@ import PlaceholderScreen from "./components/PlaceholderScreen";
 import NotFound from "./pages/NotFound";
 import PolitiqueConfidentialite from "./pages/PolitiqueConfidentialite";
 import Waitlist from "./pages/Waitlist";
+import AVenirDetail from "./pages/AVenirDetail";
 
 const queryClient = new QueryClient();
 

@@ -660,10 +660,10 @@ export default function OutilsQuestions() {
                   ...glassCard,
                   ...(isAsked ? { borderLeft: "3px solid #8B74E0" } : {}),
                 }}
-                onClick={() => !isExpanded && void openCard(question.id)}
-                role={isExpanded ? undefined : "button"}
-                tabIndex={isExpanded ? undefined : 0}
-                onKeyDown={!isExpanded ? (e) => { if (e.key === "Enter") void openCard(question.id); } : undefined}
+                onClick={() => navigate(`/a-venir/${question.id}`)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === "Enter") navigate(`/a-venir/${question.id}`); }}
               >
                 {isExpanded && draft ? (
                   /* ─── EXPANDED MODE ─── */
