@@ -223,7 +223,23 @@ async function reformulateQuestionFromTranscription(
   lovableApiKey: string,
   transcription: string,
   prompt: string = QUESTION_REFORMULATION_PROMPT,
+  context?: {
+    childPrenom?: string | null;
+    intervenantsNoms?: string[];
+    lexiqueFormatted?: string | null;
+  },
 ): Promise<{ question: string; precisions: string | null }> {
+  let contextStr = "";
+  if (context?.childPrenom) {
+    contextStr += `\nPrénom de l'enfant : ${context.childPrenom} (orthographe exacte, ne jamais modifier)`;
+  }
+  if (context?.intervenantsNoms?.length) {
+    contextStr += `\nIntervenants du Village : ${context.intervenantsNoms.join(", ")} (orthographes exactes)`;
+  }
+  if (context?.lexiqueFormatted) {
+    contextStr += `\nLexique phonétique :\n${context.lexiqueFormatted}`;
+  }
+
   const reformulationResponse = await fetch(AI_GATEWAY_URL, {
     method: "POST",
     headers: {
@@ -239,7 +255,7 @@ async function reformulateQuestionFromTranscription(
         },
         {
           role: "user",
-          content: `Transcription : ${transcription}`,
+          content: `Transcription : ${transcription}${contextStr}`,
         },
       ],
     }),
