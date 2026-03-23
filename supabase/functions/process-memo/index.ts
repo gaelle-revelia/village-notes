@@ -222,6 +222,7 @@ async function transcribeTempAudio(
 async function reformulateQuestionFromTranscription(
   lovableApiKey: string,
   transcription: string,
+  prompt: string = QUESTION_REFORMULATION_PROMPT,
 ): Promise<{ question: string; precisions: string | null }> {
   const reformulationResponse = await fetch(AI_GATEWAY_URL, {
     method: "POST",
@@ -234,7 +235,7 @@ async function reformulateQuestionFromTranscription(
       messages: [
         {
           role: "system",
-          content: QUESTION_REFORMULATION_PROMPT,
+          content: prompt,
         },
         {
           role: "user",
