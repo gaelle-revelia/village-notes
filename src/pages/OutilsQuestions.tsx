@@ -333,6 +333,11 @@ export default function OutilsQuestions() {
           answer: item.answer,
           created_at: item.created_at,
           asked_at: item.asked_at,
+          type: (item.type as QuestionType) ?? "question",
+          due_date: item.due_date ?? null,
+          is_approximate_date: item.is_approximate_date ?? false,
+          linked_rdv_id: item.linked_rdv_id ?? null,
+          archived_at: item.archived_at ?? null,
         }];
       });
 
