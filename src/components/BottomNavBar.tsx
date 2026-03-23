@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { Home, Heart, Wrench, Clock } from "lucide-react";
+import { Home, Heart, Wrench, SunMedium } from "lucide-react";
 import { useEnfantPrenom } from "@/hooks/useEnfantPrenom";
 import { useEnfantId } from "@/hooks/useEnfantId";
 
