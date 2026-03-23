@@ -125,6 +125,12 @@ function formatShortDate(value: string) {
   return new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short" }).format(new Date(value));
 }
 
+const TYPE_BADGE_CONFIG: Record<QuestionType, { label: string; bg: string; color: string }> = {
+  rdv: { label: "RDV", bg: "#EEEDFE", color: "#534AB7" },
+  rappel: { label: "Rappel", bg: "#FAEEDA", color: "#854F0B" },
+  question: { label: "Question", bg: "#E1F5EE", color: "#0F6E56" },
+};
+
 function isQuestionStatus(value: string): value is QuestionStatus {
   return value === "to_ask" || value === "asked";
 }
