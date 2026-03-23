@@ -153,7 +153,7 @@ export default function AddMemoSheet({ open, onOpenChange, enfantId }: Props) {
               </nav>
 
               {/* === Activites sub-menu === */}
-              <div className="w-full px-2 pb-4 pt-1" style={{ flex: "0 0 33.33%" }}>
+              <div className="w-full px-2 pb-4 pt-1" style={{ flex: "0 0 25%" }}>
                 <BackHeader label="Activité" onBack={() => setView("main")} />
                 {loadingActivites ? (
                   <div className="flex items-center justify-center py-6">
