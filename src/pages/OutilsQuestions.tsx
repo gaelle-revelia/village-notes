@@ -371,7 +371,39 @@ export default function OutilsQuestions() {
     return () => { cancelled = true; };
   }, [authLoading, enfantId, enfantLoading, toast, user]);
 
-  /* ── fetch recent intervenant ids ── */
+  // Fetch archived questions
+  useEffect(() => {
+    if (activeTab !== "archives" || !user || !enfantId) return;
+    supabase
+      .from("questions")
+      .select("id, text, precisions, linked_pro_ids, status, answer, created_at, asked_at, type, due_date, is_approximate_date, linked_rdv_id, archived_at")
+      .eq("parent_id", user.id)
+      .eq("child_id", enfantId)
+      .not("archived_at", "is", null)
+      .order("archived_at", { ascending: false })
+      .then(({ data }) => {
+        if (!data) { setArchivedQuestions([]); return; }
+        setArchivedQuestions(data.flatMap((item) => {
+          if (!isQuestionStatus(item.status)) return [];
+          return [{
+            id: item.id,
+            text: item.text,
+            precisions: item.precisions ?? null,
+            linked_pro_ids: Array.isArray(item.linked_pro_ids) ? item.linked_pro_ids : [],
+            status: item.status,
+            answer: item.answer,
+            created_at: item.created_at,
+            asked_at: item.asked_at,
+            type: (item.type as QuestionType) ?? "question",
+            due_date: item.due_date ?? null,
+            is_approximate_date: item.is_approximate_date ?? false,
+            linked_rdv_id: item.linked_rdv_id ?? null,
+            archived_at: item.archived_at ?? null,
+          }];
+        }));
+      });
+  }, [activeTab, user, enfantId]);
+
 
   useEffect(() => {
     if (!enfantId) return;
