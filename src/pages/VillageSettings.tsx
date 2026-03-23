@@ -389,6 +389,22 @@ export default function VillageSettings() {
                   <Mail className="w-[18px] h-[18px] text-[#8B74E0]" />
                 </a>
               )}
+              {(openCounts[m.id] ?? 0) > 0 && (
+                <span
+                  className="shrink-0"
+                  style={{
+                    background: "rgba(139,116,224,0.12)",
+                    color: "#534AB7",
+                    fontSize: 10,
+                    fontWeight: 600,
+                    padding: "2px 7px",
+                    borderRadius: 10,
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {openCounts[m.id] === 1 ? "1 ouverte" : `${openCounts[m.id]} ouvertes`}
+                </span>
+              )}
               <ChevronRight className="w-4 h-4 text-[#9A9490] shrink-0" />
             </button>
           ))
