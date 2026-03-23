@@ -443,7 +443,7 @@ export default function NouvelleQuestion() {
               </button>
 
               {isRecording ? (
-                <div style={{ fontFamily: "monospace", fontSize: 22, fontWeight: 700, color: "#1E1A1A", letterSpacing: 3 }}>
+                <div style={{ fontFamily: "monospace", fontSize: 22, fontWeight: 500, color: "#1E1A1A", letterSpacing: 3 }}>
                   {formatTime(elapsedSeconds)}
                 </div>
               ) : isTranscribing ? (
