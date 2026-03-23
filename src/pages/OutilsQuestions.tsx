@@ -67,6 +67,8 @@ const answerBlockStyle: CSSProperties = {
 
 type QuestionStatus = "to_ask" | "asked";
 
+type QuestionType = "rdv" | "rappel" | "question";
+
 type QuestionItem = {
   id: string;
   text: string;
@@ -76,6 +78,11 @@ type QuestionItem = {
   answer: string | null;
   created_at: string;
   asked_at: string | null;
+  type: QuestionType;
+  due_date: string | null;
+  is_approximate_date: boolean;
+  linked_rdv_id: string | null;
+  archived_at: string | null;
 };
 
 type Member = {
@@ -289,9 +296,10 @@ export default function OutilsQuestions() {
     Promise.all([
       supabase
         .from("questions")
-        .select("id, text, precisions, linked_pro_ids, status, answer, created_at, asked_at")
+        .select("id, text, precisions, linked_pro_ids, status, answer, created_at, asked_at, type, due_date, is_approximate_date, linked_rdv_id, archived_at")
         .eq("parent_id", user.id)
         .eq("child_id", enfantId)
+        .is("archived_at", null)
         .order("created_at", { ascending: true }),
       supabase
         .from("intervenants")
@@ -325,6 +333,11 @@ export default function OutilsQuestions() {
           answer: item.answer,
           created_at: item.created_at,
           asked_at: item.asked_at,
+          type: (item.type as QuestionType) ?? "question",
+          due_date: item.due_date ?? null,
+          is_approximate_date: item.is_approximate_date ?? false,
+          linked_rdv_id: item.linked_rdv_id ?? null,
+          archived_at: item.archived_at ?? null,
         }];
       });
 
@@ -916,7 +929,7 @@ export default function OutilsQuestions() {
           >
             <ArrowLeft size={18} />
           </button>
-          <h1 className="flex-1 text-lg font-semibold text-foreground">Mes questions</h1>
+          <h1 className="flex-1 text-lg font-semibold text-foreground">À venir</h1>
         </div>
 
         {/* Row 2: filter button + search field */}
