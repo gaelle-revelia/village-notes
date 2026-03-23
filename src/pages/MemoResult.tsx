@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate, useParams, Navigate } from "react-router-dom";
-import { ArrowLeft, Trash2, X, Plus, Info, Activity, Hand, Brain, Stethoscope, MessageCircle, User, Heart, Waves, ChevronLeft, ChevronRight, FileText, Download, ExternalLink, Check, Loader2 } from "lucide-react";
+import { ArrowLeft, Trash2, X, Plus, Info, ChevronLeft, ChevronRight, FileText, Download, ExternalLink, Check, Loader2 } from "lucide-react";
+import { getSpecialiteAvatar } from "@/lib/avatar";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useEnfantId } from "@/hooks/useEnfantId";
