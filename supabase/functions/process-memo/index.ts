@@ -713,9 +713,12 @@ ${lexiqueFormatted}` : "(aucun lexique pour cet enfant)"}`,
                   },
                   tags: {
                     type: "array",
-                    items: { type: "string" },
-                    maxItems: 4,
-                    description: "Domaine ou intervenant détecté. Exemples : Kiné, Psychomot, Ergo, Moteur, Sensoriel, Cognitif, Bien-être, Médical, Parent.",
+                    items: {
+                      type: "string",
+                      enum: ["Moteur", "Cognitif", "Sensoriel", "Bien-être", "Médical", "Administratif"],
+                    },
+                    maxItems: 3,
+                    description: "Domaines concernés par ce mémo. Choisir uniquement parmi les valeurs autorisées.",
                   },
                   intervenant_detected: {
                     type: ["string", "null"],
