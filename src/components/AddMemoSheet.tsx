@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   Mic, PenLine, FileText, Sparkles, Activity,
   Timer, ChevronRight, ChevronLeft, X, MessageCircleQuestion,
+  Clock, CalendarDays, Bell,
 } from "lucide-react";
 import { icons } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
