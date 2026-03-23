@@ -197,7 +197,7 @@ export default function VillageSettings() {
       try {
         const inferredRole = inferRole(newSpecialite);
         const { error } = await supabase.functions.invoke("invite-member", {
-          body: { email: emailVal, role: inferredRole, enfant_id: enfantId, redirect_url: "https://thevillage-app.lovable.app/onboarding-invite" },
+          body: { email: emailVal, role: inferredRole, enfant_id: enfantId, redirect_url: "https://the-village.app/onboarding-invite" },
         });
         if (error) {
           console.error("Invite error:", error);
