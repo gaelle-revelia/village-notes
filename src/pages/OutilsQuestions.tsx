@@ -1104,7 +1104,52 @@ export default function OutilsQuestions() {
           </div>
         ) : (
           <div style={{ paddingBottom: 48 }}>
-            {renderQuestionList(filteredQuestions, "Aucune question ne correspond aux filtres.")}
+            {(() => {
+              const today = new Date();
+              const in7days = new Date(today);
+              in7days.setDate(today.getDate() + 7);
+
+              const aTraiter = filteredQuestions.filter(q => q.due_date && new Date(q.due_date) <= in7days);
+              const planifiees = filteredQuestions.filter(q => q.due_date && new Date(q.due_date) > in7days);
+              const sansDate = filteredQuestions.filter(q => !q.due_date);
+
+              if (aTraiter.length === 0 && planifiees.length === 0 && sansDate.length === 0) {
+                return renderQuestionList([], "Aucune question ne correspond aux filtres.");
+              }
+
+              const sectionLabelStyle: CSSProperties = {
+                fontSize: 11,
+                fontWeight: 600,
+                color: "#9A9490",
+                letterSpacing: "0.05em",
+                textTransform: "uppercase" as const,
+                marginTop: 16,
+                marginBottom: 8,
+              };
+
+              return (
+                <>
+                  {aTraiter.length > 0 && (
+                    <>
+                      <p style={sectionLabelStyle}>À traiter</p>
+                      {renderQuestionList(aTraiter, "")}
+                    </>
+                  )}
+                  {planifiees.length > 0 && (
+                    <>
+                      <p style={sectionLabelStyle}>Planifiées</p>
+                      {renderQuestionList(planifiees, "")}
+                    </>
+                  )}
+                  {sansDate.length > 0 && (
+                    <>
+                      <p style={sectionLabelStyle}>Sans date</p>
+                      {renderQuestionList(sansDate, "")}
+                    </>
+                  )}
+                </>
+              );
+            })()}
           </div>
         )}
       </main>
