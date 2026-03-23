@@ -36,7 +36,7 @@ export function SignupForm({ onSwitchToLogin, onSuccess }: SignupFormProps) {
 
     setLoading(true);
 
-    const { error: authError } = await supabase.auth.signUp({
+    const { data, error: authError } = await supabase.auth.signUp({
       email,
       password,
       options: {
