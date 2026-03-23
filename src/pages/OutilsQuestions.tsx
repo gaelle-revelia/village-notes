@@ -653,19 +653,14 @@ export default function OutilsQuestions() {
       );
     }
 
-    return (
-      <div className="relative" style={{ paddingLeft: 44 }}>
-        {/* Vertical timeline line */}
-        <div
-          className="absolute top-0 bottom-0"
-          style={{
-            left: 16,
-            width: 1.5,
-            background: "linear-gradient(180deg, rgba(232,115,106,0.4) 0%, rgba(139,116,224,0.4) 50%, rgba(68,168,130,0.3) 100%)",
-            borderRadius: 2,
-          }}
-        />
+    const TYPE_DOT_COLOR: Record<QuestionType, string> = {
+      rdv: "#8B74E0",
+      rappel: "#E8A44A",
+      question: "#44A882",
+    };
 
+    return (
+      <div>
         {items.map((question) => {
           const isExpanded = editingId === question.id;
           const draft = drafts[question.id];
@@ -674,38 +669,9 @@ export default function OutilsQuestions() {
             .filter(Boolean);
           const isSaving = savingId === question.id;
           const isAsked = question.status === "asked";
-          const hasFill = isAsked || !!question.answer;
-
-          const dotStyle: React.CSSProperties = hasFill
-            ? {
-                left: -32,
-                marginTop: 18,
-                width: 11,
-                height: 11,
-                borderRadius: "50%",
-                background: "#8B74E0",
-                boxShadow: "0 0 0 3px rgba(139,116,224,0.24)",
-                zIndex: 1,
-              }
-            : {
-                left: -32,
-                marginTop: 18,
-                width: 11,
-                height: 11,
-                borderRadius: "50%",
-                background: "rgba(255,255,255,0.7)",
-                backdropFilter: "blur(4px)",
-                WebkitBackdropFilter: "blur(4px)",
-                border: "2.5px solid #8A9BAE",
-                boxShadow: "0 0 0 3px rgba(138,155,174,0.16)",
-                zIndex: 1,
-              };
 
           return (
-            <div key={question.id} className="relative" style={{ marginBottom: 16 }}>
-              {/* Timeline dot */}
-              <div className="absolute" style={dotStyle} />
-
+            <div key={question.id} style={{ marginBottom: 16 }}>
               <article
                 data-question-id={question.id}
                 className="p-4 transition-all"
@@ -720,7 +686,17 @@ export default function OutilsQuestions() {
               >
                 {/* ─── COLLAPSED MODE ─── */}
                   <div className="space-y-2">
-                    <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-start gap-2">
+                      <div
+                        style={{
+                          width: 8,
+                          height: 8,
+                          borderRadius: "50%",
+                          flexShrink: 0,
+                          marginTop: 3,
+                          background: TYPE_DOT_COLOR[question.type],
+                        }}
+                      />
                       <div className="min-w-0 flex-1">
                         <p style={{ fontSize: 14, fontWeight: 500 }} className="leading-5 text-foreground">{question.text}</p>
                       </div>
@@ -1020,38 +996,27 @@ export default function OutilsQuestions() {
                 return (
                   <div key={key}>
                     <p style={monthLabelStyle}>{label}</p>
-                    <div className="relative" style={{ paddingLeft: 44 }}>
-                      <div
-                        className="absolute top-0 bottom-0"
-                        style={{
-                          left: 16,
-                          width: 1.5,
-                          background: "linear-gradient(180deg, rgba(154,148,144,0.2) 0%, rgba(154,148,144,0.1) 100%)",
-                          borderRadius: 2,
-                        }}
-                      />
+                    <div>
                       {items.map((q) => {
                         const meta = getMetaLine(q);
                         return (
-                          <div key={q.id} className="relative cursor-pointer" style={{ marginBottom: 12, opacity: 0.6 }} onClick={() => navigate(`/a-venir/${q.id}`)}>
-                            <div
-                              className="absolute"
-                              style={{
-                                left: -32,
-                                marginTop: 14,
-                                width: 11,
-                                height: 11,
-                                borderRadius: "50%",
-                                background: "rgba(255,255,255,0.7)",
-                                border: "2px solid #9A9490",
-                                zIndex: 1,
-                              }}
-                            />
+                          <div key={q.id} className="cursor-pointer" style={{ marginBottom: 12, opacity: 0.6 }} onClick={() => navigate(`/a-venir/${q.id}`)}>
                             <div style={{
                               ...glassCard,
                               padding: "12px 14px",
                             }}>
-                              <div className="flex items-start justify-between gap-2">
+                              <div className="flex items-start gap-2">
+                                <div
+                                  style={{
+                                    width: 8,
+                                    height: 8,
+                                    borderRadius: "50%",
+                                    flexShrink: 0,
+                                    marginTop: 3,
+                                    background: "transparent",
+                                    border: "2px solid #C4C0BC",
+                                  }}
+                                />
                                 <p style={{
                                   fontSize: 14,
                                   fontWeight: 500,
