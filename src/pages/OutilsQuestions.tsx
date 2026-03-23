@@ -296,9 +296,10 @@ export default function OutilsQuestions() {
     Promise.all([
       supabase
         .from("questions")
-        .select("id, text, precisions, linked_pro_ids, status, answer, created_at, asked_at")
+        .select("id, text, precisions, linked_pro_ids, status, answer, created_at, asked_at, type, due_date, is_approximate_date, linked_rdv_id, archived_at")
         .eq("parent_id", user.id)
         .eq("child_id", enfantId)
+        .is("archived_at", null)
         .order("created_at", { ascending: true }),
       supabase
         .from("intervenants")
