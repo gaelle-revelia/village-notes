@@ -114,7 +114,7 @@ export default function AddMemoSheet({ open, onOpenChange, enfantId }: Props) {
               }}
             >
               {/* === Main panel === */}
-              <nav className="w-full px-2 pb-4 pt-1" style={{ flex: "0 0 33.33%" }}>
+              <nav className="w-full px-2 pb-4 pt-1" style={{ flex: "0 0 25%" }}>
                 <MenuItem
                   icon={<Mic size={18} />}
                   color="#8B74E0"
