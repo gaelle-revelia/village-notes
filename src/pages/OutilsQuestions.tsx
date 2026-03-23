@@ -3,6 +3,7 @@ import { ArrowLeft, Check, Loader2, Mic, Plus, Search, SlidersHorizontal, Square
 import { useVocalRecording } from "@/hooks/useVocalRecording";
 import { useNavigate } from "react-router-dom";
 import BottomNavBar from "@/components/BottomNavBar";
+import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { useAuth } from "@/hooks/useAuth";
 import { useEnfantId } from "@/hooks/useEnfantId";
 import { useToast } from "@/hooks/use-toast";
@@ -919,17 +920,10 @@ export default function OutilsQuestions() {
   return (
     <div className="flex min-h-screen flex-col">
       <header data-filter-header className="sticky top-0 z-10 px-4" style={glassHeader}>
-        {/* Row 1: back + title + add */}
-        <div className="flex items-center gap-3 py-3">
-          <button
-            type="button"
-            onClick={() => navigate("/outils")}
-            className="flex items-center justify-center text-secondary"
-            aria-label="Retour"
-          >
-            <ArrowLeft size={18} />
-          </button>
-          <h1 className="flex-1 text-lg font-semibold text-foreground">À venir</h1>
+        {/* Row 1: title + avatar */}
+        <div className="flex items-center justify-between py-3">
+          <h1 style={{ fontFamily: "Fraunces, serif", fontSize: 28, fontWeight: 700 }} className="text-foreground">À venir</h1>
+          <ProfileAvatar />
         </div>
 
         {/* Row 2: filter button + search field */}
