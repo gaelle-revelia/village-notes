@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { getAvatarGradient } from "@/lib/avatar";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -46,20 +47,6 @@ type Intervenant = {
   notes: string | null;
 };
 
-function getAvatarGradient(specialite: string | null, type: string): string {
-  const s = (specialite ?? "").toLowerCase();
-  if (s.includes("kiné") || s.includes("kine") || s.includes("moteur") || s.includes("motric"))
-    return "linear-gradient(135deg, #E8736A, #E8845A)";
-  if (s.includes("psychomot") || s.includes("psycho"))
-    return "linear-gradient(135deg, #8B74E0, #5CA8D8)";
-  if (s.includes("ergo"))
-    return "linear-gradient(135deg, #44A882, #4E96C8)";
-  if (s.includes("ortho"))
-    return "linear-gradient(135deg, #44A882, #4E96C8)";
-  if (type === "famille" || s.includes("parent") || s.includes("famille"))
-    return "linear-gradient(135deg, #E8736A, #C85A8A)";
-  return "linear-gradient(135deg, #8A9BAE, #6B7F94)";
-}
 
 const glassCard =
   "bg-[rgba(255,255,255,0.52)] backdrop-blur-[16px] backdrop-saturate-[1.6] border border-[rgba(255,255,255,0.72)] rounded-2xl shadow-[0_4px_16px_rgba(0,0,0,0.07),0_1px_3px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.8)]";
