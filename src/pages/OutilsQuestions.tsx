@@ -217,6 +217,7 @@ export default function OutilsQuestions() {
   const [archivedQuestions, setArchivedQuestions] = useState<QuestionItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<string | null>(null);
+  const [fabOpen, setFabOpen] = useState(false);
 
   // inline-edit state
   const [editingId, setEditingId] = useState<string | null>(null);
