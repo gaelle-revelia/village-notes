@@ -1114,7 +1114,11 @@ export default function OutilsQuestions() {
               const sansDate = filteredQuestions.filter(q => !q.due_date);
 
               if (aTraiter.length === 0 && planifiees.length === 0 && sansDate.length === 0) {
-                return renderQuestionList([], "Aucune question ne correspond aux filtres.");
+                return (
+                  <div className="flex items-center justify-center py-16">
+                    <p style={{ color: "#9A9490", fontSize: 14 }}>Aucune boucle ouverte</p>
+                  </div>
+                );
               }
 
               const sectionLabelStyle: CSSProperties = {
