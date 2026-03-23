@@ -1,7 +1,11 @@
 import { type CSSProperties, useEffect, useMemo, useState } from "react";
 import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Keyboard, Mic, Search, Square, X } from "lucide-react";
+import { format } from "date-fns";
 import { MemoDatePicker } from "@/components/memo/MemoDatePicker";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
@@ -139,6 +143,16 @@ export default function NouvelleQuestion() {
   const [loadingIntervenants, setLoadingIntervenants] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
+
+  const [dueDate, setDueDate] = useState<Date | null>(null);
+  const [isApproximate, setIsApproximate] = useState(type === "rappel");
+  const [approxMonth, setApproxMonth] = useState(new Date().getMonth());
+  const [approxYear, setApproxYear] = useState(new Date().getFullYear());
+
+  const MONTHS = [
+    "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+    "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre",
+  ];
   const [transcriptionError, setTranscriptionError] = useState<string | null>(null);
 
   const { isRecording, elapsedSeconds, audioBlob, permissionDenied, start, stop, reset } =
@@ -324,8 +338,18 @@ export default function NouvelleQuestion() {
     const trimmedQuestion = question.trim();
     const trimmedPrecisions = precisions.trim();
     if (!trimmedQuestion || !user || !enfantId) return;
+    if (type === "rdv" && !dueDate) return;
 
     setSubmitting(true);
+
+    const computedDueDate =
+      type === "question"
+        ? null
+        : isApproximate && type === "rappel"
+          ? `${approxYear}-${String(approxMonth + 1).padStart(2, "0")}-01`
+          : dueDate
+            ? format(dueDate, "yyyy-MM-dd")
+            : null;
 
     const { error: insertError } = await supabase.from("questions").insert({
       parent_id: user.id,
@@ -334,13 +358,17 @@ export default function NouvelleQuestion() {
       precisions: trimmedPrecisions || null,
       linked_pro_ids: selectedIds,
       status: "to_ask",
+      type,
+      due_date: computedDueDate,
+      is_approximate_date: type === "rappel" && isApproximate,
+      archived_at: null,
     });
 
     setSubmitting(false);
 
     if (insertError) {
       toast({
-        title: "Impossible d'ajouter la question",
+        title: "Impossible d'ajouter",
         description: "Réessayez dans un instant.",
         variant: "destructive",
       });
@@ -348,10 +376,9 @@ export default function NouvelleQuestion() {
     }
 
     toast({
-      title: "Question ajoutée",
-      description: "Votre question a bien été enregistrée.",
+      title: type === "rdv" ? "RDV ajouté" : type === "rappel" ? "Rappel ajouté" : "Question ajoutée",
     });
-    navigate("/outils");
+    navigate("/a-venir");
   };
 
   if (authLoading || enfantLoading) {
@@ -418,7 +445,7 @@ export default function NouvelleQuestion() {
             })}
           </div>
 
-          <MemoDatePicker date={questionDate} onDateChange={setQuestionDate} />
+          {/* Date field removed — now inside text form */}
 
           <IntervenantSelection
             loadingIntervenants={loadingIntervenants}
@@ -511,20 +538,75 @@ export default function NouvelleQuestion() {
             <form onSubmit={handleSubmit} className="space-y-6 pt-2">
               <div className="space-y-2">
                 <label htmlFor="question-text" className="text-sm font-medium text-foreground">
-                  Votre question
+                  Titre
                 </label>
                 <input
                   id="question-text"
                   type="text"
                   value={question}
                   onChange={(event) => setQuestion(event.target.value)}
-                  placeholder="Écrivez votre question ici"
+                  placeholder={
+                    type === "rdv"
+                      ? "Ex : RDV kiné — préparer les questions"
+                      : type === "rappel"
+                        ? "Ex : Relancer hôpital Bordeaux"
+                        : "Ex : Continuer les retournements ?"
+                  }
                   required
                   className="h-12 w-full rounded-xl px-3 py-2 text-base font-medium text-foreground outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   style={glassFieldStyle}
                   autoFocus
                 />
               </div>
+
+              {type === "rdv" && (
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Date</Label>
+                  <MemoDatePicker date={dueDate ?? new Date()} onDateChange={(d) => setDueDate(d)} />
+                </div>
+              )}
+
+              {type === "rappel" && (
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium">Date (optionnelle)</Label>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={isApproximate}
+                      onCheckedChange={setIsApproximate}
+                      id="approx-toggle"
+                    />
+                    <label htmlFor="approx-toggle" className="text-sm text-muted-foreground cursor-pointer">
+                      Date approximative
+                    </label>
+                  </div>
+                  {isApproximate ? (
+                    <div className="grid grid-cols-2 gap-3">
+                      <Select value={String(approxMonth)} onValueChange={(v) => setApproxMonth(Number(v))}>
+                        <SelectTrigger className="rounded-xl" style={glassFieldStyle}>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {MONTHS.map((m, i) => (
+                            <SelectItem key={i} value={String(i)}>{m}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Select value={String(approxYear)} onValueChange={(v) => setApproxYear(Number(v))}>
+                        <SelectTrigger className="rounded-xl" style={glassFieldStyle}>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {[2024, 2025, 2026, 2027, 2028, 2029, 2030].map((y) => (
+                            <SelectItem key={y} value={String(y)}>{y}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  ) : (
+                    <MemoDatePicker date={dueDate ?? new Date()} onDateChange={(d) => setDueDate(d)} />
+                  )}
+                </div>
+              )}
 
               <div className="space-y-2">
                 <label htmlFor="question-precisions" className="text-sm font-medium text-foreground">
@@ -546,7 +628,13 @@ export default function NouvelleQuestion() {
                 <Button
                   type="submit"
                   className="h-12 w-full rounded-xl text-base"
-                  disabled={submitting || !question.trim() || !user || !enfantId}
+                  disabled={
+                    submitting ||
+                    !question.trim() ||
+                    !user ||
+                    !enfantId ||
+                    (type === "rdv" && !dueDate)
+                  }
                 >
                   {submitting ? "Ajout…" : "Ajouter"}
                 </Button>
