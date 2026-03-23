@@ -724,7 +724,7 @@ function SlideMemos() {
             lineHeight: 1.4,
           }}
         >
-          <span style={{ color: "#8B74E0", fontWeight: 500 }}>Résumé IA : </span>
+          <span style={{ color: "#8B74E0", fontWeight: 500 }}>Résumé : </span>
           Belle progression sur le retournement.
         </p>
       </GlassCard>
