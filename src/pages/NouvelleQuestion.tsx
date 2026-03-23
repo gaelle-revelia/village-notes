@@ -1,6 +1,6 @@
 import { type CSSProperties, useEffect, useMemo, useState } from "react";
 import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Keyboard, Mic, Search, Square, X } from "lucide-react";
+import { ArrowLeft, Loader2, Mic, Square, X } from "lucide-react";
 import { format } from "date-fns";
 import { MemoDatePicker } from "@/components/memo/MemoDatePicker";
 import { Label } from "@/components/ui/label";
@@ -63,16 +63,6 @@ const glassHeader: CSSProperties = {
   boxShadow: "0 2px 12px hsl(var(--foreground) / 0.05)",
 };
 
-const searchFieldStyle: CSSProperties = {
-  background: "hsl(var(--background) / 0.45)",
-  backdropFilter: "blur(12px) saturate(1.4)",
-  WebkitBackdropFilter: "blur(12px) saturate(1.4)",
-  border: "1px solid hsl(var(--background) / 0.65)",
-  borderRadius: 12,
-  boxShadow:
-    "0 2px 8px hsl(var(--foreground) / 0.05), inset 0 1px 0 hsl(var(--background) / 0.7)",
-};
-
 const glassFieldStyle: CSSProperties = {
   background: "rgba(255,255,255,0.52)",
   backdropFilter: "blur(16px) saturate(1.6)",
@@ -132,13 +122,10 @@ export default function NouvelleQuestion() {
   const [type, setType] = useState<"rdv" | "rappel" | "question">(
     paramType && validTypes.includes(paramType) ? paramType : "question"
   );
-  const [mode, setMode] = useState<"voice" | "text">(type === "question" ? "voice" : "text");
-  const [questionDate, setQuestionDate] = useState(new Date());
   const [question, setQuestion] = useState("");
   const [precisions, setPrecisions] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [recentIds, setRecentIds] = useState<string[]>([]);
   const [intervenants, setIntervenants] = useState<Intervenant[]>([]);
   const [loadingIntervenants, setLoadingIntervenants] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -193,34 +180,6 @@ export default function NouvelleQuestion() {
   }, [enfantId, toast]);
 
   useEffect(() => {
-    if (!enfantId) return;
-
-    supabase
-      .from("memos")
-      .select("intervenant_id, memo_date")
-      .not("intervenant_id", "is", null)
-      .not("enfant_id", "is", null)
-      .order("memo_date", { ascending: false })
-      .limit(20)
-      .then(({ data }) => {
-        if (!data) return;
-
-        const seen = new Set<string>();
-        const ids: string[] = [];
-
-        for (const memo of data) {
-          if (memo.intervenant_id && !seen.has(memo.intervenant_id)) {
-            seen.add(memo.intervenant_id);
-            ids.push(memo.intervenant_id);
-            if (ids.length >= 3) break;
-          }
-        }
-
-        setRecentIds(ids);
-      });
-  }, [enfantId]);
-
-  useEffect(() => {
     if (!audioBlob) return;
 
     let cancelled = false;
@@ -257,7 +216,6 @@ export default function NouvelleQuestion() {
 
         setQuestion(reformulatedQuestion);
         setPrecisions(reformulatedPrecisions);
-        setMode("text");
         toast({
           title: "Question reformulée",
           description: "Vous pouvez maintenant la relire avant de l'ajouter.",
@@ -298,16 +256,6 @@ export default function NouvelleQuestion() {
         (intervenant.specialite && normalize(intervenant.specialite).includes(query))
     );
   }, [intervenants, searchQuery]);
-
-  const recentIntervenants = useMemo(() => {
-    if (recentIds.length > 0) {
-      return recentIds
-        .map((id) => intervenants.find((intervenant) => intervenant.id === id))
-        .filter(Boolean) as Intervenant[];
-    }
-
-    return intervenants.slice(0, 3);
-  }, [intervenants, recentIds]);
 
   const selectedIntervenants = useMemo(
     () =>
@@ -406,7 +354,7 @@ export default function NouvelleQuestion() {
       </header>
 
       <main className="flex-1 px-4 py-6">
-        <div className="mx-auto max-w-[400px] space-y-6">
+        <div className="mx-auto max-w-[400px] space-y-5">
           {/* Type selector */}
           <div className="grid grid-cols-3 gap-3">
             {([
@@ -419,7 +367,7 @@ export default function NouvelleQuestion() {
                 <button
                   key={item.value}
                   type="button"
-                  onClick={() => { setType(item.value); setMode(item.value === "question" ? "voice" : "text"); }}
+                  onClick={() => { setType(item.value); }}
                   style={{
                     background: isActive ? "rgba(139,116,224,0.1)" : "rgba(255,255,255,0.52)",
                     border: isActive ? "1.5px solid #8B74E0" : "1px solid rgba(255,255,255,0.72)",
@@ -445,329 +393,277 @@ export default function NouvelleQuestion() {
             })}
           </div>
 
-          {/* Date field removed — now inside text form */}
-
-          <IntervenantSelection
-            loadingIntervenants={loadingIntervenants}
-            intervenants={intervenants}
-            filteredIntervenants={filteredIntervenants}
-            recentIntervenants={recentIntervenants}
-            selectedIntervenants={selectedIntervenants}
-            selectedIds={selectedIds}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            onToggleIntervenant={toggleIntervenant}
-            label="Pour quel intervenant ?"
-          />
-
-          {mode === "voice" ? (
-            <section className="space-y-8 pt-4">
-              {permissionDenied ? (
-                <div className="space-y-4 py-6 text-center">
-                  <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-muted">
-                    <Mic className="h-8 w-8 text-muted-foreground" />
-                  </div>
-                  <h2 className="text-xl font-semibold text-card-foreground">Micro non disponible</h2>
-                  <p className="text-sm text-muted-foreground">
-                    L'accès au microphone a été refusé. Vous pouvez saisir votre question en texte.
-                  </p>
-                  <Button type="button" onClick={() => setMode("text")} className="rounded-xl">
-                    <Keyboard className="mr-2 h-4 w-4" />
-                    Saisir en texte
-                  </Button>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center space-y-8 py-6">
-                  <div className="text-4xl font-mono tracking-wider text-card-foreground">
-                    {formatTime(elapsedSeconds)}
-                  </div>
-
-                  <div className="relative">
-                    {isRecording && (
-                      <>
-                        <div className="absolute inset-0 rounded-full bg-primary/20 animate-ping" />
-                        <div className="absolute -inset-3 rounded-full bg-secondary/15 animate-pulse" />
-                      </>
-                    )}
-                    <button
-                      type="button"
-                      onClick={isRecording ? handleStopRecording : handleStartRecording}
-                      disabled={isTranscribing}
-                      className="relative z-10 flex h-24 w-24 items-center justify-center rounded-full text-primary-foreground shadow-lg transition-all disabled:cursor-wait disabled:opacity-70"
-                      style={{
-                        background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)))",
-                        boxShadow: "0 12px 30px hsl(var(--secondary) / 0.3)",
-                      }}
-                      aria-label={isRecording ? "Arrêter l'enregistrement" : "Commencer l'enregistrement"}
-                    >
-                      {isRecording ? (
-                        <Square className="h-8 w-8" fill="currentColor" />
-                      ) : (
-                        <Mic className="h-10 w-10" />
-                      )}
-                    </button>
-                  </div>
-
-                  <div className="space-y-2 text-center">
-                    <p className="max-w-[250px] text-sm text-muted-foreground">
-                      {isTranscribing
-                        ? "Reformulation en cours..."
-                        : isRecording
-                          ? "Posez votre question... Appuyez sur le bouton pour arrêter."
-                          : "Appuyez sur le micro pour commencer l'enregistrement"}
-                    </p>
-                    {transcriptionError && !permissionDenied && (
-                      <p className="max-w-[280px] text-xs text-destructive">{transcriptionError}</p>
-                    )}
-                  </div>
-
-                  {!isRecording && !isTranscribing && (
-                    <button
-                      type="button"
-                      onClick={() => setMode("text")}
-                      className="flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
-                    >
-                      <Keyboard className="h-3.5 w-3.5" />
-                      Saisir en texte à la place
-                    </button>
-                  )}
-                </div>
-              )}
-            </section>
+          {/* Vocal strip */}
+          {permissionDenied ? (
+            <p style={{ fontSize: 12, color: "#9A9490", textAlign: "center" }}>
+              Microphone non disponible — utilisez la saisie texte.
+            </p>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-6 pt-2">
-              <div className="space-y-2">
-                <label htmlFor="question-text" className="text-sm font-medium text-foreground">
-                  Titre
-                </label>
-                <input
-                  id="question-text"
-                  type="text"
-                  value={question}
-                  onChange={(event) => setQuestion(event.target.value)}
-                  placeholder={
-                    type === "rdv"
-                      ? "Ex : RDV kiné — préparer les questions"
-                      : type === "rappel"
-                        ? "Ex : Relancer hôpital Bordeaux"
-                        : "Ex : Continuer les retournements ?"
-                  }
-                  required
-                  className="h-12 w-full rounded-xl px-3 py-2 text-base font-medium text-foreground outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                  style={glassFieldStyle}
-                  autoFocus
-                />
-              </div>
-
-              {type === "rdv" && (
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Date</Label>
-                  <MemoDatePicker date={dueDate ?? new Date()} onDateChange={(d) => setDueDate(d)} />
-                </div>
-              )}
-
-              {type === "rappel" && (
-                <div className="space-y-3">
-                  <Label className="text-sm font-medium">Date (optionnelle)</Label>
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      checked={isApproximate}
-                      onCheckedChange={setIsApproximate}
-                      id="approx-toggle"
-                    />
-                    <label htmlFor="approx-toggle" className="text-sm text-muted-foreground cursor-pointer">
-                      Date approximative
-                    </label>
-                  </div>
-                  {isApproximate ? (
-                    <div className="grid grid-cols-2 gap-3">
-                      <Select value={String(approxMonth)} onValueChange={(v) => setApproxMonth(Number(v))}>
-                        <SelectTrigger className="rounded-xl" style={glassFieldStyle}>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {MONTHS.map((m, i) => (
-                            <SelectItem key={i} value={String(i)}>{m}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <Select value={String(approxYear)} onValueChange={(v) => setApproxYear(Number(v))}>
-                        <SelectTrigger className="rounded-xl" style={glassFieldStyle}>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {[2024, 2025, 2026, 2027, 2028, 2029, 2030].map((y) => (
-                            <SelectItem key={y} value={String(y)}>{y}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  ) : (
-                    <MemoDatePicker date={dueDate ?? new Date()} onDateChange={(d) => setDueDate(d)} />
-                  )}
-                </div>
-              )}
-
-              <div className="space-y-2">
-                <label htmlFor="question-precisions" className="text-sm font-medium text-foreground">
-                  Précisions complémentaires (optionnel)
-                </label>
-                <Textarea
-                  id="question-precisions"
-                  value={precisions}
-                  onChange={(event) => setPrecisions(event.target.value)}
-                  placeholder="Ajoutez un contexte utile si besoin"
-                  rows={1}
-                  className="w-full rounded-xl resize-none"
-                  style={glassFieldStyle}
-                  autoResize
-                />
-              </div>
-
-              <div className="space-y-3 pt-2">
-                <Button
-                  type="submit"
-                  className="h-12 w-full rounded-xl text-base"
-                  disabled={
-                    submitting ||
-                    !question.trim() ||
-                    !user ||
-                    !enfantId ||
-                    (type === "rdv" && !dueDate)
-                  }
-                >
-                  {submitting ? "Ajout…" : "Ajouter"}
-                </Button>
-
-                <button
-                  type="button"
-                  onClick={() => setMode("voice")}
-                  className="flex w-full items-center justify-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  <Mic className="h-3.5 w-3.5" />
-                  Enregistrer en vocal à la place
-                </button>
-              </div>
-            </form>
-          )}
-        </div>
-      </main>
-    </div>
-  );
-}
-
-function IntervenantSelection({
-  loadingIntervenants,
-  intervenants,
-  filteredIntervenants,
-  recentIntervenants,
-  selectedIntervenants,
-  selectedIds,
-  searchQuery,
-  onSearchChange,
-  onToggleIntervenant,
-  label,
-}: {
-  loadingIntervenants: boolean;
-  intervenants: Intervenant[];
-  filteredIntervenants: Intervenant[];
-  recentIntervenants: Intervenant[];
-  selectedIntervenants: Intervenant[];
-  selectedIds: string[];
-  searchQuery: string;
-  onSearchChange: (value: string) => void;
-  onToggleIntervenant: (id: string) => void;
-  label: string;
-}) {
-  return (
-    <div className="space-y-3">
-      <label htmlFor="question-intervenant-search" className="text-sm font-medium text-foreground">
-        {label}
-      </label>
-
-      {selectedIntervenants.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {selectedIntervenants.map((intervenant) => {
-            const palette = getMemberPalette(intervenant.id);
-            return (
-              <div
-                key={intervenant.id}
-                className="inline-flex items-center gap-2 rounded-full border px-2.5 py-1.5 text-sm"
+            <div
+              style={{
+                background: isRecording
+                  ? "rgba(232,115,106,0.15)"
+                  : "linear-gradient(135deg, rgba(232,115,106,0.1), rgba(139,116,224,0.1))",
+                border: isRecording
+                  ? "1px solid rgba(232,115,106,0.3)"
+                  : "1px solid rgba(255,255,255,0.8)",
+                borderRadius: 14,
+                padding: "12px 14px",
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+              }}
+            >
+              <button
+                type="button"
+                onClick={isRecording ? handleStopRecording : handleStartRecording}
+                disabled={isTranscribing}
                 style={{
-                  backgroundColor: `hsl(${palette.accent} / 0.14)`,
-                  borderColor: `hsl(${palette.accent} / 0.32)`,
-                  color: `hsl(${palette.accent})`,
+                  width: 42,
+                  height: 42,
+                  borderRadius: "50%",
+                  background: isRecording ? "#E8736A" : "linear-gradient(135deg, #E8736A, #8B74E0)",
+                  border: "none",
+                  cursor: isTranscribing ? "wait" : "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  boxShadow: "0 4px 12px rgba(139,116,224,0.3)",
+                  flexShrink: 0,
+                  opacity: isTranscribing ? 0.6 : 1,
                 }}
               >
-                <div
-                  className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-[11px] font-semibold text-white"
-                  style={{ background: palette.avatar }}
-                >
-                  {intervenant.nom.charAt(0).toUpperCase()}
+                {isTranscribing ? (
+                  <Loader2 size={18} color="white" className="animate-spin" />
+                ) : isRecording ? (
+                  <Square size={16} color="white" fill="white" />
+                ) : (
+                  <Mic size={18} color="white" />
+                )}
+              </button>
+
+              {isRecording ? (
+                <div style={{ fontFamily: "monospace", fontSize: 22, fontWeight: 700, color: "#1E1A1A", letterSpacing: 3 }}>
+                  {formatTime(elapsedSeconds)}
                 </div>
-                <span className="max-w-[140px] truncate font-medium">{intervenant.nom}</span>
-                <button
-                  type="button"
-                  onClick={() => onToggleIntervenant(intervenant.id)}
-                  className="inline-flex h-5 w-5 items-center justify-center rounded-full transition-colors hover:bg-foreground/5"
-                  aria-label={`Retirer ${intervenant.nom}`}
-                >
-                  <X className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <input
-          id="question-intervenant-search"
-          value={searchQuery}
-          onChange={(event) => onSearchChange(event.target.value)}
-          placeholder="Nom ou spécialité..."
-          className="w-full py-2.5 pl-9 pr-3 text-sm text-foreground outline-none placeholder:text-muted-foreground"
-          style={searchFieldStyle}
-        />
-      </div>
-
-      {loadingIntervenants ? (
-        <p className="animate-pulse text-sm text-muted-foreground">Chargement...</p>
-      ) : intervenants.length === 0 ? (
-        <p className="text-xs text-muted-foreground">Aucun membre enregistré.</p>
-      ) : searchQuery.trim() ? (
-        <div className="space-y-1">
-          <p className="px-1 text-xs text-muted-foreground">
-            {filteredIntervenants.length} résultat{filteredIntervenants.length !== 1 ? "s" : ""}
-          </p>
-          {filteredIntervenants.map((intervenant) => (
-            <IntervenantRow
-              key={intervenant.id}
-              intervenant={intervenant}
-              query={searchQuery}
-              selected={selectedIds.includes(intervenant.id)}
-              onToggle={() => onToggleIntervenant(intervenant.id)}
-            />
-          ))}
-          {filteredIntervenants.length === 0 && (
-            <p className="py-3 text-center text-xs text-muted-foreground">Aucun résultat</p>
+              ) : isTranscribing ? (
+                <div style={{ fontSize: 13, fontWeight: 500, color: "#9A9490" }}>
+                  Reformulation en cours...
+                </div>
+              ) : (
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: "#1E1A1A" }}>
+                    {type === "rdv" ? "Dicter le RDV" : type === "rappel" ? "Dicter le rappel" : "Dicter la question"}
+                  </div>
+                  <div style={{ fontSize: 11, color: "#9A9490" }}>
+                    L'IA remplit le titre et les précisions
+                  </div>
+                </div>
+              )}
+            </div>
           )}
+
+          {transcriptionError && (
+            <p className="text-xs text-destructive text-center">{transcriptionError}</p>
+          )}
+
+          {/* Divider */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 10, color: "#9A9490", fontWeight: 500, letterSpacing: "0.04em" }}>
+            <div style={{ flex: 1, height: 1, background: "rgba(139,116,224,0.15)" }} />
+            OU SAISIR MANUELLEMENT
+            <div style={{ flex: 1, height: 1, background: "rgba(139,116,224,0.15)" }} />
+          </div>
+
+          {/* Form — always visible */}
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Title field */}
+            <div className="space-y-2">
+              <label htmlFor="question-text" className="text-sm font-medium text-foreground">
+                Titre
+              </label>
+              <input
+                id="question-text"
+                type="text"
+                value={question}
+                onChange={(event) => setQuestion(event.target.value)}
+                placeholder={
+                  type === "rdv"
+                    ? "Ex : RDV kiné — préparer les questions"
+                    : type === "rappel"
+                      ? "Ex : Relancer hôpital Bordeaux"
+                      : "Ex : Continuer les retournements ?"
+                }
+                required
+                className="h-12 w-full rounded-xl px-3 py-2 text-base font-medium text-foreground outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                style={glassFieldStyle}
+              />
+            </div>
+
+            {/* Date — RDV (required) */}
+            {type === "rdv" && (
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Date</Label>
+                <MemoDatePicker date={dueDate ?? new Date()} onDateChange={(d) => setDueDate(d)} />
+              </div>
+            )}
+
+            {/* Date — Rappel (optional, with approximate toggle) */}
+            {type === "rappel" && (
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Date (optionnelle)</Label>
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={isApproximate}
+                    onCheckedChange={setIsApproximate}
+                    id="approx-toggle"
+                  />
+                  <label htmlFor="approx-toggle" className="text-sm text-muted-foreground cursor-pointer">
+                    Date approximative
+                  </label>
+                </div>
+                {isApproximate ? (
+                  <div className="grid grid-cols-2 gap-3">
+                    <Select value={String(approxMonth)} onValueChange={(v) => setApproxMonth(Number(v))}>
+                      <SelectTrigger className="rounded-xl" style={glassFieldStyle}>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {MONTHS.map((m, i) => (
+                          <SelectItem key={i} value={String(i)}>{m}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Select value={String(approxYear)} onValueChange={(v) => setApproxYear(Number(v))}>
+                      <SelectTrigger className="rounded-xl" style={glassFieldStyle}>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[2024, 2025, 2026, 2027, 2028, 2029, 2030].map((y) => (
+                          <SelectItem key={y} value={String(y)}>{y}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                ) : (
+                  <MemoDatePicker date={dueDate ?? new Date()} onDateChange={(d) => setDueDate(d)} />
+                )}
+              </div>
+            )}
+
+            {/* Intervenant — simple search, no auto-suggestions */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">
+                Pour quel intervenant ?
+              </label>
+
+              {selectedIntervenants.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {selectedIntervenants.map((intervenant) => {
+                    const palette = getMemberPalette(intervenant.id);
+                    return (
+                      <div
+                        key={intervenant.id}
+                        className="inline-flex items-center gap-2 rounded-full border px-2.5 py-1.5 text-sm"
+                        style={{
+                          backgroundColor: `hsl(${palette.accent} / 0.14)`,
+                          borderColor: `hsl(${palette.accent} / 0.32)`,
+                          color: `hsl(${palette.accent})`,
+                        }}
+                      >
+                        <div
+                          className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-[11px] font-semibold text-white"
+                          style={{ background: palette.avatar }}
+                        >
+                          {intervenant.nom.charAt(0).toUpperCase()}
+                        </div>
+                        <span className="max-w-[140px] truncate font-medium">{intervenant.nom}</span>
+                        <button
+                          type="button"
+                          onClick={() => toggleIntervenant(intervenant.id)}
+                          className="inline-flex h-5 w-5 items-center justify-center rounded-full transition-colors hover:bg-foreground/5"
+                          aria-label={`Retirer ${intervenant.nom}`}
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              <input
+                type="text"
+                placeholder="Chercher un professionnel…"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "10px 12px",
+                  borderRadius: 11,
+                  border: "1px solid rgba(255,255,255,0.72)",
+                  background: "rgba(255,255,255,0.52)",
+                  fontSize: 13,
+                  color: "#1E1A1A",
+                  outline: "none",
+                }}
+              />
+
+              {searchQuery.trim() && (
+                <div className="space-y-1">
+                  {filteredIntervenants.length > 0 ? (
+                    filteredIntervenants.map((intervenant) => (
+                      <IntervenantRow
+                        key={intervenant.id}
+                        intervenant={intervenant}
+                        query={searchQuery}
+                        selected={selectedIds.includes(intervenant.id)}
+                        onToggle={() => {
+                          toggleIntervenant(intervenant.id);
+                          setSearchQuery("");
+                        }}
+                      />
+                    ))
+                  ) : (
+                    <p className="py-2 text-center text-xs text-muted-foreground">Aucun résultat</p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Précisions */}
+            <div className="space-y-2">
+              <label htmlFor="question-precisions" className="text-sm font-medium text-foreground">
+                Précisions complémentaires (optionnel)
+              </label>
+              <Textarea
+                id="question-precisions"
+                value={precisions}
+                onChange={(event) => setPrecisions(event.target.value)}
+                placeholder="Ajoutez un contexte utile si besoin"
+                rows={1}
+                className="w-full rounded-xl resize-none"
+                style={glassFieldStyle}
+                autoResize
+              />
+            </div>
+
+            {/* Submit */}
+            <Button
+              type="submit"
+              className="h-12 w-full rounded-xl text-base"
+              disabled={
+                submitting ||
+                !question.trim() ||
+                !user ||
+                !enfantId ||
+                (type === "rdv" && !dueDate)
+              }
+            >
+              {submitting ? "Ajout…" : "Ajouter"}
+            </Button>
+          </form>
         </div>
-      ) : recentIntervenants.length > 0 ? (
-        <div className="space-y-1">
-          <p className="px-1 text-xs font-medium tracking-[0.03em] text-muted-foreground">Récents</p>
-          {recentIntervenants.map((intervenant) => (
-            <IntervenantRow
-              key={intervenant.id}
-              intervenant={intervenant}
-              query=""
-              selected={selectedIds.includes(intervenant.id)}
-              onToggle={() => onToggleIntervenant(intervenant.id)}
-            />
-          ))}
-        </div>
-      ) : null}
+      </main>
     </div>
   );
 }
@@ -820,7 +716,7 @@ function IntervenantRow({
         className="text-xs font-medium"
         style={{ color: selected ? `hsl(${palette.accent})` : "hsl(var(--muted-foreground))" }}
       >
-        {selected ? "Sélectionné" : "Choisir"}
+        {selected ? "✓" : "Choisir"}
       </span>
     </button>
   );
