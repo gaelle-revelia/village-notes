@@ -538,20 +538,75 @@ export default function NouvelleQuestion() {
             <form onSubmit={handleSubmit} className="space-y-6 pt-2">
               <div className="space-y-2">
                 <label htmlFor="question-text" className="text-sm font-medium text-foreground">
-                  Votre question
+                  Titre
                 </label>
                 <input
                   id="question-text"
                   type="text"
                   value={question}
                   onChange={(event) => setQuestion(event.target.value)}
-                  placeholder="Écrivez votre question ici"
+                  placeholder={
+                    type === "rdv"
+                      ? "Ex : RDV kiné — préparer les questions"
+                      : type === "rappel"
+                        ? "Ex : Relancer hôpital Bordeaux"
+                        : "Ex : Continuer les retournements ?"
+                  }
                   required
                   className="h-12 w-full rounded-xl px-3 py-2 text-base font-medium text-foreground outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   style={glassFieldStyle}
                   autoFocus
                 />
               </div>
+
+              {type === "rdv" && (
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Date</Label>
+                  <MemoDatePicker date={dueDate ?? new Date()} onDateChange={(d) => setDueDate(d)} />
+                </div>
+              )}
+
+              {type === "rappel" && (
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium">Date (optionnelle)</Label>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={isApproximate}
+                      onCheckedChange={setIsApproximate}
+                      id="approx-toggle"
+                    />
+                    <label htmlFor="approx-toggle" className="text-sm text-muted-foreground cursor-pointer">
+                      Date approximative
+                    </label>
+                  </div>
+                  {isApproximate ? (
+                    <div className="grid grid-cols-2 gap-3">
+                      <Select value={String(approxMonth)} onValueChange={(v) => setApproxMonth(Number(v))}>
+                        <SelectTrigger className="rounded-xl" style={glassFieldStyle}>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {MONTHS.map((m, i) => (
+                            <SelectItem key={i} value={String(i)}>{m}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Select value={String(approxYear)} onValueChange={(v) => setApproxYear(Number(v))}>
+                        <SelectTrigger className="rounded-xl" style={glassFieldStyle}>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {[2024, 2025, 2026, 2027, 2028, 2029, 2030].map((y) => (
+                            <SelectItem key={y} value={String(y)}>{y}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  ) : (
+                    <MemoDatePicker date={dueDate ?? new Date()} onDateChange={(d) => setDueDate(d)} />
+                  )}
+                </div>
+              )}
 
               <div className="space-y-2">
                 <label htmlFor="question-precisions" className="text-sm font-medium text-foreground">
@@ -573,7 +628,13 @@ export default function NouvelleQuestion() {
                 <Button
                   type="submit"
                   className="h-12 w-full rounded-xl text-base"
-                  disabled={submitting || !question.trim() || !user || !enfantId}
+                  disabled={
+                    submitting ||
+                    !question.trim() ||
+                    !user ||
+                    !enfantId ||
+                    (type === "rdv" && !dueDate)
+                  }
                 >
                   {submitting ? "Ajout…" : "Ajouter"}
                 </Button>
