@@ -349,7 +349,7 @@ serve(async (req) => {
     const userId = claimsData.claims.sub as string;
 
     const body = await req.json();
-    const { memo_id, mode, text_input, audio_path } = body;
+    const { memo_id, mode, text_input, audio_path, boucle_type } = body;
 
     if (mode === "transcription_only" || mode === "question_reformulation" || mode === "answer_reformulation") {
       if (!audio_path) {
