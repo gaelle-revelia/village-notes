@@ -335,13 +335,14 @@ const Timeline = () => {
                   key={pill.key}
                   onClick={() => toggleFilter(pill.key)}
                   style={{
-                    padding: "8px 16px",
+                    padding: "5px 12px",
                     borderRadius: 20,
-                    fontSize: 13,
+                    fontSize: 12,
                     fontWeight: 500,
-                    background: isActive ? pill.color : pill.bg,
-                    color: isActive ? "#FFFFFF" : pill.color,
-                    border: isActive ? `1.5px solid ${pill.color}` : `1.5px solid ${pill.border}`,
+                    background: isActive ? "#8B74E0" : "rgba(255,255,255,0.52)",
+                    color: isActive ? "#fff" : "#1E1A1A",
+                    border: isActive ? "1.5px solid #8B74E0" : "1px solid rgba(255,255,255,0.72)",
+                    boxShadow: isActive ? "0 2px 8px rgba(139,116,224,0.25)" : "none",
                     transition: "all 0.2s ease",
                   }}
                 >
@@ -351,18 +352,14 @@ const Timeline = () => {
             })}
           </div>
           {isFilterActive && (
-            <button
-              onClick={() => setActiveFilters(new Set<FilterType>(["tous"]))}
-              className="w-full mt-3 py-2.5 text-sm font-medium"
-              style={{
-                color: "#8B74E0",
-                background: "rgba(139,116,224,0.08)",
-                borderRadius: 12,
-                border: "1px solid rgba(139,116,224,0.2)",
-              }}
-            >
-              Réinitialiser
-            </button>
+            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}>
+              <button
+                onClick={() => setActiveFilters(new Set<FilterType>(["tous"]))}
+                style={{ fontSize: 12, fontWeight: 500, color: "#8B74E0", background: "none", border: "none", cursor: "pointer" }}
+              >
+                Réinitialiser
+              </button>
+            </div>
           )}
         </div>
       </header>
