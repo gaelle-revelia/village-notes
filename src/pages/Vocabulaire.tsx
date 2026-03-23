@@ -249,7 +249,7 @@ const Vocabulaire = () => {
 
         <p className="text-xs text-muted-foreground leading-relaxed" style={{ fontFamily: "DM Sans" }}>
           Ajoutez les noms propres, lieux ou termes spécifiques que vous utilisez au quotidien.
-          L'IA générera automatiquement des variantes phonétiques pour améliorer la transcription vocale.
+          The Village génère automatiquement des variantes phonétiques pour améliorer la transcription vocale.
         </p>
 
         {/* Prénom section */}

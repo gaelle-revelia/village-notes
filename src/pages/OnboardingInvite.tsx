@@ -1264,7 +1264,7 @@ export default function OnboardingInvite() {
           {
             label: "02 — Les mémos",
             title: "Capturer l'essentiel en quelques secondes",
-            description: "Après une séance, dictez vos observations à voix haute. L'IA structure et résume automatiquement.",
+            description: "Après une séance, dictez vos observations à voix haute. The Village structure et résume automatiquement.",
             illustration: <SlideMemos />,
           },
         ]
