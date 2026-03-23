@@ -726,36 +726,31 @@ export default function OutilsQuestions() {
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0">
                         {isSaving && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
-                        <span style={{ fontSize: 11, color: "#9A9490", whiteSpace: "nowrap" }}>
-                          {question.due_date ? formatShortDate(question.due_date) : formatShortDate(question.created_at)}
+                        <span
+                          className="rounded-full px-2.5 py-0.5 text-[10px] font-medium"
+                          style={{
+                            background: TYPE_BADGE_CONFIG[question.type].bg,
+                            color: TYPE_BADGE_CONFIG[question.type].color,
+                          }}
+                        >
+                          {TYPE_BADGE_CONFIG[question.type].label}
                         </span>
                       </div>
                     </div>
 
-                    {question.precisions && (
-                      <p style={{ fontSize: 13 }} className="leading-5 text-muted-foreground line-clamp-2">{question.precisions}</p>
-                    )}
-
-                    {linkedMembers.length > 0 && (
-                      <div className="flex flex-wrap gap-2">
-                        {linkedMembers.map((member) => {
-                          const palette = getMemberPalette(member.id);
-                          return (
-                            <span
-                              key={member.id}
-                              className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium"
-                              style={{
-                                background: `hsl(${palette.accent} / 0.14)`,
-                                color: `hsl(${palette.accent})`,
-                                border: `1px solid hsl(${palette.accent} / 0.18)`,
-                              }}
-                            >
-                              {member.nom}
-                            </span>
-                          );
-                        })}
-                      </div>
-                    )}
+                    {(() => {
+                      const meta = getMetaLine(question);
+                      return (
+                        <p style={{
+                          fontSize: 12,
+                          color: meta.color,
+                          marginTop: 2,
+                          fontWeight: meta.color === "#E8A44A" ? 500 : 400,
+                        }}>
+                          {meta.text}
+                        </p>
+                      );
+                    })()}
 
                     {/* Answer indicator */}
                     {question.answer && (
