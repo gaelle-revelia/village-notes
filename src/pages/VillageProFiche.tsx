@@ -61,6 +61,8 @@ export default function VillageProFiche() {
   const [loading, setLoading] = useState(true);
   const [rdvList, setRdvList] = useState<QuestionRow[]>([]);
   const [questionList, setQuestionList] = useState<QuestionRow[]>([]);
+  const [rdvExpanded, setRdvExpanded] = useState(false);
+  const [questionExpanded, setQuestionExpanded] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -287,9 +289,20 @@ export default function VillageProFiche() {
               + Nouveau RDV
             </button>
           ) : (
-            rdvList.map((item, i) =>
-              renderItem(item, "#8B74E0", i === rdvList.length - 1, rdvBadge(item))
-            )
+            <>
+              {(rdvExpanded ? rdvList : rdvList.slice(0, 3)).map((item, i, arr) =>
+                renderItem(item, "#8B74E0", i === arr.length - 1 && (rdvExpanded || rdvList.length <= 3), rdvBadge(item))
+              )}
+              {rdvList.length > 3 && (
+                <button
+                  onClick={() => setRdvExpanded(!rdvExpanded)}
+                  className="w-full text-center py-1.5"
+                  style={{ fontSize: 11, color: rdvExpanded ? "#9A9490" : "#8B74E0" }}
+                >
+                  {rdvExpanded ? "Replier" : `Voir ${rdvList.length - 3} de plus`}
+                </button>
+              )}
+            </>
           )}
         </div>
 
@@ -315,9 +328,20 @@ export default function VillageProFiche() {
               + Nouvelle question
             </button>
           ) : (
-            questionList.map((item, i) =>
-              renderItem(item, "#44A882", i === questionList.length - 1, questionBadge(item))
-            )
+            <>
+              {(questionExpanded ? questionList : questionList.slice(0, 3)).map((item, i, arr) =>
+                renderItem(item, "#44A882", i === arr.length - 1 && (questionExpanded || questionList.length <= 3), questionBadge(item))
+              )}
+              {questionList.length > 3 && (
+                <button
+                  onClick={() => setQuestionExpanded(!questionExpanded)}
+                  className="w-full text-center py-1.5"
+                  style={{ fontSize: 11, color: questionExpanded ? "#9A9490" : "#8B74E0" }}
+                >
+                  {questionExpanded ? "Replier" : `Voir ${questionList.length - 3} de plus`}
+                </button>
+              )}
+            </>
           )}
         </div>
       </div>
