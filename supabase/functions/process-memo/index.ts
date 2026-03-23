@@ -385,7 +385,54 @@ serve(async (req) => {
           boucle_type === "rdv" ? RDV_REFORMULATION_PROMPT :
           boucle_type === "rappel" ? RAPPEL_REFORMULATION_PROMPT :
           QUESTION_REFORMULATION_PROMPT;
-        const reformulated = await reformulateQuestionFromTranscription(lovableApiKey, transcription, reformulationPrompt);
+
+        const supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
+
+        let childPrenom: string | null = null;
+        let intervenantsNoms: string[] = [];
+        let lexiqueFormattedCtx: string | null = null;
+
+        if (child_id) {
+          const { data: enfant } = await supabaseClient
+            .from("enfants")
+            .select("prenom")
+            .eq("id", child_id)
+            .single();
+          childPrenom = enfant?.prenom ?? null;
+
+          const { data: intervenants } = await supabaseClient
+            .from("intervenants")
+            .select("nom, specialite")
+            .eq("enfant_id", child_id)
+            .eq("actif", true);
+          intervenantsNoms = (intervenants ?? []).map((i: any) =>
+            i.specialite ? `${i.nom} (${i.specialite})` : i.nom
+          );
+
+          const { data: lexiqueEntries } = await supabaseClient
+            .from("enfant_lexique")
+            .select("mot_transcrit, mot_correct")
+            .eq("enfant_id", child_id);
+
+          if (lexiqueEntries?.length) {
+            const grouped = lexiqueEntries.reduce((acc: Record<string, string[]>, entry: any) => {
+              if (!acc[entry.mot_correct]) acc[entry.mot_correct] = [];
+              acc[entry.mot_correct].push(entry.mot_transcrit);
+              return acc;
+            }, {} as Record<string, string[]>);
+            lexiqueFormattedCtx = Object.entries(grouped)
+              .map(([correct, variants]) =>
+                `"${(variants as string[]).join('", "')}" → "${correct}"`)
+              .join("\n");
+          }
+        }
+
+        const reformulated = await reformulateQuestionFromTranscription(
+          lovableApiKey,
+          transcription,
+          reformulationPrompt,
+          { childPrenom, intervenantsNoms, lexiqueFormatted: lexiqueFormattedCtx },
+        );
         return jsonResponse(reformulated, corsHeaders);
       }
 
