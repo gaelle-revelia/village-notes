@@ -1,5 +1,5 @@
 import { type CSSProperties, useEffect, useMemo, useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Keyboard, Mic, Search, Square, X } from "lucide-react";
 import { MemoDatePicker } from "@/components/memo/MemoDatePicker";
 import { Button } from "@/components/ui/button";

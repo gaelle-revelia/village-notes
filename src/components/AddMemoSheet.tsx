@@ -236,6 +236,32 @@ export default function AddMemoSheet({ open, onOpenChange, enfantId }: Props) {
                   </button>
                 </div>
               </div>
+
+              {/* === À venir sub-menu === */}
+              <div className="w-full px-2 pb-4 pt-1" style={{ flex: "0 0 25%" }}>
+                <BackHeader label="À venir" onBack={() => setView("main")} />
+                <MenuItem
+                  icon={<CalendarDays size={18} />}
+                  color="#8B74E0"
+                  label="Rendez-vous"
+                  description="Préparer un RDV à venir"
+                  onClick={() => go("/nouvelle-question?type=rdv")}
+                />
+                <MenuItem
+                  icon={<Bell size={18} />}
+                  color="#E8A44A"
+                  label="Rappel"
+                  description="Ne pas oublier de faire quelque chose"
+                  onClick={() => go("/nouvelle-question?type=rappel")}
+                />
+                <MenuItem
+                  icon={<MessageCircleQuestion size={18} />}
+                  color="#44A882"
+                  label="Question"
+                  description="Ce que je veux demander au pro"
+                  onClick={() => go("/nouvelle-question?type=question")}
+                />
+              </div>
             </div>
           </div>
         </DialogContent>
