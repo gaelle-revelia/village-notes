@@ -1,6 +1,7 @@
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Loader2, Activity, Hand, Brain, Stethoscope, MessageCircle, User, Heart, Waves } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import { getSpecialiteAvatar } from "@/lib/avatar";
 import { useNavigate } from "react-router-dom";
 
 interface MemoCardProps {
