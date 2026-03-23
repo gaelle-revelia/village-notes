@@ -41,6 +41,7 @@ import NotFound from "./pages/NotFound";
 import PolitiqueConfidentialite from "./pages/PolitiqueConfidentialite";
 import Waitlist from "./pages/Waitlist";
 import AVenirDetail from "./pages/AVenirDetail";
+import VillageProFiche from "./pages/VillageProFiche";
 
 const queryClient = new QueryClient();
 
