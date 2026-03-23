@@ -274,7 +274,7 @@ export default function VillageProFiche() {
               Rendez-vous
             </span>
             <button
-              onClick={() => navigate(`/a-venir/nouvelle?type=rdv&pro_id=${member.id}`)}
+              onClick={() => navigate(`/nouvelle-question?type=rdv&pro_id=${member.id}`)}
               className="flex items-center gap-1 text-[11px] font-medium text-[#8B74E0]"
             >
               <Plus className="w-3 h-3" />
@@ -283,7 +283,7 @@ export default function VillageProFiche() {
           </div>
           {rdvList.length === 0 ? (
             <button
-              onClick={() => navigate(`/a-venir/nouvelle?type=rdv&pro_id=${member.id}`)}
+              onClick={() => navigate(`/nouvelle-question?type=rdv&pro_id=${member.id}`)}
               className="w-full text-center text-sm text-[#8B74E0] font-medium py-2"
             >
               + Nouveau RDV
@@ -313,7 +313,7 @@ export default function VillageProFiche() {
               Questions
             </span>
             <button
-              onClick={() => navigate(`/a-venir/nouvelle?type=question&pro_id=${member.id}`)}
+              onClick={() => navigate(`/nouvelle-question?type=question&pro_id=${member.id}`)}
               className="flex items-center gap-1 text-[11px] font-medium text-[#8B74E0]"
             >
               <Plus className="w-3 h-3" />
@@ -322,7 +322,7 @@ export default function VillageProFiche() {
           </div>
           {questionList.length === 0 ? (
             <button
-              onClick={() => navigate(`/a-venir/nouvelle?type=question&pro_id=${member.id}`)}
+              onClick={() => navigate(`/nouvelle-question?type=question&pro_id=${member.id}`)}
               className="w-full text-center text-sm text-[#8B74E0] font-medium py-2"
             >
               + Nouvelle question
