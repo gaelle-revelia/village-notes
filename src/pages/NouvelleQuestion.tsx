@@ -168,7 +168,12 @@ export default function NouvelleQuestion() {
           });
           setIntervenants([]);
         } else {
-          setIntervenants(data ?? []);
+          const list = data ?? [];
+          setIntervenants(list);
+          const paramProId = searchParams.get("pro_id");
+          if (paramProId && list.some((i) => i.id === paramProId)) {
+            setSelectedIds([paramProId]);
+          }
         }
 
         setLoadingIntervenants(false);
