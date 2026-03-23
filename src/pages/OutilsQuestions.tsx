@@ -3,6 +3,7 @@ import { ArrowLeft, Check, Loader2, Mic, Plus, Search, SlidersHorizontal, Square
 import { useVocalRecording } from "@/hooks/useVocalRecording";
 import { useNavigate } from "react-router-dom";
 import BottomNavBar from "@/components/BottomNavBar";
+import ProfileAvatar from "@/components/ProfileAvatar";
 import { useAuth } from "@/hooks/useAuth";
 import { useEnfantId } from "@/hooks/useEnfantId";
 import { useToast } from "@/hooks/use-toast";
