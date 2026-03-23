@@ -93,13 +93,18 @@ const Timeline = () => {
     return new Set(["tous"]);
   });
   const bottomRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLElement>(null);
 
-  // Close filter panel on scroll
+  // Close filter panel on click outside header
   useEffect(() => {
-    const handleScroll = () => setFilterPanelOpen(false);
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    const handleClickOutside = (e: MouseEvent) => {
+      if (filterPanelOpen && headerRef.current && !headerRef.current.contains(e.target as Node)) {
+        setFilterPanelOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [filterPanelOpen]);
 
 
   useEffect(() => {
@@ -245,6 +250,7 @@ const Timeline = () => {
     <div className="flex min-h-screen flex-col">
       {/* Header */}
       <header
+        ref={headerRef}
         className="sticky top-0 z-10 px-4 space-y-3"
         style={{
           paddingTop: 20,
