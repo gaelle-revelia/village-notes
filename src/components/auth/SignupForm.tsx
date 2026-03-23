@@ -36,7 +36,7 @@ export function SignupForm({ onSwitchToLogin, onSuccess }: SignupFormProps) {
 
     setLoading(true);
 
-    const { error: authError } = await supabase.auth.signUp({
+    const { data, error: authError } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -63,6 +63,18 @@ export function SignupForm({ onSwitchToLogin, onSuccess }: SignupFormProps) {
         });
       }
       return;
+    }
+
+    if (data?.user?.id) {
+      try {
+        await supabase.from("profiles").upsert({
+          user_id: data.user.id,
+          consent_at: new Date().toISOString(),
+          consent_version: "1.0",
+        }, { onConflict: "user_id" });
+      } catch (err) {
+        console.error("Failed to record consent:", err);
+      }
     }
 
     navigate("/onboarding");
