@@ -141,6 +141,7 @@ export default function NouvelleQuestion() {
   const [recentIds, setRecentIds] = useState<string[]>([]);
   const [intervenants, setIntervenants] = useState<Intervenant[]>([]);
   const [loadingIntervenants, setLoadingIntervenants] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
 
   const [dueDate, setDueDate] = useState<Date | null>(null);
