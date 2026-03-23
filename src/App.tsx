@@ -82,6 +82,7 @@ const AppRoutes = () => {
       <Route path="/profil" element={<ProfileSettings />} />
       <Route path="/village" element={<VillageSettings />} />
       <Route path="/village/:id" element={<VillageProFiche />} />
+      <Route path="/village/:id/edit" element={<VillageProEdit />} />
       <Route path="/enfant" element={<ChildProfile />} />
       <Route path="/parametres" element={<AppSettings />} />
       <Route path="/onboarding-invite" element={<OnboardingInvite />} />
