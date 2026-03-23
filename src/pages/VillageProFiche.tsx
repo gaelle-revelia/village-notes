@@ -289,9 +289,20 @@ export default function VillageProFiche() {
               + Nouveau RDV
             </button>
           ) : (
-            rdvList.map((item, i) =>
-              renderItem(item, "#8B74E0", i === rdvList.length - 1, rdvBadge(item))
-            )
+            <>
+              {(rdvExpanded ? rdvList : rdvList.slice(0, 3)).map((item, i, arr) =>
+                renderItem(item, "#8B74E0", i === arr.length - 1 && (rdvExpanded || rdvList.length <= 3), rdvBadge(item))
+              )}
+              {rdvList.length > 3 && (
+                <button
+                  onClick={() => setRdvExpanded(!rdvExpanded)}
+                  className="w-full text-center py-1.5"
+                  style={{ fontSize: 11, color: rdvExpanded ? "#9A9490" : "#8B74E0" }}
+                >
+                  {rdvExpanded ? "Replier" : `Voir ${rdvList.length - 3} de plus`}
+                </button>
+              )}
+            </>
           )}
         </div>
 
