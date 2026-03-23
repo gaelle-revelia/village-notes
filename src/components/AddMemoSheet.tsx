@@ -144,11 +144,11 @@ export default function AddMemoSheet({ open, onOpenChange, enfantId }: Props) {
                   onClick={() => setView("activites")}
                 />
                 <MenuItem
-                  icon={<MessageCircleQuestion size={18} />}
-                  color="#1D9E75"
-                  label="Question à poser"
-                  description="Ce que je veux demander au pro"
-                  onClick={() => go("/nouvelle-question")}
+                  icon={<Clock size={18} />}
+                  color="#8B74E0"
+                  label="À venir"
+                  description="RDV à préparer, rappel, question à poser"
+                  onClick={() => setView("avenir")}
                 />
               </nav>
 
