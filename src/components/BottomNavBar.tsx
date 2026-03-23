@@ -12,8 +12,8 @@ const BottomNavBar = () => {
   const allTabs = [
     { icon: Home, label: "Accueil", path: "/timeline" },
     { icon: Heart, label: prenom || "Enfant", path: "/selena" },
+    { icon: Clock, label: "À venir", path: "/a-venir" },
     { icon: Wrench, label: "Outils", path: "/outils" },
-    { icon: Compass, label: "Explorer", path: "/explorer" },
   ];
 
   // Hide Outils tab for famille role
