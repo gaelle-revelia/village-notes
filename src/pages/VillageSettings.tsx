@@ -342,7 +342,7 @@ export default function VillageSettings() {
           filtered.map((m) => (
             <button
               key={m.id}
-              onClick={() => openEdit(m)}
+              onClick={() => m.type === "pro" ? navigate(`/village/${m.id}`) : openEdit(m)}
               className={`${glassCard} flex items-center gap-3 px-4 py-3 w-full text-left`}
             >
               {/* Avatar */}
