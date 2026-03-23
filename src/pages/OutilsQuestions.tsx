@@ -622,7 +622,7 @@ export default function OutilsQuestions() {
       }
 
       const dayLabel = new Intl.DateTimeFormat("fr-FR", {
-        weekday: "short", day: "numeric", month: "long"
+        weekday: "long", day: "numeric", month: "long"
       }).format(d);
       const dayStr = dayLabel.charAt(0).toUpperCase() + dayLabel.slice(1);
       const isUrgent = d <= in7days;
