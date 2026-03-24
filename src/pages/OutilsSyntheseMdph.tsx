@@ -134,7 +134,9 @@ const OutilsSyntheseMdph = () => {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   // --- Question states ---
-  const [currentQ, setCurrentQ] = useState(1);
+  const [currentQ, setCurrentQ] = useState(0.5);
+  const [q0Lien, setQ0Lien] = useState<string | null>(null);
+  const [q0Prenom, setQ0Prenom] = useState<string>("");
   const [q1, setQ1] = useState<string | null>(null);
   const [q2, setQ2] = useState<string[]>([]);
   const [q3Chips, setQ3Chips] = useState<string[]>([]);
@@ -163,7 +165,8 @@ const OutilsSyntheseMdph = () => {
   const [refineBloc, setRefineBloc] = useState<{ id: string; title: string; content: string; cas_usage: string } | null>(null);
 
   // --- Visibility rules ---
-  const showQ1 = true;
+  const showQ0 = true;
+  const showQ1 = currentQ >= 1;
   const showQ2 = currentQ >= 2;
   const showQ3 = currentQ >= 3 && (q1 === "Renouvellement" || q1 === "Évolution de situation");
   const showQ4 = currentQ >= 4;
@@ -177,6 +180,7 @@ const OutilsSyntheseMdph = () => {
 
   // --- Step navigation ---
   const isCurrentStepValid = () => {
+    if (currentQ === 0.5) return q0Lien !== null && q0Prenom.trim().length > 0;
     switch (currentQ) {
       case 1: return q1 !== null;
       case 2: return q2.length > 0;
@@ -192,6 +196,7 @@ const OutilsSyntheseMdph = () => {
   };
 
   const advanceStep = () => {
+    if (currentQ === 0.5) { setCurrentQ(1); return; }
     if (currentQ === 8) { handleGenerateMdph(); return; }
     let next = currentQ + 1;
     if (currentQ === 2 && !(q1 === "Renouvellement" || q1 === "Évolution de situation")) {
@@ -217,7 +222,7 @@ const OutilsSyntheseMdph = () => {
 
   useEffect(() => {
     if (!user) return;
-    supabase.from("profiles").select("prenom").eq("user_id", user.id).single().then(({ data }) => { if (data?.prenom) setParentPrenom(data.prenom); });
+    supabase.from("profiles").select("prenom").eq("user_id", user.id).single().then(({ data }) => { if (data?.prenom) { setParentPrenom(data.prenom); setQ0Prenom(data.prenom); } });
   }, [user]);
 
   // --- Auto-scroll ---
@@ -278,6 +283,8 @@ const OutilsSyntheseMdph = () => {
           type: "mdph",
           enfant_id: enfantId,
           parent_context: {
+            declarant_prenom: q0Prenom.trim(),
+            declarant_lien: q0Lien,
             vocal_mdph: q8Vocal.trim() || null,
             type_demande: q1,
             objectifs: q2,
@@ -333,11 +340,48 @@ const OutilsSyntheseMdph = () => {
 
 
       <main className="flex-1 px-4 pt-5 pb-32">
-        {/* Q1 — Type de demande */}
-        {showQ1 && (
+        {/* Q0 — Déclarant */}
+        {showQ0 && (
           <>
             <UserBubble text="📋 Dossier MDPH" />
             <SectionSeparator text={`Dossier MDPH — ${displayName}`} />
+            <AiBubble text="Avant de commencer — qui dépose ce dossier ?" />
+            <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
+              <p style={{ fontSize: 11, color: "#8B74E0", lineHeight: 1.55 }}>
+                La CDAPH traite une demande faite par un représentant légal. Le dossier doit être rédigé à la première personne par la personne qui signe.
+              </p>
+            </div>
+            <div className="flex justify-end mb-3">
+              <input
+                type="text"
+                value={q0Prenom}
+                onChange={(e) => setQ0Prenom(e.target.value)}
+                placeholder="Ton prénom"
+                className="text-[14px] font-sans"
+                style={{
+                  ...glassCard,
+                  borderRadius: 14,
+                  padding: "10px 14px",
+                  maxWidth: "60%",
+                  width: "60%",
+                  border: "1px solid rgba(139,116,224,0.25)",
+                  outline: "none",
+                  color: "#1E1A1A"
+                }}
+              />
+            </div>
+            <ChipGroup
+              chips={["Mère", "Père", "Tuteur", "Autre"]}
+              selected={q0Lien ? [q0Lien] : []}
+              onToggle={(c) => setQ0Lien(q0Lien === c ? null : c)}
+            />
+          </>
+        )}
+
+        {/* Q1 — Type de demande */}
+        {showQ1 && (
+          <>
+            {currentQ > 0.5 && q0Lien && <UserBubble text={`${q0Prenom} · ${q0Lien}`} />}
             <AiBubble text="Pour préparer ton dossier, j'ai besoin de quelques infos que je n'ai pas dans tes mémos." />
             <AiBubble text="1 — C'est quel type de demande ?" />
             <ChipGroup chips={Q1_CHIPS} selected={q1 ? [q1] : []} onToggle={(c) => toggleSingle(c, q1, setQ1)} />
