@@ -132,14 +132,14 @@ export default function ChildProfile() {
     }`;
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col" style={{ background: "linear-gradient(160deg, #EDE8F5 0%, #F5EEF0 40%, #EEF0F8 100%)" }}>
       <header className="sticky top-0 z-10 flex items-center gap-3 px-4 py-3" style={{ background: "rgba(255,255,255,0.72)", backdropFilter: "blur(20px) saturate(1.5)", WebkitBackdropFilter: "blur(20px) saturate(1.5)", borderBottom: "1px solid rgba(255,255,255,0.6)", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
         <button onClick={() => navigate("/timeline")} className="flex items-center gap-1 text-sm font-sans text-primary">
           <ArrowLeft size={18} />
           <span>Retour</span>
         </button>
       </header>
-      <main className="flex flex-1 flex-col gap-6 px-5 pt-8 pb-24">
+      <main className="flex flex-1 flex-col gap-8 px-5 pt-6 pb-28">
         <h2 className="text-2xl font-serif font-semibold text-foreground">Profil de {prenom || "mon enfant"}</h2>
 
         {/* Sexe */}
@@ -159,7 +159,7 @@ export default function ChildProfile() {
         {/* ── TRAITEMENTS ── */}
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-sans font-medium text-foreground">💊 Traitements</span>
+            <span className="text-base font-semibold text-foreground" style={{ fontFamily: "DM Sans" }}>💊 Traitements</span>
             <div className="flex items-center gap-2">
               <span className="text-xs font-sans text-muted-foreground">
                 {hasMedicaments ? "Actif" : "Inactif"}
@@ -220,7 +220,7 @@ export default function ChildProfile() {
         {/* ── SOINS PARTICULIERS ── */}
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-sans font-medium text-foreground">🩺 Soins particuliers</span>
+            <span className="text-base font-semibold text-foreground" style={{ fontFamily: "DM Sans" }}>🩺 Soins particuliers</span>
             <div className="flex items-center gap-2">
               <span className="text-xs font-sans text-muted-foreground">
                 {hasSoins ? "Actif" : "Inactif"}
