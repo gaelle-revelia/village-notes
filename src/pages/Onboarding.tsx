@@ -250,7 +250,7 @@ const Onboarding = () => {
               }}
             />
           )}
-          {[3, 4, 5].includes(step) && !enfantId && (
+          {[3, 4, 5, 6].includes(step) && !enfantId && (
             <div className="flex flex-col items-center justify-center gap-4 text-center">
               <p className="text-muted-foreground">Une erreur est survenue. Veuillez recommencer.</p>
               <Button
