@@ -360,9 +360,7 @@ Retourne UNIQUEMENT ce JSON, sans markdown, sans commentaire :
 
 {"blocks":[
 
-  {"id":"vie_quotidienne","title":"Vie quotidienne et besoins","cerfa_ref":"Zone libre B · Page 8","cerfa_ref_complementaire":"Cases B2 · Page 6 — à cocher par le parent","icon":"Home","content":"...","editorial_note":"Dans la section B2 (page 6), coche les cases correspondant aux actes où ${prenom} a besoin d'aide — The Village ne les coche pas pour toi.","signal":null},
-
-  {"id":"suivi_medical","title":"Suivi médical et thérapeutique","cerfa_ref":"Zone libre B · Page 8","cerfa_ref_complementaire":"Complète le certificat médical joint","icon":"Activity","content":"...","editorial_note":null,"signal":null},
+  {"id":"zone_b","title":"Situation de l'enfant — vie quotidienne et suivi","cerfa_ref":"Zone libre B · Page 8","cerfa_ref_complementaire":"Cases B2 · Page 6 — à cocher par le parent · Cohérence avec le certificat médical joint","icon":"Home","content":"...","editorial_note":"Dans la section B2 (page 6), coche les cases correspondant aux actes où ${prenom} a besoin d'aide — The Village ne les coche pas pour toi.","signal":null},
 
   {"id":"scolarite_c1","title":"Scolarité — situation actuelle","cerfa_ref":"C1 · Page 9","cerfa_ref_complementaire":null,"icon":"BookOpen","content":"...","editorial_note":null,"signal":null},
 
