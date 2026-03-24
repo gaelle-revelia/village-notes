@@ -350,7 +350,7 @@ const OutilsSyntheseMdph = () => {
         {/* Q2 — Objectifs */}
         {showQ2 && (
           <>
-            <UserBubble text={q1!} />
+            {currentQ > 1 && q1 && <UserBubble text={q1} />}
             <AiBubble text="2 — Quels droits souhaites-tu demander ?" />
             <ChipGroup chips={Q2_CHIPS} selected={q2} multi onToggle={(c) => toggleMulti(c, q2, setQ2)} />
             <div style={{ margin: "0 4px 14px", background: "rgba(232,115,106,0.07)", borderLeft: "2.5px solid #E8736A", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
@@ -364,7 +364,7 @@ const OutilsSyntheseMdph = () => {
         {/* Q3 — Changements (only for Renouvellement / Évolution) */}
         {showQ3 && (
           <>
-            {q2.length > 0 && <UserBubble text={q2.join(" · ")} />}
+            {currentQ > 2 && q2.length > 0 && <UserBubble text={q2.join(" · ")} />}
             <AiBubble text="3 — Qu'est-ce qui a changé depuis ton dernier dossier ?" />
             <ChipGroup chips={Q3_CHIPS} selected={q3Chips} multi onToggle={(c) => toggleMulti(c, q3Chips, setQ3Chips)} />
             {q3Vocal.trim() && (
@@ -376,11 +376,11 @@ const OutilsSyntheseMdph = () => {
 
         {showQ4 && (
           <>
-            {showQ3 && q3Answer() && <UserBubble text={q3Answer()!} />}
-            {!showQ3 && <UserBubble text={q2.join(" · ")} />}
+            {currentQ > 3 && showQ3 && q3Answer() && <UserBubble text={q3Answer()!} />}
+            {currentQ > 2 && !showQ3 && q2.length > 0 && <UserBubble text={q2.join(" · ")} />}
             <AiBubble text="4 — Ta situation professionnelle actuelle ?" />
             <ChipGroup chips={Q4_CHIPS} selected={q4 ? [q4] : []} onToggle={(c) => toggleSingle(c, q4, setQ4)} />
-            {q4 !== null && <UserBubble text={q4Answer()} />}
+            {currentQ > 4 && q4 && <UserBubble text={q4Answer()} />}
             {q4 !== null && (
               <>
                 {q4Vocal.trim() && (
@@ -424,7 +424,7 @@ const OutilsSyntheseMdph = () => {
         {/* Q6 — Projet 2-3 ans */}
         {showQ6 && (
           <>
-            <UserBubble text={q5Answer()} />
+            {currentQ > 5 && q5 && <UserBubble text={q5Answer()} />}
             <AiBubble text={`6 — Quel est ton projet pour ${displayName} dans les 2-3 prochaines années ?`} />
             <ChipGroup chips={Q6_CHIPS} selected={q6Chips} multi onToggle={(c) => toggleMulti(c, q6Chips, setQ6Chips)} />
             {q6Vocal.trim() && (
@@ -437,7 +437,7 @@ const OutilsSyntheseMdph = () => {
         {/* Q7 — Champ libre */}
          {showQ7 && (
           <>
-            <UserBubble text={q6Answer()} />
+            {currentQ > 6 && <UserBubble text={q6Answer()} />}
             <AiBubble text="7 — Y a-t-il quelque chose d'important que je ne vois pas dans tes mémos ?" />
             {q7.trim() && (
               <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
@@ -449,7 +449,7 @@ const OutilsSyntheseMdph = () => {
         {/* Q8 — Certificat médical */}
         {showQ8 && (
           <>
-            {q7.trim() ? <UserBubble text="Enregistrement ajouté ✅" /> : null}
+            {currentQ > 7 && q7.trim() && <UserBubble text="Enregistrement ajouté ✅" />}
             <AiBubble text="8 — As-tu le certificat médical sous la main ?" />
             <ChipGroup
               chips={Q8_CHIPS}
