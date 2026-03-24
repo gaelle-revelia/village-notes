@@ -339,8 +339,13 @@ const OutilsSyntheseMdph = () => {
         {showQ2 && (
           <>
             <UserBubble text={q1!} />
-            <AiBubble text="Qu'est-ce que tu souhaites obtenir ?" />
+            <AiBubble text="Quels droits souhaites-tu demander ?" />
             <ChipGroup chips={Q2_CHIPS} selected={q2} multi onToggle={(c) => toggleMulti(c, q2, setQ2)} />
+            <div style={{ margin: "0 4px 14px", background: "rgba(232,115,106,0.07)", borderLeft: "2.5px solid #E8736A", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
+              <p style={{ fontSize: 11, color: "#9A9490", lineHeight: 1.55, fontStyle: "italic" }}>
+                Ces informations orientent la rédaction de ton texte. The Village ne peut pas te conseiller sur tes droits — rapproche-toi d'une assistante sociale ou de la MDPH de ton département.
+              </p>
+            </div>
           </>
         )}
 
