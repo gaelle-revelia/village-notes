@@ -397,7 +397,6 @@ const OutilsSyntheseMdph = () => {
         {/* Q5 — Situation scolaire */}
         {showQ5 && (
           <>
-            <UserBubble text={q4Answer()} />
             <AiBubble text={`Quelle est la situation scolaire de ${displayName} ?`} />
             <ChipGroup chips={Q5_CHIPS} selected={q5 ? [q5] : []} onToggle={(c) => toggleSingle(c, q5, (v) => setQ5(v))} />
             {q5 === "🏫 Scolarisée" && q1 === "Renouvellement" && (
