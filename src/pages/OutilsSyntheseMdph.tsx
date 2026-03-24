@@ -184,7 +184,7 @@ const OutilsSyntheseMdph = () => {
       case 4: return q4 !== null;
       case 4.5: return q4TiercePersonne !== null;
       case 5: return q5 !== null;
-      case 6: return q6Chips.length > 0 || q6Vocal.trim().length > 0;
+      case 6: return q6Vocal.trim().length > 0;
       case 7: return true;
       case 8: return q8Etat !== null;
       default: return false;
