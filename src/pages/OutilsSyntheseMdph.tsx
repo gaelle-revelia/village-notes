@@ -155,6 +155,7 @@ const OutilsSyntheseMdph = () => {
   const [parentPrenom, setParentPrenom] = useState<string | null>(null);
   const [emailValue, setEmailValue] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
   const [generatedBlocks, setGeneratedBlocks] = useState<any[] | null>(null);
   const [syntheseId, setSyntheseId] = useState<string | null>(null);
   const [refineBloc, setRefineBloc] = useState<{ id: string; title: string; content: string; cas_usage: string } | null>(null);
