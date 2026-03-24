@@ -120,7 +120,7 @@ const Q1_CHIPS = ["Première demande", "Renouvellement", "Évolution de situatio
 const Q2_CHIPS = ["AEEH / complément AEEH", "PCH", "Carte mobilité", "AVPF", "Je ne sais pas", "Autre"];
 const Q3_CHIPS = ["Nouveau diagnostic", "Nouveaux soins", "Changement situation pro", "Nouveau matériel", "Scolarisation à venir"];
 const Q4_CHIPS = ["En emploi", "Temps partiel lié au handicap", "Arrêt maladie", "Arrêt d'activité lié au handicap", "Sans emploi", "Freelance / indépendant"];
-const Q5_CHIPS = ["🏫 Scolarisée", "🌱 Entrée à l'école prévue", "🏥 Orientation médico-sociale", "— Pas encore scolarisée"];
+const Q5_CHIPS = ["🏫 Scolarisé·e en milieu ordinaire", "🏫 Scolarisé·e en ULIS", "🏥 En établissement médico-social (IME, ITEP…)", "— Pas encore scolarisé·e"];
 const Q6_CHIPS = ["Plus d'autonomie", "Entrée à l'école", "Mise en place SESSAD", "Nouveau matériel", "Maintien des droits actuels", "Autre"];
 const Q8_CHIPS = ["Oui, je l'ai", "Pas encore", "Certificat simplifié"];
 
@@ -144,6 +144,7 @@ const OutilsSyntheseMdph = () => {
   const [q4TiercePersonne, setQ4TiercePersonne] = useState<boolean | null>(null);
   const [q4HeuresTierce, setQ4HeuresTierce] = useState("");
   const [q5, setQ5] = useState<string | null>(null);
+  const [q5Vocal, setQ5Vocal] = useState("");
   const [q6Chips, setQ6Chips] = useState<string[]>([]);
   const [q6Vocal, setQ6Vocal] = useState("");
   const [q7, setQ7] = useState("");
@@ -241,7 +242,12 @@ const OutilsSyntheseMdph = () => {
     if (q4Vocal.trim()) parts.push("Enregistrement ajouté ✅");
     return parts.join(" · ") || "Non précisé";
   };
-  const q5Answer = () => q5 || "Non précisé";
+  const q5Answer = () => {
+    const parts: string[] = [];
+    if (q5) parts.push(q5);
+    if (q5Vocal.trim()) parts.push("Enregistrement ajouté ✅");
+    return parts.join(" · ") || "Non précisé";
+  };
   const q6Answer = () => {
     const parts = [...q6Chips];
     if (q6Vocal.trim()) parts.push("Enregistrement ajouté ✅");
@@ -411,13 +417,22 @@ const OutilsSyntheseMdph = () => {
           <>
             <AiBubble text={`5 — Quelle est la situation scolaire de ${displayName} ?`} />
             <ChipGroup chips={Q5_CHIPS} selected={q5 ? [q5] : []} onToggle={(c) => toggleSingle(c, q5, (v) => setQ5(v))} />
-            {q5 === "🏫 Scolarisée" && q1 === "Renouvellement" && (
+            {q5 === "🏫 Scolarisé·e en milieu ordinaire" && q1 === "Renouvellement" && (
               <div style={{ margin: "0 4px 14px", background: "rgba(68,168,130,0.07)", borderLeft: "2.5px solid #44A882", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
                 <p style={{ fontSize: 11, color: "#2a8a6a", lineHeight: 1.55 }}>
                   Pense à demander le GEVASco à l'école — ce document est attendu par la MDPH pour les renouvellements.
                 </p>
               </div>
             )}
+            <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
+              <p style={{ fontSize: 11, color: "#8B74E0", lineHeight: 1.55 }}>
+                Décris la situation scolaire de {displayName} — AESH, aménagements, temps partiel, projet d'entrée…
+              </p>
+            </div>
+            {q5Vocal.trim() && (
+              <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
+            )}
+            <WiredMicOrb onTranscription={(text) => setQ5Vocal((prev) => prev ? prev + " " + text : text)} onRecordingChange={setIsRecording} />
           </>
         )}
 
