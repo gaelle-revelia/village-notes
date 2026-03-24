@@ -143,6 +143,7 @@ const OutilsSyntheseMdph = () => {
   const [q4Vocal, setQ4Vocal] = useState("");
   const [q4TiercePersonne, setQ4TiercePersonne] = useState<boolean | null>(null);
   const [q4HeuresTierce, setQ4HeuresTierce] = useState("");
+  const [q4bVocal, setQ4bVocal] = useState("");
   const [q5, setQ5] = useState<string | null>(null);
   const [q5Vocal, setQ5Vocal] = useState("");
   const [q6Chips, setQ6Chips] = useState<string[]>([]);
@@ -166,6 +167,7 @@ const OutilsSyntheseMdph = () => {
   const showQ2 = currentQ >= 2;
   const showQ3 = currentQ >= 3 && (q1 === "Renouvellement" || q1 === "Évolution de situation");
   const showQ4 = currentQ >= 4;
+  const showQ4b = currentQ >= 4.5;
   const showQ5 = currentQ >= 5;
   const showQ6 = currentQ >= 6;
   const showQ7 = currentQ >= 7;
@@ -173,7 +175,12 @@ const OutilsSyntheseMdph = () => {
   const showResults = generatedBlocks !== null;
 
   // --- Progress bar ---
-  const progressPercent = (currentQ / 8) * 100;
+  const progressPercent = (() => {
+    const map: Record<number, number> = {
+      1: 1, 2: 2, 3: 3, 4: 4, 4.5: 5, 5: 6, 6: 7, 7: 8, 8: 9
+    };
+    return ((map[currentQ] ?? currentQ) / 9) * 100;
+  })();
 
   // --- Step navigation ---
   const isCurrentStepValid = () => {
@@ -182,6 +189,7 @@ const OutilsSyntheseMdph = () => {
       case 2: return q2.length > 0;
       case 3: return q3Chips.length > 0 || q3Vocal.trim().length > 0;
       case 4: return q4 !== null;
+      case 4.5: return q4TiercePersonne !== null;
       case 5: return q5 !== null;
       case 6: return q6Chips.length > 0 || q6Vocal.trim().length > 0;
       case 7: return true;
@@ -196,6 +204,8 @@ const OutilsSyntheseMdph = () => {
     if (currentQ === 2 && !(q1 === "Renouvellement" || q1 === "Évolution de situation")) {
       next = 4;
     }
+    if (currentQ === 4) next = 4.5;
+    if (currentQ === 4.5) next = 5;
     setCurrentQ(next);
   };
 
@@ -326,7 +336,6 @@ const OutilsSyntheseMdph = () => {
           <ArrowLeft size={20} style={{ color: "#1E1A1A" }} />
         </button>
         <h1 className="text-xl font-serif font-semibold" style={{ color: "#1E1A1A" }}>Dossier MDPH</h1>
-        <span style={{ fontSize: 11, color: "red", fontWeight: "bold", marginLeft: 8 }}>Q{currentQ}</span>
       </header>
 
       {/* Progress bar */}
@@ -342,9 +351,6 @@ const OutilsSyntheseMdph = () => {
         />
       </div>
 
-      <p style={{ fontSize: 11, color: "red", textAlign: "center", padding: "2px 0" }}>
-        currentQ: {currentQ}
-      </p>
 
       <main className="flex-1 px-4 pt-5 pb-32">
         {/* Q1 — Type de demande */}
@@ -396,29 +402,39 @@ const OutilsSyntheseMdph = () => {
             {currentQ > 2 && !showQ3 && q2.length > 0 && <UserBubble text={q2.join(" · ")} />}
             <AiBubble text="4 — Ta situation professionnelle actuelle ?" />
             <ChipGroup chips={Q4_CHIPS} selected={q4 ? [q4] : []} onToggle={(c) => toggleSingle(c, q4, setQ4)} />
+          </>
+        )}
+
+        {/* Q4b — Tierce personne */}
+        {showQ4b && (
+          <>
             {currentQ > 4 && q4 && <UserBubble text={q4Answer()} />}
-            {q4 !== null && (
+            <AiBubble text="Tu fais appel à une tierce personne rémunérée ? (garde, auxiliaire de vie…)" />
+            <ChipGroup
+              chips={["Oui", "Non"]}
+              selected={q4TiercePersonne === true ? ["Oui"] : q4TiercePersonne === false ? ["Non"] : []}
+              onToggle={(c) => setQ4TiercePersonne(c === "Oui")}
+            />
+            {q4TiercePersonne === true && (
               <>
-                {q4Vocal.trim() && (
-                  <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
-                )}
-                <WiredMicOrb onTranscription={(text) => setQ4Vocal((prev) => prev ? prev + " " + text : text)} onRecordingChange={setIsRecording} />
+                <AiBubble text="Combien d'heures par semaine environ ?" />
+                <div className="flex justify-end mb-4">
+                  <Input type="number" placeholder="ex : 8" value={q4HeuresTierce} onChange={(e) => setQ4HeuresTierce(e.target.value)} className="text-[14px] font-sans border-none" style={{ ...glassCard, borderRadius: 14, maxWidth: "50%", width: "50%", height: 44, textAlign: "right" }} />
+                </div>
               </>
             )}
-            {(q4 === "Arrêt d'activité lié au handicap" || q4 === "Temps partiel lié au handicap" || q4 === "Arrêt maladie") && (
-              <>
-                <AiBubble text="Tu fais appel à une tierce personne rémunérée ?" />
-                <ChipGroup chips={["Oui", "Non"]} selected={q4TiercePersonne === true ? ["Oui"] : q4TiercePersonne === false ? ["Non"] : []} onToggle={(c) => setQ4TiercePersonne(c === "Oui")} />
-                {q4TiercePersonne === true && (
-                  <>
-                    <AiBubble text="Combien d'heures par semaine environ ?" />
-                    <div className="flex justify-end mb-4">
-                      <Input type="number" placeholder="ex : 8" value={q4HeuresTierce} onChange={(e) => setQ4HeuresTierce(e.target.value)} className="text-[14px] font-sans border-none" style={{ ...glassCard, borderRadius: 14, maxWidth: "50%", width: "50%", height: 44, textAlign: "center" }} />
-                    </div>
-                  </>
-                )}
-              </>
+            <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
+              <p style={{ fontSize: 11, color: "#8B74E0", lineHeight: 1.55 }}>
+                Précise à l'oral : qui intervient, combien d'heures par semaine, le coût mensuel environ…
+              </p>
+            </div>
+            {q4bVocal.trim() && (
+              <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
             )}
+            <WiredMicOrb
+              onTranscription={(text) => setQ4bVocal((prev) => prev ? prev + " " + text : text)}
+              onRecordingChange={setIsRecording}
+            />
           </>
         )}
 
