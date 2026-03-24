@@ -134,23 +134,26 @@ serve(async (req) => {
         .order("memo_date", { ascending: false });
       memos = memosData ?? [];
 
-      const { data: medicamentsData } = await supabase
+      const { data: medData } = await supabase
         .from("medicaments")
         .select("nom, dosage, frequence, voie, instructions")
         .eq("enfant_id", enfant_id)
         .eq("actif", true);
+      medicamentsData = medData;
 
-      const { data: soinsData } = await supabase
+      const { data: sData } = await supabase
         .from("soins")
         .select("nom, description, frequence, instructions")
         .eq("enfant_id", enfant_id)
         .eq("actif", true);
+      soinsData = sData;
 
-      const { data: materielData } = await supabase
+      const { data: matData } = await supabase
         .from("materiel")
         .select("nom, conseils, date_reception")
         .eq("enfant_id", enfant_id)
         .eq("actif", true);
+      materielData = matData;
     }
 
     // 7. BUILD PROMPT
