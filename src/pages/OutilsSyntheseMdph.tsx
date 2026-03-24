@@ -174,7 +174,7 @@ const OutilsSyntheseMdph = () => {
   const showQ6 = currentQ >= 6;
   const showQ7 = currentQ >= 7;
   const showQ8 = currentQ >= 8;
-  const showResults = generatedBlocks !== null;
+  
 
   // --- Loading message switch ---
   useEffect(() => {
