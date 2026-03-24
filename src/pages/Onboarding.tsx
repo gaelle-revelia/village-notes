@@ -10,8 +10,10 @@ import { StepVillage } from "@/components/onboarding/StepVillage";
 import { StepVocabulaire } from "@/components/onboarding/StepVocabulaire";
 import { StepNSM } from "@/components/onboarding/StepNSM";
 import { StepReady } from "@/components/onboarding/StepReady";
+import { StepMedicaments } from "@/components/onboarding/StepMedicaments";
+import { StepSoins } from "@/components/onboarding/StepSoins";
 
-const TOTAL_STEPS = 5;
+const TOTAL_STEPS = 7;
 
 const Onboarding = () => {
   const { user, loading } = useAuth();
