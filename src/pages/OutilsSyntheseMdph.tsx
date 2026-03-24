@@ -234,7 +234,12 @@ const OutilsSyntheseMdph = () => {
     if (q3Vocal.trim()) parts.push("Enregistrement ajouté ✅");
     return parts.length > 0 ? parts.join(" · ") : null;
   };
-  const q4Answer = () => q4 || "Non précisé";
+  const q4Answer = () => {
+    const parts: string[] = [];
+    if (q4) parts.push(q4);
+    if (q4Vocal.trim()) parts.push("Enregistrement ajouté ✅");
+    return parts.join(" · ") || "Non précisé";
+  };
   const q5Answer = () => q5 || "Non précisé";
   const q6Answer = () => {
     const parts = [...q6Chips];
