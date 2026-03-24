@@ -261,7 +261,7 @@ const Onboarding = () => {
               </Button>
             </div>
           )}
-          {step === 6 && <StepReady prenomEnfant={prenomEnfant} />}
+          {step === 7 && <StepReady prenomEnfant={prenomEnfant} />}
         </div>
       </div>
     </main>
