@@ -364,7 +364,7 @@ const OutilsSyntheseMdph = () => {
         {/* Q3 — Changements (only for Renouvellement / Évolution) */}
         {showQ3 && (
           <>
-            {q2.length > 0 && <UserBubble text={q2.join(" · ")} />}
+            {currentQ > 2 && q2.length > 0 && <UserBubble text={q2.join(" · ")} />}
             <AiBubble text="3 — Qu'est-ce qui a changé depuis ton dernier dossier ?" />
             <ChipGroup chips={Q3_CHIPS} selected={q3Chips} multi onToggle={(c) => toggleMulti(c, q3Chips, setQ3Chips)} />
             {q3Vocal.trim() && (
