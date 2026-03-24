@@ -170,7 +170,7 @@ const Onboarding = () => {
         toast({ title: "Erreur", description: "Impossible de sauvegarder le vocabulaire.", variant: "destructive" });
       }
     }
-    setStep(4);
+    setStep(6);
   };
 
   const handleNSM = async (score: number) => {
