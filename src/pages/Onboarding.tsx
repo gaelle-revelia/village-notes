@@ -170,29 +170,12 @@ const Onboarding = () => {
         toast({ title: "Erreur", description: "Impossible de sauvegarder le vocabulaire.", variant: "destructive" });
       }
     }
-    setStep(6);
-  };
-
-  const handleNSM = async (score: number) => {
-    setSaving(true);
-    const { error } = await supabase.from("nsm_scores").insert({
-      user_id: user.id,
-      score,
-      context: "onboarding_j0",
-    });
-    setSaving(false);
-
-    if (error) {
-      toast({ title: "Erreur", description: "Impossible de sauvegarder le score.", variant: "destructive" });
-    }
-
     // Mark onboarding as completed
     await supabase.from("profiles").upsert(
       { user_id: user.id, onboarding_completed: true },
       { onConflict: "user_id" }
     );
-
-    setStep(7);
+    setStep(6);
   };
 
   return (
