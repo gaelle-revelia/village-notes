@@ -441,12 +441,11 @@ const OutilsSyntheseMdph = () => {
         )}
 
         {/* Q7 — Champ libre */}
-        {showQ7 && (
+         {showQ7 && (
           <>
             <UserBubble text={q6Answer()} />
             <AiBubble text="Y a-t-il quelque chose d'important que je ne vois pas dans tes mémos ?" />
             <WiredMicOrb onTranscription={(text) => setQ7((prev) => prev ? prev + " " + text : text)} />
-            <button onClick={() => setQ7Seen(true)} style={{ background: "transparent", border: "none", color: "#9A9490", fontSize: 12, cursor: "pointer", display: "block", margin: "4px auto 0" }}>Passer →</button>
           </>
         )}
 
