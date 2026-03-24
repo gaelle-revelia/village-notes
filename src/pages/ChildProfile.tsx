@@ -34,7 +34,7 @@ export default function ChildProfile() {
     if (!enfantId) return;
     supabase
       .from("enfants")
-      .select("prenom, sexe, has_medicaments, has_soins")
+      .select("prenom, sexe, has_medicaments, has_soins, date_naissance, diagnostic_label")
       .eq("id", enfantId)
       .single()
       .then(({ data }) => {
