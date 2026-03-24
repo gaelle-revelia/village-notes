@@ -180,6 +180,7 @@ const OutilsSyntheseMdph = () => {
 
   // --- Step navigation ---
   const isCurrentStepValid = () => {
+    if (currentQ === 0.5) return q0Lien !== null && q0Prenom.trim().length > 0;
     switch (currentQ) {
       case 1: return q1 !== null;
       case 2: return q2.length > 0;
