@@ -340,7 +340,7 @@ Si donnée absente, insérer exactement :
 
 ## REGISTRES DE GÉNÉRATION
 
-REGISTRE A — "Première demande" : pose le contexte depuis le début. Pour le bloc vie_quotidienne, compare aux capacités d'un enfant ordinaire du même âge — uniquement sur la base des observations documentées.
+REGISTRE A — "Première demande" : pose le contexte depuis le début. Pour le bloc zone_b, compare aux capacités d'un enfant ordinaire du même âge — uniquement sur la base des observations documentées.
 
 REGISTRE B — "Renouvellement" ou "Évolution" : accent sur les changements documentés. Justifie le maintien des droits souhaités.
 
