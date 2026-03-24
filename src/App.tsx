@@ -31,6 +31,7 @@ import OutilsSyntheseRdv from "./pages/OutilsSyntheseRdv";
 import OutilsSynthesePickMeUp from "./pages/OutilsSynthesePickMeUp";
 import OutilsSyntheseMdph from "./pages/OutilsSyntheseMdph";
 import OutilsSyntheseRdvBriefing from "./pages/OutilsSyntheseRdvBriefing";
+import OutilsSyntheseMdphResultats from "./pages/OutilsSyntheseMdphResultats";
 import OutilsSyntheseTransmission from "./pages/OutilsSyntheseTransmission";
 import OutilsCoherence from "./pages/OutilsCoherence";
 import ExplorerScreen from "./pages/ExplorerScreen";
