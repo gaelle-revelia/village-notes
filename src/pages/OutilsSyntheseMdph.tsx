@@ -306,10 +306,12 @@ const OutilsSyntheseMdph = () => {
         },
       });
       if (error) throw error;
-      if (data?.blocks) {
-        setGeneratedBlocks(data.blocks);
+      if (data?.synthese_id) {
+        setSyntheseId(data.synthese_id);
+        navigate("/outils/synthese/mdph/resultats", {
+          state: { syntheseId: data.synthese_id },
+        });
       }
-      if (data?.synthese_id) setSyntheseId(data.synthese_id);
     } catch (e) {
       console.error("generate-synthesis error:", e);
       toast({ title: "Une erreur est survenue — réessaie.", variant: "destructive" });
