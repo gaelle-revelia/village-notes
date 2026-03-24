@@ -162,7 +162,7 @@ const OutilsSyntheseMdph = () => {
   const showQ1 = true;
   const showQ2 = q1 !== null;
   const showQ3 = q1 === "Renouvellement" || q1 === "Évolution de situation";
-  const showQ4 = q2.length > 0;
+  const showQ4 = q2.length > 0 && (!showQ3 || q3Chips.length > 0 || q3Vocal.trim().length > 0);
   const showQ5 = q4 !== null;
   const showQ6 = q5 !== null;
   const showQ7 = q6Chips.length > 0 || q6Vocal.trim().length > 0;
