@@ -10,6 +10,7 @@ const formatTime = (s: number) => {
 
 interface WiredMicOrbProps {
   onTranscription: (text: string) => void;
+  onRecordingChange?: (recording: boolean) => void;
   disabled?: boolean;
 }
 
