@@ -18,6 +18,13 @@ export default function ChildProfile() {
   const [dateNaissance, setDateNaissance] = useState<string | null>(null);
   const [diagnostic, setDiagnostic] = useState<string | null>(null);
 
+  // Edit infos state
+  const [editingInfos, setEditingInfos] = useState(false);
+  const [editPrenom, setEditPrenom] = useState("");
+  const [editDateNaissance, setEditDateNaissance] = useState("");
+  const [editDiagnostic, setEditDiagnostic] = useState("");
+  const [savingInfos, setSavingInfos] = useState(false);
+
   // Medicaments state
   const [medicaments, setMedicaments] = useState<any[]>([]);
   const [hasMedicaments, setHasMedicaments] = useState(false);
