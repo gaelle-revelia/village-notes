@@ -103,7 +103,7 @@ export function StepMedicaments({ prenomEnfant, enfantId, onNext, onSkip }: Step
 
   const removeMed = async (id: string) => {
     setMeds((prev) => prev.filter((m) => m.id !== id));
-    await supabase.from("medicaments").delete().eq("id", id).catch(() => {});
+    try { await supabase.from("medicaments").delete().eq("id", id); } catch { /* silent */ }
   };
 
   const chipClass = (active: boolean) =>
