@@ -252,9 +252,8 @@ const OutilsSyntheseMdph = () => {
     return parts.join(" · ") || "Non précisé";
   };
   const q6Answer = () => {
-    const parts = [...q6Chips];
-    if (q6Vocal.trim()) parts.push("Enregistrement ajouté ✅");
-    return parts.join(" · ") || "Non précisé";
+    if (q6Vocal.trim()) return "Enregistrement ajouté ✅";
+    return null;
   };
   const q8Answer = () => {
     const parts: string[] = [];
