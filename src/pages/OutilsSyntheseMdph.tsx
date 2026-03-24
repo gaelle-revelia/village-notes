@@ -212,17 +212,22 @@ const OutilsSyntheseMdph = () => {
   // Answer text helpers
   const q3Answer = () => {
     const parts = [...q3Chips];
-    if (q3Vocal.trim()) parts.push(q3Vocal.trim());
+    if (q3Vocal.trim()) parts.push("Enregistrement ajouté ✅");
     return parts.join(" · ") || "Aucun changement";
   };
   const q4Answer = () => q4 || "Non précisé";
   const q5Answer = () => q5 || "Non précisé";
   const q6Answer = () => {
     const parts = [...q6Chips];
-    if (q6Vocal.trim()) parts.push(q6Vocal.trim());
+    if (q6Vocal.trim()) parts.push("Enregistrement ajouté ✅");
     return parts.join(" · ") || "Non précisé";
   };
-  const q8Answer = () => q8Vocal.trim() || "Rien à ajouter";
+  const q8Answer = () => {
+    const parts: string[] = [];
+    if (q8Etat) parts.push(q8Etat);
+    if (q8Etat === "Oui, je l'ai" && q8Vocal.trim()) parts.push("Enregistrement ajouté ✅");
+    return parts.join(" · ") || "Rien à ajouter";
+  };
 
   const handleCopy = async () => {
     try {
@@ -356,10 +361,6 @@ const OutilsSyntheseMdph = () => {
             {q2.length > 0 && <UserBubble text={q2.join(" · ")} />}
             <AiBubble text="Qu'est-ce qui a changé depuis ton dernier dossier ?" />
             <ChipGroup chips={Q3_CHIPS} selected={q3Chips} multi onToggle={(c) => toggleMulti(c, q3Chips, setQ3Chips)} />
-            <OrSeparator />
-            <div className="mb-2 flex justify-end">
-              <Textarea placeholder="Précise si besoin..." value={q3Vocal} onChange={(e) => setQ3Vocal(e.target.value)} className="text-[14px] font-sans border-none italic placeholder:italic" style={{ ...glassCard, borderRadius: 14, minHeight: 70, maxWidth: "80%" }} autoResize />
-            </div>
             <WiredMicOrb onTranscription={(text) => setQ3Vocal((prev) => prev ? prev + " " + text : text)} />
           </>
         )}
@@ -414,10 +415,6 @@ const OutilsSyntheseMdph = () => {
             <UserBubble text={q5Answer()} />
             <AiBubble text={`Quel est ton projet pour ${displayName} dans les 2-3 prochaines années ?`} />
             <ChipGroup chips={Q6_CHIPS} selected={q6Chips} multi onToggle={(c) => toggleMulti(c, q6Chips, setQ6Chips)} />
-            <OrSeparator />
-            <div className="mb-2 flex justify-end">
-              <Textarea placeholder="Décris ton projet..." value={q6Vocal} onChange={(e) => setQ6Vocal(e.target.value)} className="text-[14px] font-sans border-none italic placeholder:italic" style={{ ...glassCard, borderRadius: 14, minHeight: 70, maxWidth: "80%" }} autoResize />
-            </div>
             <WiredMicOrb onTranscription={(text) => setQ6Vocal((prev) => prev ? prev + " " + text : text)} />
           </>
         )}
@@ -427,9 +424,6 @@ const OutilsSyntheseMdph = () => {
           <>
             <UserBubble text={q6Answer()} />
             <AiBubble text="Y a-t-il quelque chose d'important que je ne vois pas dans tes mémos ?" />
-            <div className="mb-2 flex justify-end">
-              <Textarea placeholder="Ajoute ce que tu veux mettre en avant..." value={q7} onChange={(e) => setQ7(e.target.value)} className="text-[14px] font-sans border-none italic placeholder:italic" style={{ ...glassCard, borderRadius: 14, minHeight: 70, maxWidth: "80%" }} autoResize />
-            </div>
             <WiredMicOrb onTranscription={(text) => setQ7((prev) => prev ? prev + " " + text : text)} />
             <button onClick={() => setQ7Seen(true)} style={{ background: "transparent", border: "none", color: "#9A9490", fontSize: 12, cursor: "pointer", display: "block", margin: "4px auto 0" }}>Passer →</button>
           </>
@@ -438,7 +432,7 @@ const OutilsSyntheseMdph = () => {
         {/* Q8 — Certificat médical */}
         {showQ8 && (
           <>
-            {q7.trim() && <UserBubble text={q7.trim()} />}
+            {q7.trim() ? <UserBubble text="Enregistrement ajouté ✅" /> : null}
             <AiBubble text="As-tu le certificat médical sous la main ?" />
             <ChipGroup
               chips={Q8_CHIPS}
