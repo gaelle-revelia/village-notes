@@ -121,7 +121,7 @@ const Q2_CHIPS = ["AEEH / complément AEEH", "PCH", "Carte mobilité", "AVPF", "
 const Q3_CHIPS = ["Nouveau diagnostic", "Nouveaux soins", "Changement situation pro", "Nouveau matériel", "Scolarisation à venir"];
 const Q4_CHIPS = ["En emploi", "Temps partiel lié au handicap", "Arrêt maladie", "Arrêt d'activité lié au handicap", "Sans emploi", "Freelance / indépendant"];
 const Q5_CHIPS = ["Milieu ordinaire", "ULIS", "IME / ITEP", "Pas encore scolarisé·e"];
-const Q6_CHIPS = ["Plus d'autonomie", "Entrée à l'école", "Mise en place SESSAD", "Nouveau matériel", "Maintien des droits actuels", "Autre"];
+const Q6_CHIPS = ["Continuer le parcours actuel", "Entrée ou maintien à l'école", "Établissement spécialisé", "Communication", "Autonomie au quotidien", "Nouveau matériel", "Autre"];
 const Q8_CHIPS = ["Oui, je l'ai", "Pas encore", "Certificat simplifié"];
 
 const OutilsSyntheseMdph = () => {
@@ -447,6 +447,11 @@ const OutilsSyntheseMdph = () => {
             {currentQ > 5 && q5 && <UserBubble text={q5Answer()} />}
             <AiBubble text={`6 — Quel est ton projet pour ${displayName} dans les 2-3 prochaines années ?`} />
             <ChipGroup chips={Q6_CHIPS} selected={q6Chips} multi onToggle={(c) => toggleMulti(c, q6Chips, setQ6Chips)} />
+            <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
+              <p style={{ fontSize: 11, color: "#8B74E0", lineHeight: 1.55 }}>
+                Précise à l'oral : dispositifs visés (SESSAD, AESH…), fréquence souhaitée, projet scolaire, objectif thérapeutique, horizon de temps…
+              </p>
+            </div>
             {q6Vocal.trim() && (
               <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
             )}
