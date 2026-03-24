@@ -415,10 +415,6 @@ const OutilsSyntheseMdph = () => {
             <UserBubble text={q5Answer()} />
             <AiBubble text={`Quel est ton projet pour ${displayName} dans les 2-3 prochaines années ?`} />
             <ChipGroup chips={Q6_CHIPS} selected={q6Chips} multi onToggle={(c) => toggleMulti(c, q6Chips, setQ6Chips)} />
-            <OrSeparator />
-            <div className="mb-2 flex justify-end">
-              <Textarea placeholder="Décris ton projet..." value={q6Vocal} onChange={(e) => setQ6Vocal(e.target.value)} className="text-[14px] font-sans border-none italic placeholder:italic" style={{ ...glassCard, borderRadius: 14, minHeight: 70, maxWidth: "80%" }} autoResize />
-            </div>
             <WiredMicOrb onTranscription={(text) => setQ6Vocal((prev) => prev ? prev + " " + text : text)} />
           </>
         )}
