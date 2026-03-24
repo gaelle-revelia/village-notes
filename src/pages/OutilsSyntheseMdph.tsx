@@ -89,28 +89,8 @@ const ChipGroup = ({ chips, selected, multi, disabled, onToggle }: ChipGroupProp
   </div>
 );
 
-interface ThematicBlockProps {
-  icon: React.ReactNode;
-  title: string;
-  badge: string;
-  body: string;
-}
 
-const ThematicBlock = ({ icon, title, badge, body, onPreciser }: ThematicBlockProps & { onPreciser?: () => void }) => (
-  <div className="mb-4 px-5 py-4" style={glassCard}>
-    <div className="flex items-center gap-2 mb-2">
-      {icon}
-      <h3 className="text-[16px] font-serif font-semibold" style={{ color: "#1E1A1A" }}>{title}</h3>
-    </div>
-    <span className="inline-block px-2.5 py-0.5 text-[11px] font-sans font-medium mb-3" style={{ background: "rgba(139,116,224,0.12)", color: "#8B74E0", borderRadius: 999 }}>
-      {badge}
-    </span>
-    <p className="text-[14px] font-sans leading-relaxed mb-3" style={{ color: "#1E1A1A" }}>{body}</p>
-    <button onClick={onPreciser} className="w-full py-2.5 text-[13px] font-sans font-medium" style={{ border: "1.5px dashed #8B74E0", color: "#8B74E0", borderRadius: 12, background: "transparent" }}>
-      ✏️ Préciser ce bloc
-    </button>
-  </div>
-);
+
 
 // --- Questions config ---
 const Q1_CHIPS = ["Première demande", "Renouvellement", "Évolution de situation"];
