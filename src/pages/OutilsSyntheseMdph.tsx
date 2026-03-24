@@ -364,7 +364,7 @@ const OutilsSyntheseMdph = () => {
         {showQ3 && (
           <>
             {q2.length > 0 && <UserBubble text={q2.join(" · ")} />}
-            <AiBubble text="Qu'est-ce qui a changé depuis ton dernier dossier ?" />
+            <AiBubble text="3 — Qu'est-ce qui a changé depuis ton dernier dossier ?" />
             <ChipGroup chips={Q3_CHIPS} selected={q3Chips} multi onToggle={(c) => toggleMulti(c, q3Chips, setQ3Chips)} />
             <WiredMicOrb onTranscription={(text) => setQ3Vocal((prev) => prev ? prev + " " + text : text)} />
             {q3Vocal.trim() && (
