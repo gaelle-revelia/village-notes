@@ -48,7 +48,7 @@ const Auth = () => {
       <div className="w-full max-w-[400px] rounded-2xl p-6" style={{ background: "rgba(255,255,255,0.52)", backdropFilter: "blur(16px) saturate(1.6)", WebkitBackdropFilter: "blur(16px) saturate(1.6)", border: "1px solid rgba(255,255,255,0.72)", boxShadow: "0 4px 16px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8)" }}>
         {view === "login" && (
           <LoginForm
-            onSwitchToSignup={() => setView("signup")}
+            onSwitchToSignup={() => navigate("/waitlist")}
             onForgotPassword={() => setView("forgot-password")}
           />
         )}
