@@ -192,7 +192,7 @@ const Onboarding = () => {
       { onConflict: "user_id" }
     );
 
-    setStep(5);
+    setStep(7);
   };
 
   return (
