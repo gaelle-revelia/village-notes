@@ -161,30 +161,48 @@ const OutilsSyntheseMdph = () => {
 
   // --- Visibility rules ---
   const showQ1 = true;
-  const showQ2 = q1 !== null;
-  const showQ3 = q1 === "Renouvellement" || q1 === "Évolution de situation";
-  const showQ4 = q2.length > 0 && (!showQ3 || q3Chips.length > 0 || q3Vocal.trim().length > 0);
-  const showQ5 = q4 !== null;
-  const showQ6 = q5 !== null;
-  const showQ7 = q6Chips.length > 0 || q6Vocal.trim().length > 0;
-  const showQ8 = q7Seen;
+  const showQ2 = currentQ >= 2;
+  const showQ3 = currentQ >= 3 && (q1 === "Renouvellement" || q1 === "Évolution de situation");
+  const showQ4 = currentQ >= 4;
+  const showQ5 = currentQ >= 5;
+  const showQ6 = currentQ >= 6;
+  const showQ7 = currentQ >= 7;
+  const showQ8 = currentQ >= 8;
   const showResults = generatedBlocks !== null;
 
-  // Set q7Seen when Q7 becomes visible
-  useEffect(() => {
-    if (showQ7 && !q7Seen) setQ7Seen(true);
-  }, [showQ7, q7Seen]);
-
   // --- Progress bar ---
-  const answeredCount = [
-    q1 !== null,
-    q2.length > 0,
-    q4 !== null,
-    q5 !== null,
-    q6Chips.length > 0 || q6Vocal.trim().length > 0,
-    q8Etat !== null,
-  ].filter(Boolean).length;
-  const progressPercent = (answeredCount / 7) * 100;
+  const progressPercent = (currentQ / 8) * 100;
+
+  // --- Step navigation ---
+  const isCurrentStepValid = () => {
+    switch (currentQ) {
+      case 1: return q1 !== null;
+      case 2: return q2.length > 0;
+      case 3: return q3Chips.length > 0 || q3Vocal.trim().length > 0;
+      case 4: return q4 !== null;
+      case 5: return q5 !== null;
+      case 6: return q6Chips.length > 0 || q6Vocal.trim().length > 0;
+      case 7: return true;
+      case 8: return q8Etat !== null;
+      default: return false;
+    }
+  };
+
+  const advanceStep = () => {
+    if (currentQ === 8) { handleGenerateMdph(); return; }
+    let next = currentQ + 1;
+    if (currentQ === 2 && !(q1 === "Renouvellement" || q1 === "Évolution de situation")) {
+      next = 4;
+    }
+    setCurrentQ(next);
+  };
+
+  // --- Q3 skip edge case ---
+  useEffect(() => {
+    if (currentQ === 3 && !(q1 === "Renouvellement" || q1 === "Évolution de situation")) {
+      setCurrentQ(4);
+    }
+  }, [currentQ, q1]);
 
   // --- Data fetching ---
   useEffect(() => {
@@ -200,7 +218,7 @@ const OutilsSyntheseMdph = () => {
   // --- Auto-scroll ---
   useEffect(() => {
     setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
-  }, [showQ2, showQ3, showQ4, showQ5, showQ6, showQ7, showQ8, showResults]);
+  }, [currentQ]);
 
   const toggleSingle = (val: string, current: string | null, setter: (v: string | null) => void) => {
     setter(current === val ? null : val);
