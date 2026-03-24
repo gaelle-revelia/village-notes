@@ -1,25 +1,48 @@
 
 
-## Plan: Remove NSM step from Onboarding
+## Plan: Insert StepMateriel as step 5 in Onboarding.tsx
 
 **File**: `src/pages/Onboarding.tsx` (only)
 
-### Surgical edits
+### Edits
 
-1. **Line 11**: Remove `import { StepNSM }` line
-2. **Line 16**: Change `TOTAL_STEPS = 7` → `TOTAL_STEPS = 6`
-3. **Lines 173**: In `handleVocabulaire`, replace `setStep(6)` with onboarding completion + `setStep(6)`:
+1. **Line 14**: Add import after StepSoins import:
    ```ts
-   await supabase.from("profiles").upsert(
-     { user_id: user.id, onboarding_completed: true },
-     { onConflict: "user_id" }
-   );
-   setStep(6);
+   import { StepMateriel } from "@/components/onboarding/StepMateriel";
    ```
-4. **Lines 176-196**: Delete entire `handleNSM` function
-5. **Line 252**: Change `onSkip={() => setStep(6)}` → `onSkip` calls same completion logic (upsert + setStep(6))
-6. **Line 266**: Remove `{step === 6 && <StepNSM .../>}`
-7. **Line 267**: Change `step === 7` → `step === 6` for StepReady
 
-Flow becomes: 1.Enfant → 2.Village → 3.Médicaments → 4.Soins → 5.Vocabulaire → 6.Ready
+2. **Line 16**: `TOTAL_STEPS = 6` → `TOTAL_STEPS = 7`
+
+3. **Line 178**: `setStep(6)` → `setStep(7)` (in handleVocabulaire)
+
+4. **Lines 229-242**: Replace StepVocabulaire block (was step 5) with StepMateriel at step 5 + StepVocabulaire at step 6:
+   ```tsx
+   {step === 5 && enfantId && (
+     <StepMateriel
+       prenomEnfant={prenomEnfant}
+       enfantId={enfantId}
+       onNext={() => setStep(6)}
+       onSkip={() => setStep(6)}
+     />
+   )}
+   {step === 6 && enfantId && (
+     <StepVocabulaire
+       prenomEnfant={prenomEnfant}
+       enfantId={enfantId}
+       intervenants={villageIntervenants}
+       onNext={handleVocabulaire}
+       onSkip={async () => {
+         await supabase.from("profiles").upsert(
+           { user_id: user.id, onboarding_completed: true },
+           { onConflict: "user_id" }
+         );
+         setStep(7);
+       }}
+     />
+   )}
+   ```
+
+5. **Line 244**: `[3, 4, 5]` → `[3, 4, 5, 6]` (enfantId error fallback)
+
+6. **Line 255**: `step === 6` → `step === 7` (StepReady)
 
