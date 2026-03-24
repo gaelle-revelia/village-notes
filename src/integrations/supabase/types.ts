@@ -181,6 +181,7 @@ export type Database = {
           created_at: string
           date_naissance: string | null
           diagnostic_label: string | null
+          has_materiel: boolean
           has_medicaments: boolean
           has_soins: boolean
           id: string
@@ -195,6 +196,7 @@ export type Database = {
           created_at?: string
           date_naissance?: string | null
           diagnostic_label?: string | null
+          has_materiel?: boolean
           has_medicaments?: boolean
           has_soins?: boolean
           id?: string
@@ -209,6 +211,7 @@ export type Database = {
           created_at?: string
           date_naissance?: string | null
           diagnostic_label?: string | null
+          has_materiel?: boolean
           has_medicaments?: boolean
           has_soins?: boolean
           id?: string
