@@ -176,7 +176,7 @@ const Onboarding = () => {
       { user_id: user.id, onboarding_completed: true },
       { onConflict: "user_id" }
     );
-    setStep(6);
+    setStep(7);
   };
 
   return (
