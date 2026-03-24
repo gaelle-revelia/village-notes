@@ -746,6 +746,7 @@ export type Database = {
           contenu: string | null
           created_at: string | null
           enfant_id: string
+          etat: string
           etat_emotionnel: string | null
           id: string
           metadata: Json | null
@@ -760,6 +761,7 @@ export type Database = {
           contenu?: string | null
           created_at?: string | null
           enfant_id: string
+          etat?: string
           etat_emotionnel?: string | null
           id?: string
           metadata?: Json | null
@@ -774,6 +776,7 @@ export type Database = {
           contenu?: string | null
           created_at?: string | null
           enfant_id?: string
+          etat?: string
           etat_emotionnel?: string | null
           id?: string
           metadata?: Json | null
