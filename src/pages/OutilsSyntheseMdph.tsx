@@ -1,16 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Copy, Share2, Pencil, RefreshCw, Sparkles, Settings, Stethoscope, BookOpen, Users, Briefcase, Mail } from "lucide-react";
+import { ArrowLeft, Sparkles } from "lucide-react";
 import WiredMicOrb from "@/components/synthese/WiredMicOrb";
 import BottomNavBar from "@/components/BottomNavBar";
 import { useEnfantPrenom } from "@/hooks/useEnfantPrenom";
 import { useEnfantId } from "@/hooks/useEnfantId";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import PreciserBlocDrawer from "@/components/synthese/PreciserBlocDrawer";
 
 // --- Shared styles ---
 const glassCard: React.CSSProperties = {
@@ -92,28 +89,8 @@ const ChipGroup = ({ chips, selected, multi, disabled, onToggle }: ChipGroupProp
   </div>
 );
 
-interface ThematicBlockProps {
-  icon: React.ReactNode;
-  title: string;
-  badge: string;
-  body: string;
-}
 
-const ThematicBlock = ({ icon, title, badge, body, onPreciser }: ThematicBlockProps & { onPreciser?: () => void }) => (
-  <div className="mb-4 px-5 py-4" style={glassCard}>
-    <div className="flex items-center gap-2 mb-2">
-      {icon}
-      <h3 className="text-[16px] font-serif font-semibold" style={{ color: "#1E1A1A" }}>{title}</h3>
-    </div>
-    <span className="inline-block px-2.5 py-0.5 text-[11px] font-sans font-medium mb-3" style={{ background: "rgba(139,116,224,0.12)", color: "#8B74E0", borderRadius: 999 }}>
-      {badge}
-    </span>
-    <p className="text-[14px] font-sans leading-relaxed mb-3" style={{ color: "#1E1A1A" }}>{body}</p>
-    <button onClick={onPreciser} className="w-full py-2.5 text-[13px] font-sans font-medium" style={{ border: "1.5px dashed #8B74E0", color: "#8B74E0", borderRadius: 12, background: "transparent" }}>
-      ✏️ Préciser ce bloc
-    </button>
-  </div>
-);
+
 
 // --- Questions config ---
 const Q1_CHIPS = ["Première demande", "Renouvellement", "Évolution de situation"];
@@ -157,13 +134,11 @@ const OutilsSyntheseMdph = () => {
 
   const [memoCount, setMemoCount] = useState<number | null>(null);
   const [parentPrenom, setParentPrenom] = useState<string | null>(null);
-  const [emailValue, setEmailValue] = useState("");
+  
   const [isGenerating, setIsGenerating] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("Préparation du dossier en cours…");
-  const [generatedBlocks, setGeneratedBlocks] = useState<any[] | null>(null);
   const [syntheseId, setSyntheseId] = useState<string | null>(null);
-  const [refineBloc, setRefineBloc] = useState<{ id: string; title: string; content: string; cas_usage: string } | null>(null);
 
   // --- Visibility rules ---
   const showQ0 = true;
@@ -176,7 +151,7 @@ const OutilsSyntheseMdph = () => {
   const showQ6 = currentQ >= 6;
   const showQ7 = currentQ >= 7;
   const showQ8 = currentQ >= 8;
-  const showResults = generatedBlocks !== null;
+  
 
   // --- Loading message switch ---
   useEffect(() => {
@@ -306,10 +281,12 @@ const OutilsSyntheseMdph = () => {
         },
       });
       if (error) throw error;
-      if (data?.blocks) {
-        setGeneratedBlocks(data.blocks);
+      if (data?.synthese_id) {
+        setSyntheseId(data.synthese_id);
+        navigate("/outils/synthese/mdph/resultats", {
+          state: { syntheseId: data.synthese_id },
+        });
       }
-      if (data?.synthese_id) setSyntheseId(data.synthese_id);
     } catch (e) {
       console.error("generate-synthesis error:", e);
       toast({ title: "Une erreur est survenue — réessaie.", variant: "destructive" });
@@ -548,67 +525,11 @@ const OutilsSyntheseMdph = () => {
         )}
 
 
-        {/* Results */}
-        {showResults && (
-          <>
-            <UserBubble text={q8Answer()} />
-            <SectionSeparator text="Dossier MDPH" />
-
-            {generatedBlocks!.map((block: any, i: number) => {
-              const iconMap: Record<string, React.ReactNode> = {
-                Settings: <Settings size={18} style={{ color: "#8B74E0" }} />,
-                Stethoscope: <Stethoscope size={18} style={{ color: "#8B74E0" }} />,
-                BookOpen: <BookOpen size={18} style={{ color: "#8B74E0" }} />,
-                Heart: <Briefcase size={18} style={{ color: "#8B74E0" }} />,
-                Briefcase: <Briefcase size={18} style={{ color: "#8B74E0" }} />,
-              };
-              return (
-                <ThematicBlock
-                  key={block.id || i}
-                  icon={iconMap[block.icon] || <Settings size={18} style={{ color: "#8B74E0" }} />}
-                  title={block.title}
-                  badge={block.badge || ""}
-                  body={block.content}
-                  onPreciser={() => setRefineBloc({ id: block.id, title: block.title, content: block.content, cas_usage: "mdph" })}
-                />
-              );
-            })}
-
-            <p className="text-center text-[10px] font-sans mb-6" style={{ color: "#9A9490" }}>
-              Synthèse des observations de {parentPrenom ?? "Parent"} pour {displayName} · The Village · Mars 2026
-            </p>
-          </>
-        )}
-
-        {showResults && (
-          <div className="mb-4 px-1">
-            <div className="flex items-center gap-2">
-              <div className="flex-1 relative">
-                <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "#9A9490" }} />
-                <Input type="email" placeholder="ton@email.com" value={emailValue} onChange={(e) => setEmailValue(e.target.value)} className="pl-9 text-[13px] font-sans border-none" style={{ ...glassCard, borderRadius: 999, height: 44 }} />
-              </div>
-              <button className="px-5 py-2.5 text-[13px] font-sans font-semibold flex-shrink-0" style={{ background: "linear-gradient(135deg, #E8736A, #8B74E0)", color: "#fff", borderRadius: 999, border: "none" }}>
-                Envoyer →
-              </button>
-            </div>
-          </div>
-        )}
 
         <div ref={bottomRef} />
       </main>
 
-      {!showResults && renderCta()}
-
-      <PreciserBlocDrawer
-        isOpen={!!refineBloc}
-        onClose={() => setRefineBloc(null)}
-        bloc={refineBloc}
-        enfantId={enfantId ?? ""}
-        syntheseId={syntheseId ?? ""}
-        onBlockUpdated={(blocId, newContent) => {
-          setGeneratedBlocks((prev) => prev?.map((b) => b.id === blocId ? { ...b, content: newContent } : b) ?? null);
-        }}
-      />
+      {renderCta()}
 
       <BottomNavBar />
     </div>
