@@ -220,7 +220,7 @@ export default function ChildProfile() {
         {/* ── SOINS PARTICULIERS ── */}
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-sans font-medium text-foreground">🩺 Soins particuliers</span>
+            <span className="text-base font-semibold text-foreground" style={{ fontFamily: "DM Sans" }}>🩺 Soins particuliers</span>
             <div className="flex items-center gap-2">
               <span className="text-xs font-sans text-muted-foreground">
                 {hasSoins ? "Actif" : "Inactif"}

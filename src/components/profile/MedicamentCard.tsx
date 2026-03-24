@@ -23,9 +23,10 @@ export function MedicamentCard({
 
   return (
     <div
-      className={`bg-white/72 backdrop-blur-[16px] border rounded-2xl p-4 mb-2.5 transition-all cursor-pointer ${
+      className={`border rounded-2xl p-4 mb-2.5 transition-all cursor-pointer shadow-sm ${
         expanded ? "border-[#AFA9EC]" : "border-white/85"
       }`}
+      style={{ background: "rgba(255,255,255,0.82)", backdropFilter: "blur(16px)" }}
       onClick={() => { setExpanded((p) => !p); setConfirmDelete(false); }}
     >
       {/* Header */}
