@@ -55,8 +55,6 @@ const SectionSeparator = ({ text }: { text: string }) => (
   </div>
 );
 
-// MicOrb removed — using WiredMicOrb instead
-
 const OrSeparator = () => (
   <div className="flex justify-center my-4">
     <span className="text-[13px] font-sans" style={{ color: "#9A9490" }}>ou</span>
@@ -124,8 +122,6 @@ const Q3_CHIPS = ["Nouveau diagnostic", "Nouveaux soins", "Changement situation 
 const Q4_CHIPS = ["En emploi", "Arrêt lié au handicap", "Sans emploi", "Freelance / indépendant"];
 const Q5_CHIPS = ["Entrée à l'école", "Mise en place SESSAD", "Nouveau matériel", "Plus d'autonomie"];
 
-type Phase = 1 | 2 | 3 | 4 | 5 | 6 | 7;
-
 const OutilsSyntheseMdph = () => {
   const navigate = useNavigate();
   const prenom = useEnfantPrenom();
@@ -135,7 +131,23 @@ const OutilsSyntheseMdph = () => {
   const displayName = prenom ?? "votre enfant";
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  const [phase, setPhase] = useState<Phase>(1);
+  // --- Question states ---
+  const [q0, setQ0] = useState<string | null>(null);
+  const [q1, setQ1] = useState<string | null>(null);
+  const [q2, setQ2] = useState<string[]>([]);
+  const [q3Chips, setQ3Chips] = useState<string[]>([]);
+  const [q3Vocal, setQ3Vocal] = useState("");
+  const [q4, setQ4] = useState<string | null>(null);
+  const [q4TiercePersonne, setQ4TiercePersonne] = useState<boolean | null>(null);
+  const [q4HeuresTierce, setQ4HeuresTierce] = useState("");
+  const [q5, setQ5] = useState<string | null>(null);
+  const [q6Chips, setQ6Chips] = useState<string[]>([]);
+  const [q6Vocal, setQ6Vocal] = useState("");
+  const [q7, setQ7] = useState("");
+  const [q7Seen, setQ7Seen] = useState(false);
+  const [q8Etat, setQ8Etat] = useState<string | null>(null);
+  const [q8Vocal, setQ8Vocal] = useState("");
+
   const [memoCount, setMemoCount] = useState<number | null>(null);
   const [parentPrenom, setParentPrenom] = useState<string | null>(null);
   const [emailValue, setEmailValue] = useState("");
@@ -144,22 +156,35 @@ const OutilsSyntheseMdph = () => {
   const [syntheseId, setSyntheseId] = useState<string | null>(null);
   const [refineBloc, setRefineBloc] = useState<{ id: string; title: string; content: string; cas_usage: string } | null>(null);
 
-  // Q1 single-select
-  const [q1, setQ1] = useState<string | null>(null);
-  // Q2 multi-select
-  const [q2, setQ2] = useState<string[]>([]);
-  // Q3 multi-select + textarea
-  const [q3Chips, setQ3Chips] = useState<string[]>([]);
-  const [q3Text, setQ3Text] = useState("");
-  // Q4 single-select + textarea
-  const [q4, setQ4] = useState<string | null>(null);
-  const [q4Text, setQ4Text] = useState("");
-  // Q5 multi-select + textarea
-  const [q5Chips, setQ5Chips] = useState<string[]>([]);
-  const [q5Text, setQ5Text] = useState("");
-  // Q6 textarea only
-  const [q6Text, setQ6Text] = useState("");
+  // --- Visibility rules ---
+  const showQ1 = true;
+  const showQ2 = q1 !== null;
+  const showQ3 = q1 === "Renouvellement" || q1 === "Évolution de situation";
+  const showQ4 = q2.length > 0;
+  const showQ5 = q4 !== null;
+  const showQ6 = q5 !== null;
+  const showQ7 = q6Chips.length > 0 || q6Vocal.trim().length > 0;
+  const showQ8 = q7Seen;
+  const showResults = generatedBlocks !== null;
 
+  // Set q7Seen when Q7 becomes visible
+  useEffect(() => {
+    if (showQ7 && !q7Seen) setQ7Seen(true);
+  }, [showQ7, q7Seen]);
+
+  // --- Progress bar ---
+  const answeredCount = [
+    q0 !== null,
+    q1 !== null,
+    q2.length > 0,
+    q4 !== null,
+    q5 !== null,
+    q6Chips.length > 0 || q6Vocal.trim().length > 0,
+    q8Etat !== null,
+  ].filter(Boolean).length;
+  const progressPercent = (answeredCount / 7) * 100;
+
+  // --- Data fetching ---
   useEffect(() => {
     if (!enfantId) return;
     supabase.from("memos").select("id", { count: "exact", head: true }).eq("enfant_id", enfantId).then(({ count }) => setMemoCount(count ?? 0));
@@ -170,9 +195,10 @@ const OutilsSyntheseMdph = () => {
     supabase.from("profiles").select("prenom").eq("user_id", user.id).single().then(({ data }) => { if (data?.prenom) setParentPrenom(data.prenom); });
   }, [user]);
 
+  // --- Auto-scroll ---
   useEffect(() => {
     setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
-  }, [phase]);
+  }, [q1, q2, q3Chips, q3Vocal, q4, q5, q6Chips, q6Vocal, q7Seen, q8Etat, generatedBlocks]);
 
   const toggleSingle = (val: string, current: string | null, setter: (v: string | null) => void) => {
     setter(current === val ? null : val);
@@ -185,23 +211,17 @@ const OutilsSyntheseMdph = () => {
   // Answer text helpers
   const q3Answer = () => {
     const parts = [...q3Chips];
-    if (q3Text.trim()) parts.push(q3Text.trim());
+    if (q3Vocal.trim()) parts.push(q3Vocal.trim());
     return parts.join(" · ") || "Aucun changement";
   };
-  const q4Answer = () => q4 || q4Text.trim() || "Non précisé";
-  const q5Answer = () => {
-    const parts = [...q5Chips];
-    if (q5Text.trim()) parts.push(q5Text.trim());
+  const q4Answer = () => q4 || "Non précisé";
+  const q5Answer = () => q5 || "Non précisé";
+  const q6Answer = () => {
+    const parts = [...q6Chips];
+    if (q6Vocal.trim()) parts.push(q6Vocal.trim());
     return parts.join(" · ") || "Non précisé";
   };
-  const q6Answer = () => q6Text.trim() || "Rien à ajouter";
-
-  // CTA enabled states
-  const cta1Enabled = !!q1;
-  const cta2Enabled = q2.length > 0;
-  const cta3Enabled = q3Chips.length > 0 || q3Text.trim().length > 0;
-  const cta4Enabled = !!q4 || q4Text.trim().length > 0;
-  const cta5Enabled = q5Chips.length > 0 || q5Text.trim().length > 0;
+  const q8Answer = () => q8Vocal.trim() || "Rien à ajouter";
 
   const handleCopy = async () => {
     try {
@@ -219,12 +239,12 @@ const OutilsSyntheseMdph = () => {
           type: "mdph",
           enfant_id: enfantId,
           parent_context: {
-            vocal_mdph: q6Text.trim() || null,
+            vocal_mdph: q8Vocal.trim() || null,
             type_demande: q1,
             objectifs: q2,
             changements: q3Answer(),
             situation_pro: q4Answer(),
-            projet: q5Answer(),
+            projet: q6Answer(),
           },
         },
       });
@@ -233,7 +253,6 @@ const OutilsSyntheseMdph = () => {
         setGeneratedBlocks(data.blocks);
       }
       if (data?.synthese_id) setSyntheseId(data.synthese_id);
-      setPhase(7);
     } catch (e) {
       console.error("generate-synthesis error:", e);
       toast({ title: "Une erreur est survenue — réessaie.", variant: "destructive" });
@@ -244,7 +263,7 @@ const OutilsSyntheseMdph = () => {
 
   // --- CTA ---
   const renderCta = () => {
-    if (phase === 7) {
+    if (showResults) {
       return (
         <div className="fixed bottom-16 left-0 right-0 z-10 px-4 py-3" style={{ background: "rgba(255,255,255,0.72)", backdropFilter: "blur(20px) saturate(1.5)", WebkitBackdropFilter: "blur(20px) saturate(1.5)", borderTop: "1px solid rgba(255,255,255,0.6)", boxShadow: "0 -2px 12px rgba(0,0,0,0.05)" }}>
           <div className="flex items-center gap-2">
@@ -260,34 +279,27 @@ const OutilsSyntheseMdph = () => {
       );
     }
 
-    const configs: Record<number, { label: string; enabled: boolean; next: Phase; action?: () => void }> = {
-      1: { label: "Continuer →", enabled: cta1Enabled, next: 2 },
-      2: { label: "Continuer →", enabled: cta2Enabled, next: 3 },
-      3: { label: "Continuer →", enabled: cta3Enabled, next: 4 },
-      4: { label: "Continuer →", enabled: cta4Enabled, next: 5 },
-      5: { label: "Continuer →", enabled: cta5Enabled, next: 6 },
-      6: { label: isGenerating ? "Génération en cours..." : "Générer le dossier →", enabled: !isGenerating, action: handleGenerateMdph, next: 7 },
-    };
-
-    const cfg = configs[phase];
-    if (!cfg) return null;
+    const isReadyToGenerate = q8Etat !== null;
+    const ctaEnabled = isReadyToGenerate ? !isGenerating : q1 !== null;
+    const ctaLabel = isReadyToGenerate
+      ? (isGenerating ? "Génération en cours..." : "Générer mon dossier →")
+      : "Continuer →";
 
     return (
       <div className="fixed bottom-16 left-0 right-0 z-10 px-4 py-3" style={{ background: "rgba(255,255,255,0.72)", backdropFilter: "blur(20px) saturate(1.5)", WebkitBackdropFilter: "blur(20px) saturate(1.5)" }}>
         <button
-          onClick={() => cfg.enabled && (cfg.action ? cfg.action() : setPhase(cfg.next))}
-          disabled={!cfg.enabled}
+          onClick={() => {
+            if (isReadyToGenerate) handleGenerateMdph();
+          }}
+          disabled={!ctaEnabled}
           className={`w-full py-3.5 text-[15px] font-sans font-semibold transition-opacity ${isGenerating ? "animate-pulse" : ""}`}
-          style={{ background: "linear-gradient(135deg, #E8736A, #8B74E0)", color: "#fff", borderRadius: 14, border: "none", opacity: cfg.enabled ? 1 : 0.45 }}
+          style={{ background: "linear-gradient(135deg, #E8736A, #8B74E0)", color: "#fff", borderRadius: 14, border: "none", opacity: ctaEnabled ? 1 : 0.45 }}
         >
-          {cfg.label}
+          {ctaLabel}
         </button>
       </div>
     );
   };
-
-  const past = (p: Phase) => phase > p;
-  const current = (p: Phase) => phase === p;
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -298,84 +310,124 @@ const OutilsSyntheseMdph = () => {
         <h1 className="text-xl font-serif font-semibold" style={{ color: "#1E1A1A" }}>Dossier MDPH</h1>
       </header>
 
-      <main className="flex-1 px-4 pt-5 pb-32">
-        {/* BLOCK 1 — Q1 */}
-        <UserBubble text="📋 Dossier MDPH" />
-        <SectionSeparator text={`Dossier MDPH — ${displayName}`} />
-        <AiBubble text="Pour préparer ton dossier, j'ai besoin de quelques infos que je n'ai pas dans tes mémos." />
-        <AiBubble text="C'est quel type de demande ?" />
-        <ChipGroup chips={Q1_CHIPS} selected={q1 ? [q1] : []} disabled={past(1)} onToggle={(c) => toggleSingle(c, q1, setQ1)} />
+      {/* Progress bar */}
+      <div className="w-full" style={{ height: 3, background: "rgba(154,148,144,0.15)" }}>
+        <div
+          style={{
+            height: "100%",
+            width: `${progressPercent}%`,
+            background: "linear-gradient(90deg, #E8736A, #8B74E0)",
+            transition: "width 0.4s ease",
+            borderRadius: "0 2px 2px 0",
+          }}
+        />
+      </div>
 
-        {/* BLOCK 2 — Q2 */}
-        {phase >= 2 && (
+      <main className="flex-1 px-4 pt-5 pb-32">
+        {/* Q1 — Type de demande */}
+        {showQ1 && (
+          <>
+            <UserBubble text="📋 Dossier MDPH" />
+            <SectionSeparator text={`Dossier MDPH — ${displayName}`} />
+            <AiBubble text="Pour préparer ton dossier, j'ai besoin de quelques infos que je n'ai pas dans tes mémos." />
+            <AiBubble text="C'est quel type de demande ?" />
+            <ChipGroup chips={Q1_CHIPS} selected={q1 ? [q1] : []} onToggle={(c) => toggleSingle(c, q1, setQ1)} />
+          </>
+        )}
+
+        {/* Q2 — Objectifs */}
+        {showQ2 && (
           <>
             <UserBubble text={q1!} />
             <AiBubble text="Qu'est-ce que tu souhaites obtenir ?" />
-            <ChipGroup chips={Q2_CHIPS} selected={q2} multi disabled={past(2)} onToggle={(c) => toggleMulti(c, q2, setQ2)} />
+            <ChipGroup chips={Q2_CHIPS} selected={q2} multi onToggle={(c) => toggleMulti(c, q2, setQ2)} />
           </>
         )}
 
-        {/* BLOCK 3 — Q3 */}
-        {phase >= 3 && (
+        {/* Q3 — Changements (only for Renouvellement / Évolution) */}
+        {showQ3 && (
           <>
-            <UserBubble text={q2.join(" · ")} />
+            {q2.length > 0 && <UserBubble text={q2.join(" · ")} />}
             <AiBubble text="Qu'est-ce qui a changé depuis ton dernier dossier ?" />
-            <ChipGroup chips={Q3_CHIPS} selected={q3Chips} multi disabled={past(3)} onToggle={(c) => toggleMulti(c, q3Chips, setQ3Chips)} />
+            <ChipGroup chips={Q3_CHIPS} selected={q3Chips} multi onToggle={(c) => toggleMulti(c, q3Chips, setQ3Chips)} />
             <OrSeparator />
             <div className="mb-2 flex justify-end">
-              <Textarea placeholder="Précise si besoin..." value={q3Text} disabled={past(3)} onChange={(e) => setQ3Text(e.target.value)} className="text-[14px] font-sans border-none italic placeholder:italic" style={{ ...glassCard, borderRadius: 14, minHeight: 70, maxWidth: "80%" }} autoResize />
+              <Textarea placeholder="Précise si besoin..." value={q3Vocal} onChange={(e) => setQ3Vocal(e.target.value)} className="text-[14px] font-sans border-none italic placeholder:italic" style={{ ...glassCard, borderRadius: 14, minHeight: 70, maxWidth: "80%" }} autoResize />
             </div>
-            <WiredMicOrb disabled={past(3)} onTranscription={(text) => setQ3Text((prev) => prev ? prev + " " + text : text)} />
+            <WiredMicOrb onTranscription={(text) => setQ3Vocal((prev) => prev ? prev + " " + text : text)} />
           </>
         )}
 
-        {/* BLOCK 4 — Q4 */}
-        {phase >= 4 && (
+        {/* Q4 — Situation professionnelle */}
+        {showQ4 && (
           <>
-            <UserBubble text={q3Answer()} />
+            {showQ3 && <UserBubble text={q3Answer()} />}
+            {!showQ3 && <UserBubble text={q2.join(" · ")} />}
             <AiBubble text="Ta situation professionnelle actuelle ?" />
-            <ChipGroup chips={Q4_CHIPS} selected={q4 ? [q4] : []} disabled={past(4)} onToggle={(c) => toggleSingle(c, q4, setQ4)} />
-            <OrSeparator />
-            <div className="mb-5 flex justify-end">
-              <Textarea placeholder="Précise si besoin..." value={q4Text} disabled={past(4)} onChange={(e) => { setQ4Text(e.target.value); if (e.target.value.trim()) setQ4(null); }} className="text-[14px] font-sans border-none italic placeholder:italic" style={{ ...glassCard, borderRadius: 14, minHeight: 70, maxWidth: "80%" }} autoResize />
-            </div>
+            <ChipGroup chips={Q4_CHIPS} selected={q4 ? [q4] : []} onToggle={(c) => toggleSingle(c, q4, setQ4)} />
           </>
         )}
 
-        {/* BLOCK 5 — Q5 */}
-        {phase >= 5 && (
+        {/* Q5 — Projet de vie */}
+        {showQ5 && (
           <>
             <UserBubble text={q4Answer()} />
             <AiBubble text={`Quel est ton projet pour ${displayName} dans les 2-3 prochaines années ?`} />
-            <ChipGroup chips={Q5_CHIPS} selected={q5Chips} multi disabled={past(5)} onToggle={(c) => toggleMulti(c, q5Chips, setQ5Chips)} />
-            <OrSeparator />
-            <div className="mb-2 flex justify-end">
-              <Textarea placeholder="Décris ton projet..." value={q5Text} disabled={past(5)} onChange={(e) => setQ5Text(e.target.value)} className="text-[14px] font-sans border-none italic placeholder:italic" style={{ ...glassCard, borderRadius: 14, minHeight: 70, maxWidth: "80%" }} autoResize />
-            </div>
-            <WiredMicOrb disabled={past(5)} onTranscription={(text) => setQ5Text((prev) => prev ? prev + " " + text : text)} />
+            <ChipGroup chips={Q5_CHIPS} selected={q5 ? [q5] : []} onToggle={(c) => toggleSingle(c, q5, (v) => setQ5(v))} />
           </>
         )}
 
-        {/* BLOCK 6 — Q6 */}
-        {phase >= 6 && (
+        {/* Q6 — Précisions projet */}
+        {showQ6 && (
           <>
             <UserBubble text={q5Answer()} />
-            <AiBubble text="Y a-t-il quelque chose d'important que je ne vois pas dans tes mémos ?" />
-            <WiredMicOrb disabled={past(6)} onTranscription={(text) => setQ6Text((prev) => prev ? prev + " " + text : text)} />
+            <AiBubble text="Des précisions sur le projet de vie ?" />
+            <ChipGroup chips={["Entrée à l'école", "Mise en place SESSAD", "Nouveau matériel", "Plus d'autonomie"]} selected={q6Chips} multi onToggle={(c) => toggleMulti(c, q6Chips, setQ6Chips)} />
             <OrSeparator />
-            <div className="mb-5 flex justify-end">
-              <Textarea placeholder="Ajoute ce que tu veux mettre en avant..." value={q6Text} disabled={past(6)} onChange={(e) => setQ6Text(e.target.value)} className="text-[14px] font-sans border-none italic placeholder:italic" style={{ ...glassCard, borderRadius: 14, minHeight: 70, maxWidth: "80%" }} autoResize />
+            <div className="mb-2 flex justify-end">
+              <Textarea placeholder="Décris ton projet..." value={q6Vocal} onChange={(e) => setQ6Vocal(e.target.value)} className="text-[14px] font-sans border-none italic placeholder:italic" style={{ ...glassCard, borderRadius: 14, minHeight: 70, maxWidth: "80%" }} autoResize />
             </div>
+            <WiredMicOrb onTranscription={(text) => setQ6Vocal((prev) => prev ? prev + " " + text : text)} />
           </>
         )}
 
-        {/* BLOCK 7 — Result */}
-        {phase === 7 && (
+        {/* Q7 — Remarques supplémentaires (textarea) */}
+        {showQ7 && (
           <>
             <UserBubble text={q6Answer()} />
+            <AiBubble text="Y a-t-il quelque chose d'important que je ne vois pas dans tes mémos ?" />
+            <div className="mb-2 flex justify-end">
+              <Textarea placeholder="Ajoute ce que tu veux mettre en avant..." value={q7} onChange={(e) => setQ7(e.target.value)} className="text-[14px] font-sans border-none italic placeholder:italic" style={{ ...glassCard, borderRadius: 14, minHeight: 70, maxWidth: "80%" }} autoResize />
+            </div>
+            <WiredMicOrb onTranscription={(text) => setQ7((prev) => prev ? prev + " " + text : text)} />
+          </>
+        )}
+
+        {/* Q8 — État émotionnel */}
+        {showQ8 && (
+          <>
+            {q7.trim() && <UserBubble text={q7.trim()} />}
+            <AiBubble text="Comment tu te sens par rapport à cette démarche ?" />
+            <ChipGroup
+              chips={["Serein(e)", "Stressé(e)", "Épuisé(e)", "Motivé(e)", "Perdu(e)"]}
+              selected={q8Etat ? [q8Etat] : []}
+              onToggle={(c) => toggleSingle(c, q8Etat, setQ8Etat)}
+            />
+            <OrSeparator />
+            <div className="mb-5 flex justify-end">
+              <Textarea placeholder="Précise si besoin..." value={q8Vocal} onChange={(e) => setQ8Vocal(e.target.value)} className="text-[14px] font-sans border-none italic placeholder:italic" style={{ ...glassCard, borderRadius: 14, minHeight: 70, maxWidth: "80%" }} autoResize />
+            </div>
+            <WiredMicOrb onTranscription={(text) => setQ8Vocal((prev) => prev ? prev + " " + text : text)} />
+          </>
+        )}
+
+        {/* Results */}
+        {showResults && (
+          <>
+            <UserBubble text={q8Answer()} />
             <SectionSeparator text="Dossier MDPH" />
 
-            {generatedBlocks ? generatedBlocks.map((block: any, i: number) => {
+            {generatedBlocks!.map((block: any, i: number) => {
               const iconMap: Record<string, React.ReactNode> = {
                 Settings: <Settings size={18} style={{ color: "#8B74E0" }} />,
                 Stethoscope: <Stethoscope size={18} style={{ color: "#8B74E0" }} />,
@@ -393,14 +445,7 @@ const OutilsSyntheseMdph = () => {
                   onPreciser={() => setRefineBloc({ id: block.id, title: block.title, content: block.content, cas_usage: "mdph" })}
                 />
               );
-            }) : (
-              <>
-                <ThematicBlock icon={<Settings size={18} style={{ color: "#8B74E0" }} />} title="Autonomie au quotidien" badge="Dépendance totale" body={`${displayName} nécessite une aide humaine constante pour tous les actes de la vie quotidienne.`} />
-                <ThematicBlock icon={<Stethoscope size={18} style={{ color: "#8B74E0" }} />} title="Soins et suivi médical" badge="Suivi pluridisciplinaire intensif" body={`Le parcours de soins de ${displayName} comprend des séances hebdomadaires.`} />
-                <ThematicBlock icon={<BookOpen size={18} style={{ color: "#8B74E0" }} />} title="Scolarité et projet de vie" badge="Accompagnement spécialisé" body={`${displayName} est scolarisé(e) en milieu ordinaire avec accompagnement.`} />
-                <ThematicBlock icon={<Briefcase size={18} style={{ color: "#8B74E0" }} />} title="Situation professionnelle" badge="Arrêt d'activité lié au handicap" body={`Le handicap de ${displayName} a un impact majeur sur l'organisation familiale.`} />
-              </>
-            )}
+            })}
 
             <p className="text-center text-[10px] font-sans mb-6" style={{ color: "#9A9490" }}>
               Synthèse des observations de {parentPrenom ?? "Parent"} pour {displayName} · The Village · Mars 2026
