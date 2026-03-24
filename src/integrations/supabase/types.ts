@@ -311,6 +311,53 @@ export type Database = {
           },
         ]
       }
+      medicaments: {
+        Row: {
+          actif: boolean
+          conditions: string | null
+          created_at: string
+          dosage: string | null
+          enfant_id: string
+          frequence: string | null
+          id: string
+          instructions: string | null
+          nom: string
+          voie: string | null
+        }
+        Insert: {
+          actif?: boolean
+          conditions?: string | null
+          created_at?: string
+          dosage?: string | null
+          enfant_id: string
+          frequence?: string | null
+          id?: string
+          instructions?: string | null
+          nom: string
+          voie?: string | null
+        }
+        Update: {
+          actif?: boolean
+          conditions?: string | null
+          created_at?: string
+          dosage?: string | null
+          enfant_id?: string
+          frequence?: string | null
+          id?: string
+          instructions?: string | null
+          nom?: string
+          voie?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medicaments_enfant_id_fkey"
+            columns: ["enfant_id"]
+            isOneToOne: false
+            referencedRelation: "enfants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       memos: {
         Row: {
           content_structured: Json | null
