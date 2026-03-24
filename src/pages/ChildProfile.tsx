@@ -531,6 +531,35 @@ export default function ChildProfile() {
                   style={{ fontFamily: "DM Sans" }}
                 />
               </div>
+              <div>
+                <label className="text-sm font-medium text-foreground mb-1.5 block" style={{ fontFamily: "DM Sans" }}>
+                  Genre
+                </label>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditSexe(editSexe === "F" ? null : "F")}
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all border ${
+                      editSexe === "F"
+                        ? "bg-primary/10 border-primary text-primary"
+                        : "bg-white/50 border-white/60 text-muted-foreground"
+                    }`}
+                  >
+                    Fille
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditSexe(editSexe === "M" ? null : "M")}
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all border ${
+                      editSexe === "M"
+                        ? "bg-primary/10 border-primary text-primary"
+                        : "bg-white/50 border-white/60 text-muted-foreground"
+                    }`}
+                  >
+                    Garçon
+                  </button>
+                </div>
+              </div>
             </div>
             <div className="space-y-3 mt-6">
               <button
