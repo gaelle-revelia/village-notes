@@ -121,7 +121,7 @@ const Q2_CHIPS = ["AEEH / complément AEEH", "PCH", "Carte mobilité", "AVPF", "
 const Q3_CHIPS = ["Nouveau diagnostic", "Nouveaux soins", "Changement situation pro", "Nouveau matériel", "Scolarisation à venir"];
 const Q4_CHIPS = ["En emploi", "Temps partiel lié au handicap", "Arrêt maladie", "Arrêt d'activité lié au handicap", "Sans emploi", "Freelance / indépendant"];
 const Q5_CHIPS = ["Milieu ordinaire", "ULIS", "IME / ITEP", "Pas encore scolarisé·e"];
-const Q6_CHIPS = ["Continuer le parcours actuel", "Entrée ou maintien à l'école", "Établissement spécialisé", "Communication", "Autonomie au quotidien", "Nouveau matériel", "Autre"];
+
 const Q8_CHIPS = ["Oui, je l'ai", "Pas encore", "Certificat simplifié"];
 
 const OutilsSyntheseMdph = () => {
