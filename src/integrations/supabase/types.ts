@@ -317,6 +317,44 @@ export type Database = {
           },
         ]
       }
+      materiel: {
+        Row: {
+          actif: boolean
+          conseils: string | null
+          created_at: string
+          date_reception: string | null
+          enfant_id: string
+          id: string
+          nom: string
+        }
+        Insert: {
+          actif?: boolean
+          conseils?: string | null
+          created_at?: string
+          date_reception?: string | null
+          enfant_id: string
+          id?: string
+          nom: string
+        }
+        Update: {
+          actif?: boolean
+          conseils?: string | null
+          created_at?: string
+          date_reception?: string | null
+          enfant_id?: string
+          id?: string
+          nom?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "materiel_enfant_id_fkey"
+            columns: ["enfant_id"]
+            isOneToOne: false
+            referencedRelation: "enfants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       medicaments: {
         Row: {
           actif: boolean
