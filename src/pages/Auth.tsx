@@ -52,12 +52,6 @@ const Auth = () => {
             onForgotPassword={() => setView("forgot-password")}
           />
         )}
-        {view === "signup" && (
-          <SignupForm
-            onSwitchToLogin={() => setView("login")}
-            onSuccess={handleSignupSuccess}
-          />
-        )}
         {view === "forgot-password" && (
           <ForgotPasswordForm onBack={() => setView("login")} />
         )}
