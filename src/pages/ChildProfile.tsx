@@ -183,6 +183,7 @@ export default function ChildProfile() {
         prenom: editPrenom.trim() || prenom,
         date_naissance: editDateNaissance || null,
         diagnostic_label: editDiagnostic.trim() || null,
+        sexe: editSexe,
       })
       .eq("id", enfantId);
     setSavingInfos(false);
