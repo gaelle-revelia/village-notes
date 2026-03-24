@@ -387,7 +387,7 @@ const OutilsSyntheseMdph = () => {
             {q4Vocal.trim() && (
               <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
             )}
-            <WiredMicOrb onTranscription={(text) => setQ4Vocal((prev) => prev ? prev + " " + text : text)} />
+            <WiredMicOrb onTranscription={(text) => setQ4Vocal((prev) => prev ? prev + " " + text : text)} onRecordingChange={setIsRecording} />
             {(q4 === "Arrêt d'activité lié au handicap" || q4 === "Temps partiel lié au handicap" || q4 === "Arrêt maladie") && (
               <>
                 <AiBubble text="Tu fais appel à une tierce personne rémunérée ?" />
