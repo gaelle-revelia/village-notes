@@ -261,14 +261,9 @@ export default function ChildProfile() {
             )}
             <div className="flex items-center justify-between py-2.5 last:pb-0">
               <span className="text-sm text-muted-foreground" style={{ fontFamily: "DM Sans" }}>Genre</span>
-              <div className="flex gap-2">
-                <button className={pillClass("F")} onClick={() => handleSexeChange("F")} disabled={saving}>
-                  Fille {sexe === "F" && <Check size={12} className="inline ml-1" />}
-                </button>
-                <button className={pillClass("M")} onClick={() => handleSexeChange("M")} disabled={saving}>
-                  Garçon {sexe === "M" && <Check size={12} className="inline ml-1" />}
-                </button>
-              </div>
+              <span className="text-sm font-medium text-foreground" style={{ fontFamily: "DM Sans" }}>
+                {sexe === "F" ? "Fille" : sexe === "M" ? "Garçon" : "—"}
+              </span>
             </div>
           </div>
         </div>
