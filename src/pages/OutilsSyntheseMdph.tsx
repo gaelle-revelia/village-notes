@@ -134,7 +134,9 @@ const OutilsSyntheseMdph = () => {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   // --- Question states ---
-  const [currentQ, setCurrentQ] = useState(1);
+  const [currentQ, setCurrentQ] = useState(0.5);
+  const [q0Lien, setQ0Lien] = useState<string | null>(null);
+  const [q0Prenom, setQ0Prenom] = useState<string>("");
   const [q1, setQ1] = useState<string | null>(null);
   const [q2, setQ2] = useState<string[]>([]);
   const [q3Chips, setQ3Chips] = useState<string[]>([]);
