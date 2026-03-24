@@ -143,6 +143,7 @@ const OutilsSyntheseMdph = () => {
   const [q4Vocal, setQ4Vocal] = useState("");
   const [q4TiercePersonne, setQ4TiercePersonne] = useState<boolean | null>(null);
   const [q4HeuresTierce, setQ4HeuresTierce] = useState("");
+  const [q4bVocal, setQ4bVocal] = useState("");
   const [q5, setQ5] = useState<string | null>(null);
   const [q5Vocal, setQ5Vocal] = useState("");
   const [q6Chips, setQ6Chips] = useState<string[]>([]);
