@@ -424,7 +424,7 @@ const OutilsSyntheseMdph = () => {
         {/* Q6 — Projet 2-3 ans */}
         {showQ6 && (
           <>
-            <UserBubble text={q5Answer()} />
+            {currentQ > 5 && q5 && <UserBubble text={q5Answer()} />}
             <AiBubble text={`6 — Quel est ton projet pour ${displayName} dans les 2-3 prochaines années ?`} />
             <ChipGroup chips={Q6_CHIPS} selected={q6Chips} multi onToggle={(c) => toggleMulti(c, q6Chips, setQ6Chips)} />
             {q6Vocal.trim() && (
