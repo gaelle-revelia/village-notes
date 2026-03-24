@@ -199,7 +199,7 @@ const OutilsSyntheseMdph = () => {
   // --- Auto-scroll ---
   useEffect(() => {
     setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
-  }, [q1, q2, q3Chips, q3Vocal, q4, q5, q6Chips, q6Vocal, q7Seen, q8Etat, generatedBlocks]);
+  }, [showQ2, showQ3, showQ4, showQ5, showQ6, showQ7, showQ8, showResults]);
 
   const toggleSingle = (val: string, current: string | null, setter: (v: string | null) => void) => {
     setter(current === val ? null : val);
