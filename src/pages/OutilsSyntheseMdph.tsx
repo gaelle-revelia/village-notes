@@ -461,7 +461,7 @@ const OutilsSyntheseMdph = () => {
                 {q8Vocal.trim() && (
                   <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
                 )}
-                <WiredMicOrb onTranscription={(text) => setQ8Vocal((prev) => prev ? prev + " " + text : text)} />
+                <WiredMicOrb onTranscription={(text) => setQ8Vocal((prev) => prev ? prev + " " + text : text)} onRecordingChange={setIsRecording} />
               </>
             )}
             {(q8Etat === "Pas encore" || q8Etat === "Certificat simplifié") && (
