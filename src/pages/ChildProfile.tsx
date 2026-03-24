@@ -144,6 +144,34 @@ export default function ChildProfile() {
     fetchSoins();
   };
 
+  const fetchMateriel = async () => {
+    if (!enfantId) return;
+    const { data } = await supabase
+      .from("materiel")
+      .select("*")
+      .eq("enfant_id", enfantId)
+      .eq("actif", true)
+      .order("created_at", { ascending: true });
+    if (data) {
+      setMateriel(data);
+      if (data.length > 0 && !hasMateriel) {
+        setHasMateriel(true);
+        await supabase.from("enfants").update({ has_materiel: true }).eq("id", enfantId);
+      }
+    }
+  };
+
+  const toggleHasMateriel = async (value: boolean) => {
+    setHasMateriel(value);
+    if (!enfantId) return;
+    await supabase.from("enfants").update({ has_materiel: value }).eq("id", enfantId);
+  };
+
+  const deleteMateriel = async (id: string) => {
+    await supabase.from("materiel").update({ actif: false }).eq("id", id);
+    fetchMateriel();
+  };
+
   const handleSaveInfos = async () => {
     if (!enfantId) return;
     setSavingInfos(true);
