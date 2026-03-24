@@ -417,13 +417,22 @@ const OutilsSyntheseMdph = () => {
           <>
             <AiBubble text={`5 — Quelle est la situation scolaire de ${displayName} ?`} />
             <ChipGroup chips={Q5_CHIPS} selected={q5 ? [q5] : []} onToggle={(c) => toggleSingle(c, q5, (v) => setQ5(v))} />
-            {q5 === "🏫 Scolarisée" && q1 === "Renouvellement" && (
+            {q5 === "🏫 Scolarisé·e en milieu ordinaire" && q1 === "Renouvellement" && (
               <div style={{ margin: "0 4px 14px", background: "rgba(68,168,130,0.07)", borderLeft: "2.5px solid #44A882", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
                 <p style={{ fontSize: 11, color: "#2a8a6a", lineHeight: 1.55 }}>
                   Pense à demander le GEVASco à l'école — ce document est attendu par la MDPH pour les renouvellements.
                 </p>
               </div>
             )}
+            <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
+              <p style={{ fontSize: 11, color: "#8B74E0", lineHeight: 1.55 }}>
+                Décris la situation scolaire de {displayName} — AESH, aménagements, temps partiel, projet d'entrée…
+              </p>
+            </div>
+            {q5Vocal.trim() && (
+              <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
+            )}
+            <WiredMicOrb onTranscription={(text) => setQ5Vocal((prev) => prev ? prev + " " + text : text)} onRecordingChange={setIsRecording} />
           </>
         )}
 
