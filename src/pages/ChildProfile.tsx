@@ -43,6 +43,8 @@ export default function ChildProfile() {
           setSexe(data.sexe);
           setHasMedicaments(data.has_medicaments ?? false);
           setHasSoins(data.has_soins ?? false);
+          setDateNaissance(data.date_naissance ?? null);
+          setDiagnostic(data.diagnostic_label ?? null);
         }
       });
   }, [enfantId]);
