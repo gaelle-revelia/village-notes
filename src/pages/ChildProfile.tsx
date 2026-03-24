@@ -39,6 +39,12 @@ export default function ChildProfile() {
   const [soinModalOpen, setSoinModalOpen] = useState(false);
   const [editingSoin, setEditingSoin] = useState<any>(null);
 
+  // Materiel state
+  const [materiel, setMateriel] = useState<any[]>([]);
+  const [hasMateriel, setHasMateriel] = useState(false);
+  const [materielModalOpen, setMaterielModalOpen] = useState(false);
+  const [editingMateriel, setEditingMateriel] = useState<any>(null);
+
   useEffect(() => {
     if (!enfantId) return;
     supabase
