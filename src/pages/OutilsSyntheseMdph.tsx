@@ -119,7 +119,7 @@ const ThematicBlock = ({ icon, title, badge, body, onPreciser }: ThematicBlockPr
 const Q1_CHIPS = ["Première demande", "Renouvellement", "Évolution de situation"];
 const Q2_CHIPS = ["AEEH / complément AEEH", "PCH", "SESSAD", "Mention invalidité", "Mention stationnement", "AVPF", "Je ne sais pas", "Autre"];
 const Q3_CHIPS = ["Nouveau diagnostic", "Nouveaux soins", "Changement situation pro", "Nouveau matériel", "Scolarisation à venir"];
-const Q4_CHIPS = ["En emploi", "Arrêt lié au handicap", "Réduction d'activité liée au handicap", "Sans emploi", "Freelance / indépendant"];
+const Q4_CHIPS = ["En emploi", "Temps partiel lié au handicap", "Arrêt maladie", "Arrêt d'activité lié au handicap", "Sans emploi", "Freelance / indépendant"];
 const Q5_CHIPS = ["🏫 Scolarisée", "🌱 Entrée à l'école prévue", "🏥 Orientation médico-sociale", "— Pas encore scolarisée"];
 const Q6_CHIPS = ["Plus d'autonomie", "Entrée à l'école", "Mise en place SESSAD", "Nouveau matériel", "Maintien des droits actuels", "Autre"];
 const Q8_CHIPS = ["Oui, je l'ai", "Pas encore", "Certificat simplifié"];
@@ -139,6 +139,7 @@ const OutilsSyntheseMdph = () => {
   const [q3Chips, setQ3Chips] = useState<string[]>([]);
   const [q3Vocal, setQ3Vocal] = useState("");
   const [q4, setQ4] = useState<string | null>(null);
+  const [q4Vocal, setQ4Vocal] = useState("");
   const [q4TiercePersonne, setQ4TiercePersonne] = useState<boolean | null>(null);
   const [q4HeuresTierce, setQ4HeuresTierce] = useState("");
   const [q5, setQ5] = useState<string | null>(null);
@@ -369,7 +370,12 @@ const OutilsSyntheseMdph = () => {
             {!showQ3 && <UserBubble text={q2.join(" · ")} />}
             <AiBubble text="Ta situation professionnelle actuelle ?" />
             <ChipGroup chips={Q4_CHIPS} selected={q4 ? [q4] : []} onToggle={(c) => toggleSingle(c, q4, setQ4)} />
-            {(q4 === "Arrêt lié au handicap" || q4 === "Réduction d'activité liée au handicap") && (
+            <AiBubble text="N'hésite pas à préciser ta situation — chaque détail aide à mieux décrire la réalité du quotidien." italic />
+            <div className="mb-2 flex justify-end">
+              <Textarea placeholder="Ex : j'ai réduit à 3 jours par semaine depuis janvier 2025 pour accompagner les soins..." value={q4Vocal} onChange={(e) => setQ4Vocal(e.target.value)} className="text-[14px] font-sans border-none italic placeholder:italic" style={{ ...glassCard, borderRadius: 14, minHeight: 70, maxWidth: "80%" }} autoResize />
+            </div>
+            <WiredMicOrb onTranscription={(text) => setQ4Vocal((prev) => prev ? prev + " " + text : text)} />
+            {(q4 === "Arrêt d'activité lié au handicap" || q4 === "Temps partiel lié au handicap" || q4 === "Arrêt maladie") && (
               <>
                 <AiBubble text="Tu fais appel à une tierce personne rémunérée ?" />
                 <ChipGroup chips={["Oui", "Non"]} selected={q4TiercePersonne === true ? ["Oui"] : q4TiercePersonne === false ? ["Non"] : []} onToggle={(c) => setQ4TiercePersonne(c === "Oui")} />
