@@ -1,48 +1,54 @@
 
 
-## Plan : Ajouter le mode `answer_reformulation` (Option A)
+## Plan: Create StepMedicaments.tsx
 
-### Résumé
-Ajouter un mode `answer_reformulation` dans l'Edge Function `process-memo` qui transcrit l'audio puis reformule la réponse en texte clair (1-3 phrases). Modifier le hook `useVocalRecording` pour accepter un mode paramétrable et adapter `OutilsQuestions.tsx` pour utiliser ce nouveau mode.
+### Overview
+Create a new standalone onboarding step component for adding medications, with a qualification gate (yes/no) before showing the form.
 
-### Fichiers modifiés (3)
+### Component Structure
 
-**1. `supabase/functions/process-memo/index.ts`**
-- Ajouter une constante `ANSWER_REFORMULATION_PROMPT` avec le prompt fourni
-- Ajouter une fonction `reformulateAnswerFromTranscription(apiKey, transcription)` — même structure que `reformulateQuestionFromTranscription` mais retourne du texte brut (pas de JSON parsing), juste `content.trim()`
-- Dans le handler (ligne 297), ajouter `"answer_reformulation"` à la condition existante → après transcription, appeler la nouvelle fonction et retourner `{ answer: string }`
+**Phase 1 — Qualification screen** (default view)
+- Two clickable cards: "Oui, je veux le renseigner" and "Non, pas de traitement"
+- "Non" calls `onSkip()` immediately
+- "Oui" transitions to Phase 2
 
-**2. `src/hooks/useVocalRecording.ts`**
-- Accepter un paramètre optionnel `mode` (défaut: `"transcription_only"`)
-- Passer ce `mode` dans le body de `supabase.functions.invoke("process-memo", { body: { mode, audio_path } })`
-- Lire `data.answer || data.transcription` pour le résultat retourné
+**Phase 2 — Medication form**
+- Title + subtitle in Fraunces/DM Sans matching StepVocabulaire
+- List of added medications as dismissible cards (bg-[#EEEDFE] rounded-xl)
+- Inline form with fields:
+  - `nom` (Input, required)
+  - `dosage` (Input, optional)
+  - `voie` (single-select chips: Oral, Gastrostomie, Patch, Inhalé, Autre)
+  - `frequence` (multi-select chips: Matin, Midi, Soir, Au besoin, Autre)
+  - `instructions` (Textarea, optional)
+  - `conditions` (Input, optional)
+- "Ajouter ce médicament" button: inserts into `public.medicaments`, then fire-and-forget calls `generate-lexique` with `{ mots: [nom] }` and inserts returned entries into `enfant_lexique` with source `"onboarding_medicament"`
+- "Continuer" button (enabled when ≥1 medication added), calls `onNext()`
+- "Compléter plus tard" ghost link calls `onSkip()`
 
-**3. `src/pages/OutilsQuestions.tsx`**
-- Passer `"answer_reformulation"` au hook : `useVocalRecording("answer_reformulation")`
-- Aucun autre changement nécessaire — le texte retourné par `stopAnswerRecording()` sera déjà reformulé
+### Technical Details
 
-### Détail technique — Edge Function
+**File**: `src/components/onboarding/StepMedicaments.tsx`
 
-```text
-Nouvelle fonction (~25 lignes) :
-reformulateAnswerFromTranscription(apiKey, transcription)
-  → fetch AI_GATEWAY_URL avec prompt texte brut
-  → if !ok: handle 429/402/500
-  → return choices[0].message.content.trim()
-
-Handler branching (ligne 297) :
-  if (mode === "transcription_only" || mode === "question_reformulation" || mode === "answer_reformulation")
-    → transcription = transcribeTempAudio(...)
-    → if "transcription_only": return { transcription }
-    → if "question_reformulation": return reformulateQuestion(...)
-    → if "answer_reformulation": return { answer: reformulateAnswer(...) }
+**Props**:
+```typescript
+interface StepMedicamentsProps {
+  prenomEnfant: string;
+  enfantId: string;
+  onNext: () => void;
+  onSkip: () => void;
+}
 ```
 
-### Détail technique — Hook
+**Data flow**:
+1. Insert medication row into `medicaments` table via Supabase client
+2. Call `generate-lexique` edge function with `{ mots: [med.nom] }`
+3. If lexique entries returned, insert them into `enfant_lexique` with `source: "onboarding_medicament"` — silent catch on failure
+4. On remove, delete from `medicaments` by id
 
-```text
-export function useVocalRecording(mode = "transcription_only")
-  → invoke body: { mode, audio_path }
-  → resolve(data?.answer || data?.transcription || "")
-```
+**Chip styling** (inline classes):
+- Inactive: `bg-white/50 border border-white/60 text-muted-foreground rounded-full px-3 py-1.5 text-sm cursor-pointer`
+- Active: `bg-primary/10 border-primary text-primary font-medium rounded-full px-3 py-1.5 text-sm cursor-pointer`
+
+**No existing files modified.**
 
