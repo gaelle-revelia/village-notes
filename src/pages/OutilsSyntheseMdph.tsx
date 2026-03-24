@@ -366,10 +366,10 @@ const OutilsSyntheseMdph = () => {
             {q2.length > 0 && <UserBubble text={q2.join(" · ")} />}
             <AiBubble text="3 — Qu'est-ce qui a changé depuis ton dernier dossier ?" />
             <ChipGroup chips={Q3_CHIPS} selected={q3Chips} multi onToggle={(c) => toggleMulti(c, q3Chips, setQ3Chips)} />
-            <WiredMicOrb onTranscription={(text) => setQ3Vocal((prev) => prev ? prev + " " + text : text)} />
             {q3Vocal.trim() && (
               <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
             )}
+            <WiredMicOrb onTranscription={(text) => setQ3Vocal((prev) => prev ? prev + " " + text : text)} />
           </>
         )}
 
@@ -383,10 +383,10 @@ const OutilsSyntheseMdph = () => {
             <p style={{ fontSize: 12, color: "#9A9490", textAlign: "center", margin: "0 8px 12px", lineHeight: 1.5 }}>
               N'hésite pas à préciser ta situation — chaque détail aide à mieux décrire la réalité du quotidien.
             </p>
-            <WiredMicOrb onTranscription={(text) => setQ4Vocal((prev) => prev ? prev + " " + text : text)} />
             {q4Vocal.trim() && (
               <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
             )}
+            <WiredMicOrb onTranscription={(text) => setQ4Vocal((prev) => prev ? prev + " " + text : text)} />
             {(q4 === "Arrêt d'activité lié au handicap" || q4 === "Temps partiel lié au handicap" || q4 === "Arrêt maladie") && (
               <>
                 <AiBubble text="Tu fais appel à une tierce personne rémunérée ?" />
@@ -425,10 +425,10 @@ const OutilsSyntheseMdph = () => {
             <UserBubble text={q5Answer()} />
             <AiBubble text={`6 — Quel est ton projet pour ${displayName} dans les 2-3 prochaines années ?`} />
             <ChipGroup chips={Q6_CHIPS} selected={q6Chips} multi onToggle={(c) => toggleMulti(c, q6Chips, setQ6Chips)} />
-            <WiredMicOrb onTranscription={(text) => setQ6Vocal((prev) => prev ? prev + " " + text : text)} />
             {q6Vocal.trim() && (
               <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
             )}
+            <WiredMicOrb onTranscription={(text) => setQ6Vocal((prev) => prev ? prev + " " + text : text)} />
           </>
         )}
 
@@ -437,10 +437,10 @@ const OutilsSyntheseMdph = () => {
           <>
             <UserBubble text={q6Answer()} />
             <AiBubble text="7 — Y a-t-il quelque chose d'important que je ne vois pas dans tes mémos ?" />
-            <WiredMicOrb onTranscription={(text) => setQ7((prev) => prev ? prev + " " + text : text)} />
             {q7.trim() && (
               <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
             )}
+            <WiredMicOrb onTranscription={(text) => setQ7((prev) => prev ? prev + " " + text : text)} />
           </>
         )}
 
@@ -457,10 +457,10 @@ const OutilsSyntheseMdph = () => {
             {q8Etat === "Oui, je l'ai" && (
               <>
                 <AiBubble text="Tu peux me lire ces éléments si ton médecin les a renseignés : le diagnostic principal, les restrictions fonctionnelles, les soins mentionnés, ses remarques finales." italic />
-                <WiredMicOrb onTranscription={(text) => setQ8Vocal((prev) => prev ? prev + " " + text : text)} />
                 {q8Vocal.trim() && (
                   <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
                 )}
+                <WiredMicOrb onTranscription={(text) => setQ8Vocal((prev) => prev ? prev + " " + text : text)} />
               </>
             )}
             {(q8Etat === "Pas encore" || q8Etat === "Certificat simplifié") && (
