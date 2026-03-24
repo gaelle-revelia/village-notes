@@ -622,6 +622,53 @@ export type Database = {
           },
         ]
       }
+      soins: {
+        Row: {
+          actif: boolean
+          created_at: string
+          description: string | null
+          enfant_id: string
+          frequence: string | null
+          id: string
+          instructions: string | null
+          materiel: string | null
+          nom: string
+          signes_alerte: string | null
+        }
+        Insert: {
+          actif?: boolean
+          created_at?: string
+          description?: string | null
+          enfant_id: string
+          frequence?: string | null
+          id?: string
+          instructions?: string | null
+          materiel?: string | null
+          nom: string
+          signes_alerte?: string | null
+        }
+        Update: {
+          actif?: boolean
+          created_at?: string
+          description?: string | null
+          enfant_id?: string
+          frequence?: string | null
+          id?: string
+          instructions?: string | null
+          materiel?: string | null
+          nom?: string
+          signes_alerte?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "soins_enfant_id_fkey"
+            columns: ["enfant_id"]
+            isOneToOne: false
+            referencedRelation: "enfants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       specialties: {
         Row: {
           created_at: string
