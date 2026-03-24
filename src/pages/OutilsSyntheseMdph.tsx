@@ -204,6 +204,8 @@ const OutilsSyntheseMdph = () => {
     if (currentQ === 2 && !(q1 === "Renouvellement" || q1 === "Évolution de situation")) {
       next = 4;
     }
+    if (currentQ === 4) next = 4.5;
+    if (currentQ === 4.5) next = 5;
     setCurrentQ(next);
   };
 
