@@ -228,15 +228,31 @@ const Onboarding = () => {
             />
           )}
           {step === 3 && enfantId && (
+            <StepMedicaments
+              prenomEnfant={prenomEnfant}
+              enfantId={enfantId}
+              onNext={() => setStep(4)}
+              onSkip={() => setStep(4)}
+            />
+          )}
+          {step === 4 && enfantId && (
+            <StepSoins
+              prenomEnfant={prenomEnfant}
+              enfantId={enfantId}
+              onNext={() => setStep(5)}
+              onSkip={() => setStep(5)}
+            />
+          )}
+          {step === 5 && enfantId && (
             <StepVocabulaire
               prenomEnfant={prenomEnfant}
               enfantId={enfantId}
               intervenants={villageIntervenants}
               onNext={handleVocabulaire}
-              onSkip={() => setStep(4)}
+              onSkip={() => setStep(6)}
             />
           )}
-          {step === 3 && !enfantId && (
+          {[3, 4, 5].includes(step) && !enfantId && (
             <div className="flex flex-col items-center justify-center gap-4 text-center">
               <p className="text-muted-foreground">Une erreur est survenue. Veuillez recommencer.</p>
               <Button
@@ -247,8 +263,8 @@ const Onboarding = () => {
               </Button>
             </div>
           )}
-          {step === 4 && <StepNSM prenomEnfant={prenomEnfant} onNext={handleNSM} />}
-          {step === 5 && <StepReady prenomEnfant={prenomEnfant} />}
+          {step === 6 && <StepNSM prenomEnfant={prenomEnfant} onNext={handleNSM} />}
+          {step === 7 && <StepReady prenomEnfant={prenomEnfant} />}
         </div>
       </div>
     </main>
