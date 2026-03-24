@@ -178,6 +178,16 @@ const OutilsSyntheseMdph = () => {
   const showQ8 = currentQ >= 8;
   const showResults = generatedBlocks !== null;
 
+  // --- Loading message switch ---
+  useEffect(() => {
+    if (isGenerating) {
+      setLoadingMessage("Préparation du dossier en cours…");
+      const t = setTimeout(() => {
+        setLoadingMessage("Relecture et peaufinage des textes…");
+      }, 4000);
+      return () => clearTimeout(t);
+    }
+  }, [isGenerating]);
 
   // --- Step navigation ---
   const isCurrentStepValid = () => {
