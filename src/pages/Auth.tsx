@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { SignupForm } from "@/components/auth/SignupForm";
+
 import { LoginForm } from "@/components/auth/LoginForm";
 import { ForgotPasswordForm } from "@/components/auth/ForgotPasswordForm";
 import { EmailConfirmation } from "@/components/auth/EmailConfirmation";
