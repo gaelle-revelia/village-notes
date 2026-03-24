@@ -288,34 +288,15 @@ const OutilsSyntheseMdph = () => {
 
   // --- CTA ---
   const renderCta = () => {
-    if (showResults) {
-      return (
-        <div className="fixed bottom-16 left-0 right-0 z-10 px-4 py-3" style={{ background: "rgba(255,255,255,0.72)", backdropFilter: "blur(20px) saturate(1.5)", WebkitBackdropFilter: "blur(20px) saturate(1.5)", borderTop: "1px solid rgba(255,255,255,0.6)", boxShadow: "0 -2px 12px rgba(0,0,0,0.05)" }}>
-          <div className="flex items-center gap-2">
-            <div className="flex-1 relative">
-              <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "#9A9490" }} />
-              <Input type="email" placeholder="ton@email.com" value={emailValue} onChange={(e) => setEmailValue(e.target.value)} className="pl-9 text-[13px] font-sans border-none" style={{ ...glassCard, borderRadius: 999, height: 44 }} />
-            </div>
-            <button className="px-5 py-2.5 text-[13px] font-sans font-semibold flex-shrink-0" style={{ background: "linear-gradient(135deg, #E8736A, #8B74E0)", color: "#fff", borderRadius: 999, border: "none" }}>
-              Envoyer →
-            </button>
-          </div>
-        </div>
-      );
-    }
-
-    const isReadyToGenerate = q8Etat !== null;
-    const ctaEnabled = isReadyToGenerate ? !isGenerating : q1 !== null;
-    const ctaLabel = isReadyToGenerate
+    const ctaEnabled = isCurrentStepValid() && !isGenerating;
+    const ctaLabel = currentQ === 8
       ? (isGenerating ? "Génération en cours..." : "Générer mon dossier →")
       : "Continuer →";
 
     return (
       <div className="fixed bottom-16 left-0 right-0 z-10 px-4 py-3" style={{ background: "rgba(255,255,255,0.72)", backdropFilter: "blur(20px) saturate(1.5)", WebkitBackdropFilter: "blur(20px) saturate(1.5)" }}>
         <button
-          onClick={() => {
-            if (isReadyToGenerate) handleGenerateMdph();
-          }}
+          onClick={advanceStep}
           disabled={!ctaEnabled}
           className={`w-full py-3.5 text-[15px] font-sans font-semibold transition-opacity ${isGenerating ? "animate-pulse" : ""}`}
           style={{ background: "linear-gradient(135deg, #E8736A, #8B74E0)", color: "#fff", borderRadius: 14, border: "none", opacity: ctaEnabled ? 1 : 0.45 }}
