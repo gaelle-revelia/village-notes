@@ -381,13 +381,14 @@ const OutilsSyntheseMdph = () => {
             <AiBubble text="4 — Ta situation professionnelle actuelle ?" />
             <ChipGroup chips={Q4_CHIPS} selected={q4 ? [q4] : []} onToggle={(c) => toggleSingle(c, q4, setQ4)} />
             {q4 !== null && <UserBubble text={q4Answer()} />}
-            <p style={{ fontSize: 12, color: "#9A9490", textAlign: "center", margin: "0 8px 12px", lineHeight: 1.5 }}>
-              N'hésite pas à préciser ta situation — chaque détail aide à mieux décrire la réalité du quotidien.
-            </p>
-            {q4Vocal.trim() && (
-              <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
+            {q4 !== null && (
+              <>
+                {q4Vocal.trim() && (
+                  <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
+                )}
+                <WiredMicOrb onTranscription={(text) => setQ4Vocal((prev) => prev ? prev + " " + text : text)} onRecordingChange={setIsRecording} />
+              </>
             )}
-            <WiredMicOrb onTranscription={(text) => setQ4Vocal((prev) => prev ? prev + " " + text : text)} onRecordingChange={setIsRecording} />
             {(q4 === "Arrêt d'activité lié au handicap" || q4 === "Temps partiel lié au handicap" || q4 === "Arrêt maladie") && (
               <>
                 <AiBubble text="Tu fais appel à une tierce personne rémunérée ?" />
@@ -395,8 +396,8 @@ const OutilsSyntheseMdph = () => {
                 {q4TiercePersonne === true && (
                   <>
                     <AiBubble text="Combien d'heures par semaine environ ?" />
-                    <div className="mb-4 flex justify-end">
-                      <Input type="number" placeholder="ex : 8" value={q4HeuresTierce} onChange={(e) => setQ4HeuresTierce(e.target.value)} className="text-[14px] font-sans border-none" style={{ ...glassCard, borderRadius: 14, maxWidth: "50%", height: 44 }} />
+                    <div className="flex justify-end mb-4">
+                      <Input type="number" placeholder="ex : 8" value={q4HeuresTierce} onChange={(e) => setQ4HeuresTierce(e.target.value)} className="text-[14px] font-sans border-none" style={{ ...glassCard, borderRadius: 14, maxWidth: "50%", width: "50%", height: 44, textAlign: "center" }} />
                     </div>
                   </>
                 )}
