@@ -174,13 +174,6 @@ const OutilsSyntheseMdph = () => {
   const showQ8 = currentQ >= 8;
   const showResults = generatedBlocks !== null;
 
-  // --- Progress bar ---
-  const progressPercent = (() => {
-    const map: Record<number, number> = {
-      1: 1, 2: 2, 3: 3, 4: 4, 4.5: 5, 5: 6, 6: 7, 7: 8, 8: 9
-    };
-    return ((map[currentQ] ?? currentQ) / 9) * 100;
-  })();
 
   // --- Step navigation ---
   const isCurrentStepValid = () => {
@@ -338,18 +331,6 @@ const OutilsSyntheseMdph = () => {
         <h1 className="text-xl font-serif font-semibold" style={{ color: "#1E1A1A" }}>Dossier MDPH</h1>
       </header>
 
-      {/* Progress bar */}
-      <div className="w-full" style={{ height: 3, background: "rgba(154,148,144,0.15)" }}>
-        <div
-          style={{
-            height: "100%",
-            width: `${progressPercent}%`,
-            background: "linear-gradient(90deg, #E8736A, #8B74E0)",
-            transition: "width 0.4s ease",
-            borderRadius: "0 2px 2px 0",
-          }}
-        />
-      </div>
 
 
       <main className="flex-1 px-4 pt-5 pb-32">
@@ -415,14 +396,6 @@ const OutilsSyntheseMdph = () => {
               selected={q4TiercePersonne === true ? ["Oui"] : q4TiercePersonne === false ? ["Non"] : []}
               onToggle={(c) => setQ4TiercePersonne(c === "Oui")}
             />
-            {q4TiercePersonne === true && (
-              <>
-                <AiBubble text="Combien d'heures par semaine environ ?" />
-                <div className="flex justify-end mb-4">
-                  <Input type="number" placeholder="ex : 8" value={q4HeuresTierce} onChange={(e) => setQ4HeuresTierce(e.target.value)} className="text-[14px] font-sans border-none" style={{ ...glassCard, borderRadius: 14, maxWidth: "50%", width: "50%", height: 44, textAlign: "right" }} />
-                </div>
-              </>
-            )}
             <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
               <p style={{ fontSize: 11, color: "#8B74E0", lineHeight: 1.55 }}>
                 Précise à l'oral : qui intervient, combien d'heures par semaine, le coût mensuel environ…
