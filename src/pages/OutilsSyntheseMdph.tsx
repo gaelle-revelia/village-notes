@@ -120,7 +120,7 @@ const Q1_CHIPS = ["Première demande", "Renouvellement", "Évolution de situatio
 const Q2_CHIPS = ["AEEH / complément AEEH", "PCH", "Carte mobilité", "AVPF", "Je ne sais pas", "Autre"];
 const Q3_CHIPS = ["Nouveau diagnostic", "Nouveaux soins", "Changement situation pro", "Nouveau matériel", "Scolarisation à venir"];
 const Q4_CHIPS = ["En emploi", "Temps partiel lié au handicap", "Arrêt maladie", "Arrêt d'activité lié au handicap", "Sans emploi", "Freelance / indépendant"];
-const Q5_CHIPS = ["🏫 Scolarisé·e en milieu ordinaire", "🏫 Scolarisé·e en ULIS", "🏥 En établissement médico-social (IME, ITEP…)", "— Pas encore scolarisé·e"];
+const Q5_CHIPS = ["Milieu ordinaire", "ULIS", "IME / ITEP", "Pas encore scolarisé·e"];
 const Q6_CHIPS = ["Plus d'autonomie", "Entrée à l'école", "Mise en place SESSAD", "Nouveau matériel", "Maintien des droits actuels", "Autre"];
 const Q8_CHIPS = ["Oui, je l'ai", "Pas encore", "Certificat simplifié"];
 
@@ -422,7 +422,7 @@ const OutilsSyntheseMdph = () => {
           <>
             <AiBubble text={`5 — Quelle est la situation scolaire de ${displayName} ?`} />
             <ChipGroup chips={Q5_CHIPS} selected={q5 ? [q5] : []} onToggle={(c) => toggleSingle(c, q5, (v) => setQ5(v))} />
-            {q5 === "🏫 Scolarisé·e en milieu ordinaire" && q1 === "Renouvellement" && (
+            {q5 === "Milieu ordinaire" && q1 === "Renouvellement" && (
               <div style={{ margin: "0 4px 14px", background: "rgba(68,168,130,0.07)", borderLeft: "2.5px solid #44A882", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
                 <p style={{ fontSize: 11, color: "#2a8a6a", lineHeight: 1.55 }}>
                   Pense à demander le GEVASco à l'école — ce document est attendu par la MDPH pour les renouvellements.
