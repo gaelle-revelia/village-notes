@@ -96,6 +96,9 @@ serve(async (req) => {
     // 6. FETCH MEMOS
     let memos: any[] = [];
     let activites: any[] = [];
+    let medicamentsData: any[] | null = null;
+    let soinsData: any[] | null = null;
+    let materielData: any[] | null = null;
 
     if (type === "pick_me_up") {
       const { data: memosData } = await supabase
