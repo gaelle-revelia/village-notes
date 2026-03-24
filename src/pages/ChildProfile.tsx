@@ -135,6 +135,26 @@ export default function ChildProfile() {
     fetchSoins();
   };
 
+  const handleSaveInfos = async () => {
+    if (!enfantId) return;
+    setSavingInfos(true);
+    const { error } = await supabase
+      .from("enfants")
+      .update({
+        prenom: editPrenom.trim() || prenom,
+        date_naissance: editDateNaissance || null,
+        diagnostic_label: editDiagnostic.trim() || null,
+      })
+      .eq("id", enfantId);
+    setSavingInfos(false);
+    if (!error) {
+      setPrenom(editPrenom.trim() || prenom);
+      setDateNaissance(editDateNaissance || null);
+      setDiagnostic(editDiagnostic.trim() || null);
+      setEditingInfos(false);
+    }
+  };
+
   const pillClass = (value: string) =>
     `px-4 py-2 rounded-full text-sm font-sans transition-all border ${
       sexe === value
