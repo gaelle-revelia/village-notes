@@ -155,10 +155,22 @@ export default function ChildProfile() {
 
         {/* ── INFORMATIONS ── */}
         <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-between mb-1">
+          <div className="flex items-center justify-between w-full mb-1">
             <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider" style={{ fontFamily: "DM Sans" }}>
               Informations
             </span>
+            <button
+              onClick={() => {
+                setEditPrenom(prenom ?? "");
+                setEditDateNaissance(dateNaissance ?? "");
+                setEditDiagnostic(diagnostic ?? "");
+                setEditingInfos(true);
+              }}
+              className="text-sm font-medium text-[#534AB7]"
+              style={{ fontFamily: "DM Sans" }}
+            >
+              Modifier
+            </button>
           </div>
           <div
             className="rounded-2xl p-4 flex flex-col divide-y divide-[rgba(139,116,224,0.1)]"
