@@ -331,18 +331,6 @@ const OutilsSyntheseMdph = () => {
         <h1 className="text-xl font-serif font-semibold" style={{ color: "#1E1A1A" }}>Dossier MDPH</h1>
       </header>
 
-      {/* Progress bar */}
-      <div className="w-full" style={{ height: 3, background: "rgba(154,148,144,0.15)" }}>
-        <div
-          style={{
-            height: "100%",
-            width: `${progressPercent}%`,
-            background: "linear-gradient(90deg, #E8736A, #8B74E0)",
-            transition: "width 0.4s ease",
-            borderRadius: "0 2px 2px 0",
-          }}
-        />
-      </div>
 
 
       <main className="flex-1 px-4 pt-5 pb-32">
