@@ -367,7 +367,7 @@ const OutilsSyntheseMdph = () => {
 
         {showQ4 && (
           <>
-            {showQ3 && <UserBubble text={q3Answer()} />}
+            {showQ3 && q3Answer() && <UserBubble text={q3Answer()!} />}
             {!showQ3 && <UserBubble text={q2.join(" · ")} />}
             <AiBubble text="Ta situation professionnelle actuelle ?" />
             <ChipGroup chips={Q4_CHIPS} selected={q4 ? [q4] : []} onToggle={(c) => toggleSingle(c, q4, setQ4)} />
