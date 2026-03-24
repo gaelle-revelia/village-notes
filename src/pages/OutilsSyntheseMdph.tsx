@@ -212,17 +212,22 @@ const OutilsSyntheseMdph = () => {
   // Answer text helpers
   const q3Answer = () => {
     const parts = [...q3Chips];
-    if (q3Vocal.trim()) parts.push(q3Vocal.trim());
+    if (q3Vocal.trim()) parts.push("Enregistrement ajouté ✅");
     return parts.join(" · ") || "Aucun changement";
   };
   const q4Answer = () => q4 || "Non précisé";
   const q5Answer = () => q5 || "Non précisé";
   const q6Answer = () => {
     const parts = [...q6Chips];
-    if (q6Vocal.trim()) parts.push(q6Vocal.trim());
+    if (q6Vocal.trim()) parts.push("Enregistrement ajouté ✅");
     return parts.join(" · ") || "Non précisé";
   };
-  const q8Answer = () => q8Vocal.trim() || "Rien à ajouter";
+  const q8Answer = () => {
+    const parts: string[] = [];
+    if (q8Etat) parts.push(q8Etat);
+    if (q8Etat === "Oui, je l'ai" && q8Vocal.trim()) parts.push("Enregistrement ajouté ✅");
+    return parts.join(" · ") || "Rien à ajouter";
+  };
 
   const handleCopy = async () => {
     try {
