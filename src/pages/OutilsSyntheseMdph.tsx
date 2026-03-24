@@ -433,6 +433,9 @@ const OutilsSyntheseMdph = () => {
             <UserBubble text={q6Answer()} />
             <AiBubble text="Y a-t-il quelque chose d'important que je ne vois pas dans tes mémos ?" />
             <WiredMicOrb onTranscription={(text) => setQ7((prev) => prev ? prev + " " + text : text)} />
+            {q7.trim() && (
+              <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
+            )}
           </>
         )}
 
