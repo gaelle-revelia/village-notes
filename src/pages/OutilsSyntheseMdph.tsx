@@ -475,7 +475,11 @@ const OutilsSyntheseMdph = () => {
             />
             {q8Etat === "Oui, je l'ai" && (
               <>
-                <AiBubble text="Tu peux me lire ces éléments si ton médecin les a renseignés : le diagnostic principal, les restrictions fonctionnelles, les soins mentionnés, ses remarques finales." italic />
+                <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
+                  <p style={{ fontSize: 11, color: "#8B74E0", lineHeight: 1.55 }}>
+                    Le diagnostic principal, les restrictions fonctionnelles, les soins mentionnés, les remarques finales — lis directement ou reformule avec tes mots, pour que le dossier généré soit cohérent avec ce que le médecin a écrit.
+                  </p>
+                </div>
                 {q8Vocal.trim() && (
                   <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
                 )}
