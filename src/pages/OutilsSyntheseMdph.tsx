@@ -283,6 +283,8 @@ const OutilsSyntheseMdph = () => {
           type: "mdph",
           enfant_id: enfantId,
           parent_context: {
+            declarant_prenom: q0Prenom.trim(),
+            declarant_lien: q0Lien,
             vocal_mdph: q8Vocal.trim() || null,
             type_demande: q1,
             objectifs: q2,
