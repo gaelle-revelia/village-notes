@@ -121,7 +121,7 @@ const Q2_CHIPS = ["AEEH / complément AEEH", "PCH", "Carte mobilité", "AVPF", "
 const Q3_CHIPS = ["Nouveau diagnostic", "Nouveaux soins", "Changement situation pro", "Nouveau matériel", "Scolarisation à venir"];
 const Q4_CHIPS = ["En emploi", "Temps partiel lié au handicap", "Arrêt maladie", "Arrêt d'activité lié au handicap", "Sans emploi", "Freelance / indépendant"];
 const Q5_CHIPS = ["Milieu ordinaire", "ULIS", "IME / ITEP", "Pas encore scolarisé·e"];
-const Q6_CHIPS = ["Continuer le parcours actuel", "Entrée ou maintien à l'école", "Établissement spécialisé", "Communication", "Autonomie au quotidien", "Nouveau matériel", "Autre"];
+
 const Q8_CHIPS = ["Oui, je l'ai", "Pas encore", "Certificat simplifié"];
 
 const OutilsSyntheseMdph = () => {
@@ -184,7 +184,7 @@ const OutilsSyntheseMdph = () => {
       case 4: return q4 !== null;
       case 4.5: return q4TiercePersonne !== null;
       case 5: return q5 !== null;
-      case 6: return q6Chips.length > 0 || q6Vocal.trim().length > 0;
+      case 6: return q6Vocal.trim().length > 0;
       case 7: return true;
       case 8: return q8Etat !== null;
       default: return false;
@@ -252,9 +252,8 @@ const OutilsSyntheseMdph = () => {
     return parts.join(" · ") || "Non précisé";
   };
   const q6Answer = () => {
-    const parts = [...q6Chips];
-    if (q6Vocal.trim()) parts.push("Enregistrement ajouté ✅");
-    return parts.join(" · ") || "Non précisé";
+    if (q6Vocal.trim()) return "Enregistrement ajouté ✅";
+    return null;
   };
   const q8Answer = () => {
     const parts: string[] = [];
@@ -440,7 +439,6 @@ const OutilsSyntheseMdph = () => {
           <>
             {currentQ > 5 && q5 && <UserBubble text={q5Answer()} />}
             <AiBubble text={`6 — Quel est ton projet pour ${displayName} dans les 2-3 prochaines années ?`} />
-            <ChipGroup chips={Q6_CHIPS} selected={q6Chips} multi onToggle={(c) => toggleMulti(c, q6Chips, setQ6Chips)} />
             <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
               <p style={{ fontSize: 11, color: "#8B74E0", lineHeight: 1.55 }}>
                 Précise à l'oral : dispositifs visés (SESSAD, AESH…), fréquence souhaitée, projet scolaire, objectif thérapeutique, horizon de temps…
@@ -456,7 +454,7 @@ const OutilsSyntheseMdph = () => {
         {/* Q7 — Champ libre */}
          {showQ7 && (
           <>
-            {currentQ > 6 && <UserBubble text={q6Answer()} />}
+            {currentQ > 6 && q6Answer() && <UserBubble text={q6Answer()!} />}
             <AiBubble text="7 — Y a-t-il quelque chose d'important que je ne vois pas dans tes mémos ?" />
             {q7.trim() && (
               <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
