@@ -134,7 +134,7 @@ const OutilsSyntheseMdph = () => {
 
   const [memoCount, setMemoCount] = useState<number | null>(null);
   const [parentPrenom, setParentPrenom] = useState<string | null>(null);
-  const [emailValue, setEmailValue] = useState("");
+  
   const [isGenerating, setIsGenerating] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("Préparation du dossier en cours…");
