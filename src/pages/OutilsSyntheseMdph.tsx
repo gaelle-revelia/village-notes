@@ -184,7 +184,7 @@ const OutilsSyntheseMdph = () => {
       setLoadingMessage("Préparation du dossier en cours…");
       const t = setTimeout(() => {
         setLoadingMessage("Relecture et peaufinage des textes…");
-      }, 4000);
+      }, 7000);
       return () => clearTimeout(t);
     }
   }, [isGenerating]);
