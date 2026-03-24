@@ -175,7 +175,12 @@ const OutilsSyntheseMdph = () => {
   const showResults = generatedBlocks !== null;
 
   // --- Progress bar ---
-  const progressPercent = (currentQ / 8) * 100;
+  const progressPercent = (() => {
+    const map: Record<number, number> = {
+      1: 1, 2: 2, 3: 3, 4: 4, 4.5: 5, 5: 6, 6: 7, 7: 8, 8: 9
+    };
+    return ((map[currentQ] ?? currentQ) / 9) * 100;
+  })();
 
   // --- Step navigation ---
   const isCurrentStepValid = () => {
