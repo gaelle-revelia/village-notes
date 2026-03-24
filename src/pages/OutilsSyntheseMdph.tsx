@@ -234,7 +234,12 @@ const OutilsSyntheseMdph = () => {
     if (q3Vocal.trim()) parts.push("Enregistrement ajouté ✅");
     return parts.length > 0 ? parts.join(" · ") : null;
   };
-  const q4Answer = () => q4 || "Non précisé";
+  const q4Answer = () => {
+    const parts: string[] = [];
+    if (q4) parts.push(q4);
+    if (q4Vocal.trim()) parts.push("Enregistrement ajouté ✅");
+    return parts.join(" · ") || "Non précisé";
+  };
   const q5Answer = () => q5 || "Non précisé";
   const q6Answer = () => {
     const parts = [...q6Chips];
@@ -336,7 +341,7 @@ const OutilsSyntheseMdph = () => {
             <UserBubble text="📋 Dossier MDPH" />
             <SectionSeparator text={`Dossier MDPH — ${displayName}`} />
             <AiBubble text="Pour préparer ton dossier, j'ai besoin de quelques infos que je n'ai pas dans tes mémos." />
-            <AiBubble text="C'est quel type de demande ?" />
+            <AiBubble text="1 — C'est quel type de demande ?" />
             <ChipGroup chips={Q1_CHIPS} selected={q1 ? [q1] : []} onToggle={(c) => toggleSingle(c, q1, setQ1)} />
           </>
         )}
@@ -345,7 +350,7 @@ const OutilsSyntheseMdph = () => {
         {showQ2 && (
           <>
             <UserBubble text={q1!} />
-            <AiBubble text="Quels droits souhaites-tu demander ?" />
+            <AiBubble text="2 — Quels droits souhaites-tu demander ?" />
             <ChipGroup chips={Q2_CHIPS} selected={q2} multi onToggle={(c) => toggleMulti(c, q2, setQ2)} />
             <div style={{ margin: "0 4px 14px", background: "rgba(232,115,106,0.07)", borderLeft: "2.5px solid #E8736A", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
               <p style={{ fontSize: 11, color: "#9A9490", lineHeight: 1.55, fontStyle: "italic" }}>
@@ -359,7 +364,7 @@ const OutilsSyntheseMdph = () => {
         {showQ3 && (
           <>
             {q2.length > 0 && <UserBubble text={q2.join(" · ")} />}
-            <AiBubble text="Qu'est-ce qui a changé depuis ton dernier dossier ?" />
+            <AiBubble text="3 — Qu'est-ce qui a changé depuis ton dernier dossier ?" />
             <ChipGroup chips={Q3_CHIPS} selected={q3Chips} multi onToggle={(c) => toggleMulti(c, q3Chips, setQ3Chips)} />
             <WiredMicOrb onTranscription={(text) => setQ3Vocal((prev) => prev ? prev + " " + text : text)} />
             {q3Vocal.trim() && (
@@ -372,16 +377,16 @@ const OutilsSyntheseMdph = () => {
           <>
             {showQ3 && q3Answer() && <UserBubble text={q3Answer()!} />}
             {!showQ3 && <UserBubble text={q2.join(" · ")} />}
-            <AiBubble text="Ta situation professionnelle actuelle ?" />
+            <AiBubble text="4 — Ta situation professionnelle actuelle ?" />
             <ChipGroup chips={Q4_CHIPS} selected={q4 ? [q4] : []} onToggle={(c) => toggleSingle(c, q4, setQ4)} />
             {q4 !== null && <UserBubble text={q4Answer()} />}
             <p style={{ fontSize: 12, color: "#9A9490", textAlign: "center", margin: "0 8px 12px", lineHeight: 1.5 }}>
               N'hésite pas à préciser ta situation — chaque détail aide à mieux décrire la réalité du quotidien.
             </p>
-            <div className="mb-2 flex justify-end">
-              <Textarea placeholder="Ex : j'ai réduit à 3 jours par semaine depuis janvier 2025 pour accompagner les soins..." value={q4Vocal} onChange={(e) => setQ4Vocal(e.target.value)} className="text-[14px] font-sans border-none italic placeholder:italic" style={{ ...glassCard, borderRadius: 14, minHeight: 70, maxWidth: "78%", width: "78%" }} autoResize />
-            </div>
             <WiredMicOrb onTranscription={(text) => setQ4Vocal((prev) => prev ? prev + " " + text : text)} />
+            {q4Vocal.trim() && (
+              <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
+            )}
             {(q4 === "Arrêt d'activité lié au handicap" || q4 === "Temps partiel lié au handicap" || q4 === "Arrêt maladie") && (
               <>
                 <AiBubble text="Tu fais appel à une tierce personne rémunérée ?" />
@@ -402,7 +407,7 @@ const OutilsSyntheseMdph = () => {
         {/* Q5 — Situation scolaire */}
         {showQ5 && (
           <>
-            <AiBubble text={`Quelle est la situation scolaire de ${displayName} ?`} />
+            <AiBubble text={`5 — Quelle est la situation scolaire de ${displayName} ?`} />
             <ChipGroup chips={Q5_CHIPS} selected={q5 ? [q5] : []} onToggle={(c) => toggleSingle(c, q5, (v) => setQ5(v))} />
             {q5 === "🏫 Scolarisée" && q1 === "Renouvellement" && (
               <div style={{ margin: "0 4px 14px", background: "rgba(68,168,130,0.07)", borderLeft: "2.5px solid #44A882", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
@@ -418,7 +423,7 @@ const OutilsSyntheseMdph = () => {
         {showQ6 && (
           <>
             <UserBubble text={q5Answer()} />
-            <AiBubble text={`Quel est ton projet pour ${displayName} dans les 2-3 prochaines années ?`} />
+            <AiBubble text={`6 — Quel est ton projet pour ${displayName} dans les 2-3 prochaines années ?`} />
             <ChipGroup chips={Q6_CHIPS} selected={q6Chips} multi onToggle={(c) => toggleMulti(c, q6Chips, setQ6Chips)} />
             <WiredMicOrb onTranscription={(text) => setQ6Vocal((prev) => prev ? prev + " " + text : text)} />
             {q6Vocal.trim() && (
@@ -431,7 +436,7 @@ const OutilsSyntheseMdph = () => {
          {showQ7 && (
           <>
             <UserBubble text={q6Answer()} />
-            <AiBubble text="Y a-t-il quelque chose d'important que je ne vois pas dans tes mémos ?" />
+            <AiBubble text="7 — Y a-t-il quelque chose d'important que je ne vois pas dans tes mémos ?" />
             <WiredMicOrb onTranscription={(text) => setQ7((prev) => prev ? prev + " " + text : text)} />
             {q7.trim() && (
               <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
@@ -443,7 +448,7 @@ const OutilsSyntheseMdph = () => {
         {showQ8 && (
           <>
             {q7.trim() ? <UserBubble text="Enregistrement ajouté ✅" /> : null}
-            <AiBubble text="As-tu le certificat médical sous la main ?" />
+            <AiBubble text="8 — As-tu le certificat médical sous la main ?" />
             <ChipGroup
               chips={Q8_CHIPS}
               selected={q8Etat ? [q8Etat] : []}
