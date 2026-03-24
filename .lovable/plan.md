@@ -1,54 +1,26 @@
 
 
-## Plan: Create StepMedicaments.tsx
+## Plan: Wire StepMedicaments and StepSoins into Onboarding.tsx
 
-### Overview
-Create a new standalone onboarding step component for adding medications, with a qualification gate (yes/no) before showing the form.
+Six surgical edits to `src/pages/Onboarding.tsx`, no other files touched.
 
-### Component Structure
+### Changes
 
-**Phase 1 — Qualification screen** (default view)
-- Two clickable cards: "Oui, je veux le renseigner" and "Non, pas de traitement"
-- "Non" calls `onSkip()` immediately
-- "Oui" transitions to Phase 2
+1. **Lines 12-14** — Add two imports after StepReady, change TOTAL_STEPS to 7
 
-**Phase 2 — Medication form**
-- Title + subtitle in Fraunces/DM Sans matching StepVocabulaire
-- List of added medications as dismissible cards (bg-[#EEEDFE] rounded-xl)
-- Inline form with fields:
-  - `nom` (Input, required)
-  - `dosage` (Input, optional)
-  - `voie` (single-select chips: Oral, Gastrostomie, Patch, Inhalé, Autre)
-  - `frequence` (multi-select chips: Matin, Midi, Soir, Au besoin, Autre)
-  - `instructions` (Textarea, optional)
-  - `conditions` (Input, optional)
-- "Ajouter ce médicament" button: inserts into `public.medicaments`, then fire-and-forget calls `generate-lexique` with `{ mots: [nom] }` and inserts returned entries into `enfant_lexique` with source `"onboarding_medicament"`
-- "Continuer" button (enabled when ≥1 medication added), calls `onNext()`
-- "Compléter plus tard" ghost link calls `onSkip()`
+2. **Line 171** — In `handleVocabulaire`: `setStep(4)` → `setStep(6)`
 
-### Technical Details
+3. **Line 193** — In `handleNSM`: `setStep(5)` → `setStep(7)`
 
-**File**: `src/components/onboarding/StepMedicaments.tsx`
+4. **Lines 220-249** — Replace the JSX step rendering block with the new 7-step mapping:
+   - step 1 → StepEnfant (unchanged)
+   - step 2 → StepVillage (unchanged)
+   - step 3 → StepMedicaments (guarded by enfantId)
+   - step 4 → StepSoins (guarded by enfantId)
+   - step 5 → StepVocabulaire (guarded by enfantId, was step 3)
+   - step 6 → StepNSM (was step 4)
+   - step 7 → StepReady (was step 5)
+   - Error fallback for missing enfantId covers steps 3, 4, and 5: `[3,4,5].includes(step) && !enfantId`
 
-**Props**:
-```typescript
-interface StepMedicamentsProps {
-  prenomEnfant: string;
-  enfantId: string;
-  onNext: () => void;
-  onSkip: () => void;
-}
-```
-
-**Data flow**:
-1. Insert medication row into `medicaments` table via Supabase client
-2. Call `generate-lexique` edge function with `{ mots: [med.nom] }`
-3. If lexique entries returned, insert them into `enfant_lexique` with `source: "onboarding_medicament"` — silent catch on failure
-4. On remove, delete from `medicaments` by id
-
-**Chip styling** (inline classes):
-- Inactive: `bg-white/50 border border-white/60 text-muted-foreground rounded-full px-3 py-1.5 text-sm cursor-pointer`
-- Active: `bg-primary/10 border-primary text-primary font-medium rounded-full px-3 py-1.5 text-sm cursor-pointer`
-
-**No existing files modified.**
+No changes to handlers (handleEnfant, handleVillage), auth guards, saving overlay, ProgressBar, or any other file.
 
