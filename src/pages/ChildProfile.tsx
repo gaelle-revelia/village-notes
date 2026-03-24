@@ -132,7 +132,7 @@ export default function ChildProfile() {
     }`;
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col" style={{ background: "linear-gradient(160deg, #EDE8F5 0%, #F5EEF0 40%, #EEF0F8 100%)" }}>
       <header className="sticky top-0 z-10 flex items-center gap-3 px-4 py-3" style={{ background: "rgba(255,255,255,0.72)", backdropFilter: "blur(20px) saturate(1.5)", WebkitBackdropFilter: "blur(20px) saturate(1.5)", borderBottom: "1px solid rgba(255,255,255,0.6)", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
         <button onClick={() => navigate("/timeline")} className="flex items-center gap-1 text-sm font-sans text-primary">
           <ArrowLeft size={18} />
