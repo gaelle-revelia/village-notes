@@ -85,10 +85,10 @@ export function StepSoins({ prenomEnfant, enfantId, onNext, onSkip }: StepSoinsP
             className="text-[32px] font-semibold text-card-foreground leading-tight"
             style={{ fontFamily: "Fraunces" }}
           >
-            {prenomEnfant} a-t-il des soins spécifiques&nbsp;?
+            Des soins spécifiques&nbsp;?
           </h1>
           <p className="text-muted-foreground text-sm leading-relaxed" style={{ fontFamily: "DM Sans" }}>
-            Décrivez les gestes techniques ou soins quotidiens pour que toute personne qui s'occupe de votre enfant puisse les retrouver.
+            Décrivez les gestes techniques ou soins quotidiens pour {prenomEnfant} — utiles pour toute personne qui s'en occupe.
           </p>
         </div>
 
