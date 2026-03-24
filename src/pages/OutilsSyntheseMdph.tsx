@@ -196,6 +196,7 @@ const OutilsSyntheseMdph = () => {
   };
 
   const advanceStep = () => {
+    if (currentQ === 0.5) { setCurrentQ(1); return; }
     if (currentQ === 8) { handleGenerateMdph(); return; }
     let next = currentQ + 1;
     if (currentQ === 2 && !(q1 === "Renouvellement" || q1 === "Évolution de situation")) {
