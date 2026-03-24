@@ -599,18 +599,7 @@ const OutilsSyntheseMdph = () => {
         <div ref={bottomRef} />
       </main>
 
-      {!showResults && renderCta()}
-
-      <PreciserBlocDrawer
-        isOpen={!!refineBloc}
-        onClose={() => setRefineBloc(null)}
-        bloc={refineBloc}
-        enfantId={enfantId ?? ""}
-        syntheseId={syntheseId ?? ""}
-        onBlockUpdated={(blocId, newContent) => {
-          setGeneratedBlocks((prev) => prev?.map((b) => b.id === blocId ? { ...b, content: newContent } : b) ?? null);
-        }}
-      />
+      {renderCta()}
 
       <BottomNavBar />
     </div>
