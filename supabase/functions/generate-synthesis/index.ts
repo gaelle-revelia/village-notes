@@ -675,13 +675,17 @@ VIOLATIONS À CORRIGER :
 - "hypotonie axiale" → "faiblesse musculaire du tronc"
 - Tout terme médical latin ou technique absent du diagnostic et des vocaux parentaux
 
-2. "nous", "les parents" → "je" dans le bloc impact_professionnel uniquement
+2. "nous", "notre", "les parents" → "je", "ma", "mon" dans tous les blocs SAUF scolarite_c1 et scolarite_c3
 
 3. Prescriptions :
 "est nécessaire pour compenser", "est envisagé", "sont nécessaires pour" → reformuler en description de besoin sans prescrire la solution
 
 4. Assertions médicales de risque absentes du diagnostic_label et non dictées par le parent en Q8 :
 → supprimer ou reformuler en "fait l'objet d'un suivi médical spécialisé"
+
+5. Superlatifs et jugements de valeur sur la pathologie :
+"complexe", "lourd", "sévère" appliqués à la pathologie → supprimer l'adjectif, garder le fait.
+Exemple : "pathologie génétique complexe" → "pathologie génétique"
 
 RÈGLES :
 - Ne pas réécrire ce qui est correct
