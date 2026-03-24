@@ -181,6 +181,8 @@ export type Database = {
           created_at: string
           date_naissance: string | null
           diagnostic_label: string | null
+          has_medicaments: boolean
+          has_soins: boolean
           id: string
           mdph_derniere_demande: string | null
           mdph_type_demande: string | null
@@ -193,6 +195,8 @@ export type Database = {
           created_at?: string
           date_naissance?: string | null
           diagnostic_label?: string | null
+          has_medicaments?: boolean
+          has_soins?: boolean
           id?: string
           mdph_derniere_demande?: string | null
           mdph_type_demande?: string | null
@@ -205,6 +209,8 @@ export type Database = {
           created_at?: string
           date_naissance?: string | null
           diagnostic_label?: string | null
+          has_medicaments?: boolean
+          has_soins?: boolean
           id?: string
           mdph_derniere_demande?: string | null
           mdph_type_demande?: string | null
