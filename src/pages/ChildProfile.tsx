@@ -271,10 +271,206 @@ export default function ChildProfile() {
           </div>
         </div>
 
-        {/* ── TRAITEMENTS ── */}
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-between">
-            <span className="text-base font-semibold text-foreground" style={{ fontFamily: "DM Sans" }}>💊 Traitements</span>
+        {(() => {
+          const sections = [
+            {
+              key: "medicaments",
+              active: hasMedicaments,
+              node: (
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-base font-semibold text-foreground" style={{ fontFamily: "DM Sans" }}>💊 Traitements</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-sans text-muted-foreground">
+                        {hasMedicaments ? "Actif" : "Inactif"}
+                      </span>
+                      <button
+                        onClick={() => toggleHasMedicaments(!hasMedicaments)}
+                        className={`w-10 h-6 rounded-full transition-colors relative cursor-pointer ${
+                          hasMedicaments ? "bg-[#8B74E0]" : "bg-gray-200"
+                        }`}
+                      >
+                        <span className={`block w-5 h-5 bg-white rounded-full shadow absolute top-0.5 transition-transform ${
+                          hasMedicaments ? "translate-x-[18px]" : "translate-x-0.5"
+                        }`} />
+                      </button>
+                    </div>
+                  </div>
+                  {hasMedicaments && (
+                    <div className="mt-1">
+                      {medicaments.length === 0 ? (
+                        <div className="text-center py-4">
+                          <p className="text-sm text-muted-foreground font-sans">
+                            Aucun traitement renseigné
+                          </p>
+                          <button
+                            onClick={() => { setEditingMed(null); setMedModalOpen(true); }}
+                            className="mt-2 text-sm text-[#534AB7] font-medium"
+                          >
+                            + Ajouter
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          {medicaments.map((med) => (
+                            <MedicamentCard
+                              key={med.id}
+                              {...med}
+                              onEdit={(id) => {
+                                setEditingMed(medicaments.find((m) => m.id === id));
+                                setMedModalOpen(true);
+                              }}
+                              onDelete={deleteMedicament}
+                            />
+                          ))}
+                          <button
+                            onClick={() => { setEditingMed(null); setMedModalOpen(true); }}
+                            className="flex items-center gap-1.5 text-sm text-[#534AB7] font-medium mt-1 px-1"
+                          >
+                            <Plus size={14} />
+                            Ajouter un médicament
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ),
+            },
+            {
+              key: "soins",
+              active: hasSoins,
+              node: (
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-base font-semibold text-foreground" style={{ fontFamily: "DM Sans" }}>🩺 Soins particuliers</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-sans text-muted-foreground">
+                        {hasSoins ? "Actif" : "Inactif"}
+                      </span>
+                      <button
+                        onClick={() => toggleHasSoins(!hasSoins)}
+                        className={`w-10 h-6 rounded-full transition-colors relative cursor-pointer ${
+                          hasSoins ? "bg-[#44A882]" : "bg-gray-200"
+                        }`}
+                      >
+                        <span className={`block w-5 h-5 bg-white rounded-full shadow absolute top-0.5 transition-transform ${
+                          hasSoins ? "translate-x-[18px]" : "translate-x-0.5"
+                        }`} />
+                      </button>
+                    </div>
+                  </div>
+                  {hasSoins && (
+                    <div className="mt-1">
+                      {soins.length === 0 ? (
+                        <div className="text-center py-4">
+                          <p className="text-sm text-muted-foreground font-sans">
+                            Aucun soin spécifique renseigné
+                          </p>
+                          <button
+                            onClick={() => { setEditingSoin(null); setSoinModalOpen(true); }}
+                            className="mt-2 text-sm text-[#085041] font-medium"
+                          >
+                            + Ajouter
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          {soins.map((soin) => (
+                            <SoinCard
+                              key={soin.id}
+                              {...soin}
+                              onEdit={(id) => {
+                                setEditingSoin(soins.find((s) => s.id === id));
+                                setSoinModalOpen(true);
+                              }}
+                              onDelete={deleteSoin}
+                            />
+                          ))}
+                          <button
+                            onClick={() => { setEditingSoin(null); setSoinModalOpen(true); }}
+                            className="flex items-center gap-1.5 text-sm text-[#085041] font-medium mt-1 px-1"
+                          >
+                            <Plus size={14} />
+                            Ajouter un soin
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ),
+            },
+            {
+              key: "materiel",
+              active: hasMateriel,
+              node: (
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-base font-semibold text-foreground" style={{ fontFamily: "DM Sans" }}>🔧 Matériel</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-sans text-muted-foreground">
+                        {hasMateriel ? "Actif" : "Inactif"}
+                      </span>
+                      <button
+                        onClick={() => toggleHasMateriel(!hasMateriel)}
+                        className="w-10 h-6 rounded-full transition-colors relative cursor-pointer"
+                        style={{ background: hasMateriel ? "#E8A44A" : "#e5e7eb" }}
+                      >
+                        <span className={`block w-5 h-5 bg-white rounded-full shadow absolute top-0.5 transition-transform ${
+                          hasMateriel ? "translate-x-[18px]" : "translate-x-0.5"
+                        }`} />
+                      </button>
+                    </div>
+                  </div>
+                  {hasMateriel && (
+                    <div className="mt-1">
+                      {materiel.length === 0 ? (
+                        <div className="text-center py-4">
+                          <p className="text-sm text-muted-foreground font-sans">
+                            Aucun matériel renseigné
+                          </p>
+                          <button
+                            onClick={() => { setEditingMateriel(null); setMaterielModalOpen(true); }}
+                            className="mt-2 text-sm text-[#92560A] font-medium"
+                          >
+                            + Ajouter
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          {materiel.map((item) => (
+                            <MaterielCard
+                              key={item.id}
+                              {...item}
+                              onEdit={(id) => {
+                                setEditingMateriel(materiel.find((m) => m.id === id));
+                                setMaterielModalOpen(true);
+                              }}
+                              onDelete={deleteMateriel}
+                            />
+                          ))}
+                          <button
+                            onClick={() => { setEditingMateriel(null); setMaterielModalOpen(true); }}
+                            className="flex items-center gap-1.5 text-sm text-[#92560A] font-medium mt-1 px-1"
+                          >
+                            <Plus size={14} />
+                            Ajouter du matériel
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ),
+            },
+          ];
+          return [...sections]
+            .sort((a, b) => Number(b.active) - Number(a.active))
+            .map((s) => (
+              <React.Fragment key={s.key}>{s.node}</React.Fragment>
+            ));
+        })()}
             <div className="flex items-center gap-2">
               <span className="text-xs font-sans text-muted-foreground">
                 {hasMedicaments ? "Actif" : "Inactif"}
