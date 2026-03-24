@@ -1,35 +1,21 @@
 
 
-## Plan: Move Genre to read-only in card, editable in modal
+## Plan: Dynamic sorting of Traitements, Soins, Matériel sections
 
 **File**: `src/pages/ChildProfile.tsx` (only)
 
-### 6 edits (original line numbers):
+### Single edit — Lines 270–454
 
-1. **Line 28** — Add `editSexe` state after `savingInfos`:
-   ```ts
-   const [editSexe, setEditSexe] = useState<string | null>(null);
-   ```
+Replace the three static section blocks (Traitements lines 270-333, Soins lines 335-394, Matériel lines 396-454) with a dynamic sorted render:
 
-2. **Lines 261-271** — Replace Genre row (interactive pills) with read-only row:
-   ```tsx
-   <div className="flex items-center justify-between py-2.5 last:pb-0">
-     <span className="text-sm text-muted-foreground" style={{ fontFamily: "DM Sans" }}>Genre</span>
-     <span className="text-sm font-medium text-foreground" style={{ fontFamily: "DM Sans" }}>
-       {sexe === "F" ? "Fille" : sexe === "M" ? "Garçon" : "—"}
-     </span>
-   </div>
-   ```
+1. Define a `sections` array containing three entries, each with `key`, `active` flag, and `node` (the existing JSX for that section, unchanged).
+2. Render with `[...sections].sort((a, b) => Number(b.active) - Number(a.active)).map(...)` wrapped in `React.Fragment`.
 
-3. **Lines 221-225** — Add `setEditSexe(sexe)` in the Modifier button's onClick:
-   ```ts
-   setEditSexe(sexe);
-   setEditingInfos(true);
-   ```
+### Technical details
 
-4. **Lines 534-535** — After the Situation input div (line 533), insert Genre field with toggle pills using `editSexe`/`setEditSexe`
-
-5. **Lines 181-184** — Add `sexe: editSexe,` to the update payload in `handleSaveInfos`
-
-6. **Line 191** — Add `setSexe(editSexe);` in the save success block after existing setters
+- Import `React` if not already imported (needed for `React.Fragment`).
+- The `sections` array is defined inline in the JSX return block (or just above the return).
+- Each section's JSX is moved verbatim into its `node` property — no content changes.
+- Sort is stable in modern JS engines, preserving original order among sections with the same active state.
+- Modals, handlers, state, INFORMATIONS card — all untouched.
 
