@@ -134,6 +134,7 @@ const OutilsSyntheseMdph = () => {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   // --- Question states ---
+  const [currentQ, setCurrentQ] = useState(1);
   const [q1, setQ1] = useState<string | null>(null);
   const [q2, setQ2] = useState<string[]>([]);
   const [q3Chips, setQ3Chips] = useState<string[]>([]);
@@ -146,7 +147,7 @@ const OutilsSyntheseMdph = () => {
   const [q6Chips, setQ6Chips] = useState<string[]>([]);
   const [q6Vocal, setQ6Vocal] = useState("");
   const [q7, setQ7] = useState("");
-  const [q7Seen, setQ7Seen] = useState(false);
+  
   const [q8Etat, setQ8Etat] = useState<string | null>(null);
   const [q8Vocal, setQ8Vocal] = useState("");
 
@@ -160,30 +161,48 @@ const OutilsSyntheseMdph = () => {
 
   // --- Visibility rules ---
   const showQ1 = true;
-  const showQ2 = q1 !== null;
-  const showQ3 = q1 === "Renouvellement" || q1 === "Évolution de situation";
-  const showQ4 = q2.length > 0 && (!showQ3 || q3Chips.length > 0 || q3Vocal.trim().length > 0);
-  const showQ5 = q4 !== null;
-  const showQ6 = q5 !== null;
-  const showQ7 = q6Chips.length > 0 || q6Vocal.trim().length > 0;
-  const showQ8 = q7Seen;
+  const showQ2 = currentQ >= 2;
+  const showQ3 = currentQ >= 3 && (q1 === "Renouvellement" || q1 === "Évolution de situation");
+  const showQ4 = currentQ >= 4;
+  const showQ5 = currentQ >= 5;
+  const showQ6 = currentQ >= 6;
+  const showQ7 = currentQ >= 7;
+  const showQ8 = currentQ >= 8;
   const showResults = generatedBlocks !== null;
 
-  // Set q7Seen when Q7 becomes visible
-  useEffect(() => {
-    if (showQ7 && !q7Seen) setQ7Seen(true);
-  }, [showQ7, q7Seen]);
-
   // --- Progress bar ---
-  const answeredCount = [
-    q1 !== null,
-    q2.length > 0,
-    q4 !== null,
-    q5 !== null,
-    q6Chips.length > 0 || q6Vocal.trim().length > 0,
-    q8Etat !== null,
-  ].filter(Boolean).length;
-  const progressPercent = (answeredCount / 7) * 100;
+  const progressPercent = (currentQ / 8) * 100;
+
+  // --- Step navigation ---
+  const isCurrentStepValid = () => {
+    switch (currentQ) {
+      case 1: return q1 !== null;
+      case 2: return q2.length > 0;
+      case 3: return q3Chips.length > 0 || q3Vocal.trim().length > 0;
+      case 4: return q4 !== null;
+      case 5: return q5 !== null;
+      case 6: return q6Chips.length > 0 || q6Vocal.trim().length > 0;
+      case 7: return true;
+      case 8: return q8Etat !== null;
+      default: return false;
+    }
+  };
+
+  const advanceStep = () => {
+    if (currentQ === 8) { handleGenerateMdph(); return; }
+    let next = currentQ + 1;
+    if (currentQ === 2 && !(q1 === "Renouvellement" || q1 === "Évolution de situation")) {
+      next = 4;
+    }
+    setCurrentQ(next);
+  };
+
+  // --- Q3 skip edge case ---
+  useEffect(() => {
+    if (currentQ === 3 && !(q1 === "Renouvellement" || q1 === "Évolution de situation")) {
+      setCurrentQ(4);
+    }
+  }, [currentQ, q1]);
 
   // --- Data fetching ---
   useEffect(() => {
@@ -199,7 +218,7 @@ const OutilsSyntheseMdph = () => {
   // --- Auto-scroll ---
   useEffect(() => {
     setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
-  }, [showQ2, showQ3, showQ4, showQ5, showQ6, showQ7, showQ8, showResults]);
+  }, [currentQ]);
 
   const toggleSingle = (val: string, current: string | null, setter: (v: string | null) => void) => {
     setter(current === val ? null : val);
@@ -269,34 +288,15 @@ const OutilsSyntheseMdph = () => {
 
   // --- CTA ---
   const renderCta = () => {
-    if (showResults) {
-      return (
-        <div className="fixed bottom-16 left-0 right-0 z-10 px-4 py-3" style={{ background: "rgba(255,255,255,0.72)", backdropFilter: "blur(20px) saturate(1.5)", WebkitBackdropFilter: "blur(20px) saturate(1.5)", borderTop: "1px solid rgba(255,255,255,0.6)", boxShadow: "0 -2px 12px rgba(0,0,0,0.05)" }}>
-          <div className="flex items-center gap-2">
-            <div className="flex-1 relative">
-              <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "#9A9490" }} />
-              <Input type="email" placeholder="ton@email.com" value={emailValue} onChange={(e) => setEmailValue(e.target.value)} className="pl-9 text-[13px] font-sans border-none" style={{ ...glassCard, borderRadius: 999, height: 44 }} />
-            </div>
-            <button className="px-5 py-2.5 text-[13px] font-sans font-semibold flex-shrink-0" style={{ background: "linear-gradient(135deg, #E8736A, #8B74E0)", color: "#fff", borderRadius: 999, border: "none" }}>
-              Envoyer →
-            </button>
-          </div>
-        </div>
-      );
-    }
-
-    const isReadyToGenerate = q8Etat !== null;
-    const ctaEnabled = isReadyToGenerate ? !isGenerating : q1 !== null;
-    const ctaLabel = isReadyToGenerate
+    const ctaEnabled = isCurrentStepValid() && !isGenerating;
+    const ctaLabel = currentQ === 8
       ? (isGenerating ? "Génération en cours..." : "Générer mon dossier →")
       : "Continuer →";
 
     return (
       <div className="fixed bottom-16 left-0 right-0 z-10 px-4 py-3" style={{ background: "rgba(255,255,255,0.72)", backdropFilter: "blur(20px) saturate(1.5)", WebkitBackdropFilter: "blur(20px) saturate(1.5)" }}>
         <button
-          onClick={() => {
-            if (isReadyToGenerate) handleGenerateMdph();
-          }}
+          onClick={advanceStep}
           disabled={!ctaEnabled}
           className={`w-full py-3.5 text-[15px] font-sans font-semibold transition-opacity ${isGenerating ? "animate-pulse" : ""}`}
           style={{ background: "linear-gradient(135deg, #E8736A, #8B74E0)", color: "#fff", borderRadius: 14, border: "none", opacity: ctaEnabled ? 1 : 0.45 }}
@@ -422,12 +422,11 @@ const OutilsSyntheseMdph = () => {
         )}
 
         {/* Q7 — Champ libre */}
-        {showQ7 && (
+         {showQ7 && (
           <>
             <UserBubble text={q6Answer()} />
             <AiBubble text="Y a-t-il quelque chose d'important que je ne vois pas dans tes mémos ?" />
             <WiredMicOrb onTranscription={(text) => setQ7((prev) => prev ? prev + " " + text : text)} />
-            <button onClick={() => setQ7Seen(true)} style={{ background: "transparent", border: "none", color: "#9A9490", fontSize: 12, cursor: "pointer", display: "block", margin: "4px auto 0" }}>Passer →</button>
           </>
         )}
 
@@ -485,10 +484,24 @@ const OutilsSyntheseMdph = () => {
           </>
         )}
 
+        {showResults && (
+          <div className="mb-4 px-1">
+            <div className="flex items-center gap-2">
+              <div className="flex-1 relative">
+                <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "#9A9490" }} />
+                <Input type="email" placeholder="ton@email.com" value={emailValue} onChange={(e) => setEmailValue(e.target.value)} className="pl-9 text-[13px] font-sans border-none" style={{ ...glassCard, borderRadius: 999, height: 44 }} />
+              </div>
+              <button className="px-5 py-2.5 text-[13px] font-sans font-semibold flex-shrink-0" style={{ background: "linear-gradient(135deg, #E8736A, #8B74E0)", color: "#fff", borderRadius: 999, border: "none" }}>
+                Envoyer →
+              </button>
+            </div>
+          </div>
+        )}
+
         <div ref={bottomRef} />
       </main>
 
-      {renderCta()}
+      {!showResults && renderCta()}
 
       <PreciserBlocDrawer
         isOpen={!!refineBloc}
