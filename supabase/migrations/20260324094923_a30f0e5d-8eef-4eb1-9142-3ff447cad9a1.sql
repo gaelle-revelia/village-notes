@@ -1,0 +1,1 @@
+ALTER TABLE public.enfants ADD COLUMN IF NOT EXISTS has_materiel boolean NOT NULL DEFAULT false;
