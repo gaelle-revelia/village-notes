@@ -423,7 +423,7 @@ const OutilsSyntheseMdph = () => {
         {showQ6 && (
           <>
             <UserBubble text={q5Answer()} />
-            <AiBubble text={`Quel est ton projet pour ${displayName} dans les 2-3 prochaines années ?`} />
+            <AiBubble text={`6 — Quel est ton projet pour ${displayName} dans les 2-3 prochaines années ?`} />
             <ChipGroup chips={Q6_CHIPS} selected={q6Chips} multi onToggle={(c) => toggleMulti(c, q6Chips, setQ6Chips)} />
             <WiredMicOrb onTranscription={(text) => setQ6Vocal((prev) => prev ? prev + " " + text : text)} />
             {q6Vocal.trim() && (
