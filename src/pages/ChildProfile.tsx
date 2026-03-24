@@ -156,11 +156,11 @@ export default function ChildProfile() {
           <div
             className="rounded-2xl p-4 flex flex-col divide-y divide-[rgba(139,116,224,0.1)]"
             style={{
-              background: "rgba(255,255,255,0.88)",
-              backdropFilter: "blur(12px)",
-              WebkitBackdropFilter: "blur(12px)",
-              border: "1px solid rgba(255,255,255,0.85)",
-              boxShadow: "0 2px 12px rgba(139,116,224,0.08)",
+              background: "rgba(255,255,255,0.55)",
+              backdropFilter: "blur(16px)",
+              WebkitBackdropFilter: "blur(16px)",
+              border: "1px solid rgba(255,255,255,0.72)",
+              boxShadow: "0 2px 12px rgba(139,116,224,0.06)",
             }}
           >
             <div className="flex items-center justify-between py-2.5 first:pt-0 last:pb-0">
