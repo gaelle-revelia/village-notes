@@ -372,7 +372,9 @@ const OutilsSyntheseMdph = () => {
             <AiBubble text="Ta situation professionnelle actuelle ?" />
             <ChipGroup chips={Q4_CHIPS} selected={q4 ? [q4] : []} onToggle={(c) => toggleSingle(c, q4, setQ4)} />
             {q4 !== null && <UserBubble text={q4Answer()} />}
-            <AiBubble text="N'hésite pas à préciser ta situation — chaque détail aide à mieux décrire la réalité du quotidien." italic />
+            <p style={{ fontSize: 12, color: "#9A9490", textAlign: "center", margin: "0 8px 12px", lineHeight: 1.5 }}>
+              N'hésite pas à préciser ta situation — chaque détail aide à mieux décrire la réalité du quotidien.
+            </p>
             <div className="mb-2 flex justify-end">
               <Textarea placeholder="Ex : j'ai réduit à 3 jours par semaine depuis janvier 2025 pour accompagner les soins..." value={q4Vocal} onChange={(e) => setQ4Vocal(e.target.value)} className="text-[14px] font-sans border-none italic placeholder:italic" style={{ ...glassCard, borderRadius: 14, minHeight: 70, maxWidth: "78%", width: "78%" }} autoResize />
             </div>
