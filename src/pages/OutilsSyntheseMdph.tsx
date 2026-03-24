@@ -457,10 +457,10 @@ const OutilsSyntheseMdph = () => {
             {q8Etat === "Oui, je l'ai" && (
               <>
                 <AiBubble text="Tu peux me lire ces éléments si ton médecin les a renseignés : le diagnostic principal, les restrictions fonctionnelles, les soins mentionnés, ses remarques finales." italic />
-                <WiredMicOrb onTranscription={(text) => setQ8Vocal((prev) => prev ? prev + " " + text : text)} />
                 {q8Vocal.trim() && (
                   <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
                 )}
+                <WiredMicOrb onTranscription={(text) => setQ8Vocal((prev) => prev ? prev + " " + text : text)} />
               </>
             )}
             {(q8Etat === "Pas encore" || q8Etat === "Certificat simplifié") && (
