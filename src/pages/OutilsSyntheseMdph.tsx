@@ -431,7 +431,7 @@ const OutilsSyntheseMdph = () => {
             )}
             <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
               <p style={{ fontSize: 11, color: "#8B74E0", lineHeight: 1.55 }}>
-                Décris la situation scolaire de {displayName} — AESH, aménagements, temps partiel, projet d'entrée…
+                Coche la situation aujourd'hui — si une orientation est en cours ou prévue, précise-le à l'oral.
               </p>
             </div>
             {q5Vocal.trim() && (
