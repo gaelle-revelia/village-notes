@@ -64,6 +64,7 @@ const AppRoutes = () => {
       <Route path="/outils/questions" element={<OutilsQuestions />} />
       <Route path="/outils/synthese/pick-me-up" element={<OutilsSynthesePickMeUp />} />
       <Route path="/outils/synthese/mdph" element={<OutilsSyntheseMdph />} />
+      <Route path="/outils/synthese/mdph/resultats" element={<OutilsSyntheseMdphResultats />} />
       <Route path="/outils/synthese/rdv" element={<OutilsSyntheseRdv />} />
       <Route path="/outils/synthese/rdv/briefing" element={<OutilsSyntheseRdvBriefing />} />
       <Route path="/outils/synthese/rdv/presentation" element={<PlaceholderScreen title="Présenter l'enfant" />} />
