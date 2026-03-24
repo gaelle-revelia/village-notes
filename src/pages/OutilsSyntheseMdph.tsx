@@ -175,7 +175,6 @@ const OutilsSyntheseMdph = () => {
 
   // --- Progress bar ---
   const answeredCount = [
-    q0 !== null,
     q1 !== null,
     q2.length > 0,
     q4 !== null,
