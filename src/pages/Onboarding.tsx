@@ -10,8 +10,10 @@ import { StepVillage } from "@/components/onboarding/StepVillage";
 import { StepVocabulaire } from "@/components/onboarding/StepVocabulaire";
 import { StepNSM } from "@/components/onboarding/StepNSM";
 import { StepReady } from "@/components/onboarding/StepReady";
+import { StepMedicaments } from "@/components/onboarding/StepMedicaments";
+import { StepSoins } from "@/components/onboarding/StepSoins";
 
-const TOTAL_STEPS = 5;
+const TOTAL_STEPS = 7;
 
 const Onboarding = () => {
   const { user, loading } = useAuth();
@@ -168,7 +170,7 @@ const Onboarding = () => {
         toast({ title: "Erreur", description: "Impossible de sauvegarder le vocabulaire.", variant: "destructive" });
       }
     }
-    setStep(4);
+    setStep(6);
   };
 
   const handleNSM = async (score: number) => {
@@ -190,7 +192,7 @@ const Onboarding = () => {
       { onConflict: "user_id" }
     );
 
-    setStep(5);
+    setStep(7);
   };
 
   return (
@@ -226,15 +228,31 @@ const Onboarding = () => {
             />
           )}
           {step === 3 && enfantId && (
+            <StepMedicaments
+              prenomEnfant={prenomEnfant}
+              enfantId={enfantId}
+              onNext={() => setStep(4)}
+              onSkip={() => setStep(4)}
+            />
+          )}
+          {step === 4 && enfantId && (
+            <StepSoins
+              prenomEnfant={prenomEnfant}
+              enfantId={enfantId}
+              onNext={() => setStep(5)}
+              onSkip={() => setStep(5)}
+            />
+          )}
+          {step === 5 && enfantId && (
             <StepVocabulaire
               prenomEnfant={prenomEnfant}
               enfantId={enfantId}
               intervenants={villageIntervenants}
               onNext={handleVocabulaire}
-              onSkip={() => setStep(4)}
+              onSkip={() => setStep(6)}
             />
           )}
-          {step === 3 && !enfantId && (
+          {[3, 4, 5].includes(step) && !enfantId && (
             <div className="flex flex-col items-center justify-center gap-4 text-center">
               <p className="text-muted-foreground">Une erreur est survenue. Veuillez recommencer.</p>
               <Button
@@ -245,8 +263,8 @@ const Onboarding = () => {
               </Button>
             </div>
           )}
-          {step === 4 && <StepNSM prenomEnfant={prenomEnfant} onNext={handleNSM} />}
-          {step === 5 && <StepReady prenomEnfant={prenomEnfant} />}
+          {step === 6 && <StepNSM prenomEnfant={prenomEnfant} onNext={handleNSM} />}
+          {step === 7 && <StepReady prenomEnfant={prenomEnfant} />}
         </div>
       </div>
     </main>
