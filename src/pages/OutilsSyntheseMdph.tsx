@@ -350,7 +350,7 @@ const OutilsSyntheseMdph = () => {
         {showQ2 && (
           <>
             <UserBubble text={q1!} />
-            <AiBubble text="Quels droits souhaites-tu demander ?" />
+            <AiBubble text="2 — Quels droits souhaites-tu demander ?" />
             <ChipGroup chips={Q2_CHIPS} selected={q2} multi onToggle={(c) => toggleMulti(c, q2, setQ2)} />
             <div style={{ margin: "0 4px 14px", background: "rgba(232,115,106,0.07)", borderLeft: "2.5px solid #E8736A", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
               <p style={{ fontSize: 11, color: "#9A9490", lineHeight: 1.55, fontStyle: "italic" }}>
