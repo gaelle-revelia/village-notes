@@ -10,21 +10,24 @@ const formatTime = (s: number) => {
 
 interface WiredMicOrbProps {
   onTranscription: (text: string) => void;
+  onRecordingChange?: (recording: boolean) => void;
   disabled?: boolean;
 }
 
-export default function WiredMicOrb({ onTranscription, disabled }: WiredMicOrbProps) {
+export default function WiredMicOrb({ onTranscription, onRecordingChange, disabled }: WiredMicOrbProps) {
   const { isRecording, isTranscribing, error, elapsedSeconds, startRecording, stopRecording } = useVocalRecording();
 
   const handleTap = useCallback(async () => {
     if (disabled || isTranscribing) return;
     if (isRecording) {
+      onRecordingChange?.(false);
       const text = await stopRecording();
       if (text) onTranscription(text);
     } else {
       await startRecording();
+      onRecordingChange?.(true);
     }
-  }, [disabled, isRecording, isTranscribing, startRecording, stopRecording, onTranscription]);
+  }, [disabled, isRecording, isTranscribing, startRecording, stopRecording, onTranscription, onRecordingChange]);
 
   const isIdle = !isRecording && !isTranscribing;
 

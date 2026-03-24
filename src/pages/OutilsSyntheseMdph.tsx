@@ -155,6 +155,7 @@ const OutilsSyntheseMdph = () => {
   const [parentPrenom, setParentPrenom] = useState<string | null>(null);
   const [emailValue, setEmailValue] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
   const [generatedBlocks, setGeneratedBlocks] = useState<any[] | null>(null);
   const [syntheseId, setSyntheseId] = useState<string | null>(null);
   const [refineBloc, setRefineBloc] = useState<{ id: string; title: string; content: string; cas_usage: string } | null>(null);
@@ -293,7 +294,7 @@ const OutilsSyntheseMdph = () => {
 
   // --- CTA ---
   const renderCta = () => {
-    const ctaEnabled = isCurrentStepValid() && !isGenerating;
+    const ctaEnabled = isCurrentStepValid() && !isGenerating && !isRecording;
     const ctaLabel = currentQ === 8
       ? (isGenerating ? "Génération en cours..." : "Générer mon dossier →")
       : "Continuer →";
@@ -369,7 +370,7 @@ const OutilsSyntheseMdph = () => {
             {q3Vocal.trim() && (
               <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
             )}
-            <WiredMicOrb onTranscription={(text) => setQ3Vocal((prev) => prev ? prev + " " + text : text)} />
+            <WiredMicOrb onTranscription={(text) => setQ3Vocal((prev) => prev ? prev + " " + text : text)} onRecordingChange={setIsRecording} />
           </>
         )}
 
@@ -386,7 +387,7 @@ const OutilsSyntheseMdph = () => {
             {q4Vocal.trim() && (
               <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
             )}
-            <WiredMicOrb onTranscription={(text) => setQ4Vocal((prev) => prev ? prev + " " + text : text)} />
+            <WiredMicOrb onTranscription={(text) => setQ4Vocal((prev) => prev ? prev + " " + text : text)} onRecordingChange={setIsRecording} />
             {(q4 === "Arrêt d'activité lié au handicap" || q4 === "Temps partiel lié au handicap" || q4 === "Arrêt maladie") && (
               <>
                 <AiBubble text="Tu fais appel à une tierce personne rémunérée ?" />
@@ -428,7 +429,7 @@ const OutilsSyntheseMdph = () => {
             {q6Vocal.trim() && (
               <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
             )}
-            <WiredMicOrb onTranscription={(text) => setQ6Vocal((prev) => prev ? prev + " " + text : text)} />
+            <WiredMicOrb onTranscription={(text) => setQ6Vocal((prev) => prev ? prev + " " + text : text)} onRecordingChange={setIsRecording} />
           </>
         )}
 
@@ -440,7 +441,7 @@ const OutilsSyntheseMdph = () => {
             {q7.trim() && (
               <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
             )}
-            <WiredMicOrb onTranscription={(text) => setQ7((prev) => prev ? prev + " " + text : text)} />
+            <WiredMicOrb onTranscription={(text) => setQ7((prev) => prev ? prev + " " + text : text)} onRecordingChange={setIsRecording} />
           </>
         )}
 
@@ -460,7 +461,7 @@ const OutilsSyntheseMdph = () => {
                 {q8Vocal.trim() && (
                   <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
                 )}
-                <WiredMicOrb onTranscription={(text) => setQ8Vocal((prev) => prev ? prev + " " + text : text)} />
+                <WiredMicOrb onTranscription={(text) => setQ8Vocal((prev) => prev ? prev + " " + text : text)} onRecordingChange={setIsRecording} />
               </>
             )}
             {(q8Etat === "Pas encore" || q8Etat === "Certificat simplifié") && (
