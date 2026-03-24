@@ -262,17 +262,18 @@ export default function ChildProfile() {
         </div>
 
         {/* Sexe */}
-        <div className="flex flex-col gap-2">
-          <label className="text-sm font-sans font-medium text-foreground">Sexe</label>
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-muted-foreground" style={{ fontFamily: "DM Sans" }}>
+            Genre
+          </span>
           <div className="flex gap-2">
             <button className={pillClass("F")} onClick={() => handleSexeChange("F")} disabled={saving}>
-              Fille {sexe === "F" && <Check size={14} className="inline ml-1" />}
+              Fille {sexe === "F" && <Check size={12} className="inline ml-1" />}
             </button>
             <button className={pillClass("M")} onClick={() => handleSexeChange("M")} disabled={saving}>
-              Garçon {sexe === "M" && <Check size={14} className="inline ml-1" />}
+              Garçon {sexe === "M" && <Check size={12} className="inline ml-1" />}
             </button>
           </div>
-          <p className="text-xs font-sans text-muted-foreground">Utilisé pour personnaliser les textes (il/elle)</p>
         </div>
 
         {/* ── TRAITEMENTS ── */}
