@@ -361,10 +361,6 @@ const OutilsSyntheseMdph = () => {
             {q2.length > 0 && <UserBubble text={q2.join(" · ")} />}
             <AiBubble text="Qu'est-ce qui a changé depuis ton dernier dossier ?" />
             <ChipGroup chips={Q3_CHIPS} selected={q3Chips} multi onToggle={(c) => toggleMulti(c, q3Chips, setQ3Chips)} />
-            <OrSeparator />
-            <div className="mb-2 flex justify-end">
-              <Textarea placeholder="Précise si besoin..." value={q3Vocal} onChange={(e) => setQ3Vocal(e.target.value)} className="text-[14px] font-sans border-none italic placeholder:italic" style={{ ...glassCard, borderRadius: 14, minHeight: 70, maxWidth: "80%" }} autoResize />
-            </div>
             <WiredMicOrb onTranscription={(text) => setQ3Vocal((prev) => prev ? prev + " " + text : text)} />
           </>
         )}
