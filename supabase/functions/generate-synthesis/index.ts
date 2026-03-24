@@ -118,13 +118,36 @@ serve(async (req) => {
     }
 
     if (type === "mdph") {
+      const cutoffDate = new Date();
+      cutoffDate.setMonth(cutoffDate.getMonth() - 24);
+      const cutoffStr = cutoffDate.toISOString().split("T")[0];
+
       const { data: memosData } = await supabase
         .from("memos")
         .select("content_structured, memo_date, type")
         .eq("enfant_id", enfant_id)
         .neq("type", "synthese")
+        .gte("memo_date", cutoffStr)
         .order("memo_date", { ascending: false });
       memos = memosData ?? [];
+
+      const { data: medicamentsData } = await supabase
+        .from("medicaments")
+        .select("nom, dosage, frequence, voie, instructions")
+        .eq("enfant_id", enfant_id)
+        .eq("actif", true);
+
+      const { data: soinsData } = await supabase
+        .from("soins")
+        .select("nom, description, frequence, instructions")
+        .eq("enfant_id", enfant_id)
+        .eq("actif", true);
+
+      const { data: materielData } = await supabase
+        .from("materiel")
+        .select("nom, conseils, date_reception")
+        .eq("enfant_id", enfant_id)
+        .eq("actif", true);
     }
 
     // 7. BUILD PROMPT
