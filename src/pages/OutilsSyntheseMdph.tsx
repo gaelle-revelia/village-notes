@@ -210,10 +210,10 @@ const OutilsSyntheseMdph = () => {
   };
 
   // Answer text helpers
-  const q3Answer = () => {
+  const q3Answer = (): string | null => {
     const parts = [...q3Chips];
-    if (q3Vocal.trim()) parts.push("Enregistrement ajouté ✅");
-    return parts.join(" · ") || "Aucun changement";
+    if (q3Vocal.trim()) parts.push(q3Vocal.trim());
+    return parts.length > 0 ? parts.join(" · ") : null;
   };
   const q4Answer = () => q4 || "Non précisé";
   const q5Answer = () => q5 || "Non précisé";
