@@ -371,9 +371,10 @@ const OutilsSyntheseMdph = () => {
             {!showQ3 && <UserBubble text={q2.join(" · ")} />}
             <AiBubble text="Ta situation professionnelle actuelle ?" />
             <ChipGroup chips={Q4_CHIPS} selected={q4 ? [q4] : []} onToggle={(c) => toggleSingle(c, q4, setQ4)} />
+            {q4 !== null && <UserBubble text={q4Answer()} />}
             <AiBubble text="N'hésite pas à préciser ta situation — chaque détail aide à mieux décrire la réalité du quotidien." italic />
             <div className="mb-2 flex justify-end">
-              <Textarea placeholder="Ex : j'ai réduit à 3 jours par semaine depuis janvier 2025 pour accompagner les soins..." value={q4Vocal} onChange={(e) => setQ4Vocal(e.target.value)} className="text-[14px] font-sans border-none italic placeholder:italic" style={{ ...glassCard, borderRadius: 14, minHeight: 70, maxWidth: "80%" }} autoResize />
+              <Textarea placeholder="Ex : j'ai réduit à 3 jours par semaine depuis janvier 2025 pour accompagner les soins..." value={q4Vocal} onChange={(e) => setQ4Vocal(e.target.value)} className="text-[14px] font-sans border-none italic placeholder:italic" style={{ ...glassCard, borderRadius: 14, minHeight: 70, maxWidth: "78%", width: "78%" }} autoResize />
             </div>
             <WiredMicOrb onTranscription={(text) => setQ4Vocal((prev) => prev ? prev + " " + text : text)} />
             {(q4 === "Arrêt d'activité lié au handicap" || q4 === "Temps partiel lié au handicap" || q4 === "Arrêt maladie") && (
@@ -396,7 +397,6 @@ const OutilsSyntheseMdph = () => {
         {/* Q5 — Situation scolaire */}
         {showQ5 && (
           <>
-            <UserBubble text={q4Answer()} />
             <AiBubble text={`Quelle est la situation scolaire de ${displayName} ?`} />
             <ChipGroup chips={Q5_CHIPS} selected={q5 ? [q5] : []} onToggle={(c) => toggleSingle(c, q5, (v) => setQ5(v))} />
             {q5 === "🏫 Scolarisée" && q1 === "Renouvellement" && (
