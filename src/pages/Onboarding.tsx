@@ -12,8 +12,9 @@ import { StepVocabulaire } from "@/components/onboarding/StepVocabulaire";
 import { StepReady } from "@/components/onboarding/StepReady";
 import { StepMedicaments } from "@/components/onboarding/StepMedicaments";
 import { StepSoins } from "@/components/onboarding/StepSoins";
+import { StepMateriel } from "@/components/onboarding/StepMateriel";
 
-const TOTAL_STEPS = 6;
+const TOTAL_STEPS = 7;
 
 const Onboarding = () => {
   const { user, loading } = useAuth();
