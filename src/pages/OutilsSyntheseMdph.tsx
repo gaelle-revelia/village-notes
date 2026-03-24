@@ -421,6 +421,9 @@ const OutilsSyntheseMdph = () => {
             <AiBubble text={`Quel est ton projet pour ${displayName} dans les 2-3 prochaines années ?`} />
             <ChipGroup chips={Q6_CHIPS} selected={q6Chips} multi onToggle={(c) => toggleMulti(c, q6Chips, setQ6Chips)} />
             <WiredMicOrb onTranscription={(text) => setQ6Vocal((prev) => prev ? prev + " " + text : text)} />
+            {q6Vocal.trim() && (
+              <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
+            )}
           </>
         )}
 
