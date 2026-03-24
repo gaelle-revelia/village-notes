@@ -424,9 +424,6 @@ const OutilsSyntheseMdph = () => {
           <>
             <UserBubble text={q6Answer()} />
             <AiBubble text="Y a-t-il quelque chose d'important que je ne vois pas dans tes mémos ?" />
-            <div className="mb-2 flex justify-end">
-              <Textarea placeholder="Ajoute ce que tu veux mettre en avant..." value={q7} onChange={(e) => setQ7(e.target.value)} className="text-[14px] font-sans border-none italic placeholder:italic" style={{ ...glassCard, borderRadius: 14, minHeight: 70, maxWidth: "80%" }} autoResize />
-            </div>
             <WiredMicOrb onTranscription={(text) => setQ7((prev) => prev ? prev + " " + text : text)} />
             <button onClick={() => setQ7Seen(true)} style={{ background: "transparent", border: "none", color: "#9A9490", fontSize: 12, cursor: "pointer", display: "block", margin: "4px auto 0" }}>Passer →</button>
           </>
