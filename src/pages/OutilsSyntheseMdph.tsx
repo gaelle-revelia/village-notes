@@ -484,10 +484,24 @@ const OutilsSyntheseMdph = () => {
           </>
         )}
 
+        {showResults && (
+          <div className="mb-4 px-1">
+            <div className="flex items-center gap-2">
+              <div className="flex-1 relative">
+                <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "#9A9490" }} />
+                <Input type="email" placeholder="ton@email.com" value={emailValue} onChange={(e) => setEmailValue(e.target.value)} className="pl-9 text-[13px] font-sans border-none" style={{ ...glassCard, borderRadius: 999, height: 44 }} />
+              </div>
+              <button className="px-5 py-2.5 text-[13px] font-sans font-semibold flex-shrink-0" style={{ background: "linear-gradient(135deg, #E8736A, #8B74E0)", color: "#fff", borderRadius: 999, border: "none" }}>
+                Envoyer →
+              </button>
+            </div>
+          </div>
+        )}
+
         <div ref={bottomRef} />
       </main>
 
-      {renderCta()}
+      {!showResults && renderCta()}
 
       <PreciserBlocDrawer
         isOpen={!!refineBloc}
