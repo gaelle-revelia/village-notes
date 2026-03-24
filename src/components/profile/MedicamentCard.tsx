@@ -23,10 +23,10 @@ export function MedicamentCard({
 
   return (
     <div
-      className={`border rounded-2xl p-4 mb-2.5 transition-all cursor-pointer shadow-sm ${
-        expanded ? "border-[#AFA9EC]" : "border-white/85"
+      className={`rounded-2xl p-4 mb-2.5 transition-all cursor-pointer ${
+        expanded ? "border-[#AFA9EC]" : ""
       }`}
-      style={{ background: "rgba(255,255,255,0.82)", backdropFilter: "blur(16px)" }}
+      style={{ background: "rgba(255,255,255,0.88)", backdropFilter: "blur(16px)", boxShadow: "0 2px 12px rgba(139,116,224,0.08)", border: expanded ? undefined : "1px solid rgba(255,255,255,0.85)" }}
       onClick={() => { setExpanded((p) => !p); setConfirmDelete(false); }}
     >
       {/* Header */}

@@ -21,10 +21,10 @@ export function SoinCard({
 
   return (
     <div
-      className={`border rounded-2xl p-4 mb-2.5 transition-all cursor-pointer ${
-        expanded ? "border-[#44A882]" : "border-white/85"
+      className={`rounded-2xl p-4 mb-2.5 transition-all cursor-pointer ${
+        expanded ? "border-[#44A882]" : ""
       }`}
-      style={{ background: "rgba(255,255,255,0.88)", backdropFilter: "blur(16px)", boxShadow: "0 2px 12px rgba(68,168,130,0.08)" }}
+      style={{ background: "rgba(255,255,255,0.88)", backdropFilter: "blur(16px)", boxShadow: "0 2px 12px rgba(68,168,130,0.08)", border: expanded ? undefined : "1px solid rgba(255,255,255,0.85)" }}
       onClick={() => { setExpanded((p) => !p); setConfirmDelete(false); }}
     >
       <div className="flex items-center gap-3">
