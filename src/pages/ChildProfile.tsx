@@ -191,6 +191,7 @@ export default function ChildProfile() {
       setPrenom(editPrenom.trim() || prenom);
       setDateNaissance(editDateNaissance || null);
       setDiagnostic(editDiagnostic.trim() || null);
+      setSexe(editSexe);
       setEditingInfos(false);
     }
   };
