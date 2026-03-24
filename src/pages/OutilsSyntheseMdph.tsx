@@ -402,29 +402,39 @@ const OutilsSyntheseMdph = () => {
             {currentQ > 2 && !showQ3 && q2.length > 0 && <UserBubble text={q2.join(" · ")} />}
             <AiBubble text="4 — Ta situation professionnelle actuelle ?" />
             <ChipGroup chips={Q4_CHIPS} selected={q4 ? [q4] : []} onToggle={(c) => toggleSingle(c, q4, setQ4)} />
+          </>
+        )}
+
+        {/* Q4b — Tierce personne */}
+        {showQ4b && (
+          <>
             {currentQ > 4 && q4 && <UserBubble text={q4Answer()} />}
-            {q4 !== null && (
+            <AiBubble text="Tu fais appel à une tierce personne rémunérée ? (garde, auxiliaire de vie…)" />
+            <ChipGroup
+              chips={["Oui", "Non"]}
+              selected={q4TiercePersonne === true ? ["Oui"] : q4TiercePersonne === false ? ["Non"] : []}
+              onToggle={(c) => setQ4TiercePersonne(c === "Oui")}
+            />
+            {q4TiercePersonne === true && (
               <>
-                {q4Vocal.trim() && (
-                  <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
-                )}
-                <WiredMicOrb onTranscription={(text) => setQ4Vocal((prev) => prev ? prev + " " + text : text)} onRecordingChange={setIsRecording} />
+                <AiBubble text="Combien d'heures par semaine environ ?" />
+                <div className="flex justify-end mb-4">
+                  <Input type="number" placeholder="ex : 8" value={q4HeuresTierce} onChange={(e) => setQ4HeuresTierce(e.target.value)} className="text-[14px] font-sans border-none" style={{ ...glassCard, borderRadius: 14, maxWidth: "50%", width: "50%", height: 44, textAlign: "right" }} />
+                </div>
               </>
             )}
-            {(q4 === "Arrêt d'activité lié au handicap" || q4 === "Temps partiel lié au handicap" || q4 === "Arrêt maladie") && (
-              <>
-                <AiBubble text="Tu fais appel à une tierce personne rémunérée ?" />
-                <ChipGroup chips={["Oui", "Non"]} selected={q4TiercePersonne === true ? ["Oui"] : q4TiercePersonne === false ? ["Non"] : []} onToggle={(c) => setQ4TiercePersonne(c === "Oui")} />
-                {q4TiercePersonne === true && (
-                  <>
-                    <AiBubble text="Combien d'heures par semaine environ ?" />
-                    <div className="flex justify-end mb-4">
-                      <Input type="number" placeholder="ex : 8" value={q4HeuresTierce} onChange={(e) => setQ4HeuresTierce(e.target.value)} className="text-[14px] font-sans border-none" style={{ ...glassCard, borderRadius: 14, maxWidth: "50%", width: "50%", height: 44, textAlign: "center" }} />
-                    </div>
-                  </>
-                )}
-              </>
+            <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
+              <p style={{ fontSize: 11, color: "#8B74E0", lineHeight: 1.55 }}>
+                Précise à l'oral : qui intervient, combien d'heures par semaine, le coût mensuel environ…
+              </p>
+            </div>
+            {q4bVocal.trim() && (
+              <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
             )}
+            <WiredMicOrb
+              onTranscription={(text) => setQ4bVocal((prev) => prev ? prev + " " + text : text)}
+              onRecordingChange={setIsRecording}
+            />
           </>
         )}
 
