@@ -162,7 +162,7 @@ const OutilsSyntheseMdph = () => {
   const showQ1 = true;
   const showQ2 = q1 !== null;
   const showQ3 = q1 === "Renouvellement" || q1 === "Évolution de situation";
-  const showQ4 = q2.length > 0;
+  const showQ4 = q2.length > 0 && (!showQ3 || q3Chips.length > 0 || q3Vocal.trim().length > 0);
   const showQ5 = q4 !== null;
   const showQ6 = q5 !== null;
   const showQ7 = q6Chips.length > 0 || q6Vocal.trim().length > 0;
@@ -210,10 +210,10 @@ const OutilsSyntheseMdph = () => {
   };
 
   // Answer text helpers
-  const q3Answer = () => {
+  const q3Answer = (): string | null => {
     const parts = [...q3Chips];
-    if (q3Vocal.trim()) parts.push("Enregistrement ajouté ✅");
-    return parts.join(" · ") || "Aucun changement";
+    if (q3Vocal.trim()) parts.push(q3Vocal.trim());
+    return parts.length > 0 ? parts.join(" · ") : null;
   };
   const q4Answer = () => q4 || "Non précisé";
   const q5Answer = () => q5 || "Non précisé";
@@ -367,7 +367,7 @@ const OutilsSyntheseMdph = () => {
 
         {showQ4 && (
           <>
-            {showQ3 && <UserBubble text={q3Answer()} />}
+            {showQ3 && q3Answer() && <UserBubble text={q3Answer()!} />}
             {!showQ3 && <UserBubble text={q2.join(" · ")} />}
             <AiBubble text="Ta situation professionnelle actuelle ?" />
             <ChipGroup chips={Q4_CHIPS} selected={q4 ? [q4] : []} onToggle={(c) => toggleSingle(c, q4, setQ4)} />
