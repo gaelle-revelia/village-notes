@@ -120,10 +120,10 @@ export function StepMedicaments({ prenomEnfant, enfantId, onNext, onSkip }: Step
             className="text-[32px] font-semibold text-card-foreground leading-tight"
             style={{ fontFamily: "Fraunces" }}
           >
-            {prenomEnfant} prend-il un traitement&nbsp;?
+            Un traitement en cours&nbsp;?
           </h1>
           <p className="text-muted-foreground text-sm leading-relaxed" style={{ fontFamily: "DM Sans" }}>
-            Renseigner les médicaments permet de les retrouver facilement et d'améliorer la reconnaissance vocale.
+            Renseigner les médicaments de {prenomEnfant} permet de les retrouver facilement et d'améliorer la reconnaissance vocale.
           </p>
         </div>
 
