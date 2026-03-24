@@ -370,7 +370,12 @@ const OutilsSyntheseMdph = () => {
             {!showQ3 && <UserBubble text={q2.join(" · ")} />}
             <AiBubble text="Ta situation professionnelle actuelle ?" />
             <ChipGroup chips={Q4_CHIPS} selected={q4 ? [q4] : []} onToggle={(c) => toggleSingle(c, q4, setQ4)} />
-            {(q4 === "Arrêt lié au handicap" || q4 === "Réduction d'activité liée au handicap") && (
+            <AiBubble text="N'hésite pas à préciser ta situation — chaque détail aide à mieux décrire la réalité du quotidien." italic />
+            <div className="mb-2 flex justify-end">
+              <Textarea placeholder="Ex : j'ai réduit à 3 jours par semaine depuis janvier 2025 pour accompagner les soins..." value={q4Vocal} onChange={(e) => setQ4Vocal(e.target.value)} className="text-[14px] font-sans border-none italic placeholder:italic" style={{ ...glassCard, borderRadius: 14, minHeight: 70, maxWidth: "80%" }} autoResize />
+            </div>
+            <WiredMicOrb onTranscription={(text) => setQ4Vocal((prev) => prev ? prev + " " + text : text)} />
+            {(q4 === "Arrêt d'activité lié au handicap" || q4 === "Temps partiel lié au handicap" || q4 === "Arrêt maladie") && (
               <>
                 <AiBubble text="Tu fais appel à une tierce personne rémunérée ?" />
                 <ChipGroup chips={["Oui", "Non"]} selected={q4TiercePersonne === true ? ["Oui"] : q4TiercePersonne === false ? ["Non"] : []} onToggle={(c) => setQ4TiercePersonne(c === "Oui")} />
