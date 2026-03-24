@@ -1,25 +1,25 @@
 
 
-## Plan: Add editable INFORMATIONS bottom sheet in ChildProfile.tsx
+## Plan: Remove NSM step from Onboarding
 
-**Single file**: `src/pages/ChildProfile.tsx`
+**File**: `src/pages/Onboarding.tsx` (only)
 
-### Changes
+### Surgical edits
 
-1. **Add state variables** (after existing state declarations):
-   - `editingInfos`, `editPrenom`, `editDateNaissance`, `editDiagnostic`, `savingInfos`
+1. **Line 11**: Remove `import { StepNSM }` line
+2. **Line 16**: Change `TOTAL_STEPS = 7` → `TOTAL_STEPS = 6`
+3. **Lines 173**: In `handleVocabulaire`, replace `setStep(6)` with onboarding completion + `setStep(6)`:
+   ```ts
+   await supabase.from("profiles").upsert(
+     { user_id: user.id, onboarding_completed: true },
+     { onConflict: "user_id" }
+   );
+   setStep(6);
+   ```
+4. **Lines 176-196**: Delete entire `handleNSM` function
+5. **Line 252**: Change `onSkip={() => setStep(6)}` → `onSkip` calls same completion logic (upsert + setStep(6))
+6. **Line 266**: Remove `{step === 6 && <StepNSM .../>}`
+7. **Line 267**: Change `step === 7` → `step === 6` for StepReady
 
-2. **Add `handleSaveInfos` function** (after existing handlers):
-   - Updates `enfants` table with edited prenom, date_naissance, diagnostic_label
-   - On success, updates local state and closes modal
+Flow becomes: 1.Enfant → 2.Village → 3.Médicaments → 4.Soins → 5.Vocabulaire → 6.Ready
 
-3. **Replace INFORMATIONS header** with flex row containing label + "Modifier" button:
-   - Button populates edit fields from current state and opens modal
-
-4. **Add bottom sheet modal** (before closing `</div>`, alongside existing modals):
-   - Fixed overlay with semi-transparent backdrop
-   - Bottom sheet with drag handle, title, 3 input fields (Prénom, Date de naissance, Situation)
-   - Gradient "Enregistrer" button + "Annuler" link
-   - All styling per user specification (rounded-xl inputs, DM Sans font, purple focus ring)
-
-No other files touched. No changes to modals, toggles, fetch functions, or onboarding.
