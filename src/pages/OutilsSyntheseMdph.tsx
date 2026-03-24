@@ -376,11 +376,11 @@ const OutilsSyntheseMdph = () => {
 
         {showQ4 && (
           <>
-            {showQ3 && q3Answer() && <UserBubble text={q3Answer()!} />}
-            {!showQ3 && <UserBubble text={q2.join(" · ")} />}
+            {currentQ > 3 && showQ3 && q3Answer() && <UserBubble text={q3Answer()!} />}
+            {currentQ > 2 && !showQ3 && q2.length > 0 && <UserBubble text={q2.join(" · ")} />}
             <AiBubble text="4 — Ta situation professionnelle actuelle ?" />
             <ChipGroup chips={Q4_CHIPS} selected={q4 ? [q4] : []} onToggle={(c) => toggleSingle(c, q4, setQ4)} />
-            {q4 !== null && <UserBubble text={q4Answer()} />}
+            {currentQ > 4 && q4 && <UserBubble text={q4Answer()} />}
             {q4 !== null && (
               <>
                 {q4Vocal.trim() && (
