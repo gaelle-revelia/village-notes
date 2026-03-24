@@ -15,6 +15,8 @@ export default function ChildProfile() {
   const [prenom, setPrenom] = useState<string | null>(null);
   const [sexe, setSexe] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [dateNaissance, setDateNaissance] = useState<string | null>(null);
+  const [diagnostic, setDiagnostic] = useState<string | null>(null);
 
   // Medicaments state
   const [medicaments, setMedicaments] = useState<any[]>([]);
