@@ -37,6 +37,11 @@ export default function OutilsSyntheseMdphResultats() {
   const [error, setError] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selectedBloc, setSelectedBloc] = useState<Block | null>(null);
+  const [enfantPrenom, setEnfantPrenom] = useState("");
+  const [syntheseDate, setSyntheseDate] = useState("");
+  const [copied, setCopied] = useState<string | null>(null);
+  const [email, setEmail] = useState("");
+  const [parentPrenom, setParentPrenom] = useState("");
 
   useEffect(() => {
     if (!syntheseId) {
@@ -44,22 +49,53 @@ export default function OutilsSyntheseMdphResultats() {
       return;
     }
 
-    const fetch = async () => {
+    const fetchData = async () => {
       setLoading(true);
-      const { data, error: err } = await supabase
+
+      // Fetch synthese
+      const { data: syntheseData, error: err } = await supabase
         .from("syntheses")
-        .select("contenu")
+        .select("contenu, created_at, enfant_id")
         .eq("id", syntheseId)
         .maybeSingle();
 
-      if (err || !data?.contenu) {
+      if (err || !syntheseData?.contenu) {
         setError("Impossible de charger la synthèse.");
         setLoading(false);
         return;
       }
 
+      // Format date
+      setSyntheseDate(
+        new Date(syntheseData.created_at!).toLocaleDateString("fr-FR", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        })
+      );
+
+      // Fetch enfant prenom
+      const { data: enfantData } = await supabase
+        .from("enfants")
+        .select("prenom")
+        .eq("id", syntheseData.enfant_id)
+        .maybeSingle();
+
+      if (enfantData?.prenom) setEnfantPrenom(enfantData.prenom);
+
+      // Fetch parent prenom
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("prenom")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (profileData?.prenom) setParentPrenom(profileData.prenom);
+      }
+
       try {
-        const parsed = JSON.parse(data.contenu);
+        const parsed = JSON.parse(syntheseData.contenu);
         setBlocks(parsed.blocks ?? parsed);
       } catch {
         setError("Format de données invalide.");
@@ -67,7 +103,7 @@ export default function OutilsSyntheseMdphResultats() {
       setLoading(false);
     };
 
-    fetch();
+    fetchData();
   }, [syntheseId, navigate]);
 
   const handleBlockUpdated = (blocId: string, newContent: string) => {
@@ -83,9 +119,14 @@ export default function OutilsSyntheseMdphResultats() {
         <button onClick={() => navigate("/outils/synthese/mdph")} className="p-1">
           <ArrowLeft size={22} color="#1E1A1A" />
         </button>
-        <h1 className="text-[17px] font-semibold" style={{ fontFamily: "Fraunces, serif", color: "#1E1A1A" }}>
-          Résultats MDPH
-        </h1>
+        <div>
+          <h1 className="text-[17px] font-semibold" style={{ fontFamily: "Fraunces, serif", color: "#1E1A1A" }}>
+            Dossier MDPH — {enfantPrenom}
+          </h1>
+          <p className="text-[11px]" style={{ fontFamily: "DM Sans, sans-serif", color: "#9A9490" }}>
+            Généré le {syntheseDate}
+          </p>
+        </div>
       </div>
 
       <div className="px-4 pt-4 space-y-4">
@@ -99,9 +140,16 @@ export default function OutilsSyntheseMdphResultats() {
             </h2>
 
             {block.cerfa_ref && (
-              <p className="text-[11px] mb-2" style={{ color: "#9A9490" }}>
+              <span
+                className="inline-block text-[10px] font-medium mb-2 px-2 py-0.5"
+                style={{
+                  borderRadius: 6,
+                  background: "rgba(139,116,224,0.1)",
+                  color: "#8B74E0",
+                }}
+              >
                 {block.cerfa_ref}
-              </p>
+              </span>
             )}
 
             <p className="text-[13px] leading-relaxed mb-3" style={{ fontFamily: "DM Sans, sans-serif", color: "#1E1A1A" }}>
@@ -109,26 +157,130 @@ export default function OutilsSyntheseMdphResultats() {
             </p>
 
             {block.editorial_note && (
-              <p className="text-[11px] italic mb-2" style={{ color: "#8B74E0" }}>
-                {block.editorial_note}
-              </p>
+              <div className="mb-2 flex" style={{ gap: 8 }}>
+                <div style={{ width: 3, borderRadius: 2, background: "#8B74E0", flexShrink: 0 }} />
+                <p className="text-[11px] leading-relaxed" style={{ color: "#8B74E0" }}>
+                  {block.editorial_note}
+                </p>
+              </div>
             )}
 
             {block.signal && (
-              <p className="text-[11px] mb-2" style={{ color: "#E8A44A" }}>
-                {block.signal}
-              </p>
+              <div className="mb-2 flex" style={{ gap: 8 }}>
+                <div style={{ width: 3, borderRadius: 2, background: "#E8A44A", flexShrink: 0 }} />
+                <p className="text-[11px] leading-relaxed" style={{ color: "#E8A44A" }}>
+                  {block.signal}
+                </p>
+              </div>
             )}
 
-            <button
-              onClick={() => { setSelectedBloc(block); setDrawerOpen(true); }}
-              className="text-[12px] font-medium"
-              style={{ color: "#8B74E0" }}
-            >
-              Préciser ce bloc
-            </button>
+            <div className="flex gap-2 mt-3">
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(block.content);
+                  setCopied(block.id);
+                  setTimeout(() => setCopied(null), 2000);
+                }}
+                style={{
+                  flex: 1,
+                  padding: "9px",
+                  borderRadius: 10,
+                  fontSize: 12,
+                  fontWeight: 500,
+                  background: "rgba(255,255,255,0.48)",
+                  border: "1px solid rgba(139,116,224,0.3)",
+                  color: "#8B74E0",
+                  cursor: "pointer",
+                }}
+              >
+                {copied === block.id ? "Copié ✓" : "Copier"}
+              </button>
+              <button
+                onClick={() => {
+                  setSelectedBloc(block);
+                  setDrawerOpen(true);
+                }}
+                style={{
+                  flex: 1,
+                  padding: "9px",
+                  borderRadius: 10,
+                  fontSize: 12,
+                  fontWeight: 500,
+                  background: "rgba(255,255,255,0.48)",
+                  border: "1px solid rgba(232,115,106,0.3)",
+                  color: "#E8736A",
+                  cursor: "pointer",
+                }}
+              >
+                Préciser ce bloc
+              </button>
+            </div>
           </div>
         ))}
+
+        {/* Update button */}
+        {blocks.length > 0 && (
+          <button
+            onClick={() => navigate("/outils/synthese/mdph")}
+            className="w-full"
+            style={{
+              padding: "14px",
+              borderRadius: 12,
+              fontSize: 14,
+              fontWeight: 600,
+              background: "linear-gradient(135deg, #E8736A, #8B74E0)",
+              color: "#fff",
+              border: "none",
+              cursor: "pointer",
+              fontFamily: "DM Sans, sans-serif",
+            }}
+          >
+            Mettre à jour les textes
+          </button>
+        )}
+
+        {/* Footer */}
+        {blocks.length > 0 && (
+          <div className="pt-2 pb-4 space-y-3">
+            <p className="text-[11px] text-center" style={{ color: "#9A9490", fontFamily: "DM Sans, sans-serif" }}>
+              Synthèse des observations de {parentPrenom} pour {enfantPrenom} · The Village ·{" "}
+              {new Date().toLocaleDateString("fr-FR", { month: "long", year: "numeric" })}
+            </p>
+            <div className="flex gap-2">
+              <input
+                type="email"
+                placeholder="email@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                style={{
+                  flex: 1,
+                  padding: "10px 12px",
+                  borderRadius: 10,
+                  fontSize: 13,
+                  background: "rgba(255,255,255,0.58)",
+                  border: "1px solid rgba(255,255,255,0.9)",
+                  color: "#1E1A1A",
+                  outline: "none",
+                }}
+              />
+              <button
+                style={{
+                  padding: "10px 16px",
+                  borderRadius: 10,
+                  fontSize: 13,
+                  fontWeight: 500,
+                  background: "linear-gradient(135deg, #E8736A, #8B74E0)",
+                  color: "#fff",
+                  border: "none",
+                  cursor: "pointer",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Envoyer →
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {syntheseId && enfantId && (
