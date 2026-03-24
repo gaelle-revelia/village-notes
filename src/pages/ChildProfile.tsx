@@ -395,6 +395,66 @@ export default function ChildProfile() {
             </div>
           )}
         </div>
+
+        {/* ── MATÉRIEL ── */}
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <span className="text-base font-semibold text-foreground" style={{ fontFamily: "DM Sans" }}>🔧 Matériel</span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-sans text-muted-foreground">
+                {hasMateriel ? "Actif" : "Inactif"}
+              </span>
+              <button
+                onClick={() => toggleHasMateriel(!hasMateriel)}
+                className="w-10 h-6 rounded-full transition-colors relative cursor-pointer"
+                style={{ background: hasMateriel ? "#E8A44A" : "#e5e7eb" }}
+              >
+                <span className={`block w-5 h-5 bg-white rounded-full shadow absolute top-0.5 transition-transform ${
+                  hasMateriel ? "translate-x-[18px]" : "translate-x-0.5"
+                }`} />
+              </button>
+            </div>
+          </div>
+
+          {hasMateriel && (
+            <div className="mt-1">
+              {materiel.length === 0 ? (
+                <div className="text-center py-4">
+                  <p className="text-sm text-muted-foreground font-sans">
+                    Aucun matériel renseigné
+                  </p>
+                  <button
+                    onClick={() => { setEditingMateriel(null); setMaterielModalOpen(true); }}
+                    className="mt-2 text-sm text-[#92560A] font-medium"
+                  >
+                    + Ajouter
+                  </button>
+                </div>
+              ) : (
+                <>
+                  {materiel.map((item) => (
+                    <MaterielCard
+                      key={item.id}
+                      {...item}
+                      onEdit={(id) => {
+                        setEditingMateriel(materiel.find((m) => m.id === id));
+                        setMaterielModalOpen(true);
+                      }}
+                      onDelete={deleteMateriel}
+                    />
+                  ))}
+                  <button
+                    onClick={() => { setEditingMateriel(null); setMaterielModalOpen(true); }}
+                    className="flex items-center gap-1.5 text-sm text-[#92560A] font-medium mt-1 px-1"
+                  >
+                    <Plus size={14} />
+                    Ajouter du matériel
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+        </div>
       </main>
 
       <MedicamentModal
