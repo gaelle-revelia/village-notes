@@ -139,7 +139,7 @@ export default function ChildProfile() {
           <span>Retour</span>
         </button>
       </header>
-      <main className="flex flex-1 flex-col gap-6 px-5 pt-8 pb-24">
+      <main className="flex flex-1 flex-col gap-8 px-5 pt-6 pb-28">
         <h2 className="text-2xl font-serif font-semibold text-foreground">Profil de {prenom || "mon enfant"}</h2>
 
         {/* Sexe */}
