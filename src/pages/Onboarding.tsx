@@ -8,12 +8,12 @@ import { ProgressBar } from "@/components/onboarding/ProgressBar";
 import { StepEnfant } from "@/components/onboarding/StepEnfant";
 import { StepVillage } from "@/components/onboarding/StepVillage";
 import { StepVocabulaire } from "@/components/onboarding/StepVocabulaire";
-import { StepNSM } from "@/components/onboarding/StepNSM";
+
 import { StepReady } from "@/components/onboarding/StepReady";
 import { StepMedicaments } from "@/components/onboarding/StepMedicaments";
 import { StepSoins } from "@/components/onboarding/StepSoins";
 
-const TOTAL_STEPS = 7;
+const TOTAL_STEPS = 6;
 
 const Onboarding = () => {
   const { user, loading } = useAuth();
@@ -170,29 +170,12 @@ const Onboarding = () => {
         toast({ title: "Erreur", description: "Impossible de sauvegarder le vocabulaire.", variant: "destructive" });
       }
     }
-    setStep(6);
-  };
-
-  const handleNSM = async (score: number) => {
-    setSaving(true);
-    const { error } = await supabase.from("nsm_scores").insert({
-      user_id: user.id,
-      score,
-      context: "onboarding_j0",
-    });
-    setSaving(false);
-
-    if (error) {
-      toast({ title: "Erreur", description: "Impossible de sauvegarder le score.", variant: "destructive" });
-    }
-
     // Mark onboarding as completed
     await supabase.from("profiles").upsert(
       { user_id: user.id, onboarding_completed: true },
       { onConflict: "user_id" }
     );
-
-    setStep(7);
+    setStep(6);
   };
 
   return (
@@ -249,7 +232,13 @@ const Onboarding = () => {
               enfantId={enfantId}
               intervenants={villageIntervenants}
               onNext={handleVocabulaire}
-              onSkip={() => setStep(6)}
+              onSkip={async () => {
+                await supabase.from("profiles").upsert(
+                  { user_id: user.id, onboarding_completed: true },
+                  { onConflict: "user_id" }
+                );
+                setStep(6);
+              }}
             />
           )}
           {[3, 4, 5].includes(step) && !enfantId && (
@@ -263,8 +252,7 @@ const Onboarding = () => {
               </Button>
             </div>
           )}
-          {step === 6 && <StepNSM prenomEnfant={prenomEnfant} onNext={handleNSM} />}
-          {step === 7 && <StepReady prenomEnfant={prenomEnfant} />}
+          {step === 6 && <StepReady prenomEnfant={prenomEnfant} />}
         </div>
       </div>
     </main>
