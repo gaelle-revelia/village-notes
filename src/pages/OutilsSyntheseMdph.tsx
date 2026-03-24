@@ -336,7 +336,6 @@ const OutilsSyntheseMdph = () => {
           <ArrowLeft size={20} style={{ color: "#1E1A1A" }} />
         </button>
         <h1 className="text-xl font-serif font-semibold" style={{ color: "#1E1A1A" }}>Dossier MDPH</h1>
-        <span style={{ fontSize: 11, color: "red", fontWeight: "bold", marginLeft: 8 }}>Q{currentQ}</span>
       </header>
 
       {/* Progress bar */}
