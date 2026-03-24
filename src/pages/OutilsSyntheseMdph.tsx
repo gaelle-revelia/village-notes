@@ -160,6 +160,7 @@ const OutilsSyntheseMdph = () => {
   const [emailValue, setEmailValue] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("Préparation du dossier en cours…");
   const [generatedBlocks, setGeneratedBlocks] = useState<any[] | null>(null);
   const [syntheseId, setSyntheseId] = useState<string | null>(null);
   const [refineBloc, setRefineBloc] = useState<{ id: string; title: string; content: string; cas_usage: string } | null>(null);
@@ -177,6 +178,16 @@ const OutilsSyntheseMdph = () => {
   const showQ8 = currentQ >= 8;
   const showResults = generatedBlocks !== null;
 
+  // --- Loading message switch ---
+  useEffect(() => {
+    if (isGenerating) {
+      setLoadingMessage("Préparation du dossier en cours…");
+      const t = setTimeout(() => {
+        setLoadingMessage("Relecture et peaufinage des textes…");
+      }, 4000);
+      return () => clearTimeout(t);
+    }
+  }, [isGenerating]);
 
   // --- Step navigation ---
   const isCurrentStepValid = () => {
@@ -311,7 +322,7 @@ const OutilsSyntheseMdph = () => {
   const renderCta = () => {
     const ctaEnabled = isCurrentStepValid() && !isGenerating && !isRecording;
     const ctaLabel = currentQ === 8
-      ? (isGenerating ? "Génération en cours..." : "Générer mon dossier →")
+      ? (isGenerating ? loadingMessage : "Générer mon dossier →")
       : "Continuer →";
 
     return (
@@ -534,6 +545,16 @@ const OutilsSyntheseMdph = () => {
               <AiBubble text="Pas de problème — je génère avec tes mémos et tes réponses." italic />
             )}
           </>
+        )}
+
+        {/* Loading screen */}
+        {isGenerating && !showResults && (
+          <div className="flex flex-col items-center justify-center py-16 gap-4">
+            <div className="flex items-center justify-center" style={{ width: 56, height: 56, borderRadius: "50%", background: "linear-gradient(135deg, #E8736A, #8B74E0)", boxShadow: "0 0 24px rgba(139,116,224,0.4)" }}>
+              <Sparkles size={24} color="#fff" className="animate-pulse" />
+            </div>
+            <p className="text-[15px] font-sans font-medium animate-pulse" style={{ color: "#8B74E0" }}>{loadingMessage}</p>
+          </div>
         )}
 
         {/* Results */}

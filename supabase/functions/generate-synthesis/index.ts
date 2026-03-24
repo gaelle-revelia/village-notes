@@ -661,6 +661,77 @@ Pronoms: ${pronom_sujet} / ${accord}`;
       );
     }
 
+    // 9b. REVIEW PASS (mdph only)
+    if (type === "mdph") {
+      const reviewSystemPrompt = `Tu es un relecteur spécialisé en dossiers MDPH. Tu reçois des blocs de texte CERFA générés pour le dossier d'un enfant. Tu corriges uniquement les violations listées.
+
+TERMES AUTORISÉS — NE JAMAIS CORRIGER :
+- Tous les termes présents dans le diagnostic : ${enfant?.diagnostic_label ?? ""}
+- Tous les termes que le parent a lui-même utilisés dans ses vocaux (réponses Q0-Q8 et mémos vocaux)
+
+VIOLATIONS À CORRIGER :
+1. Jargon médical issu des comptes rendus professionnels que le parent n'a pas utilisé :
+- "maintien céphalique" → "maintien de la tête"
+- "hypotonie axiale" → "faiblesse musculaire du tronc"
+- Tout terme médical latin ou technique absent du diagnostic et des vocaux parentaux
+
+2. "nous", "les parents" → "je" dans le bloc impact_professionnel uniquement
+
+3. Prescriptions :
+"est nécessaire pour compenser", "est envisagé", "sont nécessaires pour" → reformuler en description de besoin sans prescrire la solution
+
+4. Assertions médicales de risque absentes du diagnostic_label et non dictées par le parent en Q8 :
+→ supprimer ou reformuler en "fait l'objet d'un suivi médical spécialisé"
+
+RÈGLES :
+- Ne pas réécrire ce qui est correct
+- Ne pas ajouter d'informations
+- Conserver les signalements [EN MAJUSCULES] tels quels
+- Retourner le JSON complet avec blocs corrigés
+
+FORMAT DE SORTIE — JSON STRICT identique à l'entrée, sans markdown ni commentaire.`;
+
+      const reviewUserMessage = `Voici les blocs générés à relire et corriger :\n${JSON.stringify({ blocks })}`;
+
+      try {
+        const reviewResponse = await fetch(
+          "https://ai.gateway.lovable.dev/v1/chat/completions",
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${LOVABLE_API_KEY}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              model: "google/gemini-3-flash-preview",
+              messages: [
+                { role: "system", content: reviewSystemPrompt },
+                { role: "user", content: reviewUserMessage },
+              ],
+            }),
+          }
+        );
+
+        if (reviewResponse.ok) {
+          const reviewData = await reviewResponse.json();
+          const reviewRaw = reviewData.choices?.[0]?.message?.content ?? "";
+          try {
+            const reviewClean = reviewRaw.replace(/```json/g, "").replace(/```/g, "").trim();
+            const reviewParsed = JSON.parse(reviewClean);
+            if (reviewParsed.blocks) {
+              blocks = reviewParsed.blocks;
+            }
+          } catch (e) {
+            console.error("Review parse failed, using raw blocks:", e);
+          }
+        } else {
+          console.error("Review call failed with status:", reviewResponse.status);
+        }
+      } catch (e) {
+        console.error("Review call error, using raw blocks:", e);
+      }
+    }
+
     // 10. DOUBLE WRITE
     const contenu = JSON.stringify(blocks);
     const firstBlockTitle = blocks[0]?.title ?? "Synthèse";
