@@ -7,10 +7,7 @@ import { useEnfantPrenom } from "@/hooks/useEnfantPrenom";
 import { useEnfantId } from "@/hooks/useEnfantId";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import PreciserBlocDrawer from "@/components/synthese/PreciserBlocDrawer";
 
 // --- Shared styles ---
 const glassCard: React.CSSProperties = {
