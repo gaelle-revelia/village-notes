@@ -396,14 +396,6 @@ const OutilsSyntheseMdph = () => {
               selected={q4TiercePersonne === true ? ["Oui"] : q4TiercePersonne === false ? ["Non"] : []}
               onToggle={(c) => setQ4TiercePersonne(c === "Oui")}
             />
-            {q4TiercePersonne === true && (
-              <>
-                <AiBubble text="Combien d'heures par semaine environ ?" />
-                <div className="flex justify-end mb-4">
-                  <Input type="number" placeholder="ex : 8" value={q4HeuresTierce} onChange={(e) => setQ4HeuresTierce(e.target.value)} className="text-[14px] font-sans border-none" style={{ ...glassCard, borderRadius: 14, maxWidth: "50%", width: "50%", height: 44, textAlign: "right" }} />
-                </div>
-              </>
-            )}
             <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
               <p style={{ fontSize: 11, color: "#8B74E0", lineHeight: 1.55 }}>
                 Précise à l'oral : qui intervient, combien d'heures par semaine, le coût mensuel environ…
