@@ -18,6 +18,13 @@ export default function ChildProfile() {
   const [dateNaissance, setDateNaissance] = useState<string | null>(null);
   const [diagnostic, setDiagnostic] = useState<string | null>(null);
 
+  // Edit infos state
+  const [editingInfos, setEditingInfos] = useState(false);
+  const [editPrenom, setEditPrenom] = useState("");
+  const [editDateNaissance, setEditDateNaissance] = useState("");
+  const [editDiagnostic, setEditDiagnostic] = useState("");
+  const [savingInfos, setSavingInfos] = useState(false);
+
   // Medicaments state
   const [medicaments, setMedicaments] = useState<any[]>([]);
   const [hasMedicaments, setHasMedicaments] = useState(false);
@@ -128,6 +135,26 @@ export default function ChildProfile() {
     fetchSoins();
   };
 
+  const handleSaveInfos = async () => {
+    if (!enfantId) return;
+    setSavingInfos(true);
+    const { error } = await supabase
+      .from("enfants")
+      .update({
+        prenom: editPrenom.trim() || prenom,
+        date_naissance: editDateNaissance || null,
+        diagnostic_label: editDiagnostic.trim() || null,
+      })
+      .eq("id", enfantId);
+    setSavingInfos(false);
+    if (!error) {
+      setPrenom(editPrenom.trim() || prenom);
+      setDateNaissance(editDateNaissance || null);
+      setDiagnostic(editDiagnostic.trim() || null);
+      setEditingInfos(false);
+    }
+  };
+
   const pillClass = (value: string) =>
     `px-4 py-2 rounded-full text-sm font-sans transition-all border ${
       sexe === value
@@ -148,10 +175,22 @@ export default function ChildProfile() {
 
         {/* ── INFORMATIONS ── */}
         <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-between mb-1">
+          <div className="flex items-center justify-between w-full mb-1">
             <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider" style={{ fontFamily: "DM Sans" }}>
               Informations
             </span>
+            <button
+              onClick={() => {
+                setEditPrenom(prenom ?? "");
+                setEditDateNaissance(dateNaissance ?? "");
+                setEditDiagnostic(diagnostic ?? "");
+                setEditingInfos(true);
+              }}
+              className="text-sm font-medium text-[#534AB7]"
+              style={{ fontFamily: "DM Sans" }}
+            >
+              Modifier
+            </button>
           </div>
           <div
             className="rounded-2xl p-4 flex flex-col divide-y divide-[rgba(139,116,224,0.1)]"
@@ -336,6 +375,84 @@ export default function ChildProfile() {
         onSave={() => { setSoinModalOpen(false); setEditingSoin(null); fetchSoins(); }}
         onClose={() => { setSoinModalOpen(false); setEditingSoin(null); }}
       />
+
+      {editingInfos && (
+        <div className="fixed inset-0 z-50">
+          <div
+            className="absolute inset-0"
+            style={{ background: "rgba(0,0,0,0.5)" }}
+            onClick={() => setEditingInfos(false)}
+          />
+          <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl max-h-[90vh] overflow-y-auto p-6 z-50">
+            <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-4" />
+            <h2
+              className="text-xl font-semibold text-foreground mb-5"
+              style={{ fontFamily: "Fraunces" }}
+            >
+              Modifier les informations
+            </h2>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-foreground mb-1.5 block" style={{ fontFamily: "DM Sans" }}>
+                  Prénom
+                </label>
+                <input
+                  type="text"
+                  value={editPrenom}
+                  onChange={(e) => setEditPrenom(e.target.value)}
+                  className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#8B74E0] focus:ring-2 focus:ring-[#8B74E0]/10"
+                  style={{ fontFamily: "DM Sans" }}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-foreground mb-1.5 block" style={{ fontFamily: "DM Sans" }}>
+                  Date de naissance
+                </label>
+                <input
+                  type="date"
+                  value={editDateNaissance ?? ""}
+                  onChange={(e) => setEditDateNaissance(e.target.value)}
+                  className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#8B74E0] focus:ring-2 focus:ring-[#8B74E0]/10"
+                  style={{ fontFamily: "DM Sans" }}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-foreground mb-1.5 block" style={{ fontFamily: "DM Sans" }}>
+                  Situation ou diagnostic
+                </label>
+                <input
+                  type="text"
+                  value={editDiagnostic}
+                  onChange={(e) => setEditDiagnostic(e.target.value)}
+                  placeholder="ex : Paralysie cérébrale..."
+                  className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#8B74E0] focus:ring-2 focus:ring-[#8B74E0]/10"
+                  style={{ fontFamily: "DM Sans" }}
+                />
+              </div>
+            </div>
+            <div className="space-y-3 mt-6">
+              <button
+                onClick={handleSaveInfos}
+                disabled={savingInfos}
+                className="w-full rounded-xl h-12 text-base text-white font-medium flex items-center justify-center disabled:opacity-50"
+                style={{
+                  background: "linear-gradient(135deg, #E8736A, #8B74E0)",
+                  fontFamily: "DM Sans",
+                }}
+              >
+                {savingInfos ? "Enregistrement..." : "Enregistrer"}
+              </button>
+              <button
+                onClick={() => setEditingInfos(false)}
+                className="w-full text-center text-sm text-muted-foreground hover:text-foreground py-2"
+                style={{ fontFamily: "DM Sans" }}
+              >
+                Annuler
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
