@@ -341,7 +341,7 @@ const OutilsSyntheseMdph = () => {
             <UserBubble text="📋 Dossier MDPH" />
             <SectionSeparator text={`Dossier MDPH — ${displayName}`} />
             <AiBubble text="Pour préparer ton dossier, j'ai besoin de quelques infos que je n'ai pas dans tes mémos." />
-            <AiBubble text="C'est quel type de demande ?" />
+            <AiBubble text="1 — C'est quel type de demande ?" />
             <ChipGroup chips={Q1_CHIPS} selected={q1 ? [q1] : []} onToggle={(c) => toggleSingle(c, q1, setQ1)} />
           </>
         )}
