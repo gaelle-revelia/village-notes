@@ -26,6 +26,7 @@ export default function ChildProfile() {
   const [editDateNaissance, setEditDateNaissance] = useState("");
   const [editDiagnostic, setEditDiagnostic] = useState("");
   const [savingInfos, setSavingInfos] = useState(false);
+  const [editSexe, setEditSexe] = useState<string | null>(null);
 
   // Medicaments state
   const [medicaments, setMedicaments] = useState<any[]>([]);
@@ -182,6 +183,7 @@ export default function ChildProfile() {
         prenom: editPrenom.trim() || prenom,
         date_naissance: editDateNaissance || null,
         diagnostic_label: editDiagnostic.trim() || null,
+        sexe: editSexe,
       })
       .eq("id", enfantId);
     setSavingInfos(false);
@@ -189,6 +191,7 @@ export default function ChildProfile() {
       setPrenom(editPrenom.trim() || prenom);
       setDateNaissance(editDateNaissance || null);
       setDiagnostic(editDiagnostic.trim() || null);
+      setSexe(editSexe);
       setEditingInfos(false);
     }
   };
@@ -222,6 +225,7 @@ export default function ChildProfile() {
                 setEditPrenom(prenom ?? "");
                 setEditDateNaissance(dateNaissance ?? "");
                 setEditDiagnostic(diagnostic ?? "");
+                setEditSexe(sexe);
                 setEditingInfos(true);
               }}
               className="text-sm font-medium text-[#534AB7]"
@@ -260,14 +264,9 @@ export default function ChildProfile() {
             )}
             <div className="flex items-center justify-between py-2.5 last:pb-0">
               <span className="text-sm text-muted-foreground" style={{ fontFamily: "DM Sans" }}>Genre</span>
-              <div className="flex gap-2">
-                <button className={pillClass("F")} onClick={() => handleSexeChange("F")} disabled={saving}>
-                  Fille {sexe === "F" && <Check size={12} className="inline ml-1" />}
-                </button>
-                <button className={pillClass("M")} onClick={() => handleSexeChange("M")} disabled={saving}>
-                  Garçon {sexe === "M" && <Check size={12} className="inline ml-1" />}
-                </button>
-              </div>
+              <span className="text-sm font-medium text-foreground" style={{ fontFamily: "DM Sans" }}>
+                {sexe === "F" ? "Fille" : sexe === "M" ? "Garçon" : "—"}
+              </span>
             </div>
           </div>
         </div>
@@ -531,6 +530,35 @@ export default function ChildProfile() {
                   className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#8B74E0] focus:ring-2 focus:ring-[#8B74E0]/10"
                   style={{ fontFamily: "DM Sans" }}
                 />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-foreground mb-1.5 block" style={{ fontFamily: "DM Sans" }}>
+                  Genre
+                </label>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditSexe(editSexe === "F" ? null : "F")}
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all border ${
+                      editSexe === "F"
+                        ? "bg-primary/10 border-primary text-primary"
+                        : "bg-white/50 border-white/60 text-muted-foreground"
+                    }`}
+                  >
+                    Fille
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditSexe(editSexe === "M" ? null : "M")}
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all border ${
+                      editSexe === "M"
+                        ? "bg-primary/10 border-primary text-primary"
+                        : "bg-white/50 border-white/60 text-muted-foreground"
+                    }`}
+                  >
+                    Garçon
+                  </button>
+                </div>
               </div>
             </div>
             <div className="space-y-3 mt-6">
