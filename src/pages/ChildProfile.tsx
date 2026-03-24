@@ -355,6 +355,84 @@ export default function ChildProfile() {
         onSave={() => { setSoinModalOpen(false); setEditingSoin(null); fetchSoins(); }}
         onClose={() => { setSoinModalOpen(false); setEditingSoin(null); }}
       />
+
+      {editingInfos && (
+        <div className="fixed inset-0 z-50">
+          <div
+            className="absolute inset-0"
+            style={{ background: "rgba(0,0,0,0.5)" }}
+            onClick={() => setEditingInfos(false)}
+          />
+          <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl max-h-[90vh] overflow-y-auto p-6 z-50">
+            <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-4" />
+            <h2
+              className="text-xl font-semibold text-foreground mb-5"
+              style={{ fontFamily: "Fraunces" }}
+            >
+              Modifier les informations
+            </h2>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-foreground mb-1.5 block" style={{ fontFamily: "DM Sans" }}>
+                  Prénom
+                </label>
+                <input
+                  type="text"
+                  value={editPrenom}
+                  onChange={(e) => setEditPrenom(e.target.value)}
+                  className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#8B74E0] focus:ring-2 focus:ring-[#8B74E0]/10"
+                  style={{ fontFamily: "DM Sans" }}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-foreground mb-1.5 block" style={{ fontFamily: "DM Sans" }}>
+                  Date de naissance
+                </label>
+                <input
+                  type="date"
+                  value={editDateNaissance ?? ""}
+                  onChange={(e) => setEditDateNaissance(e.target.value)}
+                  className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#8B74E0] focus:ring-2 focus:ring-[#8B74E0]/10"
+                  style={{ fontFamily: "DM Sans" }}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-foreground mb-1.5 block" style={{ fontFamily: "DM Sans" }}>
+                  Situation ou diagnostic
+                </label>
+                <input
+                  type="text"
+                  value={editDiagnostic}
+                  onChange={(e) => setEditDiagnostic(e.target.value)}
+                  placeholder="ex : Paralysie cérébrale..."
+                  className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#8B74E0] focus:ring-2 focus:ring-[#8B74E0]/10"
+                  style={{ fontFamily: "DM Sans" }}
+                />
+              </div>
+            </div>
+            <div className="space-y-3 mt-6">
+              <button
+                onClick={handleSaveInfos}
+                disabled={savingInfos}
+                className="w-full rounded-xl h-12 text-base text-white font-medium flex items-center justify-center disabled:opacity-50"
+                style={{
+                  background: "linear-gradient(135deg, #E8736A, #8B74E0)",
+                  fontFamily: "DM Sans",
+                }}
+              >
+                {savingInfos ? "Enregistrement..." : "Enregistrer"}
+              </button>
+              <button
+                onClick={() => setEditingInfos(false)}
+                className="w-full text-center text-sm text-muted-foreground hover:text-foreground py-2"
+                style={{ fontFamily: "DM Sans" }}
+              >
+                Annuler
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
