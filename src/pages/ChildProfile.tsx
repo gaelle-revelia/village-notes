@@ -223,6 +223,7 @@ export default function ChildProfile() {
                 setEditPrenom(prenom ?? "");
                 setEditDateNaissance(dateNaissance ?? "");
                 setEditDiagnostic(diagnostic ?? "");
+                setEditSexe(sexe);
                 setEditingInfos(true);
               }}
               className="text-sm font-medium text-[#534AB7]"
