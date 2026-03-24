@@ -547,15 +547,6 @@ const OutilsSyntheseMdph = () => {
           </>
         )}
 
-        {/* Loading screen */}
-        {isGenerating && !showResults && (
-          <div className="flex flex-col items-center justify-center py-16 gap-4">
-            <div className="flex items-center justify-center" style={{ width: 56, height: 56, borderRadius: "50%", background: "linear-gradient(135deg, #E8736A, #8B74E0)", boxShadow: "0 0 24px rgba(139,116,224,0.4)" }}>
-              <Sparkles size={24} color="#fff" className="animate-pulse" />
-            </div>
-            <p className="text-[15px] font-sans font-medium animate-pulse" style={{ color: "#8B74E0" }}>{loadingMessage}</p>
-          </div>
-        )}
 
         {/* Results */}
         {showResults && (
