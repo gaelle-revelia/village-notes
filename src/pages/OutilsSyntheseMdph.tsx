@@ -373,6 +373,11 @@ const OutilsSyntheseMdph = () => {
             {currentQ > 2 && q2.length > 0 && <UserBubble text={q2.join(" · ")} />}
             <AiBubble text="3 — Qu'est-ce qui a changé depuis ton dernier dossier ?" />
             <ChipGroup chips={Q3_CHIPS} selected={q3Chips} multi onToggle={(c) => toggleMulti(c, q3Chips, setQ3Chips)} />
+            <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
+              <p style={{ fontSize: 11, color: "#8B74E0", lineHeight: 1.55 }}>
+                N'hésite pas à détailler — date du diagnostic, type de matériel, contexte du changement…
+              </p>
+            </div>
             {q3Vocal.trim() && (
               <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
             )}
