@@ -161,9 +161,7 @@ const OutilsSyntheseMdph = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("Préparation du dossier en cours…");
-  const [generatedBlocks, setGeneratedBlocks] = useState<any[] | null>(null);
   const [syntheseId, setSyntheseId] = useState<string | null>(null);
-  const [refineBloc, setRefineBloc] = useState<{ id: string; title: string; content: string; cas_usage: string } | null>(null);
 
   // --- Visibility rules ---
   const showQ0 = true;
