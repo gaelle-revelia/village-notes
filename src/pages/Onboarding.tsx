@@ -228,6 +228,14 @@ const Onboarding = () => {
             />
           )}
           {step === 5 && enfantId && (
+            <StepMateriel
+              prenomEnfant={prenomEnfant}
+              enfantId={enfantId}
+              onNext={() => setStep(6)}
+              onSkip={() => setStep(6)}
+            />
+          )}
+          {step === 6 && enfantId && (
             <StepVocabulaire
               prenomEnfant={prenomEnfant}
               enfantId={enfantId}
@@ -238,7 +246,7 @@ const Onboarding = () => {
                   { user_id: user.id, onboarding_completed: true },
                   { onConflict: "user_id" }
                 );
-                setStep(6);
+                setStep(7);
               }}
             />
           )}
