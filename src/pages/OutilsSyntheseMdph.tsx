@@ -351,9 +351,6 @@ const OutilsSyntheseMdph = () => {
         />
       </div>
 
-      <p style={{ fontSize: 11, color: "red", textAlign: "center", padding: "2px 0" }}>
-        currentQ: {currentQ}
-      </p>
 
       <main className="flex-1 px-4 pt-5 pb-32">
         {/* Q1 — Type de demande */}
