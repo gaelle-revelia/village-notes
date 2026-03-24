@@ -8,6 +8,8 @@ import { MedicamentCard } from "@/components/profile/MedicamentCard";
 import { MedicamentModal } from "@/components/profile/MedicamentModal";
 import { SoinCard } from "@/components/profile/SoinCard";
 import { SoinModal } from "@/components/profile/SoinModal";
+import { MaterielCard } from "@/components/profile/MaterielCard";
+import { MaterielModal } from "@/components/profile/MaterielModal";
 
 export default function ChildProfile() {
   const { enfantId } = useEnfantId();
@@ -37,11 +39,17 @@ export default function ChildProfile() {
   const [soinModalOpen, setSoinModalOpen] = useState(false);
   const [editingSoin, setEditingSoin] = useState<any>(null);
 
+  // Materiel state
+  const [materiel, setMateriel] = useState<any[]>([]);
+  const [hasMateriel, setHasMateriel] = useState(false);
+  const [materielModalOpen, setMaterielModalOpen] = useState(false);
+  const [editingMateriel, setEditingMateriel] = useState<any>(null);
+
   useEffect(() => {
     if (!enfantId) return;
     supabase
       .from("enfants")
-      .select("prenom, sexe, has_medicaments, has_soins, date_naissance, diagnostic_label")
+      .select("prenom, sexe, has_medicaments, has_soins, has_materiel, date_naissance, diagnostic_label")
       .eq("id", enfantId)
       .single()
       .then(({ data }) => {
@@ -50,6 +58,7 @@ export default function ChildProfile() {
           setSexe(data.sexe);
           setHasMedicaments(data.has_medicaments ?? false);
           setHasSoins(data.has_soins ?? false);
+          setHasMateriel(data.has_materiel ?? false);
           setDateNaissance(data.date_naissance ?? null);
           setDiagnostic(data.diagnostic_label ?? null);
         }
@@ -60,6 +69,7 @@ export default function ChildProfile() {
     if (!enfantId) return;
     fetchMedicaments();
     fetchSoins();
+    fetchMateriel();
   }, [enfantId]);
 
   const handleSexeChange = async (value: string) => {
@@ -133,6 +143,34 @@ export default function ChildProfile() {
   const deleteSoin = async (id: string) => {
     await supabase.from("soins").update({ actif: false }).eq("id", id);
     fetchSoins();
+  };
+
+  const fetchMateriel = async () => {
+    if (!enfantId) return;
+    const { data } = await supabase
+      .from("materiel")
+      .select("*")
+      .eq("enfant_id", enfantId)
+      .eq("actif", true)
+      .order("created_at", { ascending: true });
+    if (data) {
+      setMateriel(data);
+      if (data.length > 0 && !hasMateriel) {
+        setHasMateriel(true);
+        await supabase.from("enfants").update({ has_materiel: true }).eq("id", enfantId);
+      }
+    }
+  };
+
+  const toggleHasMateriel = async (value: boolean) => {
+    setHasMateriel(value);
+    if (!enfantId) return;
+    await supabase.from("enfants").update({ has_materiel: value }).eq("id", enfantId);
+  };
+
+  const deleteMateriel = async (id: string) => {
+    await supabase.from("materiel").update({ actif: false }).eq("id", id);
+    fetchMateriel();
   };
 
   const handleSaveInfos = async () => {
@@ -358,6 +396,66 @@ export default function ChildProfile() {
             </div>
           )}
         </div>
+
+        {/* ── MATÉRIEL ── */}
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <span className="text-base font-semibold text-foreground" style={{ fontFamily: "DM Sans" }}>🔧 Matériel</span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-sans text-muted-foreground">
+                {hasMateriel ? "Actif" : "Inactif"}
+              </span>
+              <button
+                onClick={() => toggleHasMateriel(!hasMateriel)}
+                className="w-10 h-6 rounded-full transition-colors relative cursor-pointer"
+                style={{ background: hasMateriel ? "#E8A44A" : "#e5e7eb" }}
+              >
+                <span className={`block w-5 h-5 bg-white rounded-full shadow absolute top-0.5 transition-transform ${
+                  hasMateriel ? "translate-x-[18px]" : "translate-x-0.5"
+                }`} />
+              </button>
+            </div>
+          </div>
+
+          {hasMateriel && (
+            <div className="mt-1">
+              {materiel.length === 0 ? (
+                <div className="text-center py-4">
+                  <p className="text-sm text-muted-foreground font-sans">
+                    Aucun matériel renseigné
+                  </p>
+                  <button
+                    onClick={() => { setEditingMateriel(null); setMaterielModalOpen(true); }}
+                    className="mt-2 text-sm text-[#92560A] font-medium"
+                  >
+                    + Ajouter
+                  </button>
+                </div>
+              ) : (
+                <>
+                  {materiel.map((item) => (
+                    <MaterielCard
+                      key={item.id}
+                      {...item}
+                      onEdit={(id) => {
+                        setEditingMateriel(materiel.find((m) => m.id === id));
+                        setMaterielModalOpen(true);
+                      }}
+                      onDelete={deleteMateriel}
+                    />
+                  ))}
+                  <button
+                    onClick={() => { setEditingMateriel(null); setMaterielModalOpen(true); }}
+                    className="flex items-center gap-1.5 text-sm text-[#92560A] font-medium mt-1 px-1"
+                  >
+                    <Plus size={14} />
+                    Ajouter du matériel
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+        </div>
       </main>
 
       <MedicamentModal
@@ -374,6 +472,14 @@ export default function ChildProfile() {
         initialData={editingSoin}
         onSave={() => { setSoinModalOpen(false); setEditingSoin(null); fetchSoins(); }}
         onClose={() => { setSoinModalOpen(false); setEditingSoin(null); }}
+      />
+
+      <MaterielModal
+        open={materielModalOpen}
+        enfantId={enfantId || ""}
+        initialData={editingMateriel}
+        onSave={() => { setMaterielModalOpen(false); setEditingMateriel(null); fetchMateriel(); }}
+        onClose={() => { setMaterielModalOpen(false); setEditingMateriel(null); }}
       />
 
       {editingInfos && (
