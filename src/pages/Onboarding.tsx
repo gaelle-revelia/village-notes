@@ -12,8 +12,9 @@ import { StepVocabulaire } from "@/components/onboarding/StepVocabulaire";
 import { StepReady } from "@/components/onboarding/StepReady";
 import { StepMedicaments } from "@/components/onboarding/StepMedicaments";
 import { StepSoins } from "@/components/onboarding/StepSoins";
+import { StepMateriel } from "@/components/onboarding/StepMateriel";
 
-const TOTAL_STEPS = 6;
+const TOTAL_STEPS = 7;
 
 const Onboarding = () => {
   const { user, loading } = useAuth();
@@ -175,7 +176,7 @@ const Onboarding = () => {
       { user_id: user.id, onboarding_completed: true },
       { onConflict: "user_id" }
     );
-    setStep(6);
+    setStep(7);
   };
 
   return (
@@ -227,6 +228,14 @@ const Onboarding = () => {
             />
           )}
           {step === 5 && enfantId && (
+            <StepMateriel
+              prenomEnfant={prenomEnfant}
+              enfantId={enfantId}
+              onNext={() => setStep(6)}
+              onSkip={() => setStep(6)}
+            />
+          )}
+          {step === 6 && enfantId && (
             <StepVocabulaire
               prenomEnfant={prenomEnfant}
               enfantId={enfantId}
@@ -237,11 +246,11 @@ const Onboarding = () => {
                   { user_id: user.id, onboarding_completed: true },
                   { onConflict: "user_id" }
                 );
-                setStep(6);
+                setStep(7);
               }}
             />
           )}
-          {[3, 4, 5].includes(step) && !enfantId && (
+          {[3, 4, 5, 6].includes(step) && !enfantId && (
             <div className="flex flex-col items-center justify-center gap-4 text-center">
               <p className="text-muted-foreground">Une erreur est survenue. Veuillez recommencer.</p>
               <Button
@@ -252,7 +261,7 @@ const Onboarding = () => {
               </Button>
             </div>
           )}
-          {step === 6 && <StepReady prenomEnfant={prenomEnfant} />}
+          {step === 7 && <StepReady prenomEnfant={prenomEnfant} />}
         </div>
       </div>
     </main>
