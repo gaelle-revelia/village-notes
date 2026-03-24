@@ -473,6 +473,14 @@ export default function ChildProfile() {
         onClose={() => { setSoinModalOpen(false); setEditingSoin(null); }}
       />
 
+      <MaterielModal
+        open={materielModalOpen}
+        enfantId={enfantId || ""}
+        initialData={editingMateriel}
+        onSave={() => { setMaterielModalOpen(false); setEditingMateriel(null); fetchMateriel(); }}
+        onClose={() => { setMaterielModalOpen(false); setEditingMateriel(null); }}
+      />
+
       {editingInfos && (
         <div className="fixed inset-0 z-50">
           <div
