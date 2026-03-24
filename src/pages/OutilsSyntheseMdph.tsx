@@ -165,7 +165,8 @@ const OutilsSyntheseMdph = () => {
   const [refineBloc, setRefineBloc] = useState<{ id: string; title: string; content: string; cas_usage: string } | null>(null);
 
   // --- Visibility rules ---
-  const showQ1 = true;
+  const showQ0 = true;
+  const showQ1 = currentQ >= 1;
   const showQ2 = currentQ >= 2;
   const showQ3 = currentQ >= 3 && (q1 === "Renouvellement" || q1 === "Évolution de situation");
   const showQ4 = currentQ >= 4;
