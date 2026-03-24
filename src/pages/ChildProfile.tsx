@@ -146,6 +146,44 @@ export default function ChildProfile() {
       <main className="flex flex-1 flex-col gap-8 px-5 pt-6 pb-28">
         <h2 className="text-2xl font-serif font-semibold text-foreground">Profil de {prenom || "mon enfant"}</h2>
 
+        {/* ── INFORMATIONS ── */}
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider" style={{ fontFamily: "DM Sans" }}>
+              Informations
+            </span>
+          </div>
+          <div
+            className="rounded-2xl p-4 flex flex-col divide-y divide-[rgba(139,116,224,0.1)]"
+            style={{
+              background: "rgba(255,255,255,0.88)",
+              backdropFilter: "blur(12px)",
+              WebkitBackdropFilter: "blur(12px)",
+              border: "1px solid rgba(255,255,255,0.85)",
+              boxShadow: "0 2px 12px rgba(139,116,224,0.08)",
+            }}
+          >
+            <div className="flex items-center justify-between py-2.5 first:pt-0 last:pb-0">
+              <span className="text-sm text-muted-foreground" style={{ fontFamily: "DM Sans" }}>Prénom</span>
+              <span className="text-sm font-medium text-foreground" style={{ fontFamily: "DM Sans" }}>{prenom ?? "—"}</span>
+            </div>
+            {dateNaissance && (
+              <div className="flex items-center justify-between py-2.5">
+                <span className="text-sm text-muted-foreground" style={{ fontFamily: "DM Sans" }}>Date de naissance</span>
+                <span className="text-sm font-medium text-foreground" style={{ fontFamily: "DM Sans" }}>
+                  {new Date(dateNaissance).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
+                </span>
+              </div>
+            )}
+            {diagnostic && (
+              <div className="flex items-center justify-between py-2.5 last:pb-0">
+                <span className="text-sm text-muted-foreground" style={{ fontFamily: "DM Sans" }}>Situation</span>
+                <span className="text-sm font-medium text-foreground text-right max-w-[60%]" style={{ fontFamily: "DM Sans" }}>{diagnostic}</span>
+              </div>
+            )}
+          </div>
+        </div>
+
         {/* Sexe */}
         <div className="flex flex-col gap-2">
           <label className="text-sm font-sans font-medium text-foreground">Sexe</label>
