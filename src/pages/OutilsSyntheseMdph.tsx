@@ -448,7 +448,7 @@ const OutilsSyntheseMdph = () => {
         {showQ8 && (
           <>
             {q7.trim() ? <UserBubble text="Enregistrement ajouté ✅" /> : null}
-            <AiBubble text="As-tu le certificat médical sous la main ?" />
+            <AiBubble text="8 — As-tu le certificat médical sous la main ?" />
             <ChipGroup
               chips={Q8_CHIPS}
               selected={q8Etat ? [q8Etat] : []}
