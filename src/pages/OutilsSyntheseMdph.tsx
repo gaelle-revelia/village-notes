@@ -383,10 +383,10 @@ const OutilsSyntheseMdph = () => {
             <p style={{ fontSize: 12, color: "#9A9490", textAlign: "center", margin: "0 8px 12px", lineHeight: 1.5 }}>
               N'hésite pas à préciser ta situation — chaque détail aide à mieux décrire la réalité du quotidien.
             </p>
-            <WiredMicOrb onTranscription={(text) => setQ4Vocal((prev) => prev ? prev + " " + text : text)} />
             {q4Vocal.trim() && (
               <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
             )}
+            <WiredMicOrb onTranscription={(text) => setQ4Vocal((prev) => prev ? prev + " " + text : text)} />
             {(q4 === "Arrêt d'activité lié au handicap" || q4 === "Temps partiel lié au handicap" || q4 === "Arrêt maladie") && (
               <>
                 <AiBubble text="Tu fais appel à une tierce personne rémunérée ?" />
