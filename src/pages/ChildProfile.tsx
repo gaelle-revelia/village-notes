@@ -8,6 +8,8 @@ import { MedicamentCard } from "@/components/profile/MedicamentCard";
 import { MedicamentModal } from "@/components/profile/MedicamentModal";
 import { SoinCard } from "@/components/profile/SoinCard";
 import { SoinModal } from "@/components/profile/SoinModal";
+import { MaterielCard } from "@/components/profile/MaterielCard";
+import { MaterielModal } from "@/components/profile/MaterielModal";
 
 export default function ChildProfile() {
   const { enfantId } = useEnfantId();
