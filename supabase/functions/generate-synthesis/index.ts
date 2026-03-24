@@ -273,18 +273,65 @@ Le dossier MDPH est le seul canal par lequel la commission perçoit la réalité
 Retourne UNIQUEMENT ce JSON, sans markdown, sans commentaire, sans texte avant ou après :
 {"blocks":[{"id":"autonomie","title":"Autonomie au quotidien","icon":"Settings","badge":"...","content":"..."},{"id":"soins","title":"Soins et suivi médical","icon":"Stethoscope","badge":"...","content":"..."},{"id":"scolarite","title":"Scolarité et projet de vie","icon":"BookOpen","badge":"...","content":"..."},{"id":"famille","title":"Situation familiale et professionnelle","icon":"Heart","badge":"...","content":"..."}]}`;
 
-      userMessage = `Prenom de l'enfant: ${prenom}
-Sexe: ${isFem ? "fille" : "garçon"} (utilise les pronoms ${pronom_sujet}/${pronom_cod}/${pronom_cod_tonique})
-Diagnostic: ${enfant?.diagnostic_label ?? "non renseigné"}
-Intervenants actifs: ${JSON.stringify(intervenants)}
-Nombre de mémos: ${memos.length}
-Mémos: ${JSON.stringify(memos.map((m: any) => ({
+      userMessage = `DÉCLARANT
+Prénom : ${parent_context.declarant_prenom ?? "non renseigné"}
+Lien avec l'enfant : ${parent_context.declarant_lien ?? "non renseigné"}
+
+PROFIL DE L'ENFANT
+Prénom : ${prenom}
+Sexe : ${isFem ? "fille" : "garçon"} (pronoms : ${pronom_sujet}/${pronom_cod})
+Diagnostic : ${enfant?.diagnostic_label ?? "non renseigné"}
+
+RÉPONSES DU PARENT
+Type de demande : ${parent_context.type_demande ?? "non renseigné"}
+Droits souhaités : ${JSON.stringify(parent_context.droits_souhaites ?? parent_context.objectifs ?? [])}
+Ce qui a changé : ${parent_context.changements ?? "non applicable"}
+Situation professionnelle : ${parent_context.situation_pro ?? "non renseigné"}
+Précisions situation pro : ${parent_context.situation_pro_details ?? "non renseigné"}
+Tierce personne rémunérée : ${parent_context.tierce_personne === true ? "Oui" : parent_context.tierce_personne === false ? "Non" : "non renseigné"}
+Précisions tierce personne : ${parent_context.tierce_personne_details ?? "non renseigné"}
+Scolarisation : ${parent_context.scolarisation ?? "non renseigné"}
+Précisions scolarisation : ${parent_context.scolarisation_details ?? "non renseigné"}
+Projet : ${parent_context.projet ?? "non renseigné"}
+Champ libre : ${parent_context.champ_libre ?? "rien à ajouter"}
+Certificat médical : ${parent_context.certificat_etat ?? "non renseigné"}
+Contenu certificat : ${parent_context.certificat_vocal ?? "non disponible"}
+
+DONNÉES DE L'APPLICATION
+Intervenants actifs (${intervenants?.length ?? 0}) :
+${JSON.stringify(intervenants?.map((i: any) => ({
+  specialite: i.specialite,
+  structure: i.structure,
+  frequence: i.frequence ?? "fréquence non renseignée"
+})) ?? [])}
+
+Médicaments (${medicamentsData?.length ?? 0}) :
+${JSON.stringify(medicamentsData?.map((m: any) => ({
+  nom: m.nom,
+  dosage: m.dosage ?? "non renseigné",
+  frequence: m.frequence ?? "non renseignée"
+})) ?? [])}
+
+Soins (${soinsData?.length ?? 0}) :
+${JSON.stringify(soinsData?.map((s: any) => ({
+  nom: s.nom,
+  frequence: s.frequence ?? "non renseignée",
+  description: s.description ?? ""
+})) ?? [])}
+
+Matériel (${materielData?.length ?? 0}) :
+${JSON.stringify(materielData?.map((m: any) => ({
+  nom: m.nom,
+  conseils: m.conseils ?? ""
+})) ?? [])}
+
+Mémos des 24 derniers mois (${memos?.length ?? 0}) :
+${JSON.stringify(memos?.map((m: any) => ({
   date: m.memo_date,
-  resume: m.content_structured?.resume,
-  details: m.content_structured?.details,
-  a_retenir: m.content_structured?.a_retenir,
-})))}
-Contexte MDPH fourni par le parent: ${parent_context.vocal_mdph ?? "non renseigné"}`;
+  resume: m.content_structured?.resume ?? "",
+  details: m.content_structured?.details ?? [],
+  a_retenir: m.content_structured?.a_retenir ?? ""
+})) ?? [])}`;
     }
 
     if (type === "transmission") {
