@@ -322,7 +322,7 @@ const OutilsSyntheseMdph = () => {
   const renderCta = () => {
     const ctaEnabled = isCurrentStepValid() && !isGenerating && !isRecording;
     const ctaLabel = currentQ === 8
-      ? (isGenerating ? "Génération en cours..." : "Générer mon dossier →")
+      ? (isGenerating ? loadingMessage : "Générer mon dossier →")
       : "Continuer →";
 
     return (
