@@ -117,10 +117,12 @@ const ThematicBlock = ({ icon, title, badge, body, onPreciser }: ThematicBlockPr
 
 // --- Questions config ---
 const Q1_CHIPS = ["Première demande", "Renouvellement", "Évolution de situation"];
-const Q2_CHIPS = ["AEEH / complément AEEH", "PCH", "SESSAD", "Carte mobilité", "Autre"];
+const Q2_CHIPS = ["AEEH / complément AEEH", "PCH", "SESSAD", "Mention invalidité", "Mention stationnement", "AVPF", "Je ne sais pas", "Autre"];
 const Q3_CHIPS = ["Nouveau diagnostic", "Nouveaux soins", "Changement situation pro", "Nouveau matériel", "Scolarisation à venir"];
-const Q4_CHIPS = ["En emploi", "Arrêt lié au handicap", "Sans emploi", "Freelance / indépendant"];
-const Q5_CHIPS = ["Entrée à l'école", "Mise en place SESSAD", "Nouveau matériel", "Plus d'autonomie"];
+const Q4_CHIPS = ["En emploi", "Arrêt lié au handicap", "Réduction d'activité liée au handicap", "Sans emploi", "Freelance / indépendant"];
+const Q5_CHIPS = ["🏫 Scolarisée", "🌱 Entrée à l'école prévue", "🏥 Orientation médico-sociale", "— Pas encore scolarisée"];
+const Q6_CHIPS = ["Plus d'autonomie", "Entrée à l'école", "Mise en place SESSAD", "Nouveau matériel", "Maintien des droits actuels", "Autre"];
+const Q8_CHIPS = ["Oui, je l'ai", "Pas encore", "Certificat simplifié"];
 
 const OutilsSyntheseMdph = () => {
   const navigate = useNavigate();
