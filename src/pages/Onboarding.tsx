@@ -232,7 +232,13 @@ const Onboarding = () => {
               enfantId={enfantId}
               intervenants={villageIntervenants}
               onNext={handleVocabulaire}
-              onSkip={() => setStep(6)}
+              onSkip={async () => {
+                await supabase.from("profiles").upsert(
+                  { user_id: user.id, onboarding_completed: true },
+                  { onConflict: "user_id" }
+                );
+                setStep(6);
+              }}
             />
           )}
           {[3, 4, 5].includes(step) && !enfantId && (
