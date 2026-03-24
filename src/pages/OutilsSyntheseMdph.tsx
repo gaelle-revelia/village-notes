@@ -222,7 +222,7 @@ const OutilsSyntheseMdph = () => {
 
   useEffect(() => {
     if (!user) return;
-    supabase.from("profiles").select("prenom").eq("user_id", user.id).single().then(({ data }) => { if (data?.prenom) setParentPrenom(data.prenom); });
+    supabase.from("profiles").select("prenom").eq("user_id", user.id).single().then(({ data }) => { if (data?.prenom) { setParentPrenom(data.prenom); setQ0Prenom(data.prenom); } });
   }, [user]);
 
   // --- Auto-scroll ---
