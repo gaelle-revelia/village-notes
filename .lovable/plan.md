@@ -1,48 +1,29 @@
 
 
-## Plan: Insert StepMateriel as step 5 in Onboarding.tsx
+## Plan: Add Matériel section to ChildProfile.tsx
 
-**File**: `src/pages/Onboarding.tsx` (only)
+**File**: `src/pages/ChildProfile.tsx` (only)
 
-### Edits
+### 6 surgical edits (using original line numbers):
 
-1. **Line 14**: Add import after StepSoins import:
-   ```ts
-   import { StepMateriel } from "@/components/onboarding/StepMateriel";
-   ```
+1. **Lines 9-10** — Add imports for MaterielCard and MaterielModal after SoinModal import
 
-2. **Line 16**: `TOTAL_STEPS = 6` → `TOTAL_STEPS = 7`
+2. **Lines 34-38** — Add materiel state variables after soins state block
 
-3. **Line 178**: `setStep(6)` → `setStep(7)` (in handleVocabulaire)
+3. **Line 44** — Extend select query to include `has_materiel`
 
-4. **Lines 229-242**: Replace StepVocabulaire block (was step 5) with StepMateriel at step 5 + StepVocabulaire at step 6:
-   ```tsx
-   {step === 5 && enfantId && (
-     <StepMateriel
-       prenomEnfant={prenomEnfant}
-       enfantId={enfantId}
-       onNext={() => setStep(6)}
-       onSkip={() => setStep(6)}
-     />
-   )}
-   {step === 6 && enfantId && (
-     <StepVocabulaire
-       prenomEnfant={prenomEnfant}
-       enfantId={enfantId}
-       intervenants={villageIntervenants}
-       onNext={handleVocabulaire}
-       onSkip={async () => {
-         await supabase.from("profiles").upsert(
-           { user_id: user.id, onboarding_completed: true },
-           { onConflict: "user_id" }
-         );
-         setStep(7);
-       }}
-     />
-   )}
-   ```
+4. **Line 52** — Add `setHasMateriel(data.has_materiel ?? false)` after `setHasSoins`
 
-5. **Line 244**: `[3, 4, 5]` → `[3, 4, 5, 6]` (enfantId error fallback)
+5. **Lines 59-63** — Add `fetchMateriel()` call in second useEffect, and add `fetchMateriel`, `toggleHasMateriel`, `deleteMateriel` functions after `deleteSoin`
 
-6. **Line 255**: `step === 6` → `step === 7` (StepReady)
+6. **Lines 360-377** — After Soins section closing div (line 360), insert Materiel JSX section + MaterielModal before the editingInfos block. Toggle color: `#E8A44A`. Text color: `#92560A`. Icon: 🔧.
+
+### Technical details
+
+- State: `materiel`, `hasMateriel`, `materielModalOpen`, `editingMateriel`
+- `fetchMateriel`: queries `materiel` table filtered by `enfant_id` + `actif=true`, auto-sets `has_materiel` on enfants if items exist
+- `toggleHasMateriel`: updates local state + enfants table
+- `deleteMateriel`: soft-delete via `actif: false`, then refetch
+- JSX mirrors Soins section exactly: toggle switch, empty state with "+ Ajouter", card list with MaterielCard, "Ajouter du matériel" button with Plus icon
+- MaterielModal placed alongside existing modals with same callback pattern
 
