@@ -363,31 +363,51 @@ const OutilsSyntheseMdph = () => {
           </>
         )}
 
-        {/* Q4 — Situation professionnelle */}
         {showQ4 && (
           <>
             {showQ3 && <UserBubble text={q3Answer()} />}
             {!showQ3 && <UserBubble text={q2.join(" · ")} />}
             <AiBubble text="Ta situation professionnelle actuelle ?" />
             <ChipGroup chips={Q4_CHIPS} selected={q4 ? [q4] : []} onToggle={(c) => toggleSingle(c, q4, setQ4)} />
+            {(q4 === "Arrêt lié au handicap" || q4 === "Réduction d'activité liée au handicap") && (
+              <>
+                <AiBubble text="Tu fais appel à une tierce personne rémunérée ?" />
+                <ChipGroup chips={["Oui", "Non"]} selected={q4TiercePersonne === true ? ["Oui"] : q4TiercePersonne === false ? ["Non"] : []} onToggle={(c) => setQ4TiercePersonne(c === "Oui")} />
+                {q4TiercePersonne === true && (
+                  <>
+                    <AiBubble text="Combien d'heures par semaine environ ?" />
+                    <div className="mb-4 flex justify-end">
+                      <Input type="number" placeholder="ex : 8" value={q4HeuresTierce} onChange={(e) => setQ4HeuresTierce(e.target.value)} className="text-[14px] font-sans border-none" style={{ ...glassCard, borderRadius: 14, maxWidth: "50%", height: 44 }} />
+                    </div>
+                  </>
+                )}
+              </>
+            )}
           </>
         )}
 
-        {/* Q5 — Projet de vie */}
+        {/* Q5 — Situation scolaire */}
         {showQ5 && (
           <>
             <UserBubble text={q4Answer()} />
-            <AiBubble text={`Quel est ton projet pour ${displayName} dans les 2-3 prochaines années ?`} />
+            <AiBubble text={`Quelle est la situation scolaire de ${displayName} ?`} />
             <ChipGroup chips={Q5_CHIPS} selected={q5 ? [q5] : []} onToggle={(c) => toggleSingle(c, q5, (v) => setQ5(v))} />
+            {q5 === "🏫 Scolarisée" && q1 === "Renouvellement" && (
+              <div style={{ margin: "0 4px 14px", background: "rgba(68,168,130,0.07)", borderLeft: "2.5px solid #44A882", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
+                <p style={{ fontSize: 11, color: "#2a8a6a", lineHeight: 1.55 }}>
+                  Pense à demander le GEVASco à l'école — ce document est attendu par la MDPH pour les renouvellements.
+                </p>
+              </div>
+            )}
           </>
         )}
 
-        {/* Q6 — Précisions projet */}
+        {/* Q6 — Projet 2-3 ans */}
         {showQ6 && (
           <>
             <UserBubble text={q5Answer()} />
-            <AiBubble text="Des précisions sur le projet de vie ?" />
-            <ChipGroup chips={["Entrée à l'école", "Mise en place SESSAD", "Nouveau matériel", "Plus d'autonomie"]} selected={q6Chips} multi onToggle={(c) => toggleMulti(c, q6Chips, setQ6Chips)} />
+            <AiBubble text={`Quel est ton projet pour ${displayName} dans les 2-3 prochaines années ?`} />
+            <ChipGroup chips={Q6_CHIPS} selected={q6Chips} multi onToggle={(c) => toggleMulti(c, q6Chips, setQ6Chips)} />
             <OrSeparator />
             <div className="mb-2 flex justify-end">
               <Textarea placeholder="Décris ton projet..." value={q6Vocal} onChange={(e) => setQ6Vocal(e.target.value)} className="text-[14px] font-sans border-none italic placeholder:italic" style={{ ...glassCard, borderRadius: 14, minHeight: 70, maxWidth: "80%" }} autoResize />
@@ -396,7 +416,7 @@ const OutilsSyntheseMdph = () => {
           </>
         )}
 
-        {/* Q7 — Remarques supplémentaires (textarea) */}
+        {/* Q7 — Champ libre */}
         {showQ7 && (
           <>
             <UserBubble text={q6Answer()} />
@@ -405,24 +425,29 @@ const OutilsSyntheseMdph = () => {
               <Textarea placeholder="Ajoute ce que tu veux mettre en avant..." value={q7} onChange={(e) => setQ7(e.target.value)} className="text-[14px] font-sans border-none italic placeholder:italic" style={{ ...glassCard, borderRadius: 14, minHeight: 70, maxWidth: "80%" }} autoResize />
             </div>
             <WiredMicOrb onTranscription={(text) => setQ7((prev) => prev ? prev + " " + text : text)} />
+            <button onClick={() => setQ7Seen(true)} style={{ background: "transparent", border: "none", color: "#9A9490", fontSize: 12, cursor: "pointer", display: "block", margin: "4px auto 0" }}>Passer →</button>
           </>
         )}
 
-        {/* Q8 — État émotionnel */}
+        {/* Q8 — Certificat médical */}
         {showQ8 && (
           <>
             {q7.trim() && <UserBubble text={q7.trim()} />}
-            <AiBubble text="Comment tu te sens par rapport à cette démarche ?" />
+            <AiBubble text="As-tu le certificat médical sous la main ?" />
             <ChipGroup
-              chips={["Serein(e)", "Stressé(e)", "Épuisé(e)", "Motivé(e)", "Perdu(e)"]}
+              chips={Q8_CHIPS}
               selected={q8Etat ? [q8Etat] : []}
               onToggle={(c) => toggleSingle(c, q8Etat, setQ8Etat)}
             />
-            <OrSeparator />
-            <div className="mb-5 flex justify-end">
-              <Textarea placeholder="Précise si besoin..." value={q8Vocal} onChange={(e) => setQ8Vocal(e.target.value)} className="text-[14px] font-sans border-none italic placeholder:italic" style={{ ...glassCard, borderRadius: 14, minHeight: 70, maxWidth: "80%" }} autoResize />
-            </div>
-            <WiredMicOrb onTranscription={(text) => setQ8Vocal((prev) => prev ? prev + " " + text : text)} />
+            {q8Etat === "Oui, je l'ai" && (
+              <>
+                <AiBubble text="Tu peux me lire ces éléments si ton médecin les a renseignés : le diagnostic principal, les restrictions fonctionnelles, les soins mentionnés, ses remarques finales." italic />
+                <WiredMicOrb onTranscription={(text) => setQ8Vocal((prev) => prev ? prev + " " + text : text)} />
+              </>
+            )}
+            {(q8Etat === "Pas encore" || q8Etat === "Certificat simplifié") && (
+              <AiBubble text="Pas de problème — je génère avec tes mémos et tes réponses." italic />
+            )}
           </>
         )}
 
