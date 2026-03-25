@@ -228,7 +228,7 @@ export default function OutilsSyntheseMdphResultats() {
         {/* Footer */}
         {blocks.length > 0 && (
           <div className="pt-2 pb-4 space-y-3">
-            <p className="text-[11px] text-center" style={{ color: "#9A9490", fontFamily: "DM Sans, sans-serif" }}>
+            <p style={{ fontSize: 11, color: "#9A9490", textAlign: "center", lineHeight: 1.6, marginBottom: 12 }}>
               Synthèse des observations de {parentPrenom} pour {enfantPrenom} · The Village ·{" "}
               {new Date().toLocaleDateString("fr-FR", { month: "long", year: "numeric" })}
             </p>
