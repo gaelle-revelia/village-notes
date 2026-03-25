@@ -44,6 +44,7 @@ import Waitlist from "./pages/Waitlist";
 import AVenirDetail from "./pages/AVenirDetail";
 import VillageProFiche from "./pages/VillageProFiche";
 import VillageProEdit from "./pages/VillageProEdit";
+import Archives from "./pages/Archives";
 
 const queryClient = new QueryClient();
 
@@ -90,6 +91,7 @@ const AppRoutes = () => {
       <Route path="/parametres" element={<AppSettings />} />
       <Route path="/onboarding-invite" element={<OnboardingInvite />} />
       <Route path="/vocabulaire" element={<Vocabulaire />} />
+      <Route path="/archives" element={<Archives />} />
       <Route path="/politique-confidentialite" element={<PolitiqueConfidentialite />} />
       <Route path="/waitlist" element={<Waitlist />} />
       <Route path="*" element={<NotFound />} />

@@ -113,11 +113,15 @@ const OutilsSynthese = () => {
           <ArrowLeft size={20} style={{ color: "#1E1A1A" }} />
         </button>
         <h1
-          className="text-xl font-serif font-semibold"
+          className="text-xl font-serif font-semibold flex-1"
           style={{ color: "#1E1A1A" }}>Synthèse Magique
-
-
         </h1>
+        <button
+          onClick={() => navigate("/archives")}
+          style={{ fontSize: 12, color: "#8B74E0", fontWeight: 500, background: "none", border: "none", cursor: "pointer", padding: 0 }}
+        >
+          Mes archives →
+        </button>
       </header>
 
       <main className="flex-1 px-4 pt-5 pb-24">
