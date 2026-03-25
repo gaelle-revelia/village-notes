@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, Sparkles, User, Brain, Moon, PersonStanding, Users, Pill, Activity, Mail } from "lucide-react";
 import WiredMicOrb from "@/components/synthese/WiredMicOrb";
 import BottomNavBar from "@/components/BottomNavBar";
@@ -81,20 +81,36 @@ interface ResultCardProps {
   icon: React.ReactNode;
   title: string;
   body: string;
+  showCopy?: boolean;
 }
 
-const ResultCard = ({ icon, title, body, onPreciser }: ResultCardProps & { onPreciser?: () => void }) => (
-  <div className="mb-4 px-5 py-4" style={glassCard}>
-    <div className="flex items-center gap-2 mb-2">
-      {icon}
-      <h3 className="text-[16px] font-serif font-semibold" style={{ color: "#1E1A1A" }}>{title}</h3>
+const ResultCard = ({ icon, title, body, onPreciser, showCopy }: ResultCardProps & { onPreciser?: () => void }) => {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = () => {
+    navigator.clipboard.writeText(body);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+  return (
+    <div className="mb-4 px-5 py-4" style={glassCard}>
+      <div className="flex items-center gap-2 mb-2">
+        {icon}
+        <h3 className="text-[16px] font-serif font-semibold" style={{ color: "#1E1A1A" }}>{title}</h3>
+      </div>
+      <p className="text-[14px] font-sans leading-relaxed mb-3" style={{ color: "#1E1A1A" }}>{body}</p>
+      <div style={{ display: "flex", gap: 8 }}>
+        {showCopy && (
+          <button onClick={handleCopy} style={{ flex: 1, padding: 9, borderRadius: 10, fontSize: 12, fontWeight: 500, background: "rgba(255,255,255,0.48)", border: "1px solid rgba(139,116,224,0.3)", color: "#8B74E0", cursor: "pointer" }}>
+            {copied ? "Copié ✓" : "Copier"}
+          </button>
+        )}
+        <button onClick={onPreciser} className={`py-2.5 text-[13px] font-sans font-medium ${showCopy ? "" : "w-full"}`} style={{ flex: showCopy ? 1 : undefined, border: "1.5px dashed #8B74E0", color: "#8B74E0", borderRadius: 12, background: "transparent" }}>
+          ✏️ Préciser ce bloc
+        </button>
+      </div>
     </div>
-    <p className="text-[14px] font-sans leading-relaxed mb-3" style={{ color: "#1E1A1A" }}>{body}</p>
-    <button onClick={onPreciser} className="w-full py-2.5 text-[13px] font-sans font-medium" style={{ border: "1.5px dashed #8B74E0", color: "#8B74E0", borderRadius: 12, background: "transparent" }}>
-      ✏️ Préciser ce bloc
-    </button>
-  </div>
-);
+  );
+};
 
 const SECTIONS = [
   { number: "01", title: "Qui est {prenom} ?", question: "Décris-moi {prenom} en quelques mots — {pronom_tonique} personnalité, comment {pronom_sujet} communique, ce {pronom_rel} aime." },
@@ -136,12 +152,16 @@ type Phase = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
 const OutilsSyntheseTransmission = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const prenom = useEnfantPrenom();
   const { enfantId } = useEnfantId();
   const { user } = useAuth();
   const { toast } = useToast();
   const displayName = prenom ?? "votre enfant";
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  const incomingSyntheseId = (location.state as any)?.syntheseId as string | undefined;
+  const incomingReadOnly = (location.state as any)?.readOnly === true;
 
   const [phase, setPhase] = useState<Phase>(0);
   const [destinataire, setDestinataire] = useState<string | null>(null);
@@ -153,6 +173,7 @@ const OutilsSyntheseTransmission = () => {
   const [sexe, setSexe] = useState<string | null>(null);
   const [syntheseId, setSyntheseId] = useState<string | null>(null);
   const [refineBloc, setRefineBloc] = useState<{ id: string; title: string; content: string; cas_usage: string } | null>(null);
+  const [isReadOnly, setIsReadOnly] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -167,6 +188,30 @@ const OutilsSyntheseTransmission = () => {
   useEffect(() => {
     setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
   }, [phase]);
+
+  // Read-only mode from Archives
+  useEffect(() => {
+    if (!incomingSyntheseId || !incomingReadOnly) return;
+    const load = async () => {
+      const { data } = await supabase
+        .from("syntheses")
+        .select("contenu, created_at")
+        .eq("id", incomingSyntheseId)
+        .single();
+      if (!data?.contenu) return;
+      try {
+        const parsed = typeof data.contenu === "string" ? JSON.parse(data.contenu) : data.contenu;
+        const blocks = parsed?.blocks ?? parsed;
+        if (Array.isArray(blocks)) {
+          setGeneratedBlocks(blocks);
+          setSyntheseId(incomingSyntheseId);
+          setPhase(7);
+          setIsReadOnly(true);
+        }
+      } catch { /* ignore parse errors */ }
+    };
+    load();
+  }, [incomingSyntheseId, incomingReadOnly]);
 
   const updateAnswer = (idx: number, val: string) => {
     setAnswers((prev) => { const n = [...prev]; n[idx] = val; return n; });
@@ -321,61 +366,65 @@ const OutilsSyntheseTransmission = () => {
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-10 px-4 py-3 flex items-center gap-3" style={{ background: "rgba(255,255,255,0.72)", backdropFilter: "blur(20px) saturate(1.5)", WebkitBackdropFilter: "blur(20px) saturate(1.5)", borderBottom: "1px solid rgba(255,255,255,0.6)", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
-        <button onClick={() => navigate("/outils/synthese")} className="flex items-center justify-center" aria-label="Retour">
+        <button onClick={() => navigate(isReadOnly ? "/archives" : "/outils/synthese")} className="flex items-center justify-center" aria-label="Retour">
           <ArrowLeft size={20} style={{ color: "#1E1A1A" }} />
         </button>
         <h1 className="text-xl font-serif font-semibold" style={{ color: "#1E1A1A" }}>Transmission</h1>
       </header>
 
       <main className="flex-1 px-4 pt-5 pb-32">
-        {/* Intro */}
-        <UserBubble text="📖 Transmission" />
-        <SectionSeparator text={`Transmission — ${displayName}`} />
-        <AiBubble text={`Je vais te poser 6 questions pour construire le livret de ${displayName}.`} />
-        <AiBubble text="Tu réponds à la voix ou à l'écrit, librement." />
+        {/* Intro — hidden in readOnly */}
+        {!isReadOnly && (
+          <>
+            <UserBubble text="📖 Transmission" />
+            <SectionSeparator text={`Transmission — ${displayName}`} />
+            <AiBubble text={`Je vais te poser 6 questions pour construire le livret de ${displayName}.`} />
+            <AiBubble text="Tu réponds à la voix ou à l'écrit, librement." />
 
-        {/* Destinataire block */}
-        <SectionSeparator text="POUR QUI CE LIVRET ?" />
-        <AiBubble text="Avant de commencer, dis-moi pour qui tu prépares ce livret." />
-        <AiBubble text="Le ton et les priorités s'adapteront automatiquement." />
-        <div className="grid grid-cols-2 gap-2 mb-5 max-w-[320px] mx-auto">
-          {DESTINATAIRES.map((d) => {
-            const selected = destinataire === d.label;
-            return (
-              <button
-                key={d.label}
-                onClick={() => phase === 0 && setDestinataire(d.label)}
-                disabled={phase > 0}
-                className="py-2.5 px-3 text-[12px] font-sans font-medium transition-all"
-                style={{
-                  ...glassCard,
-                  borderRadius: 999,
-                  background: selected ? "rgba(139,116,224,0.15)" : "rgba(255,255,255,0.55)",
-                  border: selected ? "1.5px solid #8B74E0" : "1px solid rgba(255,255,255,0.85)",
-                  color: selected ? "#8B74E0" : "#1E1A1A",
-                  opacity: phase > 0 && !selected ? 0.4 : 1,
-                }}
-              >
-                {d.emoji ? `${d.emoji} ` : ""}{d.label}
-              </button>
-            );
-          })}
-        </div>
+            {/* Destinataire block */}
+            <SectionSeparator text="POUR QUI CE LIVRET ?" />
+            <AiBubble text="Avant de commencer, dis-moi pour qui tu prépares ce livret." />
+            <AiBubble text="Le ton et les priorités s'adapteront automatiquement." />
+            <div className="grid grid-cols-2 gap-2 mb-5 max-w-[320px] mx-auto">
+              {DESTINATAIRES.map((d) => {
+                const selected = destinataire === d.label;
+                return (
+                  <button
+                    key={d.label}
+                    onClick={() => phase === 0 && setDestinataire(d.label)}
+                    disabled={phase > 0}
+                    className="py-2.5 px-3 text-[12px] font-sans font-medium transition-all"
+                    style={{
+                      ...glassCard,
+                      borderRadius: 999,
+                      background: selected ? "rgba(139,116,224,0.15)" : "rgba(255,255,255,0.55)",
+                      border: selected ? "1.5px solid #8B74E0" : "1px solid rgba(255,255,255,0.85)",
+                      color: selected ? "#8B74E0" : "#1E1A1A",
+                      opacity: phase > 0 && !selected ? 0.4 : 1,
+                    }}
+                  >
+                    {d.emoji ? `${d.emoji} ` : ""}{d.label}
+                  </button>
+                );
+              })}
+            </div>
 
-        {/* Section 1 — visible after destinataire */}
-        {phase >= 1 && renderSection(0)}
+            {/* Section 1 — visible after destinataire */}
+            {phase >= 1 && renderSection(0)}
 
-        {/* Sections 2-6 */}
-        {phase >= 2 && renderSection(1)}
-        {phase >= 3 && renderSection(2)}
-        {phase >= 4 && renderSection(3)}
-        {phase >= 5 && renderSection(4)}
-        {phase >= 6 && renderSection(5)}
+            {/* Sections 2-6 */}
+            {phase >= 2 && renderSection(1)}
+            {phase >= 3 && renderSection(2)}
+            {phase >= 4 && renderSection(3)}
+            {phase >= 5 && renderSection(4)}
+            {phase >= 6 && renderSection(5)}
+          </>
+        )}
 
         {/* Result */}
         {phase === 7 && (
           <>
-            <UserBubble text={answers[5] || "…"} />
+            {!isReadOnly && <UserBubble text={answers[5] || "…"} />}
             <SectionSeparator text={`Livret de transmission — ${displayName}`} />
             {generatedBlocks ? generatedBlocks.map((block: any, i: number) => {
               const iconMap: Record<string, React.ReactNode> = {
@@ -393,6 +442,7 @@ const OutilsSyntheseTransmission = () => {
                   icon={iconMap[block.icon] || <User size={18} style={{ color: "#8B74E0" }} />}
                   title={block.title}
                   body={block.content}
+                  showCopy={isReadOnly}
                   onPreciser={() => setRefineBloc({ id: block.id, title: block.title, content: block.content, cas_usage: "transmission" })}
                 />
               );
@@ -408,7 +458,7 @@ const OutilsSyntheseTransmission = () => {
         <div ref={bottomRef} />
       </main>
 
-      {renderCta()}
+      {!isReadOnly && renderCta()}
 
       <PreciserBlocDrawer
         isOpen={!!refineBloc}
