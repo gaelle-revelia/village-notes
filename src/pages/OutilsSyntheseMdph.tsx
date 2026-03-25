@@ -133,6 +133,7 @@ const OutilsSyntheseMdph = () => {
   const [loadingMessage, setLoadingMessage] = useState("Préparation du dossier en cours…");
   const [syntheseId, setSyntheseId] = useState<string | null>(null);
   const [introSeen, setIntroSeen] = useState(false);
+  const [showIntroBubble2, setShowIntroBubble2] = useState(false);
 
   // --- Visibility rules ---
   const showQ0 = true;
