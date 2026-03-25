@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Trash2 } from "lucide-react";
 import BottomNavBar from "@/components/BottomNavBar";
 import PreciserBlocDrawer from "@/components/synthese/PreciserBlocDrawer";
 import { supabase } from "@/integrations/supabase/client";
