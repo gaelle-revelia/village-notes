@@ -747,7 +747,9 @@ FORMAT DE SORTIE — JSON STRICT identique à l'entrée, sans markdown ni commen
     }
 
     // 10. DOUBLE WRITE
-    const contenu = JSON.stringify(blocks);
+    const contenu = type === "pick_me_up"
+      ? JSON.stringify({ blocks, etat_emotionnel_resume: etatResume ?? null })
+      : JSON.stringify(blocks);
     const firstBlockTitle = blocks[0]?.title ?? "Synthèse";
 
     const { data: synthese } = await supabase
