@@ -67,7 +67,7 @@ export default function OutilsSyntheseMdphResultats() {
       // Fetch synthese
       const { data: syntheseData, error: err } = await supabase
         .from("syntheses")
-        .select("contenu, created_at, enfant_id")
+        .select("contenu, created_at, enfant_id, titre, envoye")
         .eq("id", syntheseId)
         .maybeSingle();
 
