@@ -135,10 +135,32 @@ export default function OutilsSyntheseMdphResultats() {
           <button onClick={() => navigate(fromArchives ? "/archives" : "/outils/synthese")} className="p-1" aria-label="Retour">
             <ArrowLeft size={22} color="#1E1A1A" />
           </button>
-          <div>
-            <h1 className="text-[17px] font-semibold" style={{ fontFamily: "Fraunces, serif", color: "#1E1A1A" }}>
-              Dossier MDPH — {enfantPrenom}
-            </h1>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            {editingTitre ? (
+              <input
+                autoFocus
+                value={titre}
+                onChange={(e) => setTitre(e.target.value)}
+                onBlur={async () => {
+                  setEditingTitre(false);
+                  await supabase.from("syntheses").update({ titre: titre.trim() || null }).eq("id", syntheseId);
+                }}
+                onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); }}
+                style={{ fontFamily: "Fraunces, serif", fontSize: 17, fontWeight: 600, color: "#1E1A1A", background: "none", border: "none", borderBottom: "1px solid #8B74E0", outline: "none", width: "100%", padding: "2px 0" }}
+              />
+            ) : (
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <h1 style={{ fontFamily: "Fraunces, serif", fontSize: 17, fontWeight: 600, color: "#1E1A1A", margin: 0 }}>
+                  {titre || `Dossier MDPH — ${enfantPrenom}`}
+                </h1>
+                <button onClick={() => setEditingTitre(true)} style={{ background: "none", border: "none", cursor: "pointer", padding: 2, flexShrink: 0 }}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9A9490" strokeWidth="2" strokeLinecap="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                </button>
+              </div>
+            )}
             <p className="text-[11px]" style={{ fontFamily: "DM Sans, sans-serif", color: "#9A9490" }}>
               Généré le {syntheseDate}
             </p>
