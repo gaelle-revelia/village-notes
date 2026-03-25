@@ -395,19 +395,16 @@ Sexe : ${isFem ? "fille" : "garçon"} (pronoms : ${pronom_sujet}/${pronom_cod})
 Diagnostic : ${enfant?.diagnostic_label ?? "non renseigné"}
 
 RÉPONSES DU PARENT
-Type de demande : ${parent_context.type_demande ?? "non renseigné"}
-Droits souhaités : ${JSON.stringify(parent_context.droits_souhaites ?? parent_context.objectifs ?? [])}
-Ce qui a changé : ${parent_context.changements ?? "non applicable"}
-Situation professionnelle : ${parent_context.situation_pro ?? "non renseigné"}
-Précisions situation pro : ${parent_context.situation_pro_details ?? "non renseigné"}
-Tierce personne rémunérée : ${parent_context.tierce_personne === true ? "Oui" : parent_context.tierce_personne === false ? "Non" : "non renseigné"}
-Précisions tierce personne : ${parent_context.tierce_personne_details ?? "non renseigné"}
-Scolarisation : ${parent_context.scolarisation ?? "non renseigné"}
-Précisions scolarisation : ${parent_context.scolarisation_details ?? "non renseigné"}
-Projet : ${parent_context.projet ?? "non renseigné"}
-Champ libre : ${parent_context.champ_libre ?? "rien à ajouter"}
-Certificat médical : ${parent_context.certificat_etat ?? "non renseigné"}
-Contenu certificat : ${parent_context.certificat_vocal ?? "non disponible"}
+Q0 — Déclarant : ${parent_context.declarant_prenom ?? "non renseigné"} (${parent_context.declarant_lien ?? "non renseigné"})
+Q1 — Type de demande : ${parent_context.type_demande ?? "non renseigné"}
+Q2 — Vie quotidienne de l'enfant : ${parent_context.vie_quotidienne ?? "non renseigné"}
+Q3 — Organisation soins et situation pro : ${parent_context.organisation_soins ?? "non renseigné"}
+Q4 — Scolarisation : ${parent_context.scolarisation ?? "non renseigné"}
+Q4 — Précisions scolarisation : ${parent_context.scolarisation_details ?? "non renseigné"}
+Q5 — Projet : ${parent_context.projet ?? "non renseigné"}
+Q6 — Champ libre : ${parent_context.champ_libre ?? "rien à ajouter"}
+Q7 — Certificat : ${parent_context.certificat_etat ?? "non renseigné"}
+Q7 — Contenu certificat : ${parent_context.certificat_vocal ?? "non disponible"}
 
 DONNÉES DE L'APPLICATION
 Intervenants actifs (${intervenants?.length ?? 0}) :
