@@ -210,7 +210,7 @@ Si les données permettent une comparaison temporelle, l'utiliser explicitement.
 
 ## FORMAT DE SORTIE — JSON STRICT
 Retourne UNIQUEMENT ce JSON, sans markdown, sans commentaire, sans texte avant ou après :
-{"blocks":[{"id":"narrative","title":"Ce qui s'est passé","icon":"Sparkles","content":"texte narratif propre uniquement, sans signalement"}],"etat_emotionnel_resume":"une phrase courte et propre, maximum 8 mots, résumant l'état émotionnel du parent sans guillemets ni ponctuation finale","titre_archive":"4 à 6 mots, positifs, centrés sur l'enfant, évocateurs de cette période, jamais sur l'état émotionnel du parent, sans guillemets ni ponctuation finale. Exemples : Un mètre après l'autre / La curiosité comme moteur / Selena prend ses marques"}`;
+{"blocks":[{"id":"narrative","title":"Ce qui s'est passé","icon":"Sparkles","content":"texte narratif propre uniquement, sans signalement"}],"etat_emotionnel_resume":"une phrase courte et neutre, maximum 8 mots, décrivant ce que le parent cherchait dans ce remontant — ton factuel et doux, jamais dramatique ni émotionnel, sans guillemets ni ponctuation finale. Exemples : voir où en est Selena / faire un point sur ces trois mois / prendre du recul sur la période","titre_archive":"4 à 6 mots, positifs, centrés sur l'enfant, évocateurs de cette période, jamais sur l'état émotionnel du parent, sans guillemets ni ponctuation finale. Exemples : Un mètre après l'autre / La curiosité comme moteur / Selena prend ses marques"}`;
 
       userMessage = `Prenom de l'enfant: ${prenom}
 Sexe: ${isFem ? "fille" : "garçon"} (utilise les pronoms ${pronom_sujet}/${pronom_cod}/${pronom_cod_tonique})
