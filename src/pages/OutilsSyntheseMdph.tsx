@@ -280,7 +280,7 @@ const OutilsSyntheseMdph = () => {
   const renderCta = () => {
     if (!introSeen) {
       return (
-        <div style={{ position: "fixed", bottom: 64, left: 0, right: 0, padding: "12px 16px 40px", background: "rgba(255,255,255,0.72)", backdropFilter: "blur(20px)", borderTop: "1px solid rgba(255,255,255,0.6)", zIndex: 10 }}>
+        <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, padding: "12px 16px 88px" }}>
           <button
             onClick={() => setIntroSeen(true)}
             style={{ width: "100%", padding: 15, background: "linear-gradient(135deg, #E8736A, #8B74E0)", color: "#fff", border: "none", borderRadius: 16, fontSize: 15, fontWeight: 600, cursor: "pointer" }}>
