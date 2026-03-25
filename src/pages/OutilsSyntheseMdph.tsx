@@ -478,7 +478,7 @@ const OutilsSyntheseMdph = () => {
         )}
 
         {/* Q7 — Certificat médical */}
-        {showQ7 && (
+        {introSeen && showQ7 && (
           <>
             {currentQ > 6 && q6Libre.trim() && <UserBubble text="Enregistrement ajouté ✅" />}
             <AiBubble text="7 — As-tu le certificat médical sous la main ?" />
