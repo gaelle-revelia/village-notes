@@ -115,22 +115,15 @@ const OutilsSyntheseMdph = () => {
   const [q0Lien, setQ0Lien] = useState<string | null>(null);
   const [q0Prenom, setQ0Prenom] = useState<string>("");
   const [q1, setQ1] = useState<string | null>(null);
-  const [q2, setQ2] = useState<string[]>([]);
-  const [q3Chips, setQ3Chips] = useState<string[]>([]);
+  const [q2Vocal, setQ2Vocal] = useState("");
   const [q3Vocal, setQ3Vocal] = useState("");
-  const [q4, setQ4] = useState<string | null>(null);
-  const [q4Vocal, setQ4Vocal] = useState("");
-  const [q4TiercePersonne, setQ4TiercePersonne] = useState<boolean | null>(null);
-  const [q4HeuresTierce, setQ4HeuresTierce] = useState("");
-  const [q4bVocal, setQ4bVocal] = useState("");
-  const [q5, setQ5] = useState<string | null>(null);
+  const [q4Scolarite, setQ4Scolarite] = useState<string | null>(null);
+  const [q4ScolariteVocal, setQ4ScolariteVocal] = useState("");
   const [q5Vocal, setQ5Vocal] = useState("");
-  const [q6Chips, setQ6Chips] = useState<string[]>([]);
-  const [q6Vocal, setQ6Vocal] = useState("");
-  const [q7, setQ7] = useState("");
+  const [q6Libre, setQ6Libre] = useState("");
   
-  const [q8Etat, setQ8Etat] = useState<string | null>(null);
-  const [q8Vocal, setQ8Vocal] = useState("");
+  const [q7Etat, setQ7Etat] = useState<string | null>(null);
+  const [q7Vocal, setQ7Vocal] = useState("");
 
   const [memoCount, setMemoCount] = useState<number | null>(null);
   const [parentPrenom, setParentPrenom] = useState<string | null>(null);
@@ -144,13 +137,11 @@ const OutilsSyntheseMdph = () => {
   const showQ0 = true;
   const showQ1 = currentQ >= 1;
   const showQ2 = currentQ >= 2;
-  const showQ3 = currentQ >= 3 && (q1 === "Renouvellement" || q1 === "Évolution de situation");
+  const showQ3 = currentQ >= 3;
   const showQ4 = currentQ >= 4;
-  const showQ4b = currentQ >= 4.5;
   const showQ5 = currentQ >= 5;
   const showQ6 = currentQ >= 6;
   const showQ7 = currentQ >= 7;
-  const showQ8 = currentQ >= 8;
   
 
   // --- Loading message switch ---
@@ -169,36 +160,21 @@ const OutilsSyntheseMdph = () => {
     if (currentQ === 0.5) return q0Lien !== null && q0Prenom.trim().length > 0;
     switch (currentQ) {
       case 1: return q1 !== null;
-      case 2: return q2.length > 0;
-      case 3: return q3Chips.length > 0 || q3Vocal.trim().length > 0;
-      case 4: return q4 !== null;
-      case 4.5: return q4TiercePersonne !== null;
-      case 5: return q5 !== null;
-      case 6: return q6Vocal.trim().length > 0;
-      case 7: return true;
-      case 8: return q8Etat !== null;
+      case 2: return q2Vocal.trim().length > 0;
+      case 3: return q3Vocal.trim().length > 0;
+      case 4: return q4Scolarite !== null;
+      case 5: return q5Vocal.trim().length > 0;
+      case 6: return true; // optionnel
+      case 7: return q7Etat !== null;
       default: return false;
     }
   };
 
   const advanceStep = () => {
     if (currentQ === 0.5) { setCurrentQ(1); return; }
-    if (currentQ === 8) { handleGenerateMdph(); return; }
-    let next = currentQ + 1;
-    if (currentQ === 2 && !(q1 === "Renouvellement" || q1 === "Évolution de situation")) {
-      next = 4;
-    }
-    if (currentQ === 4) next = 4.5;
-    if (currentQ === 4.5) next = 5;
-    setCurrentQ(next);
+    if (currentQ === 7) { handleGenerateMdph(); return; }
+    setCurrentQ(prev => prev + 1);
   };
-
-  // --- Q3 skip edge case ---
-  useEffect(() => {
-    if (currentQ === 3 && !(q1 === "Renouvellement" || q1 === "Évolution de situation")) {
-      setCurrentQ(4);
-    }
-  }, [currentQ, q1]);
 
   // --- Data fetching ---
   useEffect(() => {
@@ -225,31 +201,32 @@ const OutilsSyntheseMdph = () => {
   };
 
   // Answer text helpers
-  const q3Answer = (): string | null => {
-    const parts = [...q3Chips];
-    if (q3Vocal.trim()) parts.push("Enregistrement ajouté ✅");
-    return parts.length > 0 ? parts.join(" · ") : null;
+  const q2Answer = () => {
+    if (q2Vocal.trim()) return "Enregistrement ajouté ✅";
+    return null;
+  };
+  const q3Answer = () => {
+    if (q3Vocal.trim()) return "Enregistrement ajouté ✅";
+    return null;
   };
   const q4Answer = () => {
     const parts: string[] = [];
-    if (q4) parts.push(q4);
-    if (q4Vocal.trim()) parts.push("Enregistrement ajouté ✅");
+    if (q4Scolarite) parts.push(q4Scolarite);
+    if (q4ScolariteVocal.trim()) parts.push("Enregistrement ajouté ✅");
     return parts.join(" · ") || "Non précisé";
   };
   const q5Answer = () => {
-    const parts: string[] = [];
-    if (q5) parts.push(q5);
-    if (q5Vocal.trim()) parts.push("Enregistrement ajouté ✅");
-    return parts.join(" · ") || "Non précisé";
-  };
-  const q6Answer = () => {
-    if (q6Vocal.trim()) return "Enregistrement ajouté ✅";
+    if (q5Vocal.trim()) return "Enregistrement ajouté ✅";
     return null;
   };
-  const q8Answer = () => {
+  const q6Answer = () => {
+    if (q6Libre.trim()) return "Enregistrement ajouté ✅";
+    return null;
+  };
+  const q7Answer = () => {
     const parts: string[] = [];
-    if (q8Etat) parts.push(q8Etat);
-    if (q8Etat === "Oui, je l'ai" && q8Vocal.trim()) parts.push("Enregistrement ajouté ✅");
+    if (q7Etat) parts.push(q7Etat);
+    if (q7Etat === "Oui, je l'ai" && q7Vocal.trim()) parts.push("Enregistrement ajouté ✅");
     return parts.join(" · ") || "Rien à ajouter";
   };
 
@@ -271,12 +248,15 @@ const OutilsSyntheseMdph = () => {
           parent_context: {
             declarant_prenom: q0Prenom.trim(),
             declarant_lien: q0Lien,
-            vocal_mdph: q8Vocal.trim() || null,
             type_demande: q1,
-            objectifs: q2,
-            changements: q3Answer(),
-            situation_pro: q4Answer(),
-            projet: q6Answer(),
+            vie_quotidienne: q2Vocal.trim() || null,
+            organisation_soins: q3Vocal.trim() || null,
+            scolarisation: q4Scolarite,
+            scolarisation_details: q4ScolariteVocal.trim() || null,
+            projet: q5Vocal.trim() || null,
+            champ_libre: q6Libre.trim() || null,
+            certificat_etat: q7Etat,
+            certificat_vocal: q7Vocal.trim() || null,
           },
         },
       });
@@ -298,7 +278,7 @@ const OutilsSyntheseMdph = () => {
   // --- CTA ---
   const renderCta = () => {
     const ctaEnabled = isCurrentStepValid() && !isGenerating && !isRecording;
-    const ctaLabel = currentQ === 8
+    const ctaLabel = currentQ === 7
       ? (isGenerating ? loadingMessage : "Générer mon dossier →")
       : "Continuer →";
 
@@ -376,26 +356,29 @@ const OutilsSyntheseMdph = () => {
           </>
         )}
 
-        {/* Q2 — Objectifs */}
+        {/* Q2 — Vie quotidienne */}
         {showQ2 && (
           <>
             {currentQ > 1 && q1 && <UserBubble text={q1} />}
             <AiBubble text="2 — Quels droits souhaites-tu demander ?" />
-            <ChipGroup chips={Q2_CHIPS} selected={q2} multi onToggle={(c) => toggleMulti(c, q2, setQ2)} />
+            <ChipGroup chips={Q2_CHIPS} selected={[]} multi onToggle={() => {}} />
             <div style={{ margin: "0 4px 14px", background: "rgba(232,115,106,0.07)", borderLeft: "2.5px solid #E8736A", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
               <p style={{ fontSize: 11, color: "#9A9490", lineHeight: 1.55, fontStyle: "italic" }}>
                 Ces informations orientent la rédaction de ton texte. The Village ne peut pas te conseiller sur tes droits — rapproche-toi d'une assistante sociale ou de la MDPH de ton département.
               </p>
             </div>
+            {q2Vocal.trim() && (
+              <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
+            )}
+            <WiredMicOrb onTranscription={(text) => setQ2Vocal((prev) => prev ? prev + " " + text : text)} onRecordingChange={setIsRecording} />
           </>
         )}
 
-        {/* Q3 — Changements (only for Renouvellement / Évolution) */}
+        {/* Q3 — Organisation soins */}
         {showQ3 && (
           <>
-            {currentQ > 2 && q2.length > 0 && <UserBubble text={q2.join(" · ")} />}
+            {currentQ > 2 && q2Answer() && <UserBubble text={q2Answer()!} />}
             <AiBubble text="3 — Qu'est-ce qui a changé depuis ton dernier dossier ?" />
-            <ChipGroup chips={Q3_CHIPS} selected={q3Chips} multi onToggle={(c) => toggleMulti(c, q3Chips, setQ3Chips)} />
             <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
               <p style={{ fontSize: 11, color: "#8B74E0", lineHeight: 1.55 }}>
                 N'hésite pas à détailler — date du diagnostic, type de matériel, contexte du changement…
@@ -408,46 +391,13 @@ const OutilsSyntheseMdph = () => {
           </>
         )}
 
+        {/* Q4 — Situation scolaire */}
         {showQ4 && (
           <>
-            {currentQ > 3 && showQ3 && q3Answer() && <UserBubble text={q3Answer()!} />}
-            {currentQ > 2 && !showQ3 && q2.length > 0 && <UserBubble text={q2.join(" · ")} />}
-            <AiBubble text="4 — Ta situation professionnelle actuelle ?" />
-            <ChipGroup chips={Q4_CHIPS} selected={q4 ? [q4] : []} onToggle={(c) => toggleSingle(c, q4, setQ4)} />
-          </>
-        )}
-
-        {/* Q4b — Tierce personne */}
-        {showQ4b && (
-          <>
-            {currentQ > 4 && q4 && <UserBubble text={q4Answer()} />}
-            <AiBubble text="Tu fais appel à une tierce personne rémunérée ? (garde, auxiliaire de vie…)" />
-            <ChipGroup
-              chips={["Oui", "Non"]}
-              selected={q4TiercePersonne === true ? ["Oui"] : q4TiercePersonne === false ? ["Non"] : []}
-              onToggle={(c) => setQ4TiercePersonne(c === "Oui")}
-            />
-            <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
-              <p style={{ fontSize: 11, color: "#8B74E0", lineHeight: 1.55 }}>
-                Précise à l'oral : qui intervient, combien d'heures par semaine, le coût mensuel environ…
-              </p>
-            </div>
-            {q4bVocal.trim() && (
-              <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
-            )}
-            <WiredMicOrb
-              onTranscription={(text) => setQ4bVocal((prev) => prev ? prev + " " + text : text)}
-              onRecordingChange={setIsRecording}
-            />
-          </>
-        )}
-
-        {/* Q5 — Situation scolaire */}
-        {showQ5 && (
-          <>
-            <AiBubble text={`5 — Quelle est la situation scolaire actuelle de ${displayName} ?`} />
-            <ChipGroup chips={Q5_CHIPS} selected={q5 ? [q5] : []} onToggle={(c) => toggleSingle(c, q5, (v) => setQ5(v))} />
-            {q5 === "Milieu ordinaire" && q1 === "Renouvellement" && (
+            {currentQ > 3 && q3Answer() && <UserBubble text={q3Answer()!} />}
+            <AiBubble text={`4 — Quelle est la situation scolaire actuelle de ${displayName} ?`} />
+            <ChipGroup chips={Q5_CHIPS} selected={q4Scolarite ? [q4Scolarite] : []} onToggle={(c) => toggleSingle(c, q4Scolarite, setQ4Scolarite)} />
+            {q4Scolarite === "Milieu ordinaire" && q1 === "Renouvellement" && (
               <div style={{ margin: "0 4px 14px", background: "rgba(68,168,130,0.07)", borderLeft: "2.5px solid #44A882", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
                 <p style={{ fontSize: 11, color: "#2a8a6a", lineHeight: 1.55 }}>
                   Pense à demander le GEVASco à l'école — ce document est attendu par la MDPH pour les renouvellements.
@@ -459,6 +409,23 @@ const OutilsSyntheseMdph = () => {
                 Coche la situation aujourd'hui — si une orientation est en cours ou prévue, précise-le à l'oral.
               </p>
             </div>
+            {q4ScolariteVocal.trim() && (
+              <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
+            )}
+            <WiredMicOrb onTranscription={(text) => setQ4ScolariteVocal((prev) => prev ? prev + " " + text : text)} onRecordingChange={setIsRecording} />
+          </>
+        )}
+
+        {/* Q5 — Projet 2-3 ans */}
+        {showQ5 && (
+          <>
+            {currentQ > 4 && q4Scolarite && <UserBubble text={q4Answer()} />}
+            <AiBubble text={`5 — Quel est ton projet pour ${displayName} dans les 2-3 prochaines années ?`} />
+            <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
+              <p style={{ fontSize: 11, color: "#8B74E0", lineHeight: 1.55 }}>
+                Précise à l'oral : dispositifs visés (SESSAD, AESH…), fréquence souhaitée, projet scolaire, objectif thérapeutique, horizon de temps…
+              </p>
+            </div>
             {q5Vocal.trim() && (
               <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
             )}
@@ -466,59 +433,42 @@ const OutilsSyntheseMdph = () => {
           </>
         )}
 
-        {/* Q6 — Projet 2-3 ans */}
-        {showQ6 && (
+        {/* Q6 — Champ libre */}
+         {showQ6 && (
           <>
-            {currentQ > 5 && q5 && <UserBubble text={q5Answer()} />}
-            <AiBubble text={`6 — Quel est ton projet pour ${displayName} dans les 2-3 prochaines années ?`} />
-            <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
-              <p style={{ fontSize: 11, color: "#8B74E0", lineHeight: 1.55 }}>
-                Précise à l'oral : dispositifs visés (SESSAD, AESH…), fréquence souhaitée, projet scolaire, objectif thérapeutique, horizon de temps…
-              </p>
-            </div>
-            {q6Vocal.trim() && (
+            {currentQ > 5 && q5Answer() && <UserBubble text={q5Answer()!} />}
+            <AiBubble text="6 — Y a-t-il quelque chose d'important que je ne vois pas dans tes mémos ?" />
+            {q6Libre.trim() && (
               <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
             )}
-            <WiredMicOrb onTranscription={(text) => setQ6Vocal((prev) => prev ? prev + " " + text : text)} onRecordingChange={setIsRecording} />
+            <WiredMicOrb onTranscription={(text) => setQ6Libre((prev) => prev ? prev + " " + text : text)} onRecordingChange={setIsRecording} />
           </>
         )}
 
-        {/* Q7 — Champ libre */}
-         {showQ7 && (
+        {/* Q7 — Certificat médical */}
+        {showQ7 && (
           <>
-            {currentQ > 6 && q6Answer() && <UserBubble text={q6Answer()!} />}
-            <AiBubble text="7 — Y a-t-il quelque chose d'important que je ne vois pas dans tes mémos ?" />
-            {q7.trim() && (
-              <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
-            )}
-            <WiredMicOrb onTranscription={(text) => setQ7((prev) => prev ? prev + " " + text : text)} onRecordingChange={setIsRecording} />
-          </>
-        )}
-
-        {/* Q8 — Certificat médical */}
-        {showQ8 && (
-          <>
-            {currentQ > 7 && q7.trim() && <UserBubble text="Enregistrement ajouté ✅" />}
-            <AiBubble text="8 — As-tu le certificat médical sous la main ?" />
+            {currentQ > 6 && q6Libre.trim() && <UserBubble text="Enregistrement ajouté ✅" />}
+            <AiBubble text="7 — As-tu le certificat médical sous la main ?" />
             <ChipGroup
               chips={Q8_CHIPS}
-              selected={q8Etat ? [q8Etat] : []}
-              onToggle={(c) => toggleSingle(c, q8Etat, setQ8Etat)}
+              selected={q7Etat ? [q7Etat] : []}
+              onToggle={(c) => toggleSingle(c, q7Etat, setQ7Etat)}
             />
-            {q8Etat === "Oui, je l'ai" && (
+            {q7Etat === "Oui, je l'ai" && (
               <>
                 <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
                   <p style={{ fontSize: 11, color: "#8B74E0", lineHeight: 1.55 }}>
                     Le diagnostic principal, les restrictions fonctionnelles, les soins mentionnés, les remarques finales — lis directement ou reformule avec tes mots, pour que le dossier généré soit cohérent avec ce que le médecin a écrit.
                   </p>
                 </div>
-                {q8Vocal.trim() && (
+                {q7Vocal.trim() && (
                   <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
                 )}
-                <WiredMicOrb onTranscription={(text) => setQ8Vocal((prev) => prev ? prev + " " + text : text)} onRecordingChange={setIsRecording} />
+                <WiredMicOrb onTranscription={(text) => setQ7Vocal((prev) => prev ? prev + " " + text : text)} onRecordingChange={setIsRecording} />
               </>
             )}
-            {(q8Etat === "Pas encore" || q8Etat === "Certificat simplifié") && (
+            {(q7Etat === "Pas encore" || q7Etat === "Certificat simplifié") && (
               <AiBubble text="Pas de problème — je génère avec tes mémos et tes réponses." italic />
             )}
           </>
