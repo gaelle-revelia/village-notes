@@ -443,7 +443,11 @@ ${JSON.stringify(memos?.map((m: any) => ({
   resume: m.content_structured?.resume ?? "",
   details: m.content_structured?.details ?? [],
   a_retenir: m.content_structured?.a_retenir ?? ""
-})) ?? [])}`;
+})) ?? [])}
+
+BLOCS À GÉNÉRER
+Toujours générer : zone_b, aidant_f
+${parent_context.scolarisation !== "Pas encore scolarisé·e" ? "Générer aussi : scolarite_c3, scolarite_e2" : "Ne PAS générer scolarite_c3 ni scolarite_e2 (enfant pas encore scolarisé·e)."}`;
     }
 
     if (type === "transmission") {
