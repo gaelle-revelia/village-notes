@@ -132,6 +132,7 @@ const OutilsSyntheseMdph = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("Préparation du dossier en cours…");
   const [syntheseId, setSyntheseId] = useState<string | null>(null);
+  const [introSeen, setIntroSeen] = useState(false);
 
   // --- Visibility rules ---
   const showQ0 = true;
