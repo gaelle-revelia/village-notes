@@ -163,36 +163,21 @@ const OutilsSyntheseMdph = () => {
     if (currentQ === 0.5) return q0Lien !== null && q0Prenom.trim().length > 0;
     switch (currentQ) {
       case 1: return q1 !== null;
-      case 2: return q2.length > 0;
-      case 3: return q3Chips.length > 0 || q3Vocal.trim().length > 0;
-      case 4: return q4 !== null;
-      case 4.5: return q4TiercePersonne !== null;
-      case 5: return q5 !== null;
-      case 6: return q6Vocal.trim().length > 0;
-      case 7: return true;
-      case 8: return q8Etat !== null;
+      case 2: return q2Vocal.trim().length > 0;
+      case 3: return q3Vocal.trim().length > 0;
+      case 4: return q4Scolarite !== null;
+      case 5: return q5Vocal.trim().length > 0;
+      case 6: return true; // optionnel
+      case 7: return q7Etat !== null;
       default: return false;
     }
   };
 
   const advanceStep = () => {
     if (currentQ === 0.5) { setCurrentQ(1); return; }
-    if (currentQ === 8) { handleGenerateMdph(); return; }
-    let next = currentQ + 1;
-    if (currentQ === 2 && !(q1 === "Renouvellement" || q1 === "Évolution de situation")) {
-      next = 4;
-    }
-    if (currentQ === 4) next = 4.5;
-    if (currentQ === 4.5) next = 5;
-    setCurrentQ(next);
+    if (currentQ === 7) { handleGenerateMdph(); return; }
+    setCurrentQ(prev => prev + 1);
   };
-
-  // --- Q3 skip edge case ---
-  useEffect(() => {
-    if (currentQ === 3 && !(q1 === "Renouvellement" || q1 === "Évolution de situation")) {
-      setCurrentQ(4);
-    }
-  }, [currentQ, q1]);
 
   // --- Data fetching ---
   useEffect(() => {
