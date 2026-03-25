@@ -228,12 +228,15 @@ const Archives = () => {
                     </div>
                     <ChevronRight size={14} style={{ color: "#8B74E0" }} className="flex-shrink-0" />
                   </div>
-                  <p style={{ fontSize: 13, fontWeight: 500, color: "#1E1A1A", margin: "4px 0 0" }}>
-                    {getCardLabel(s)}
-                  </p>
-                  <p style={{ fontSize: 11, color: "#9A9490", margin: "2px 0 0" }}>
-                    Généré par {profilesMap[s.user_id] ?? "inconnu"}
-                  </p>
+                <p style={{ fontSize: 13, fontWeight: 500, color: "#1E1A1A", margin: "4px 0 0" }}>
+                  {getCardLabel(s)}
+                </p>
+                {s.envoye && (
+                  <span style={{ fontSize: 10, color: "#44A882", fontWeight: 500 }}>Déposé ✓</span>
+                )}
+                <p style={{ fontSize: 11, color: "#9A9490", margin: "2px 0 0" }}>
+                  Généré par {profilesMap[s.user_id] ?? "inconnu"}
+                </p>
                 </button>
                 <button
                   onClick={(e) => { e.stopPropagation(); handleDelete(s.id); }}
