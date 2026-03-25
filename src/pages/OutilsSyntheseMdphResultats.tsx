@@ -43,6 +43,14 @@ export default function OutilsSyntheseMdphResultats() {
   const [copied, setCopied] = useState<string | null>(null);
   const [email, setEmail] = useState("");
   const [parentPrenom, setParentPrenom] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    if (!window.confirm("Supprimer ce dossier définitivement ?")) return;
+    setIsDeleting(true);
+    await supabase.from("syntheses").delete().eq("id", syntheseId);
+    navigate("/archives");
+  };
 
   useEffect(() => {
     if (!syntheseId) {
