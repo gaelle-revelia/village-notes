@@ -44,6 +44,7 @@ import Waitlist from "./pages/Waitlist";
 import AVenirDetail from "./pages/AVenirDetail";
 import VillageProFiche from "./pages/VillageProFiche";
 import VillageProEdit from "./pages/VillageProEdit";
+import Archives from "./pages/Archives";
 
 const queryClient = new QueryClient();
 
