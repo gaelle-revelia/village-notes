@@ -449,7 +449,7 @@ const OutilsSyntheseMdph = () => {
         )}
 
         {/* Q5 — Projet 2-3 ans */}
-        {showQ5 && (
+        {introSeen && showQ5 && (
           <>
             {currentQ > 4 && q4Scolarite && <UserBubble text={q4Answer()} />}
             <AiBubble text={`5 — Quel est ton projet pour ${displayName} dans les 2-3 prochaines années ?`} />
