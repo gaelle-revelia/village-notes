@@ -155,6 +155,10 @@ const OutilsSynthesePickMeUp = () => {
   const [generatedContent, setGeneratedContent] = useState<string | null>(null);
   const [syntheseId, setSyntheseId] = useState<string | null>(null);
   const [refineBloc, setRefineBloc] = useState<{ id: string; title: string; content: string; cas_usage: string } | null>(null);
+  const [etatEmotionnel, setEtatEmotionnel] = useState<string | null>(null);
+  const [periodDebut, setPeriodDebut] = useState<string | null>(null);
+  const [periodFin, setPeriodFin] = useState<string | null>(null);
+  const [syntheseDate, setSyntheseDate] = useState<string | null>(null);
 
   // Block 1 state
   const [selectedEmotion, setSelectedEmotion] = useState<string | null>(null);
@@ -188,7 +192,7 @@ const OutilsSynthesePickMeUp = () => {
     setSyntheseId(locState.syntheseId);
     supabase
       .from("syntheses")
-      .select("contenu, created_at")
+      .select("contenu, created_at, etat_emotionnel, periode_debut, periode_fin")
       .eq("id", locState.syntheseId)
       .single()
       .then(({ data }) => {
@@ -196,16 +200,29 @@ const OutilsSynthesePickMeUp = () => {
         try {
           const parsed = JSON.parse(data.contenu);
           let text: string;
+          let etatResume: string | null = null;
           if (parsed?.blocks && Array.isArray(parsed.blocks)) {
             text = parsed.blocks[0]?.content ?? data.contenu;
+            etatResume = parsed.etat_emotionnel_resume ?? null;
           } else if (Array.isArray(parsed)) {
             text = parsed[0]?.content ?? data.contenu;
           } else {
             text = parsed?.content ?? data.contenu;
           }
           setGeneratedContent(text ?? data.contenu);
+          // Determine emotional label
+          const emotionLabel = etatResume
+            ?? (data.etat_emotionnel
+              ? (data.etat_emotionnel.length > 80 ? data.etat_emotionnel.slice(0, 80) + "…" : data.etat_emotionnel)
+              : null);
+          setEtatEmotionnel(emotionLabel);
         } catch {
           setGeneratedContent(data.contenu);
+        }
+        if (data.periode_debut) setPeriodDebut(data.periode_debut);
+        if (data.periode_fin) setPeriodFin(data.periode_fin);
+        if (data.created_at) {
+          setSyntheseDate(new Date(data.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" }));
         }
         setPhase("result");
       });
@@ -613,6 +630,35 @@ const OutilsSynthesePickMeUp = () => {
             {!isReadOnly && periodText && <UserBubble text={periodText} />}
 
             <SectionSeparator text="Ton remontant" />
+
+            {isReadOnly && (() => {
+              const fmtDate = (d: string) => {
+                const date = new Date(d + "T00:00:00");
+                return date.toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" });
+              };
+              const periodLabel = periodDebut && periodFin
+                ? `du ${fmtDate(periodDebut)} au ${fmtDate(periodFin)}`
+                : null;
+              
+              return (
+                <div style={{
+                  borderLeft: "3px solid #8B74E0",
+                  background: "rgba(139,116,224,0.06)",
+                  borderRadius: "0 10px 10px 0",
+                  padding: "10px 13px",
+                  marginBottom: 12
+                }}>
+                  <p style={{ fontSize: 11, color: "#8B74E0", margin: "0 0 2px", fontWeight: 500 }}>
+                    Remontant du {syntheseDate}
+                  </p>
+                  {(etatEmotionnel || periodLabel) && (
+                    <p style={{ fontSize: 11, color: "#9A9490", margin: 0 }}>
+                      {[etatEmotionnel, periodLabel].filter(Boolean).join(" · ")}
+                    </p>
+                  )}
+                </div>
+              );
+            })()}
 
             <div className="px-5 py-4 mb-4" style={{ ...glassCard }}>
               <p className="text-[14px] font-sans leading-relaxed" style={{ color: "#1E1A1A" }}>
