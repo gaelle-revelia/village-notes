@@ -366,7 +366,7 @@ const OutilsSyntheseTransmission = () => {
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-10 px-4 py-3 flex items-center gap-3" style={{ background: "rgba(255,255,255,0.72)", backdropFilter: "blur(20px) saturate(1.5)", WebkitBackdropFilter: "blur(20px) saturate(1.5)", borderBottom: "1px solid rgba(255,255,255,0.6)", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
-        <button onClick={() => navigate("/outils/synthese")} className="flex items-center justify-center" aria-label="Retour">
+        <button onClick={() => navigate(isReadOnly ? "/archives" : "/outils/synthese")} className="flex items-center justify-center" aria-label="Retour">
           <ArrowLeft size={20} style={{ color: "#1E1A1A" }} />
         </button>
         <h1 className="text-xl font-serif font-semibold" style={{ color: "#1E1A1A" }}>Transmission</h1>
