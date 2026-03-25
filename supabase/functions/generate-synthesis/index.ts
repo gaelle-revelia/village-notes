@@ -210,7 +210,7 @@ Si les données permettent une comparaison temporelle, l'utiliser explicitement.
 
 ## FORMAT DE SORTIE — JSON STRICT
 Retourne UNIQUEMENT ce JSON, sans markdown, sans commentaire, sans texte avant ou après :
-{"blocks":[{"id":"narrative","title":"Ce qui s'est passé","icon":"Sparkles","content":"texte narratif propre uniquement, sans signalement"}],"etat_emotionnel_resume":"une phrase courte et propre, maximum 8 mots, résumant l'état émotionnel du parent sans guillemets ni ponctuation finale"}`;
+{"blocks":[{"id":"narrative","title":"Ce qui s'est passé","icon":"Sparkles","content":"texte narratif propre uniquement, sans signalement"}],"etat_emotionnel_resume":"une phrase courte et propre, maximum 8 mots, résumant l'état émotionnel du parent sans guillemets ni ponctuation finale","titre_archive":"4 à 6 mots, positifs, centrés sur l'enfant, évocateurs de cette période, jamais sur l'état émotionnel du parent, sans guillemets ni ponctuation finale. Exemples : Un mètre après l'autre / La curiosité comme moteur / Selena prend ses marques"}`;
 
       userMessage = `Prenom de l'enfant: ${prenom}
 Sexe: ${isFem ? "fille" : "garçon"} (utilise les pronoms ${pronom_sujet}/${pronom_cod}/${pronom_cod_tonique})
@@ -663,6 +663,7 @@ Pronoms: ${pronom_sujet} / ${accord}`;
       const parsed = JSON.parse(clean);
       blocks = parsed.blocks ?? [];
       var etatResume = parsed.etat_emotionnel_resume ?? null;
+      var titreArchive = parsed.titre_archive ?? null;
     } catch (e) {
       console.error("Failed to parse AI response:", rawText);
       return new Response(
@@ -748,7 +749,7 @@ FORMAT DE SORTIE — JSON STRICT identique à l'entrée, sans markdown ni commen
 
     // 10. DOUBLE WRITE
     const contenu = type === "pick_me_up"
-      ? JSON.stringify({ blocks, etat_emotionnel_resume: etatResume ?? null })
+      ? JSON.stringify({ blocks, etat_emotionnel_resume: etatResume ?? null, titre_archive: titreArchive ?? null })
       : JSON.stringify(blocks);
     const firstBlockTitle = blocks[0]?.title ?? "Synthèse";
 
@@ -759,6 +760,7 @@ FORMAT DE SORTIE — JSON STRICT identique à l'entrée, sans markdown ni commen
         user_id: user.id,
         cas_usage: type,
         contenu,
+        titre: type === "pick_me_up" ? (titreArchive ?? null) : null,
         etat_emotionnel: parent_context.etat_emotionnel ?? null,
         vocal_mdph: parent_context.vocal_mdph ?? null,
         reponses_transmission: parent_context.reponses ?? null,
