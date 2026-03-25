@@ -71,6 +71,7 @@ const Archives = () => {
   const prenom = useEnfantPrenom();
   const [activeFilters, setActiveFilters] = useState<string[]>(["tous"]);
   const [syntheses, setSyntheses] = useState<any[]>([]);
+  const [profilesMap, setProfilesMap] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -79,10 +80,22 @@ const Archives = () => {
       setLoading(true);
       const { data } = await supabase
         .from("syntheses")
-        .select("id, cas_usage, contenu, created_at, etat")
+        .select("id, cas_usage, contenu, created_at, etat, user_id")
         .eq("enfant_id", enfantId)
         .order("created_at", { ascending: false });
-      setSyntheses(data ?? []);
+      const items = data ?? [];
+      setSyntheses(items);
+
+      const userIds = [...new Set(items.map((s: any) => s.user_id).filter(Boolean))];
+      if (userIds.length > 0) {
+        const { data: profilesData } = await supabase
+          .from("profiles")
+          .select("user_id, prenom")
+          .in("user_id", userIds);
+        setProfilesMap(Object.fromEntries(
+          (profilesData ?? []).map(p => [p.user_id, p.prenom ?? ""])
+        ));
+      }
       setLoading(false);
     };
     fetchData();
@@ -204,6 +217,9 @@ const Archives = () => {
                 </div>
                 <p style={{ fontSize: 13, fontWeight: 500, color: "#1E1A1A", margin: "4px 0 0" }}>
                   {getCardLabel(s)}
+                </p>
+                <p style={{ fontSize: 11, color: "#9A9490", margin: "2px 0 0" }}>
+                  Généré par {profilesMap[s.user_id] ?? "inconnu"}
                 </p>
               </button>
             );
