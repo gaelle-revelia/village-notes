@@ -466,7 +466,7 @@ const OutilsSyntheseMdph = () => {
         )}
 
         {/* Q6 — Champ libre */}
-         {showQ6 && (
+         {introSeen && showQ6 && (
           <>
             {currentQ > 5 && q5Answer() && <UserBubble text={q5Answer()!} />}
             <AiBubble text="6 — Y a-t-il quelque chose d'important que je ne vois pas dans tes mémos ?" />
