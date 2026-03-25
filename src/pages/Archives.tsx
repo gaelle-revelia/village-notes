@@ -218,6 +218,9 @@ const Archives = () => {
                 <p style={{ fontSize: 13, fontWeight: 500, color: "#1E1A1A", margin: "4px 0 0" }}>
                   {getCardLabel(s)}
                 </p>
+                <p style={{ fontSize: 11, color: "#9A9490", margin: "2px 0 0" }}>
+                  Généré par {profilesMap[s.user_id] ?? "inconnu"}
+                </p>
               </button>
             );
           })
