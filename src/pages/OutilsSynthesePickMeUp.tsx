@@ -129,12 +129,17 @@ function computeDateRange(period: string): {start: Date;end: Date;} {
 
 const OutilsSynthesePickMeUp = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const prenom = useEnfantPrenom();
   const { enfantId } = useEnfantId();
   const { user } = useAuth();
   const { toast } = useToast();
   const displayName = prenom ?? "votre enfant";
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  // Read-only mode from Archives
+  const locState = location.state as { syntheseId?: string; readOnly?: boolean } | null;
+  const isReadOnly = !!(locState?.syntheseId && locState?.readOnly);
 
   const EMOTIONS = [
   "Je suis épuisé(e)",
