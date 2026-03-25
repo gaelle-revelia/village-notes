@@ -284,6 +284,31 @@ const OutilsSyntheseTransmission = () => {
       .replace(/\{accord\}/g, isFem ? "e" : "");
   };
 
+  const handleSendEmail = async () => {
+    if (!emailValue.trim()) return;
+    setIsSending(true);
+    try {
+      const { error } = await supabase.functions.invoke("send-transmission-email", {
+        body: {
+          email: emailValue,
+          parentPrenom: parentPrenom ?? "Parent",
+          enfantPrenom: displayName,
+          syntheseDate: dateStr,
+          destinataire,
+          blocks: (generatedBlocks ?? []).map(b => ({ title: b.title, content: b.content })),
+        },
+      });
+      if (error) throw error;
+      setSent(true);
+      toast({ title: "Email envoyé ✅" });
+    } catch (e) {
+      console.error("send-transmission-email error:", e);
+      toast({ title: "Une erreur est survenue — réessaie.", variant: "destructive" });
+    } finally {
+      setIsSending(false);
+    }
+  };
+
   const renderCta = () => {
     if (phase === 0) {
       const enabled = !!destinataire;
