@@ -389,7 +389,7 @@ const OutilsSyntheseMdph = () => {
         )}
 
         {/* Q2 — Vie quotidienne */}
-        {showQ2 && (
+        {introSeen && showQ2 && (
           <>
             {currentQ > 1 && q1 && <UserBubble text={q1} />}
             <AiBubble text="2 — Quels droits souhaites-tu demander ?" />
