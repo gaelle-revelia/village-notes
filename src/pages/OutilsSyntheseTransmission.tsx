@@ -98,14 +98,26 @@ const ResultCard = ({ icon, title, body, onPreciser, showCopy }: ResultCardProps
         <h3 className="text-[16px] font-serif font-semibold" style={{ color: "#1E1A1A" }}>{title}</h3>
       </div>
       <p className="text-[14px] font-sans leading-relaxed mb-3" style={{ color: "#1E1A1A" }}>{body}</p>
-      <div style={{ display: "flex", gap: 8 }}>
-        {showCopy && (
-          <button onClick={handleCopy} style={{ flex: 1, padding: 9, borderRadius: 10, fontSize: 12, fontWeight: 500, background: "rgba(255,255,255,0.48)", border: "1px solid rgba(139,116,224,0.3)", color: "#8B74E0", cursor: "pointer" }}>
-            {copied ? "Copié ✓" : "Copier"}
-          </button>
-        )}
-        <button onClick={onPreciser} className={`py-2.5 text-[13px] font-sans font-medium ${showCopy ? "" : "w-full"}`} style={{ flex: showCopy ? 1 : undefined, border: "1.5px dashed #8B74E0", color: "#8B74E0", borderRadius: 12, background: "transparent" }}>
-          ✏️ Préciser ce bloc
+      <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
+        <button
+          onClick={handleCopy}
+          style={{
+            flex: 1, padding: "9px", borderRadius: 10, fontSize: 12, fontWeight: 500,
+            background: "rgba(255,255,255,0.48)", border: "1px solid rgba(139,116,224,0.3)",
+            color: "#8B74E0", cursor: "pointer"
+          }}
+        >
+          {copied ? "Copié ✓" : "Copier"}
+        </button>
+        <button
+          onClick={onPreciser}
+          style={{
+            flex: 1, padding: "9px", borderRadius: 10, fontSize: 12, fontWeight: 500,
+            background: "rgba(255,255,255,0.48)", border: "1px solid rgba(232,115,106,0.3)",
+            color: "#E8736A", cursor: "pointer"
+          }}
+        >
+          Préciser ce bloc
         </button>
       </div>
     </div>
