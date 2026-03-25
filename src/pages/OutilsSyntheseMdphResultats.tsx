@@ -44,6 +44,9 @@ export default function OutilsSyntheseMdphResultats() {
   const [email, setEmail] = useState("");
   const [parentPrenom, setParentPrenom] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
+  const [titre, setTitre] = useState<string>("");
+  const [editingTitre, setEditingTitre] = useState(false);
+  const [envoye, setEnvoye] = useState(false);
 
   const handleDelete = async () => {
     if (!window.confirm("Supprimer ce dossier définitivement ?")) return;
@@ -64,7 +67,7 @@ export default function OutilsSyntheseMdphResultats() {
       // Fetch synthese
       const { data: syntheseData, error: err } = await supabase
         .from("syntheses")
-        .select("contenu, created_at, enfant_id")
+        .select("contenu, created_at, enfant_id, titre, envoye")
         .eq("id", syntheseId)
         .maybeSingle();
 
@@ -82,6 +85,9 @@ export default function OutilsSyntheseMdphResultats() {
           year: "numeric",
         })
       );
+
+      setTitre(syntheseData.titre ?? "");
+      setEnvoye(syntheseData.envoye ?? false);
 
       // Fetch enfant prenom
       const { data: enfantData } = await supabase
@@ -129,10 +135,32 @@ export default function OutilsSyntheseMdphResultats() {
           <button onClick={() => navigate(fromArchives ? "/archives" : "/outils/synthese")} className="p-1" aria-label="Retour">
             <ArrowLeft size={22} color="#1E1A1A" />
           </button>
-          <div>
-            <h1 className="text-[17px] font-semibold" style={{ fontFamily: "Fraunces, serif", color: "#1E1A1A" }}>
-              Dossier MDPH — {enfantPrenom}
-            </h1>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            {editingTitre ? (
+              <input
+                autoFocus
+                value={titre}
+                onChange={(e) => setTitre(e.target.value)}
+                onBlur={async () => {
+                  setEditingTitre(false);
+                  await supabase.from("syntheses").update({ titre: titre.trim() || null }).eq("id", syntheseId);
+                }}
+                onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); }}
+                style={{ fontFamily: "Fraunces, serif", fontSize: 17, fontWeight: 600, color: "#1E1A1A", background: "none", border: "none", borderBottom: "1px solid #8B74E0", outline: "none", width: "100%", padding: "2px 0" }}
+              />
+            ) : (
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <h1 style={{ fontFamily: "Fraunces, serif", fontSize: 17, fontWeight: 600, color: "#1E1A1A", margin: 0 }}>
+                  {titre || `Dossier MDPH — ${enfantPrenom}`}
+                </h1>
+                <button onClick={() => setEditingTitre(true)} style={{ background: "none", border: "none", cursor: "pointer", padding: 2, flexShrink: 0 }}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9A9490" strokeWidth="2" strokeLinecap="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                </button>
+              </div>
+            )}
             <p className="text-[11px]" style={{ fontFamily: "DM Sans, sans-serif", color: "#9A9490" }}>
               Généré le {syntheseDate}
             </p>
@@ -147,6 +175,28 @@ export default function OutilsSyntheseMdphResultats() {
         <p style={{ fontSize: 11, color: "#8B74E0", lineHeight: 1.6, margin: 0 }}>
           Ces textes sont une base de travail. Copie chaque bloc dans la section correspondante de ton formulaire CERFA, puis ajuste si besoin. Utilise "Préciser ce bloc" pour affiner si besoin avant de copier.
         </p>
+      </div>
+
+      {/* Déposé toggle */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 16px", margin: "0 16px 8px", background: envoye ? "rgba(68,168,130,0.08)" : "rgba(255,255,255,0.38)", borderRadius: 12, border: envoye ? "1px solid rgba(68,168,130,0.3)" : "1px solid rgba(255,255,255,0.85)" }}>
+        <div>
+          <p style={{ fontSize: 13, fontWeight: 500, color: envoye ? "#2a8a6a" : "#1E1A1A", margin: 0 }}>
+            {envoye ? "Dossier déposé ✓" : "Dossier déposé ?"}
+          </p>
+          <p style={{ fontSize: 11, color: "#9A9490", margin: "2px 0 0" }}>
+            {envoye ? "Tu as noté que ce dossier a été déposé" : "Note ici quand tu déposes le dossier à la MDPH"}
+          </p>
+        </div>
+        <button
+          onClick={async () => {
+            const next = !envoye;
+            setEnvoye(next);
+            await supabase.from("syntheses").update({ envoye: next }).eq("id", syntheseId);
+          }}
+          style={{ width: 44, height: 26, borderRadius: 999, background: envoye ? "#44A882" : "rgba(154,148,144,0.3)", border: "none", cursor: "pointer", position: "relative", flexShrink: 0 }}
+        >
+          <div style={{ position: "absolute", top: 3, left: envoye ? 21 : 3, width: 20, height: 20, borderRadius: "50%", background: "#fff", boxShadow: "0 1px 3px rgba(0,0,0,0.2)", transition: "left 0.2s" }} />
+        </button>
       </div>
 
       <div className="px-4 pt-4 space-y-4">
