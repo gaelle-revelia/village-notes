@@ -189,6 +189,30 @@ const OutilsSyntheseTransmission = () => {
     setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
   }, [phase]);
 
+  // Read-only mode from Archives
+  useEffect(() => {
+    if (!incomingSyntheseId || !incomingReadOnly) return;
+    const load = async () => {
+      const { data } = await supabase
+        .from("syntheses")
+        .select("contenu, created_at")
+        .eq("id", incomingSyntheseId)
+        .single();
+      if (!data?.contenu) return;
+      try {
+        const parsed = typeof data.contenu === "string" ? JSON.parse(data.contenu) : data.contenu;
+        const blocks = parsed?.blocks ?? parsed;
+        if (Array.isArray(blocks)) {
+          setGeneratedBlocks(blocks);
+          setSyntheseId(incomingSyntheseId);
+          setPhase(7);
+          setIsReadOnly(true);
+        }
+      } catch { /* ignore parse errors */ }
+    };
+    load();
+  }, [incomingSyntheseId, incomingReadOnly]);
+
   const updateAnswer = (idx: number, val: string) => {
     setAnswers((prev) => { const n = [...prev]; n[idx] = val; return n; });
   };
