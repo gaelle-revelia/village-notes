@@ -310,6 +310,27 @@ const OutilsSynthesePickMeUp = () => {
   // --- Sticky CTA / action bar ---
   const renderStickyBottom = () => {
     if (phase === "result") {
+      if (isReadOnly) {
+        return (
+          <div
+            className="fixed bottom-16 left-0 right-0 z-10 px-4 py-3 flex items-center justify-around"
+            style={{
+              background: "rgba(255,255,255,0.72)",
+              backdropFilter: "blur(20px) saturate(1.5)",
+              WebkitBackdropFilter: "blur(20px) saturate(1.5)",
+              borderTop: "1px solid rgba(255,255,255,0.6)",
+              boxShadow: "0 -2px 12px rgba(0,0,0,0.05)"
+            }}>
+            <button
+              onClick={handleCopy}
+              className="flex flex-col items-center gap-1 text-[11px] font-sans"
+              style={{ color: "#1E1A1A" }}>
+              <Copy size={18} />
+              Copier
+            </button>
+          </div>
+        );
+      }
       return (
         <div
           className="fixed bottom-16 left-0 right-0 z-10 px-4 py-3 flex items-center justify-around"
