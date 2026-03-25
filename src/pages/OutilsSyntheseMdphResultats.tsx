@@ -177,6 +177,27 @@ export default function OutilsSyntheseMdphResultats() {
         </p>
       </div>
 
+      <button
+        onClick={() => navigate("/archives")}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          width: "calc(100% - 32px)",
+          margin: "0 16px 8px",
+          padding: "10px 13px",
+          borderRadius: 12,
+          background: "rgba(255,255,255,0.38)",
+          border: "1px solid rgba(255,255,255,0.85)",
+          cursor: "pointer",
+        }}
+      >
+        <p style={{ fontSize: 12, color: "#9A9490", margin: 0 }}>
+          Retrouvez cette synthèse dans vos Archives
+        </p>
+        <ChevronRight size={14} style={{ color: "#8B74E0", flexShrink: 0 }} />
+      </button>
+
       {/* Déposé toggle */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 16px", margin: "0 16px 8px", background: envoye ? "rgba(68,168,130,0.08)" : "rgba(255,255,255,0.38)", borderRadius: 12, border: envoye ? "1px solid rgba(68,168,130,0.3)" : "1px solid rgba(255,255,255,0.85)" }}>
         <div>
