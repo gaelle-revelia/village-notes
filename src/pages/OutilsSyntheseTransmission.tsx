@@ -454,6 +454,11 @@ const OutilsSyntheseTransmission = () => {
             )}
           </div>
         )}
+        {phase === 7 && (
+          <button onClick={handleDelete} disabled={isDeleting} style={{ background: "none", border: "none", cursor: "pointer", padding: 4, marginLeft: "auto", flexShrink: 0 }} aria-label="Supprimer">
+            <Trash2 size={18} color="#E8736A" />
+          </button>
+        )}
       </header>
 
       <main className="flex-1 px-4 pt-5 pb-32">
