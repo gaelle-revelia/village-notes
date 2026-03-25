@@ -74,15 +74,7 @@ const Archives = () => {
   const [syntheses, setSyntheses] = useState<any[]>([]);
   const [profilesMap, setProfilesMap] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm("Supprimer cette synthèse ?")) return;
-    setDeletingId(id);
-    await supabase.from("syntheses").delete().eq("id", id);
-    setSyntheses(prev => prev.filter(s => s.id !== id));
-    setDeletingId(null);
-  };
 
   useEffect(() => {
     if (!enfantId) return;
@@ -203,32 +195,32 @@ const Archives = () => {
             const date = formatDate(s.created_at);
             const badge = BADGE_STYLES[s.cas_usage] ?? BADGE_STYLES.mdph;
             return (
-              <div key={s.id} style={{ position: "relative", marginBottom: 8 }}>
-                <button
-                  className="w-full text-left transition-transform active:scale-[0.98]"
-                  style={{ ...glassCard, padding: "10px 14px", paddingRight: 36, cursor: "pointer" }}
-                  onClick={() => {
-                    if (s.cas_usage === "mdph") {
-                      navigate("/outils/synthese/mdph/resultats", { state: { syntheseId: s.id, from: "archives" } });
-                    } else if (s.cas_usage === "pick_me_up") {
-                      navigate("/outils/synthese/pick-me-up", { state: { syntheseId: s.id, readOnly: true } });
-                    } else if (s.cas_usage === "transmission") {
-                      navigate("/outils/synthese/transmission", { state: { syntheseId: s.id, readOnly: true } });
-                    }
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <span
-                        className="text-[11px] font-sans font-semibold px-2 py-0.5 rounded-full"
-                        style={{ background: badge.bg, color: badge.color, whiteSpace: "nowrap" }}
-                      >
-                        {badgeLabel}
-                      </span>
-                      <span style={{ fontSize: 11, color: "#9A9490" }}>{date}</span>
-                    </div>
-                    <ChevronRight size={14} style={{ color: "#8B74E0" }} className="flex-shrink-0" />
+              <button
+                key={s.id}
+                className="w-full text-left transition-transform active:scale-[0.98]"
+                style={{ ...glassCard, padding: "10px 14px", marginBottom: 8, cursor: "pointer" }}
+                onClick={() => {
+                  if (s.cas_usage === "mdph") {
+                    navigate("/outils/synthese/mdph/resultats", { state: { syntheseId: s.id, from: "archives" } });
+                  } else if (s.cas_usage === "pick_me_up") {
+                    navigate("/outils/synthese/pick-me-up", { state: { syntheseId: s.id, readOnly: true } });
+                  } else if (s.cas_usage === "transmission") {
+                    navigate("/outils/synthese/transmission", { state: { syntheseId: s.id, readOnly: true } });
+                  }
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span
+                      className="text-[11px] font-sans font-semibold px-2 py-0.5 rounded-full"
+                      style={{ background: badge.bg, color: badge.color, whiteSpace: "nowrap" }}
+                    >
+                      {badgeLabel}
+                    </span>
+                    <span style={{ fontSize: 11, color: "#9A9490" }}>{date}</span>
                   </div>
+                  <ChevronRight size={14} style={{ color: "#8B74E0" }} className="flex-shrink-0" />
+                </div>
                 <p style={{ fontSize: 13, fontWeight: 500, color: "#1E1A1A", margin: "4px 0 0" }}>
                   {getCardLabel(s)}
                 </p>
@@ -238,21 +230,7 @@ const Archives = () => {
                 <p style={{ fontSize: 11, color: "#9A9490", margin: "2px 0 0" }}>
                   Généré par {profilesMap[s.user_id] ?? "inconnu"}
                 </p>
-                </button>
-                <button
-                  onClick={(e) => { e.stopPropagation(); handleDelete(s.id); }}
-                  disabled={deletingId === s.id}
-                  style={{ position: "absolute", top: 10, right: 10, background: "none", border: "none", cursor: "pointer", padding: 4, opacity: deletingId === s.id ? 0.4 : 1 }}
-                  aria-label="Supprimer"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8736A" strokeWidth="2" strokeLinecap="round">
-                    <polyline points="3 6 5 6 21 6"/>
-                    <path d="M19 6l-1 14H6L5 6"/>
-                    <path d="M10 11v6M14 11v6"/>
-                    <path d="M9 6V4h6v2"/>
-                  </svg>
-                </button>
-              </div>
+              </button>
             );
           })
         )}
