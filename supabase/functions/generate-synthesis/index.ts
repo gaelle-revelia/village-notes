@@ -749,7 +749,7 @@ FORMAT DE SORTIE — JSON STRICT identique à l'entrée, sans markdown ni commen
 
     // 10. DOUBLE WRITE
     const contenu = type === "pick_me_up"
-      ? JSON.stringify({ blocks, etat_emotionnel_resume: etatResume ?? null })
+      ? JSON.stringify({ blocks, etat_emotionnel_resume: etatResume ?? null, titre_archive: titreArchive ?? null })
       : JSON.stringify(blocks);
     const firstBlockTitle = blocks[0]?.title ?? "Synthèse";
 
