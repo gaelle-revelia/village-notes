@@ -379,7 +379,7 @@ const OutilsSyntheseMdph = () => {
         )}
 
         {/* Q1 — Type de demande */}
-        {showQ1 && (
+        {introSeen && showQ1 && (
           <>
             {currentQ > 0.5 && q0Lien && <UserBubble text={`${q0Prenom} · ${q0Lien}`} />}
             <AiBubble text="Pour préparer ton dossier, j'ai besoin de quelques infos que je n'ai pas dans tes mémos." />
