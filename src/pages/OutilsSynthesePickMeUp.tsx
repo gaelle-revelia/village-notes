@@ -191,7 +191,7 @@ const OutilsSynthesePickMeUp = () => {
     setSyntheseId(locState.syntheseId);
     supabase
       .from("syntheses")
-      .select("contenu, created_at")
+      .select("contenu, created_at, etat_emotionnel, periode_debut, periode_fin")
       .eq("id", locState.syntheseId)
       .single()
       .then(({ data }) => {
@@ -199,17 +199,27 @@ const OutilsSynthesePickMeUp = () => {
         try {
           const parsed = JSON.parse(data.contenu);
           let text: string;
+          let etatResume: string | null = null;
           if (parsed?.blocks && Array.isArray(parsed.blocks)) {
             text = parsed.blocks[0]?.content ?? data.contenu;
+            etatResume = parsed.etat_emotionnel_resume ?? null;
           } else if (Array.isArray(parsed)) {
             text = parsed[0]?.content ?? data.contenu;
           } else {
             text = parsed?.content ?? data.contenu;
           }
           setGeneratedContent(text ?? data.contenu);
+          // Determine emotional label
+          const emotionLabel = etatResume
+            ?? (data.etat_emotionnel
+              ? (data.etat_emotionnel.length > 80 ? data.etat_emotionnel.slice(0, 80) + "…" : data.etat_emotionnel)
+              : null);
+          setEtatEmotionnel(emotionLabel);
         } catch {
           setGeneratedContent(data.contenu);
         }
+        if (data.periode_debut) setPeriodDebut(data.periode_debut);
+        if (data.periode_fin) setPeriodFin(data.periode_fin);
         setPhase("result");
       });
   }, [isReadOnly, locState?.syntheseId]);
