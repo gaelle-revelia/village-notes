@@ -157,6 +157,13 @@ const OutilsSyntheseMdph = () => {
     }
   }, [isGenerating]);
 
+  useEffect(() => {
+    if (!introSeen) {
+      const t = setTimeout(() => setShowIntroBubble2(true), 1500);
+      return () => clearTimeout(t);
+    }
+  }, [introSeen]);
+
   // --- Step navigation ---
   const isCurrentStepValid = () => {
     if (currentQ === 0.5) return q0Lien !== null && q0Prenom.trim().length > 0;
