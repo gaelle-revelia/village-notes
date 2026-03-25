@@ -309,8 +309,36 @@ const OutilsSyntheseTransmission = () => {
               <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "#9A9490" }} />
               <Input type="email" placeholder="ton@email.com" value={emailValue} onChange={(e) => setEmailValue(e.target.value)} className="pl-9 text-[13px] font-sans border-none" style={{ ...glassCard, borderRadius: 999, height: 44 }} />
             </div>
-            <button className="px-5 py-2.5 text-[13px] font-sans font-semibold flex-shrink-0" style={{ background: "linear-gradient(135deg, #E8736A, #8B74E0)", color: "#fff", borderRadius: 999, border: "none" }}>
-              Envoyer →
+            <button
+              disabled={isSending || sent}
+              onClick={async () => {
+                if (!emailValue.trim()) return;
+                setIsSending(true);
+                try {
+                  const { error } = await supabase.functions.invoke("send-transmission-email", {
+                    body: {
+                      email: emailValue,
+                      parentPrenom: parentPrenom ?? "Parent",
+                      enfantPrenom: displayName,
+                      syntheseDate: dateStr,
+                      destinataire,
+                      blocks: (generatedBlocks ?? []).map(b => ({ title: b.title, content: b.content })),
+                    },
+                  });
+                  if (error) throw error;
+                  setSent(true);
+                  toast({ title: "Email envoyé ✅" });
+                } catch (e) {
+                  console.error("send-transmission-email error:", e);
+                  toast({ title: "Une erreur est survenue — réessaie.", variant: "destructive" });
+                } finally {
+                  setIsSending(false);
+                }
+              }}
+              className="px-5 py-2.5 text-[13px] font-sans font-semibold flex-shrink-0"
+              style={{ background: "linear-gradient(135deg, #E8736A, #8B74E0)", color: "#fff", borderRadius: 999, border: "none", opacity: isSending || sent ? 0.6 : 1 }}
+            >
+              {sent ? "Envoyé ✓" : isSending ? "Envoi..." : "Envoyer →"}
             </button>
           </div>
         </div>
