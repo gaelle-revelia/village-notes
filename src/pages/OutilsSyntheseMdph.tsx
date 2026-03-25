@@ -492,7 +492,9 @@ const OutilsSyntheseMdph = () => {
         {/* Q4 — Situation scolaire */}
         {introSeen && showQ4 && (
           <>
-            {currentQ > 3 && q3Answer() && <UserBubble text={q3Answer()!} />}
+            {currentQ > 3 && q3Vocal.trim() && (
+              <UserBubble text="Enregistrement ajouté ✅" />
+            )}
             <AiBubble text={`4 — Quelle est la situation scolaire actuelle de ${displayName} ?`} />
             <ChipGroup chips={Q5_CHIPS} selected={q4Scolarite ? [q4Scolarite] : []} onToggle={(c) => toggleSingle(c, q4Scolarite, setQ4Scolarite)} />
             {q4Scolarite === "Milieu ordinaire" && q1 === "Renouvellement" && (
@@ -517,8 +519,10 @@ const OutilsSyntheseMdph = () => {
         {/* Q5 — Projet 2-3 ans */}
         {introSeen && showQ5 && (
           <>
-            {currentQ > 4 && q4Scolarite && <UserBubble text={q4Answer()} />}
-            <AiBubble text={`5 — Quel est ton projet pour ${displayName} dans les 2-3 prochaines années ?`} />
+            {currentQ > 4 && q4Scolarite && (
+              <UserBubble text={q4Answer()} />
+            )}
+            <AiBubble text={`5 — Quel est le projet pour ${displayName} dans les 2-3 prochaines années ?`} />
             <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
               <p style={{ fontSize: 11, color: "#8B74E0", lineHeight: 1.55 }}>
                 Précise à l'oral : dispositifs visés (SESSAD, AESH…), fréquence souhaitée, projet scolaire, objectif thérapeutique, horizon de temps…
@@ -532,10 +536,17 @@ const OutilsSyntheseMdph = () => {
         )}
 
         {/* Q6 — Champ libre */}
-         {introSeen && showQ6 && (
+        {introSeen && showQ6 && (
           <>
-            {currentQ > 5 && q5Answer() && <UserBubble text={q5Answer()!} />}
+            {currentQ > 5 && q5Vocal.trim() && (
+              <UserBubble text="Enregistrement ajouté ✅" />
+            )}
             <AiBubble text="6 — Y a-t-il quelque chose d'important que je ne vois pas dans tes mémos ?" />
+            <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
+              <p style={{ fontSize: 11, color: "#8B74E0", lineHeight: 1.6, margin: 0 }}>
+                Si tu as quelque chose d'important à ajouter qui n'est pas encore dans tes mémos, c'est le moment.
+              </p>
+            </div>
             {q6Libre.trim() && (
               <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
             )}
@@ -546,7 +557,9 @@ const OutilsSyntheseMdph = () => {
         {/* Q7 — Certificat médical */}
         {introSeen && showQ7 && (
           <>
-            {currentQ > 6 && q6Libre.trim() && <UserBubble text="Enregistrement ajouté ✅" />}
+            {currentQ > 6 && q6Libre.trim() && (
+              <UserBubble text="Enregistrement ajouté ✅" />
+            )}
             <AiBubble text="7 — As-tu le certificat médical sous la main ?" />
             <ChipGroup
               chips={Q8_CHIPS}
