@@ -46,6 +46,17 @@ function getBadgeLabel(s: any): string {
   return "";
 }
 
+function getCardLabel(s: any): string {
+  if (s.cas_usage === "pick_me_up") return "Synthèse remontant";
+  if (s.cas_usage === "transmission") return "Transmission parcours";
+  try {
+    const parsed = typeof s.contenu === "string" ? JSON.parse(s.contenu ?? "{}") : s.contenu;
+    return parsed?.parent_context?.type_demande ?? parsed?.type_demande ?? "Dossier MDPH";
+  } catch {
+    return "Dossier MDPH";
+  }
+}
+
 function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString("fr-FR", {
     day: "numeric",
