@@ -224,26 +224,6 @@ export default function OutilsSyntheseMdphResultats() {
           </div>
         ))}
 
-        {/* Update button */}
-        {blocks.length > 0 && (
-          <button
-            onClick={() => navigate("/outils/synthese/mdph")}
-            className="w-full"
-            style={{
-              padding: "14px",
-              borderRadius: 12,
-              fontSize: 14,
-              fontWeight: 600,
-              background: "linear-gradient(135deg, #E8736A, #8B74E0)",
-              color: "#fff",
-              border: "none",
-              cursor: "pointer",
-              fontFamily: "DM Sans, sans-serif",
-            }}
-          >
-            Mettre à jour les textes
-          </button>
-        )}
 
         {/* Footer */}
         {blocks.length > 0 && (
