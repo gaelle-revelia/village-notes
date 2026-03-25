@@ -182,6 +182,28 @@ const OutilsSynthesePickMeUp = () => {
     });
   }, [user]);
 
+  // Read-only: fetch synthese and jump to result
+  useEffect(() => {
+    if (!isReadOnly || !locState?.syntheseId) return;
+    setSyntheseId(locState.syntheseId);
+    supabase
+      .from("syntheses")
+      .select("contenu, created_at")
+      .eq("id", locState.syntheseId)
+      .single()
+      .then(({ data }) => {
+        if (!data?.contenu) return;
+        try {
+          const parsed = JSON.parse(data.contenu);
+          const text = typeof parsed === "string" ? parsed : parsed?.content ?? parsed?.blocks?.[0]?.content ?? data.contenu;
+          setGeneratedContent(text);
+        } catch {
+          setGeneratedContent(data.contenu);
+        }
+        setPhase("result");
+      });
+  }, [isReadOnly, locState?.syntheseId]);
+
   // Auto-scroll on phase change
   useEffect(() => {
     setTimeout(() => {
