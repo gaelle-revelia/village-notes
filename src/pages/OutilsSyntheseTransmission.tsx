@@ -458,7 +458,7 @@ const OutilsSyntheseTransmission = () => {
         <div ref={bottomRef} />
       </main>
 
-      {renderCta()}
+      {!isReadOnly && renderCta()}
 
       <PreciserBlocDrawer
         isOpen={!!refineBloc}
