@@ -186,7 +186,7 @@ export default function PreciserBlocDrawer({ isOpen, onClose, bloc, enfantId, sy
             opacity: precision.trim() && !isLoading ? 1 : 0.45,
           }}
         >
-          {isLoading ? "Régénération en cours..." : "Régénérer ce bloc →"}
+          {isLoading ? "Correction en cours..." : "Corriger ce bloc →"}
         </button>
       </div>
     </div>
