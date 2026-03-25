@@ -188,6 +188,8 @@ const OutilsSyntheseTransmission = () => {
   const [isReadOnly, setIsReadOnly] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [titre, setTitre] = useState<string>("");
+  const [editingTitre, setEditingTitre] = useState(false);
 
   useEffect(() => {
     if (!user) return;
