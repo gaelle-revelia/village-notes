@@ -91,6 +91,7 @@ const AppRoutes = () => {
       <Route path="/parametres" element={<AppSettings />} />
       <Route path="/onboarding-invite" element={<OnboardingInvite />} />
       <Route path="/vocabulaire" element={<Vocabulaire />} />
+      <Route path="/archives" element={<Archives />} />
       <Route path="/politique-confidentialite" element={<PolitiqueConfidentialite />} />
       <Route path="/waitlist" element={<Waitlist />} />
       <Route path="*" element={<NotFound />} />
