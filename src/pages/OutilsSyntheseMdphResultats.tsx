@@ -30,6 +30,7 @@ export default function OutilsSyntheseMdphResultats() {
   const location = useLocation();
   const navigate = useNavigate();
   const syntheseId = location.state?.syntheseId as string | undefined;
+  const fromArchives = location.state?.from === "archives";
   const { enfantId } = useEnfantId();
 
   const [blocks, setBlocks] = useState<Block[]>([]);
