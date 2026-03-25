@@ -133,6 +133,7 @@ const OutilsSyntheseMdph = () => {
   const [loadingMessage, setLoadingMessage] = useState("Préparation du dossier en cours…");
   const [syntheseId, setSyntheseId] = useState<string | null>(null);
   const [introSeen, setIntroSeen] = useState(false);
+  const [showIntroBubble2, setShowIntroBubble2] = useState(false);
 
   // --- Visibility rules ---
   const showQ0 = true;
@@ -155,6 +156,13 @@ const OutilsSyntheseMdph = () => {
       return () => clearTimeout(t);
     }
   }, [isGenerating]);
+
+  useEffect(() => {
+    if (!introSeen) {
+      const t = setTimeout(() => setShowIntroBubble2(true), 1500);
+      return () => clearTimeout(t);
+    }
+  }, [introSeen]);
 
   // --- Step navigation ---
   const isCurrentStepValid = () => {
@@ -339,13 +347,15 @@ const OutilsSyntheseMdph = () => {
                 </div>
               </div>
             </div>
-            <div style={{ display: "flex", gap: 10, paddingLeft: 46 }}>
-              <div style={{ background: "rgba(255,255,255,0.58)", border: "1px solid rgba(255,255,255,0.9)", borderRadius: "4px 16px 16px 16px", padding: "12px 14px", maxWidth: 260 }}>
-                <p style={{ fontSize: 13.5, color: "#1E1A1A", lineHeight: 1.6, margin: 0 }}>
-                  Je vais te poser quelques questions — sur le quotidien de {displayName}, ton organisation, sa scolarité et son projet. Réponds à l'oral, prends le temps qu'il te faut. À la fin, je génère les textes à coller dans ton formulaire CERFA.
-                </p>
+            {showIntroBubble2 && (
+              <div style={{ display: "flex", gap: 10, paddingLeft: 46 }}>
+                <div style={{ background: "rgba(255,255,255,0.58)", border: "1px solid rgba(255,255,255,0.9)", borderRadius: "4px 16px 16px 16px", padding: "12px 14px", maxWidth: 260 }}>
+                  <p style={{ fontSize: 13.5, color: "#1E1A1A", lineHeight: 1.6, margin: 0 }}>
+                    Je vais te poser quelques questions — sur le quotidien de {displayName}, ton organisation, sa scolarité et son projet. Réponds à l'oral, prends le temps qu'il te faut. À la fin, je génère les textes à coller dans ton formulaire CERFA.
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         )}
 
