@@ -16,24 +16,33 @@ const glassCard: React.CSSProperties = {
     "0 4px 24px rgba(139,116,224,0.08), 0 1px 4px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9)",
 };
 
-type TabKey = "mdph" | "pick_me_up" | "transmission";
+const TABS = ["tous", "mdph", "pick_me_up", "transmission"] as const;
+type Tab = typeof TABS[number];
 
-const TABS: { key: TabKey; label: string }[] = [
-  { key: "mdph", label: "Dossier MDPH" },
-  { key: "pick_me_up", label: "Remontant" },
-  { key: "transmission", label: "Transmission" },
-];
+const TAB_LABELS: Record<Tab, string> = {
+  tous: "Tous",
+  mdph: "MDPH",
+  pick_me_up: "Remontant",
+  transmission: "Transmission",
+};
 
-function getSubtitle(s: any): string {
+const BADGE_STYLES: Record<string, { bg: string; color: string }> = {
+  mdph: { bg: "rgba(139,116,224,0.12)", color: "#8B74E0" },
+  pick_me_up: { bg: "rgba(232,196,74,0.12)", color: "#9A7A00" },
+  transmission: { bg: "rgba(68,168,130,0.12)", color: "#2a8a6a" },
+};
+
+function getBadgeLabel(s: any): string {
   if (s.cas_usage === "mdph") {
     try {
-      const parsed = typeof s.contenu === "string" ? JSON.parse(s.contenu) : s.contenu;
-      if (parsed?.parent_context?.type_demande) return parsed.parent_context.type_demande;
-    } catch {}
-    return "Dossier MDPH";
+      const parsed = typeof s.contenu === "string" ? JSON.parse(s.contenu ?? "{}") : s.contenu;
+      return parsed?.parent_context?.type_demande ?? "MDPH";
+    } catch {
+      return "MDPH";
+    }
   }
   if (s.cas_usage === "pick_me_up") return "Remontant";
-  if (s.cas_usage === "transmission") return "Transmission parcours";
+  if (s.cas_usage === "transmission") return "Transmission";
   return "";
 }
 
@@ -45,24 +54,17 @@ function formatDate(dateStr: string): string {
   });
 }
 
-function typeLabel(cas: string): string {
-  if (cas === "mdph") return "MDPH";
-  if (cas === "pick_me_up") return "Remontant";
-  if (cas === "transmission") return "Transmission";
-  return cas;
-}
-
 const Archives = () => {
   const navigate = useNavigate();
   const { enfantId } = useEnfantId();
   const prenom = useEnfantPrenom();
-  const [activeTab, setActiveTab] = useState<TabKey>("mdph");
+  const [activeTab, setActiveTab] = useState<Tab>("tous");
   const [syntheses, setSyntheses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!enfantId) return;
-    const fetch = async () => {
+    const fetchData = async () => {
       setLoading(true);
       const { data } = await supabase
         .from("syntheses")
@@ -72,10 +74,13 @@ const Archives = () => {
       setSyntheses(data ?? []);
       setLoading(false);
     };
-    fetch();
+    fetchData();
   }, [enfantId]);
 
-  const filtered = syntheses.filter((s) => s.cas_usage === activeTab);
+  const filtered = activeTab === "tous"
+    ? syntheses
+    : syntheses.filter((s) => s.cas_usage === activeTab);
+
   const displayName = prenom ?? "Enfant";
 
   return (
@@ -92,7 +97,7 @@ const Archives = () => {
         }}
       >
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => navigate("/outils/synthese")}
           className="flex items-center justify-center"
           aria-label="Retour"
         >
@@ -109,28 +114,23 @@ const Archives = () => {
       </header>
 
       {/* Tabs */}
-      <div
-        className="flex border-b px-4 gap-4"
-        style={{ borderColor: "rgba(0,0,0,0.06)" }}
-      >
+      <div className="flex px-4 gap-4" style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
         {TABS.map((tab) => (
           <button
-            key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
-            className="pb-2 text-[13px] font-sans font-medium transition-colors"
+            key={tab}
+            onClick={() => setActiveTab(tab)}
             style={{
-              color: activeTab === tab.key ? "#8B74E0" : "#9A9490",
-              borderBottom: activeTab === tab.key ? "2px solid #8B74E0" : "2px solid transparent",
+              fontSize: 13,
+              fontWeight: 500,
+              color: activeTab === tab ? "#8B74E0" : "#9A9490",
               background: "none",
               border: "none",
-              borderBottomWidth: 2,
-              borderBottomStyle: "solid",
-              borderBottomColor: activeTab === tab.key ? "#8B74E0" : "transparent",
+              borderBottom: `2px solid ${activeTab === tab ? "#8B74E0" : "transparent"}`,
               cursor: "pointer",
               padding: "10px 0 8px",
             }}
           >
-            {tab.label}
+            {TAB_LABELS[tab]}
           </button>
         ))}
       </div>
@@ -147,36 +147,35 @@ const Archives = () => {
           </p>
         ) : (
           filtered.map((s) => {
-            const subtitle = getSubtitle(s);
+            const badgeLabel = getBadgeLabel(s);
             const date = formatDate(s.created_at);
+            const badge = BADGE_STYLES[s.cas_usage] ?? BADGE_STYLES.mdph;
             return (
               <button
                 key={s.id}
                 className="w-full text-left transition-transform active:scale-[0.98]"
-                style={{ ...glassCard, padding: "14px 16px", marginBottom: 10, cursor: "pointer" }}
+                style={{ ...glassCard, padding: "10px 14px", marginBottom: 8, cursor: "pointer" }}
                 onClick={() => {
                   if (s.cas_usage === "mdph") {
                     navigate("/outils/synthese/mdph/resultats", { state: { syntheseId: s.id } });
                   }
                 }}
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex-1 min-w-0">
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     <span
-                      className="inline-block text-[11px] font-sans font-semibold px-2 py-0.5 rounded-full mb-1"
-                      style={{ background: "rgba(139,116,224,0.12)", color: "#8B74E0" }}
+                      className="text-[11px] font-sans font-semibold px-2 py-0.5 rounded-full"
+                      style={{ background: badge.bg, color: badge.color, whiteSpace: "nowrap" }}
                     >
-                      {typeLabel(s.cas_usage)}
+                      {badgeLabel}
                     </span>
-                    <p className="text-[14px] font-sans font-medium mt-1" style={{ color: "#1E1A1A" }}>
-                      {subtitle} · {displayName}
-                    </p>
-                    <p className="text-[12px] font-sans mt-0.5" style={{ color: "#9A9490" }}>
-                      {date}
-                    </p>
+                    <span style={{ fontSize: 11, color: "#9A9490" }}>{date}</span>
                   </div>
-                  <ChevronRight size={18} style={{ color: "#9A9490" }} className="flex-shrink-0" />
+                  <ChevronRight size={14} style={{ color: "#8B74E0" }} className="flex-shrink-0" />
                 </div>
+                <p style={{ fontSize: 13, fontWeight: 500, color: "#1E1A1A", margin: "4px 0 0" }}>
+                  {displayName}
+                </p>
               </button>
             );
           })
