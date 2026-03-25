@@ -209,7 +209,7 @@ const OutilsSyntheseTransmission = () => {
     const load = async () => {
       const { data } = await supabase
         .from("syntheses")
-        .select("contenu, created_at")
+        .select("contenu, created_at, metadata")
         .eq("id", incomingSyntheseId)
         .single();
       if (!data?.contenu) return;
@@ -221,6 +221,9 @@ const OutilsSyntheseTransmission = () => {
           setSyntheseId(incomingSyntheseId);
           setPhase(7);
           setIsReadOnly(true);
+          const meta = data.metadata as any;
+          const dest = meta?.destinataire ?? null;
+          if (dest) setDestinataire(dest);
         }
       } catch { /* ignore parse errors */ }
     };
