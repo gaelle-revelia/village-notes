@@ -251,12 +251,15 @@ const OutilsSyntheseMdph = () => {
           parent_context: {
             declarant_prenom: q0Prenom.trim(),
             declarant_lien: q0Lien,
-            vocal_mdph: q8Vocal.trim() || null,
             type_demande: q1,
-            objectifs: q2,
-            changements: q3Answer(),
-            situation_pro: q4Answer(),
-            projet: q6Answer(),
+            vie_quotidienne: q2Vocal.trim() || null,
+            organisation_soins: q3Vocal.trim() || null,
+            scolarisation: q4Scolarite,
+            scolarisation_details: q4ScolariteVocal.trim() || null,
+            projet: q5Vocal.trim() || null,
+            champ_libre: q6Libre.trim() || null,
+            certificat_etat: q7Etat,
+            certificat_vocal: q7Vocal.trim() || null,
           },
         },
       });
@@ -278,7 +281,7 @@ const OutilsSyntheseMdph = () => {
   // --- CTA ---
   const renderCta = () => {
     const ctaEnabled = isCurrentStepValid() && !isGenerating && !isRecording;
-    const ctaLabel = currentQ === 8
+    const ctaLabel = currentQ === 7
       ? (isGenerating ? loadingMessage : "Générer mon dossier →")
       : "Continuer →";
 
