@@ -81,20 +81,36 @@ interface ResultCardProps {
   icon: React.ReactNode;
   title: string;
   body: string;
+  showCopy?: boolean;
 }
 
-const ResultCard = ({ icon, title, body, onPreciser }: ResultCardProps & { onPreciser?: () => void }) => (
-  <div className="mb-4 px-5 py-4" style={glassCard}>
-    <div className="flex items-center gap-2 mb-2">
-      {icon}
-      <h3 className="text-[16px] font-serif font-semibold" style={{ color: "#1E1A1A" }}>{title}</h3>
+const ResultCard = ({ icon, title, body, onPreciser, showCopy }: ResultCardProps & { onPreciser?: () => void }) => {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = () => {
+    navigator.clipboard.writeText(body);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+  return (
+    <div className="mb-4 px-5 py-4" style={glassCard}>
+      <div className="flex items-center gap-2 mb-2">
+        {icon}
+        <h3 className="text-[16px] font-serif font-semibold" style={{ color: "#1E1A1A" }}>{title}</h3>
+      </div>
+      <p className="text-[14px] font-sans leading-relaxed mb-3" style={{ color: "#1E1A1A" }}>{body}</p>
+      <div style={{ display: "flex", gap: 8 }}>
+        {showCopy && (
+          <button onClick={handleCopy} style={{ flex: 1, padding: 9, borderRadius: 10, fontSize: 12, fontWeight: 500, background: "rgba(255,255,255,0.48)", border: "1px solid rgba(139,116,224,0.3)", color: "#8B74E0", cursor: "pointer" }}>
+            {copied ? "Copié ✓" : "Copier"}
+          </button>
+        )}
+        <button onClick={onPreciser} className={`py-2.5 text-[13px] font-sans font-medium ${showCopy ? "" : "w-full"}`} style={{ flex: showCopy ? 1 : undefined, border: "1.5px dashed #8B74E0", color: "#8B74E0", borderRadius: 12, background: "transparent" }}>
+          ✏️ Préciser ce bloc
+        </button>
+      </div>
     </div>
-    <p className="text-[14px] font-sans leading-relaxed mb-3" style={{ color: "#1E1A1A" }}>{body}</p>
-    <button onClick={onPreciser} className="w-full py-2.5 text-[13px] font-sans font-medium" style={{ border: "1.5px dashed #8B74E0", color: "#8B74E0", borderRadius: 12, background: "transparent" }}>
-      ✏️ Préciser ce bloc
-    </button>
-  </div>
-);
+  );
+};
 
 const SECTIONS = [
   { number: "01", title: "Qui est {prenom} ?", question: "Décris-moi {prenom} en quelques mots — {pronom_tonique} personnalité, comment {pronom_sujet} communique, ce {pronom_rel} aime." },
