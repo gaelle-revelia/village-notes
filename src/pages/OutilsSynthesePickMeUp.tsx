@@ -649,7 +649,7 @@ const OutilsSynthesePickMeUp = () => {
       </main>
 
       {/* Sticky CTA / action bar */}
-      {renderStickyBottom()}
+      {!isReadOnly && renderStickyBottom()}
 
       <PreciserBlocDrawer
         isOpen={!!refineBloc}
