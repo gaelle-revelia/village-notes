@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, Copy, Share2, Pencil, RefreshCw, CalendarIcon, Sparkles } from "lucide-react";
+import { ArrowLeft, Copy, Share2, Pencil, RefreshCw, CalendarIcon, Sparkles, Trash2 } from "lucide-react";
 import WiredMicOrb from "@/components/synthese/WiredMicOrb";
 import { format, subMonths, startOfMonth } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -155,6 +155,7 @@ const OutilsSynthesePickMeUp = () => {
   const [generatedContent, setGeneratedContent] = useState<string | null>(null);
   const [syntheseId, setSyntheseId] = useState<string | null>(null);
   const [refineBloc, setRefineBloc] = useState<{ id: string; title: string; content: string; cas_usage: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [etatEmotionnel, setEtatEmotionnel] = useState<string | null>(null);
   const [periodDebut, setPeriodDebut] = useState<string | null>(null);
   const [periodFin, setPeriodFin] = useState<string | null>(null);
@@ -411,9 +412,24 @@ const OutilsSynthesePickMeUp = () => {
         <button onClick={() => navigate(isReadOnly ? "/archives" : "/outils/synthese")} className="flex items-center justify-center" aria-label="Retour">
           <ArrowLeft size={20} style={{ color: "#1E1A1A" }} />
         </button>
-        <h1 className="text-xl font-serif font-semibold" style={{ color: "#1E1A1A" }}>
+        <h1 className="text-xl font-serif font-semibold flex-1" style={{ color: "#1E1A1A" }}>
           Remontant
         </h1>
+        {phase === "result" && (
+          <button
+            onClick={async () => {
+              if (!window.confirm("Supprimer ce remontant définitivement ?")) return;
+              setIsDeleting(true);
+              await supabase.from("syntheses").delete().eq("id", syntheseId);
+              navigate("/archives");
+            }}
+            disabled={isDeleting}
+            style={{ background: "none", border: "none", cursor: "pointer", padding: 4 }}
+            aria-label="Supprimer"
+          >
+            <Trash2 size={18} color="#E8736A" />
+          </button>
+        )}
       </header>
 
       <main className="flex-1 px-4 pt-5 pb-32">
