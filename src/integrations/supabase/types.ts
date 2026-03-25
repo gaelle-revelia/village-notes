@@ -746,6 +746,7 @@ export type Database = {
           contenu: string | null
           created_at: string | null
           enfant_id: string
+          envoye: boolean | null
           etat: string
           etat_emotionnel: string | null
           id: string
@@ -753,6 +754,7 @@ export type Database = {
           periode_debut: string | null
           periode_fin: string | null
           reponses_transmission: Json | null
+          titre: string | null
           user_id: string
           vocal_mdph: string | null
         }
@@ -761,6 +763,7 @@ export type Database = {
           contenu?: string | null
           created_at?: string | null
           enfant_id: string
+          envoye?: boolean | null
           etat?: string
           etat_emotionnel?: string | null
           id?: string
@@ -768,6 +771,7 @@ export type Database = {
           periode_debut?: string | null
           periode_fin?: string | null
           reponses_transmission?: Json | null
+          titre?: string | null
           user_id: string
           vocal_mdph?: string | null
         }
@@ -776,6 +780,7 @@ export type Database = {
           contenu?: string | null
           created_at?: string | null
           enfant_id?: string
+          envoye?: boolean | null
           etat?: string
           etat_emotionnel?: string | null
           id?: string
@@ -783,6 +788,7 @@ export type Database = {
           periode_debut?: string | null
           periode_fin?: string | null
           reponses_transmission?: Json | null
+          titre?: string | null
           user_id?: string
           vocal_mdph?: string | null
         }
