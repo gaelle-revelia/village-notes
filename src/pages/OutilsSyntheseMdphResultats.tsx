@@ -86,6 +86,9 @@ export default function OutilsSyntheseMdphResultats() {
         })
       );
 
+      setTitre(syntheseData.titre ?? "");
+      setEnvoye(syntheseData.envoye ?? false);
+
       // Fetch enfant prenom
       const { data: enfantData } = await supabase
         .from("enfants")
