@@ -300,7 +300,7 @@ Si un besoin n'est pas mentionné dans les données (aucun des trois niveaux), i
 
 Utiliser uniquement le chiffre exact fourni dans la liste des intervenants. Jamais d'estimation.
 
-### 6. Première personne singulière dans impact_professionnel
+### 6. Première personne singulière dans aidant_f
 
 Jamais "nous", jamais "les parents". Toujours "je".
 
@@ -350,11 +350,24 @@ REGISTRE B — "Renouvellement" ou "Évolution" : accent sur les changements doc
 
 - Troisième personne pour l'enfant
 
-- Première personne singulière pour le déclarant dans impact_professionnel
-
-- Paragraphe continu, 80–120 mots par bloc
+- Première personne singulière pour le déclarant dans aidant_f
 
 - Ton : administratif avec ancrage humain — factuel, précis, sans pathos ni superlatifs
+
+## LONGUEUR PAR BLOC
+
+- zone_b : pas de limite stricte — couvre 4 paragraphes :
+  § 1 Introduction : diagnostic, tableau clinique, impact global (3-4 phrases)
+  § 2 Besoins pour la vie à domicile : actes du quotidien, aide humaine nécessaire, équipements utilisés
+  § 3 Besoins pour se déplacer : mobilité, autonomie, équipements, dépendance aux tiers
+  § 4 Besoins pour la vie sociale : communication, relations, activités, interactions
+  Chaque paragraphe est aussi long que les données le permettent. Si données absentes → signalement.
+
+- scolarite_c3 : 80–100 mots maximum
+
+- scolarite_e2 : 60–80 mots maximum
+
+- aidant_f : 100–120 mots maximum
 
 ## FORMAT DE SORTIE — JSON STRICT
 
@@ -362,17 +375,13 @@ Retourne UNIQUEMENT ce JSON, sans markdown, sans commentaire :
 
 {"blocks":[
 
-  {"id":"zone_b","title":"Situation de l'enfant — vie quotidienne et suivi","cerfa_ref":"Zone libre B · Page 8","cerfa_ref_complementaire":"Cases B2 · Page 6 — à cocher par le parent · Cohérence avec le certificat médical joint","icon":"Home","content":"texte narratif propre uniquement, sans signalement","editorial_note":"Dans la section B2 (page 6), coche les cases correspondant aux actes où ${prenom} a besoin d'aide — The Village ne les coche pas pour toi.","signal":"[SIGNALEMENT EN MAJUSCULES — instruction exacte.] ou null"},
+  {"id":"zone_b","title":"Vie quotidienne, suivi et équipement","cerfa_ref":"Zone libre B · Page 8","cerfa_ref_complementaire":"Cases B2 · Page 6 — à cocher par le parent","icon":"Home","content":"texte narratif propre uniquement, sans signalement","editorial_note":"Dans la section B2 (page 6), coche les cases correspondant aux actes où ${prenom} a besoin d'aide — The Village ne les coche pas pour toi.","signal":null},
 
-  {"id":"scolarite_c1","title":"Scolarité — situation actuelle","cerfa_ref":"C1 · Page 9","cerfa_ref_complementaire":null,"icon":"BookOpen","content":"texte narratif propre uniquement, sans signalement","editorial_note":null,"signal":null},
+  {"id":"scolarite_c3","title":"Vie scolaire — renseignements","cerfa_ref":"Zone libre C3 · Page 12","cerfa_ref_complementaire":null,"icon":"BookOpen","content":"texte narratif propre uniquement, sans signalement","editorial_note":null,"signal":null},
 
-  {"id":"scolarite_c3","title":"Scolarité — demande","cerfa_ref":"C3 · Page 12","cerfa_ref_complementaire":null,"icon":"BookOpen","content":"texte narratif propre uniquement, sans signalement","editorial_note":null,"signal":null},
+  {"id":"scolarite_e2","title":"Demande scolaire","cerfa_ref":"Zone libre E2 · Page 17","cerfa_ref_complementaire":null,"icon":"BookOpen","content":"texte narratif propre uniquement, sans signalement","editorial_note":"Dans la section E1 (page 17), coche les droits souhaités — The Village ne les coche pas pour toi.","signal":null},
 
-  {"id":"projet_droits","title":"Projet et droits souhaités","cerfa_ref":"E1 + E2 · Pages 17–18","cerfa_ref_complementaire":null,"icon":"Target","content":"texte narratif propre uniquement, sans signalement","editorial_note":"Dans la section E2 (page 18), coche les cases correspondant aux droits souhaités — The Village ne les coche pas pour toi.","signal":null},
-
-  {"id":"impact_professionnel","title":"Impact professionnel","cerfa_ref":"F · Pages 19–20","cerfa_ref_complementaire":null,"icon":"Briefcase","content":"texte narratif propre uniquement, sans signalement","editorial_note":null,"signal":null},
-
-  {"id":"besoins_equipement","title":"Besoins en équipement et accessibilité","cerfa_ref":"B2 · Page 6","cerfa_ref_complementaire":"Pertinent aussi pour la PCH","icon":"Settings","content":"texte narratif propre uniquement, sans signalement","editorial_note":null,"signal":"[SIGNALEMENT EN MAJUSCULES — instruction exacte.] ou null"}
+  {"id":"aidant_f","title":"Situation de l'aidant","cerfa_ref":"Zone libre F · Pages 19–20","cerfa_ref_complementaire":null,"icon":"Briefcase","content":"texte narratif propre uniquement, sans signalement","editorial_note":null,"signal":null}
 
 ]}`;
 
@@ -434,7 +443,11 @@ ${JSON.stringify(memos?.map((m: any) => ({
   resume: m.content_structured?.resume ?? "",
   details: m.content_structured?.details ?? [],
   a_retenir: m.content_structured?.a_retenir ?? ""
-})) ?? [])}`;
+})) ?? [])}
+
+BLOCS À GÉNÉRER
+Toujours générer : zone_b, aidant_f
+${parent_context.scolarisation !== "Pas encore scolarisé·e" ? "Générer aussi : scolarite_c3, scolarite_e2" : "Ne PAS générer scolarite_c3 ni scolarite_e2 (enfant pas encore scolarisé·e)."}`;
     }
 
     if (type === "transmission") {
@@ -675,7 +688,7 @@ VIOLATIONS À CORRIGER :
 - "hypotonie axiale" → "faiblesse musculaire du tronc"
 - Tout terme médical latin ou technique absent du diagnostic et des vocaux parentaux
 
-2. "nous", "notre", "les parents" → "je", "ma", "mon" dans tous les blocs SAUF scolarite_c1 et scolarite_c3
+2. "nous", "notre", "les parents" → "je", "ma", "mon" dans tous les blocs SAUF scolarite_c3 et scolarite_e2
 
 3. Prescriptions :
 "est nécessaire pour compenser", "est envisagé", "sont nécessaires pour" → reformuler en description de besoin sans prescrire la solution
