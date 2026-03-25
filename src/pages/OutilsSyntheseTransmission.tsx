@@ -188,6 +188,8 @@ const OutilsSyntheseTransmission = () => {
   const [isReadOnly, setIsReadOnly] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [titre, setTitre] = useState<string>("");
+  const [editingTitre, setEditingTitre] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -209,7 +211,7 @@ const OutilsSyntheseTransmission = () => {
     const load = async () => {
       const { data } = await supabase
         .from("syntheses")
-        .select("contenu, created_at, metadata")
+        .select("contenu, created_at, metadata, titre")
         .eq("id", incomingSyntheseId)
         .single();
       if (!data?.contenu) return;
@@ -224,6 +226,7 @@ const OutilsSyntheseTransmission = () => {
           const meta = data.metadata as any;
           const dest = meta?.destinataire ?? null;
           if (dest) setDestinataire(dest);
+          setTitre(data.titre ?? "");
         }
       } catch { /* ignore parse errors */ }
     };
@@ -416,7 +419,33 @@ const OutilsSyntheseTransmission = () => {
         <button onClick={() => navigate(isReadOnly ? "/archives" : "/outils/synthese")} className="flex items-center justify-center" aria-label="Retour">
           <ArrowLeft size={20} style={{ color: "#1E1A1A" }} />
         </button>
-        <h1 className="text-xl font-serif font-semibold" style={{ color: "#1E1A1A" }}>Transmission</h1>
+        {editingTitre ? (
+          <input
+            autoFocus
+            value={titre}
+            onChange={(e) => setTitre(e.target.value)}
+            onBlur={async () => {
+              setEditingTitre(false);
+              await supabase.from("syntheses").update({ titre: titre.trim() || null }).eq("id", syntheseId);
+            }}
+            onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); }}
+            style={{ fontFamily: "Fraunces, serif", fontSize: 20, fontWeight: 600, color: "#1E1A1A", background: "none", border: "none", borderBottom: "1px solid #8B74E0", outline: "none", width: "100%", padding: "2px 0" }}
+          />
+        ) : (
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <h1 className="text-xl font-serif font-semibold" style={{ color: "#1E1A1A", margin: 0 }}>
+              {titre || "Transmission"}
+            </h1>
+            {isReadOnly && (
+              <button onClick={() => setEditingTitre(true)} style={{ background: "none", border: "none", cursor: "pointer", padding: 2, flexShrink: 0 }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9A9490" strokeWidth="2" strokeLinecap="round">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+              </button>
+            )}
+          </div>
+        )}
       </header>
 
       <main className="flex-1 px-4 pt-5 pb-32">
