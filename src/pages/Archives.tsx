@@ -47,11 +47,12 @@ function getBadgeLabel(s: any): string {
 }
 
 function getCardLabel(s: any): string {
+  if (s.titre?.trim()) return s.titre.trim();
   if (s.cas_usage === "pick_me_up") return "Synthèse remontant";
   if (s.cas_usage === "transmission") return "Transmission parcours";
   try {
     const parsed = typeof s.contenu === "string" ? JSON.parse(s.contenu ?? "{}") : s.contenu;
-    return parsed?.parent_context?.type_demande ?? parsed?.type_demande ?? "Dossier MDPH";
+    return parsed?.parent_context?.type_demande ?? "Dossier MDPH";
   } catch {
     return "Dossier MDPH";
   }
@@ -89,7 +90,7 @@ const Archives = () => {
       setLoading(true);
       const { data } = await supabase
         .from("syntheses")
-        .select("id, cas_usage, contenu, created_at, etat, user_id, envoye")
+        .select("id, cas_usage, contenu, created_at, etat, user_id, envoye, titre")
         .eq("enfant_id", enfantId)
         .order("created_at", { ascending: false });
       const items = data ?? [];
