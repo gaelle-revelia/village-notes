@@ -90,7 +90,7 @@ const Archives = () => {
       setLoading(true);
       const { data } = await supabase
         .from("syntheses")
-        .select("id, cas_usage, contenu, created_at, etat, user_id, envoye")
+        .select("id, cas_usage, contenu, created_at, etat, user_id, envoye, titre")
         .eq("enfant_id", enfantId)
         .order("created_at", { ascending: false });
       const items = data ?? [];
