@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, Sparkles, User, Brain, Moon, PersonStanding, Users, Pill, Activity, Mail } from "lucide-react";
 import WiredMicOrb from "@/components/synthese/WiredMicOrb";
 import BottomNavBar from "@/components/BottomNavBar";
