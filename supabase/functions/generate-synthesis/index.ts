@@ -443,8 +443,7 @@ ${JSON.stringify(memos?.map((m: any) => ({
 })) ?? [])}
 
 BLOCS À GÉNÉRER
-Toujours générer : zone_b, aidant_f
-${parent_context.scolarisation !== "Pas encore scolarisé·e" ? "Générer aussi : scolarite_c3, scolarite_e2" : "Ne PAS générer scolarite_c3 ni scolarite_e2 (enfant pas encore scolarisé·e)."}`;
+Toujours générer ces 4 blocs : zone_b, scolarite_c3, scolarite_e2, aidant_f`;
     }
 
     if (type === "transmission") {
