@@ -132,6 +132,7 @@ const OutilsSyntheseMdph = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("Préparation du dossier en cours…");
   const [syntheseId, setSyntheseId] = useState<string | null>(null);
+  const [introSeen, setIntroSeen] = useState(false);
 
   // --- Visibility rules ---
   const showQ0 = true;
@@ -277,6 +278,18 @@ const OutilsSyntheseMdph = () => {
 
   // --- CTA ---
   const renderCta = () => {
+    if (!introSeen) {
+      return (
+        <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, padding: "12px 16px 28px", background: "rgba(255,255,255,0.72)", backdropFilter: "blur(20px)", borderTop: "1px solid rgba(255,255,255,0.6)", zIndex: 10 }}>
+          <button
+            onClick={() => setIntroSeen(true)}
+            style={{ width: "100%", padding: 15, background: "linear-gradient(135deg, #E8736A, #8B74E0)", color: "#fff", border: "none", borderRadius: 16, fontSize: 15, fontWeight: 600, cursor: "pointer" }}>
+            On démarre →
+          </button>
+        </div>
+      );
+    }
+
     const ctaEnabled = isCurrentStepValid() && !isGenerating && !isRecording;
     const ctaLabel = currentQ === 7
       ? (isGenerating ? loadingMessage : "Générer mon dossier →")
@@ -308,8 +321,27 @@ const OutilsSyntheseMdph = () => {
 
 
       <main className="flex-1 px-4 pt-5 pb-32">
+        {/* Intro message */}
+        {!introSeen && (
+          <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
+            <div style={{ width: 36, height: 36, borderRadius: "50%", background: "linear-gradient(135deg, #E8736A, #8B74E0)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+            </div>
+            <div>
+              <p style={{ fontSize: 10, fontWeight: 500, color: "#8B74E0", marginBottom: 3 }}>The Village</p>
+              <div style={{ background: "rgba(255,255,255,0.58)", border: "1px solid rgba(255,255,255,0.9)", borderRadius: "4px 16px 16px 16px", padding: "12px 14px", maxWidth: 260 }}>
+                <p style={{ fontSize: 13.5, color: "#1E1A1A", lineHeight: 1.6, margin: 0 }}>
+                  The Village, c'est la mémoire vivante du quotidien de {displayName} et de ta famille. Je retranscris l'impact du handicap sur ta vie de tous les jours — à partir de ce que tu as documenté dans tes mémos. Je ne connais rien d'autre que ce que tu m'as confié : je ne peux pas te conseiller sur tes droits ni sur ce que tu devrais demander. Ce que je sais faire, c'est mettre en mots ta réalité pour que le dossier parle pour toi.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Q0 — Déclarant */}
-        {showQ0 && (
+        {introSeen && showQ0 && (
           <>
             <UserBubble text="📋 Dossier MDPH" />
             <SectionSeparator text={`Dossier MDPH — ${displayName}`} />
@@ -347,7 +379,7 @@ const OutilsSyntheseMdph = () => {
         )}
 
         {/* Q1 — Type de demande */}
-        {showQ1 && (
+        {introSeen && showQ1 && (
           <>
             {currentQ > 0.5 && q0Lien && <UserBubble text={`${q0Prenom} · ${q0Lien}`} />}
             <AiBubble text="Pour préparer ton dossier, j'ai besoin de quelques infos que je n'ai pas dans tes mémos." />
@@ -357,7 +389,7 @@ const OutilsSyntheseMdph = () => {
         )}
 
         {/* Q2 — Vie quotidienne */}
-        {showQ2 && (
+        {introSeen && showQ2 && (
           <>
             {currentQ > 1 && q1 && <UserBubble text={q1} />}
             <AiBubble text="2 — Quels droits souhaites-tu demander ?" />
@@ -375,7 +407,7 @@ const OutilsSyntheseMdph = () => {
         )}
 
         {/* Q3 — Organisation soins */}
-        {showQ3 && (
+        {introSeen && showQ3 && (
           <>
             {currentQ > 2 && q2Answer() && <UserBubble text={q2Answer()!} />}
             <AiBubble text="3 — Qu'est-ce qui a changé depuis ton dernier dossier ?" />
@@ -392,7 +424,7 @@ const OutilsSyntheseMdph = () => {
         )}
 
         {/* Q4 — Situation scolaire */}
-        {showQ4 && (
+        {introSeen && showQ4 && (
           <>
             {currentQ > 3 && q3Answer() && <UserBubble text={q3Answer()!} />}
             <AiBubble text={`4 — Quelle est la situation scolaire actuelle de ${displayName} ?`} />
@@ -417,7 +449,7 @@ const OutilsSyntheseMdph = () => {
         )}
 
         {/* Q5 — Projet 2-3 ans */}
-        {showQ5 && (
+        {introSeen && showQ5 && (
           <>
             {currentQ > 4 && q4Scolarite && <UserBubble text={q4Answer()} />}
             <AiBubble text={`5 — Quel est ton projet pour ${displayName} dans les 2-3 prochaines années ?`} />
@@ -434,7 +466,7 @@ const OutilsSyntheseMdph = () => {
         )}
 
         {/* Q6 — Champ libre */}
-         {showQ6 && (
+         {introSeen && showQ6 && (
           <>
             {currentQ > 5 && q5Answer() && <UserBubble text={q5Answer()!} />}
             <AiBubble text="6 — Y a-t-il quelque chose d'important que je ne vois pas dans tes mémos ?" />
@@ -446,7 +478,7 @@ const OutilsSyntheseMdph = () => {
         )}
 
         {/* Q7 — Certificat médical */}
-        {showQ7 && (
+        {introSeen && showQ7 && (
           <>
             {currentQ > 6 && q6Libre.trim() && <UserBubble text="Enregistrement ajouté ✅" />}
             <AiBubble text="7 — As-tu le certificat médical sous la main ?" />
