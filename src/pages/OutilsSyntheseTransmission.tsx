@@ -284,6 +284,31 @@ const OutilsSyntheseTransmission = () => {
       .replace(/\{accord\}/g, isFem ? "e" : "");
   };
 
+  const handleSendEmail = async () => {
+    if (!emailValue.trim()) return;
+    setIsSending(true);
+    try {
+      const { error } = await supabase.functions.invoke("send-transmission-email", {
+        body: {
+          email: emailValue,
+          parentPrenom: parentPrenom ?? "Parent",
+          enfantPrenom: displayName,
+          syntheseDate: dateStr,
+          destinataire,
+          blocks: (generatedBlocks ?? []).map(b => ({ title: b.title, content: b.content })),
+        },
+      });
+      if (error) throw error;
+      setSent(true);
+      toast({ title: "Email envoyé ✅" });
+    } catch (e) {
+      console.error("send-transmission-email error:", e);
+      toast({ title: "Une erreur est survenue — réessaie.", variant: "destructive" });
+    } finally {
+      setIsSending(false);
+    }
+  };
+
   const renderCta = () => {
     if (phase === 0) {
       const enabled = !!destinataire;
@@ -311,30 +336,7 @@ const OutilsSyntheseTransmission = () => {
             </div>
             <button
               disabled={isSending || sent}
-              onClick={async () => {
-                if (!emailValue.trim()) return;
-                setIsSending(true);
-                try {
-                  const { error } = await supabase.functions.invoke("send-transmission-email", {
-                    body: {
-                      email: emailValue,
-                      parentPrenom: parentPrenom ?? "Parent",
-                      enfantPrenom: displayName,
-                      syntheseDate: dateStr,
-                      destinataire,
-                      blocks: (generatedBlocks ?? []).map(b => ({ title: b.title, content: b.content })),
-                    },
-                  });
-                  if (error) throw error;
-                  setSent(true);
-                  toast({ title: "Email envoyé ✅" });
-                } catch (e) {
-                  console.error("send-transmission-email error:", e);
-                  toast({ title: "Une erreur est survenue — réessaie.", variant: "destructive" });
-                } finally {
-                  setIsSending(false);
-                }
-              }}
+              onClick={handleSendEmail}
               className="px-5 py-2.5 text-[13px] font-sans font-semibold flex-shrink-0"
               style={{ background: "linear-gradient(135deg, #E8736A, #8B74E0)", color: "#fff", borderRadius: 999, border: "none", opacity: isSending || sent ? 0.6 : 1 }}
             >
@@ -491,6 +493,32 @@ const OutilsSyntheseTransmission = () => {
             }) : RESULT_CARDS.map((card, i) => (
               <ResultCard key={i} icon={card.icon} title={q(card.title)} body={q(card.body)} />
             ))}
+
+            {/* Inline email bar for readOnly mode */}
+            {isReadOnly && (
+              <div className="my-5 px-1">
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 relative">
+                    <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "#9A9490" }} />
+                    <input
+                      type="email"
+                      placeholder="ton@email.com"
+                      value={emailValue}
+                      onChange={(e) => setEmailValue(e.target.value)}
+                      style={{ ...glassCard, borderRadius: 999, height: 44, width: "100%", paddingLeft: 36, paddingRight: 12, fontSize: 13, border: "none", outline: "none", fontFamily: "DM Sans, sans-serif" }}
+                    />
+                  </div>
+                  <button
+                    onClick={handleSendEmail}
+                    disabled={isSending || sent}
+                    style={{ padding: "10px 20px", borderRadius: 999, fontSize: 13, fontWeight: 600, background: "linear-gradient(135deg, #E8736A, #8B74E0)", color: "#fff", border: "none", cursor: "pointer", opacity: isSending || sent ? 0.7 : 1, whiteSpace: "nowrap" }}
+                  >
+                    {sent ? "Envoyé ✓" : isSending ? "Envoi..." : "Envoyer →"}
+                  </button>
+                </div>
+              </div>
+            )}
+
             <p className="text-center text-[10px] font-sans mb-6" style={{ color: "#9A9490" }}>
               Document généré par The Village à partir des observations de {parentPrenom ?? "Parent"}. À compléter et personnaliser avant partage. Généré le {dateStr}.
             </p>
