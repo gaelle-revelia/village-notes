@@ -58,7 +58,7 @@ const Archives = () => {
   const navigate = useNavigate();
   const { enfantId } = useEnfantId();
   const prenom = useEnfantPrenom();
-  const [activeTab, setActiveTab] = useState<Tab>("tous");
+  const [activeFilters, setActiveFilters] = useState<string[]>(["tous"]);
   const [syntheses, setSyntheses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -77,9 +77,20 @@ const Archives = () => {
     fetchData();
   }, [enfantId]);
 
-  const filtered = activeTab === "tous"
+  const toggleFilter = (key: string) => {
+    if (key === "tous") { setActiveFilters(["tous"]); return; }
+    const withoutTous = activeFilters.filter(f => f !== "tous");
+    if (withoutTous.includes(key)) {
+      const next = withoutTous.filter(f => f !== key);
+      setActiveFilters(next.length === 0 ? ["tous"] : next);
+    } else {
+      setActiveFilters([...withoutTous, key]);
+    }
+  };
+
+  const filtered = activeFilters.includes("tous")
     ? syntheses
-    : syntheses.filter((s) => s.cas_usage === activeTab);
+    : syntheses.filter((s) => activeFilters.includes(s.cas_usage));
 
   const displayName = prenom ?? "Enfant";
 
