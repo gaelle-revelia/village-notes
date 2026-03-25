@@ -226,6 +226,7 @@ const OutilsSyntheseTransmission = () => {
           const meta = data.metadata as any;
           const dest = meta?.destinataire ?? null;
           if (dest) setDestinataire(dest);
+          setTitre(data.titre ?? "");
         }
       } catch { /* ignore parse errors */ }
     };
