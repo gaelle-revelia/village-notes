@@ -410,18 +410,22 @@ const OutilsSyntheseMdph = () => {
         {/* Q2 — Vie quotidienne */}
         {introSeen && showQ2 && (
           <>
-            {currentQ > 1 && q1 && <UserBubble text={q1} />}
-            <AiBubble text="2 — Quels droits souhaites-tu demander ?" />
-            <ChipGroup chips={Q2_CHIPS} selected={[]} multi onToggle={() => {}} />
-            <div style={{ margin: "0 4px 14px", background: "rgba(232,115,106,0.07)", borderLeft: "2.5px solid #E8736A", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
-              <p style={{ fontSize: 11, color: "#9A9490", lineHeight: 1.55, fontStyle: "italic" }}>
-                Ces informations orientent la rédaction de ton texte. The Village ne peut pas te conseiller sur tes droits — rapproche-toi d'une assistante sociale ou de la MDPH de ton département.
+            {currentQ > 1 && q1 && (
+              <UserBubble text={q1} />
+            )}
+            <AiBubble text={`2 — Comment se passe le quotidien de ${displayName} ?`} />
+            <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
+              <p style={{ fontSize: 11, color: "#8B74E0", lineHeight: 1.6, margin: 0 }}>
+                C'est la partie la plus importante du dossier. Décris une journée type — le réveil, les repas, le bain, les déplacements, ce qui est impossible sans aide. Plus tu détailles, plus le dossier sera fort. Prends le temps qu'il te faut.
               </p>
             </div>
             {q2Vocal.trim() && (
               <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
             )}
-            <WiredMicOrb onTranscription={(text) => setQ2Vocal((prev) => prev ? prev + " " + text : text)} onRecordingChange={setIsRecording} />
+            <WiredMicOrb
+              onTranscription={(text) => setQ2Vocal(prev => prev ? prev + " " + text : text)}
+              onRecordingChange={setIsRecording}
+            />
           </>
         )}
 
