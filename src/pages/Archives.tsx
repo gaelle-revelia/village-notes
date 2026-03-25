@@ -48,7 +48,7 @@ function getBadgeLabel(s: any): string {
 
 function getCardLabel(s: any): string {
   if (s.titre?.trim()) return s.titre.trim();
-  if (s.cas_usage === "pick_me_up") return "Synthèse remontant";
+  if (s.cas_usage === "pick_me_up") return "Remontant";
   if (s.cas_usage === "transmission") return "Transmission parcours";
   try {
     const parsed = typeof s.contenu === "string" ? JSON.parse(s.contenu ?? "{}") : s.contenu;
