@@ -177,6 +177,28 @@ export default function OutilsSyntheseMdphResultats() {
         </p>
       </div>
 
+      {/* Déposé toggle */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 16px", margin: "0 16px 8px", background: envoye ? "rgba(68,168,130,0.08)" : "rgba(255,255,255,0.38)", borderRadius: 12, border: envoye ? "1px solid rgba(68,168,130,0.3)" : "1px solid rgba(255,255,255,0.85)" }}>
+        <div>
+          <p style={{ fontSize: 13, fontWeight: 500, color: envoye ? "#2a8a6a" : "#1E1A1A", margin: 0 }}>
+            {envoye ? "Dossier déposé ✓" : "Dossier déposé ?"}
+          </p>
+          <p style={{ fontSize: 11, color: "#9A9490", margin: "2px 0 0" }}>
+            {envoye ? "Tu as noté que ce dossier a été déposé" : "Note ici quand tu déposes le dossier à la MDPH"}
+          </p>
+        </div>
+        <button
+          onClick={async () => {
+            const next = !envoye;
+            setEnvoye(next);
+            await supabase.from("syntheses").update({ envoye: next }).eq("id", syntheseId);
+          }}
+          style={{ width: 44, height: 26, borderRadius: 999, background: envoye ? "#44A882" : "rgba(154,148,144,0.3)", border: "none", cursor: "pointer", position: "relative", flexShrink: 0 }}
+        >
+          <div style={{ position: "absolute", top: 3, left: envoye ? 21 : 3, width: 20, height: 20, borderRadius: "50%", background: "#fff", boxShadow: "0 1px 3px rgba(0,0,0,0.2)", transition: "left 0.2s" }} />
+        </button>
+      </div>
+
       <div className="px-4 pt-4 space-y-4">
         {loading && <p className="text-center text-sm" style={{ color: "#9A9490" }}>Chargement…</p>}
         {error && <p className="text-center text-sm" style={{ color: "#E8736A" }}>{error}</p>}
