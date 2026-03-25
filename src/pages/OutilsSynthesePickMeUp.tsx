@@ -411,7 +411,7 @@ const OutilsSynthesePickMeUp = () => {
           boxShadow: "0 2px 12px rgba(0,0,0,0.05)"
         }}>
         
-        <button onClick={() => navigate("/outils/synthese")} className="flex items-center justify-center" aria-label="Retour">
+        <button onClick={() => navigate(isReadOnly ? "/archives" : "/outils/synthese")} className="flex items-center justify-center" aria-label="Retour">
           <ArrowLeft size={20} style={{ color: "#1E1A1A" }} />
         </button>
         <h1 className="text-xl font-serif font-semibold" style={{ color: "#1E1A1A" }}>
