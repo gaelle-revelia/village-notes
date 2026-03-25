@@ -430,6 +430,7 @@ const OutilsSynthesePickMeUp = () => {
             <Trash2 size={18} color="#E8736A" />
           </button>
         )}
+      </header>
 
       <main className="flex-1 px-4 pt-5 pb-32">
         {/* ===== BLOCK 1 — always visible (hidden in readOnly) ===== */}
