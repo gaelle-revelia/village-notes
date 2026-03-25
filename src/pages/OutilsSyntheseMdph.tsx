@@ -115,22 +115,15 @@ const OutilsSyntheseMdph = () => {
   const [q0Lien, setQ0Lien] = useState<string | null>(null);
   const [q0Prenom, setQ0Prenom] = useState<string>("");
   const [q1, setQ1] = useState<string | null>(null);
-  const [q2, setQ2] = useState<string[]>([]);
-  const [q3Chips, setQ3Chips] = useState<string[]>([]);
+  const [q2Vocal, setQ2Vocal] = useState("");
   const [q3Vocal, setQ3Vocal] = useState("");
-  const [q4, setQ4] = useState<string | null>(null);
-  const [q4Vocal, setQ4Vocal] = useState("");
-  const [q4TiercePersonne, setQ4TiercePersonne] = useState<boolean | null>(null);
-  const [q4HeuresTierce, setQ4HeuresTierce] = useState("");
-  const [q4bVocal, setQ4bVocal] = useState("");
-  const [q5, setQ5] = useState<string | null>(null);
+  const [q4Scolarite, setQ4Scolarite] = useState<string | null>(null);
+  const [q4ScolariteVocal, setQ4ScolariteVocal] = useState("");
   const [q5Vocal, setQ5Vocal] = useState("");
-  const [q6Chips, setQ6Chips] = useState<string[]>([]);
-  const [q6Vocal, setQ6Vocal] = useState("");
-  const [q7, setQ7] = useState("");
+  const [q6Libre, setQ6Libre] = useState("");
   
-  const [q8Etat, setQ8Etat] = useState<string | null>(null);
-  const [q8Vocal, setQ8Vocal] = useState("");
+  const [q7Etat, setQ7Etat] = useState<string | null>(null);
+  const [q7Vocal, setQ7Vocal] = useState("");
 
   const [memoCount, setMemoCount] = useState<number | null>(null);
   const [parentPrenom, setParentPrenom] = useState<string | null>(null);
