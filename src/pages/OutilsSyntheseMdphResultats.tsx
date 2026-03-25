@@ -129,6 +129,12 @@ export default function OutilsSyntheseMdphResultats() {
         </div>
       </div>
 
+      <div style={{ margin: "16px 16px 8px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "10px 13px" }}>
+        <p style={{ fontSize: 11, color: "#8B74E0", lineHeight: 1.6, margin: 0 }}>
+          Ces textes sont une base de travail. Copie chaque bloc dans la section correspondante de ton formulaire CERFA, puis ajuste si besoin. Utilise "Préciser ce bloc" pour affiner si besoin avant de copier.
+        </p>
+      </div>
+
       <div className="px-4 pt-4 space-y-4">
         {loading && <p className="text-center text-sm" style={{ color: "#9A9490" }}>Chargement…</p>}
         {error && <p className="text-center text-sm" style={{ color: "#E8736A" }}>{error}</p>}
