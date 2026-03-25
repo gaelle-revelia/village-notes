@@ -158,6 +158,7 @@ const OutilsSynthesePickMeUp = () => {
   const [etatEmotionnel, setEtatEmotionnel] = useState<string | null>(null);
   const [periodDebut, setPeriodDebut] = useState<string | null>(null);
   const [periodFin, setPeriodFin] = useState<string | null>(null);
+  const [syntheseDate, setSyntheseDate] = useState<string | null>(null);
 
   // Block 1 state
   const [selectedEmotion, setSelectedEmotion] = useState<string | null>(null);
