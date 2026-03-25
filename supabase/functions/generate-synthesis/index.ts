@@ -662,6 +662,7 @@ Pronoms: ${pronom_sujet} / ${accord}`;
         .trim();
       const parsed = JSON.parse(clean);
       blocks = parsed.blocks ?? [];
+      var etatResume = parsed.etat_emotionnel_resume ?? null;
     } catch (e) {
       console.error("Failed to parse AI response:", rawText);
       return new Response(
