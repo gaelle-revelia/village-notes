@@ -129,6 +129,12 @@ export default function OutilsSyntheseMdphResultats() {
         </div>
       </div>
 
+      <div style={{ margin: "16px 16px 8px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "10px 13px" }}>
+        <p style={{ fontSize: 11, color: "#8B74E0", lineHeight: 1.6, margin: 0 }}>
+          Ces textes sont une base de travail. Copie chaque bloc dans la section correspondante de ton formulaire CERFA, puis ajuste si besoin. Utilise "Préciser ce bloc" pour affiner si besoin avant de copier.
+        </p>
+      </div>
+
       <div className="px-4 pt-4 space-y-4">
         {loading && <p className="text-center text-sm" style={{ color: "#9A9490" }}>Chargement…</p>}
         {error && <p className="text-center text-sm" style={{ color: "#E8736A" }}>{error}</p>}
@@ -218,31 +224,11 @@ export default function OutilsSyntheseMdphResultats() {
           </div>
         ))}
 
-        {/* Update button */}
-        {blocks.length > 0 && (
-          <button
-            onClick={() => navigate("/outils/synthese/mdph")}
-            className="w-full"
-            style={{
-              padding: "14px",
-              borderRadius: 12,
-              fontSize: 14,
-              fontWeight: 600,
-              background: "linear-gradient(135deg, #E8736A, #8B74E0)",
-              color: "#fff",
-              border: "none",
-              cursor: "pointer",
-              fontFamily: "DM Sans, sans-serif",
-            }}
-          >
-            Mettre à jour les textes
-          </button>
-        )}
 
         {/* Footer */}
         {blocks.length > 0 && (
           <div className="pt-2 pb-4 space-y-3">
-            <p className="text-[11px] text-center" style={{ color: "#9A9490", fontFamily: "DM Sans, sans-serif" }}>
+            <p style={{ fontSize: 11, color: "#9A9490", textAlign: "center", lineHeight: 1.6, marginBottom: 12 }}>
               Synthèse des observations de {parentPrenom} pour {enfantPrenom} · The Village ·{" "}
               {new Date().toLocaleDateString("fr-FR", { month: "long", year: "numeric" })}
             </p>
