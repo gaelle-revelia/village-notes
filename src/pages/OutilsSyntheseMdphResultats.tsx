@@ -4,6 +4,7 @@ import { ArrowLeft, Trash2, ChevronRight } from "lucide-react";
 import BottomNavBar from "@/components/BottomNavBar";
 import PreciserBlocDrawer from "@/components/synthese/PreciserBlocDrawer";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import { useEnfantId } from "@/hooks/useEnfantId";
 
 const glassCard: React.CSSProperties = {
@@ -47,6 +48,9 @@ export default function OutilsSyntheseMdphResultats() {
   const [titre, setTitre] = useState<string>("");
   const [editingTitre, setEditingTitre] = useState(false);
   const [envoye, setEnvoye] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [sent, setSent] = useState(false);
+  const { toast } = useToast();
 
   const handleDelete = async () => {
     if (!window.confirm("Supprimer ce dossier définitivement ?")) return;
@@ -327,6 +331,31 @@ export default function OutilsSyntheseMdphResultats() {
                 }}
               />
               <button
+                disabled={isSending || sent}
+                onClick={async () => {
+                  if (!email.trim()) return;
+                  setIsSending(true);
+                  try {
+                    const { error: fnErr } = await supabase.functions.invoke("send-mdph-email", {
+                      body: {
+                        email: email.trim(),
+                        parentPrenom,
+                        enfantPrenom,
+                        syntheseDate,
+                        typeDemande: blocks[0]?.cerfa_ref || "Dossier MDPH",
+                        blocks: blocks.map(b => ({ title: b.title, cerfa_ref: b.cerfa_ref ?? "", content: b.content })),
+                      },
+                    });
+                    if (fnErr) throw fnErr;
+                    setSent(true);
+                    toast({ title: "Email envoyé ✅" });
+                  } catch (e) {
+                    console.error("send-mdph-email error:", e);
+                    toast({ title: "Une erreur est survenue — réessaie.", variant: "destructive" });
+                  } finally {
+                    setIsSending(false);
+                  }
+                }}
                 style={{
                   padding: "10px 16px",
                   borderRadius: 10,
@@ -335,11 +364,12 @@ export default function OutilsSyntheseMdphResultats() {
                   background: "linear-gradient(135deg, #E8736A, #8B74E0)",
                   color: "#fff",
                   border: "none",
-                  cursor: "pointer",
+                  cursor: isSending || sent ? "default" : "pointer",
                   whiteSpace: "nowrap",
+                  opacity: isSending || sent ? 0.6 : 1,
                 }}
               >
-                Envoyer →
+                {sent ? "Envoyé ✓" : isSending ? "Envoi en cours..." : "Envoyer →"}
               </button>
             </div>
           </div>
