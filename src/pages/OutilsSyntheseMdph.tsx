@@ -201,6 +201,42 @@ const OutilsSyntheseMdph = () => {
     setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
   }, [currentQ, introSeen]);
 
+  useEffect(() => {
+    if (q2Vocal.trim()) {
+      setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+    }
+  }, [q2Vocal]);
+
+  useEffect(() => {
+    if (q3Vocal.trim()) {
+      setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+    }
+  }, [q3Vocal]);
+
+  useEffect(() => {
+    if (q5Vocal.trim()) {
+      setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+    }
+  }, [q5Vocal]);
+
+  useEffect(() => {
+    if (q6Libre.trim()) {
+      setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+    }
+  }, [q6Libre]);
+
+  useEffect(() => {
+    if (q7Vocal.trim()) {
+      setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+    }
+  }, [q7Vocal]);
+
+  useEffect(() => {
+    if (q7Etat) {
+      setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+    }
+  }, [q7Etat]);
+
   const toggleSingle = (val: string, current: string | null, setter: (v: string | null) => void) => {
     setter(current === val ? null : val);
   };
