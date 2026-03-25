@@ -174,7 +174,7 @@ const Archives = () => {
                   <ChevronRight size={14} style={{ color: "#8B74E0" }} className="flex-shrink-0" />
                 </div>
                 <p style={{ fontSize: 13, fontWeight: 500, color: "#1E1A1A", margin: "4px 0 0" }}>
-                  {displayName}
+                  {s.cas_usage === "mdph" ? badgeLabel : s.cas_usage === "pick_me_up" ? "Synthèse remontant" : "Transmission parcours"}
                 </p>
               </button>
             );
