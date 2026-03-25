@@ -186,6 +186,8 @@ const OutilsSyntheseTransmission = () => {
   const [syntheseId, setSyntheseId] = useState<string | null>(null);
   const [refineBloc, setRefineBloc] = useState<{ id: string; title: string; content: string; cas_usage: string } | null>(null);
   const [isReadOnly, setIsReadOnly] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [sent, setSent] = useState(false);
 
   useEffect(() => {
     if (!user) return;
