@@ -195,8 +195,8 @@ const OutilsSynthesePickMeUp = () => {
         if (!data?.contenu) return;
         try {
           const parsed = JSON.parse(data.contenu);
-          const text = typeof parsed === "string" ? parsed : parsed?.content ?? parsed?.blocks?.[0]?.content ?? data.contenu;
-          setGeneratedContent(text);
+          const text = Array.isArray(parsed) ? parsed[0]?.content : (parsed?.content ?? data.contenu);
+          setGeneratedContent(text ?? data.contenu);
         } catch {
           setGeneratedContent(data.contenu);
         }
@@ -612,6 +612,24 @@ const OutilsSynthesePickMeUp = () => {
                 {displayContent}
               </p>
             </div>
+            {isReadOnly && (
+              <button
+                onClick={handleCopy}
+                className="w-full mb-6 font-sans"
+                style={{
+                  padding: 9,
+                  borderRadius: 10,
+                  fontSize: 12,
+                  fontWeight: 500,
+                  background: "rgba(255,255,255,0.48)",
+                  border: "1px solid rgba(139,116,224,0.3)",
+                  color: "#8B74E0",
+                }}
+              >
+                <Copy size={13} className="inline mr-1" style={{ verticalAlign: "-2px" }} />
+                Copier
+              </button>
+            )}
             {!isReadOnly && <button
               onClick={() => setRefineBloc({ id: "narrative", title: "Ce qui s'est passé", content: displayContent, cas_usage: "pick_me_up" })}
               className="w-full py-2.5 text-[13px] font-sans font-medium mb-6"
@@ -631,7 +649,7 @@ const OutilsSynthesePickMeUp = () => {
       </main>
 
       {/* Sticky CTA / action bar */}
-      {renderStickyBottom()}
+      {!isReadOnly && renderStickyBottom()}
 
       <PreciserBlocDrawer
         isOpen={!!refineBloc}
