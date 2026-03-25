@@ -44,6 +44,9 @@ export default function OutilsSyntheseMdphResultats() {
   const [email, setEmail] = useState("");
   const [parentPrenom, setParentPrenom] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
+  const [titre, setTitre] = useState<string>("");
+  const [editingTitre, setEditingTitre] = useState(false);
+  const [envoye, setEnvoye] = useState(false);
 
   const handleDelete = async () => {
     if (!window.confirm("Supprimer ce dossier définitivement ?")) return;
