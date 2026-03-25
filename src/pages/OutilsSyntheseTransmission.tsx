@@ -152,12 +152,16 @@ type Phase = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
 const OutilsSyntheseTransmission = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const prenom = useEnfantPrenom();
   const { enfantId } = useEnfantId();
   const { user } = useAuth();
   const { toast } = useToast();
   const displayName = prenom ?? "votre enfant";
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  const incomingSyntheseId = (location.state as any)?.syntheseId as string | undefined;
+  const incomingReadOnly = (location.state as any)?.readOnly === true;
 
   const [phase, setPhase] = useState<Phase>(0);
   const [destinataire, setDestinataire] = useState<string | null>(null);
@@ -169,6 +173,7 @@ const OutilsSyntheseTransmission = () => {
   const [sexe, setSexe] = useState<string | null>(null);
   const [syntheseId, setSyntheseId] = useState<string | null>(null);
   const [refineBloc, setRefineBloc] = useState<{ id: string; title: string; content: string; cas_usage: string } | null>(null);
+  const [isReadOnly, setIsReadOnly] = useState(false);
 
   useEffect(() => {
     if (!user) return;
