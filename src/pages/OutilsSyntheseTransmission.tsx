@@ -209,7 +209,7 @@ const OutilsSyntheseTransmission = () => {
     const load = async () => {
       const { data } = await supabase
         .from("syntheses")
-        .select("contenu, created_at")
+        .select("contenu, created_at, metadata")
         .eq("id", incomingSyntheseId)
         .single();
       if (!data?.contenu) return;
@@ -221,6 +221,9 @@ const OutilsSyntheseTransmission = () => {
           setSyntheseId(incomingSyntheseId);
           setPhase(7);
           setIsReadOnly(true);
+          const meta = data.metadata as any;
+          const dest = meta?.destinataire ?? null;
+          if (dest) setDestinataire(dest);
         }
       } catch { /* ignore parse errors */ }
     };
@@ -470,6 +473,11 @@ const OutilsSyntheseTransmission = () => {
           <>
             {!isReadOnly && <UserBubble text={answers[5] || "…"} />}
             <SectionSeparator text={`Livret de transmission — ${displayName}`} />
+            {isReadOnly && destinataire && (
+              <p style={{ fontSize: 11, color: "#9A9490", textAlign: "center", margin: "0 0 16px", fontFamily: "DM Sans, sans-serif" }}>
+                Livret préparé pour : <span style={{ color: "#8B74E0", fontWeight: 500 }}>{destinataire}</span>
+              </p>
+            )}
             {generatedBlocks ? generatedBlocks.map((block: any, i: number) => {
               const iconMap: Record<string, React.ReactNode> = {
                 User: <User size={18} style={{ color: "#8B74E0" }} />,
