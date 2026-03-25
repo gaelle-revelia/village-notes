@@ -340,7 +340,7 @@ const OutilsSyntheseMdph = () => {
       : "Continuer →";
 
     return (
-      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, padding: "6px 16px 62px" }}>
+      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, padding: "6px 16px 76px" }}>
         <button
           onClick={advanceStep}
           disabled={!ctaEnabled}
