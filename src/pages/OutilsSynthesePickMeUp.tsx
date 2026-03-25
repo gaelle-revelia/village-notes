@@ -627,6 +627,35 @@ const OutilsSynthesePickMeUp = () => {
 
             <SectionSeparator text="Ton remontant" />
 
+            {isReadOnly && (() => {
+              const fmtDate = (d: string) => {
+                const date = new Date(d + "T00:00:00");
+                return date.toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" });
+              };
+              const periodLabel = periodDebut && periodFin
+                ? `du ${fmtDate(periodDebut)} au ${fmtDate(periodFin)}`
+                : null;
+              const syntheseDate = syntheseId ? new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" }) : null;
+              return (
+                <div style={{
+                  borderLeft: "3px solid #8B74E0",
+                  background: "rgba(139,116,224,0.06)",
+                  borderRadius: "0 10px 10px 0",
+                  padding: "10px 13px",
+                  marginBottom: 12
+                }}>
+                  <p style={{ fontSize: 11, color: "#8B74E0", margin: "0 0 2px", fontWeight: 500 }}>
+                    Remontant du {syntheseDate}
+                  </p>
+                  {(etatEmotionnel || periodLabel) && (
+                    <p style={{ fontSize: 11, color: "#9A9490", margin: 0 }}>
+                      {[etatEmotionnel, periodLabel].filter(Boolean).join(" · ")}
+                    </p>
+                  )}
+                </div>
+              );
+            })()}
+
             <div className="px-5 py-4 mb-4" style={{ ...glassCard }}>
               <p className="text-[14px] font-sans leading-relaxed" style={{ color: "#1E1A1A" }}>
                 {displayContent}
