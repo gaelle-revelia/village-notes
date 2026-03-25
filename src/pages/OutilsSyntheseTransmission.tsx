@@ -190,6 +190,14 @@ const OutilsSyntheseTransmission = () => {
   const [sent, setSent] = useState(false);
   const [titre, setTitre] = useState<string>("");
   const [editingTitre, setEditingTitre] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    if (!window.confirm("Supprimer cette transmission définitivement ?")) return;
+    setIsDeleting(true);
+    await supabase.from("syntheses").delete().eq("id", syntheseId);
+    navigate("/archives");
+  };
 
   useEffect(() => {
     if (!user) return;
