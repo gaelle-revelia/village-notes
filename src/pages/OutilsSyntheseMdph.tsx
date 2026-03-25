@@ -199,7 +199,7 @@ const OutilsSyntheseMdph = () => {
   // --- Auto-scroll ---
   useEffect(() => {
     setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
-  }, [currentQ]);
+  }, [currentQ, introSeen]);
 
   const toggleSingle = (val: string, current: string | null, setter: (v: string | null) => void) => {
     setter(current === val ? null : val);
@@ -304,7 +304,7 @@ const OutilsSyntheseMdph = () => {
       : "Continuer →";
 
     return (
-      <div className="fixed bottom-16 left-0 right-0 z-10 px-4 py-3" style={{ background: "rgba(255,255,255,0.72)", backdropFilter: "blur(20px) saturate(1.5)", WebkitBackdropFilter: "blur(20px) saturate(1.5)" }}>
+      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, padding: "12px 16px 88px" }}>
         <button
           onClick={advanceStep}
           disabled={!ctaEnabled}
