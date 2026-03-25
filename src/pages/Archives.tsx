@@ -46,6 +46,17 @@ function getBadgeLabel(s: any): string {
   return "";
 }
 
+function getCardLabel(s: any): string {
+  if (s.cas_usage === "pick_me_up") return "Synthèse remontant";
+  if (s.cas_usage === "transmission") return "Transmission parcours";
+  try {
+    const parsed = typeof s.contenu === "string" ? JSON.parse(s.contenu ?? "{}") : s.contenu;
+    return parsed?.parent_context?.type_demande ?? parsed?.type_demande ?? "Dossier MDPH";
+  } catch {
+    return "Dossier MDPH";
+  }
+}
+
 function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString("fr-FR", {
     day: "numeric",
@@ -58,7 +69,7 @@ const Archives = () => {
   const navigate = useNavigate();
   const { enfantId } = useEnfantId();
   const prenom = useEnfantPrenom();
-  const [activeTab, setActiveTab] = useState<Tab>("tous");
+  const [activeFilters, setActiveFilters] = useState<string[]>(["tous"]);
   const [syntheses, setSyntheses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -77,9 +88,20 @@ const Archives = () => {
     fetchData();
   }, [enfantId]);
 
-  const filtered = activeTab === "tous"
+  const toggleFilter = (key: string) => {
+    if (key === "tous") { setActiveFilters(["tous"]); return; }
+    const withoutTous = activeFilters.filter(f => f !== "tous");
+    if (withoutTous.includes(key)) {
+      const next = withoutTous.filter(f => f !== key);
+      setActiveFilters(next.length === 0 ? ["tous"] : next);
+    } else {
+      setActiveFilters([...withoutTous, key]);
+    }
+  };
+
+  const filtered = activeFilters.includes("tous")
     ? syntheses
-    : syntheses.filter((s) => s.cas_usage === activeTab);
+    : syntheses.filter((s) => activeFilters.includes(s.cas_usage));
 
   const displayName = prenom ?? "Enfant";
 
@@ -123,7 +145,7 @@ const Archives = () => {
         ].map((f) => (
           <button
             key={f.key}
-            onClick={() => setActiveTab(f.key as Tab)}
+            onClick={() => toggleFilter(f.key)}
             style={{
               padding: "6px 14px",
               borderRadius: 999,
@@ -132,9 +154,9 @@ const Archives = () => {
               whiteSpace: "nowrap",
               border: "none",
               cursor: "pointer",
-              background: activeTab === f.key ? "#8B74E0" : "rgba(255,255,255,0.58)",
-              color: activeTab === f.key ? "#fff" : "#1E1A1A",
-              boxShadow: activeTab === f.key ? "none" : "0 1px 3px rgba(0,0,0,0.06)",
+              background: activeFilters.includes(f.key) ? "#8B74E0" : "rgba(255,255,255,0.58)",
+              color: activeFilters.includes(f.key) ? "#fff" : "#1E1A1A",
+              boxShadow: activeFilters.includes(f.key) ? "none" : "0 1px 3px rgba(0,0,0,0.06)",
             }}
           >
             {f.label}
@@ -181,7 +203,7 @@ const Archives = () => {
                   <ChevronRight size={14} style={{ color: "#8B74E0" }} className="flex-shrink-0" />
                 </div>
                 <p style={{ fontSize: 13, fontWeight: 500, color: "#1E1A1A", margin: "4px 0 0" }}>
-                  {s.cas_usage === "mdph" ? badgeLabel : s.cas_usage === "pick_me_up" ? "Synthèse remontant" : "Transmission parcours"}
+                  {getCardLabel(s)}
                 </p>
               </button>
             );
