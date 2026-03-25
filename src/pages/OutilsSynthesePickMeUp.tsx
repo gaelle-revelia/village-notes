@@ -639,7 +639,7 @@ const OutilsSynthesePickMeUp = () => {
               const periodLabel = periodDebut && periodFin
                 ? `du ${fmtDate(periodDebut)} au ${fmtDate(periodFin)}`
                 : null;
-              const syntheseDate = syntheseId ? new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" }) : null;
+              
               return (
                 <div style={{
                   borderLeft: "3px solid #8B74E0",
