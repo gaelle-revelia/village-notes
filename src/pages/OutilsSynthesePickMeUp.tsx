@@ -603,7 +603,7 @@ const OutilsSynthesePickMeUp = () => {
         {/* ===== BLOCK 3 — visible when phase === 'result' ===== */}
         {phase === "result" &&
         <>
-            <UserBubble text={periodText!} />
+            {!isReadOnly && periodText && <UserBubble text={periodText} />}
 
             <SectionSeparator text="Ton remontant" />
 
@@ -612,13 +612,13 @@ const OutilsSynthesePickMeUp = () => {
                 {displayContent}
               </p>
             </div>
-            <button
+            {!isReadOnly && <button
               onClick={() => setRefineBloc({ id: "narrative", title: "Ce qui s'est passé", content: displayContent, cas_usage: "pick_me_up" })}
               className="w-full py-2.5 text-[13px] font-sans font-medium mb-6"
               style={{ border: "1.5px dashed #8B74E0", color: "#8B74E0", borderRadius: 12, background: "transparent" }}
             >
               ✏️ Préciser ce bloc
-            </button>
+            </button>}
 
             <p className="text-center text-[10px] font-sans mb-6" style={{ color: "#9A9490" }}>
               Synthèse des observations de {parentPrenom ?? "Parent"} pour {displayName} · The Village · Mars 2026
