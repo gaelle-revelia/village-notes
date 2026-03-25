@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
+import { ArrowLeft } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import WiredMicOrb from "@/components/synthese/WiredMicOrb";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,7 +27,6 @@ export default function PreciserBlocDrawer({ isOpen, onClose, bloc, enfantId, sy
   const { toast } = useToast();
   const [precision, setPrecision] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [expanded, setExpanded] = useState(false);
 
   const handleSubmit = async () => {
     if (!bloc || !precision.trim()) return;
@@ -52,7 +51,6 @@ export default function PreciserBlocDrawer({ isOpen, onClose, bloc, enfantId, sy
         onBlockUpdated(bloc.id, data.content);
         toast({ title: "Bloc mis à jour ✅" });
         setPrecision("");
-        setExpanded(false);
         onClose();
       }
     } catch (e) {
@@ -63,80 +61,137 @@ export default function PreciserBlocDrawer({ isOpen, onClose, bloc, enfantId, sy
     }
   };
 
-  const handleOpenChange = (open: boolean) => {
-    if (!open) {
-      setPrecision("");
-      setExpanded(false);
-      onClose();
-    }
+  const handleClose = () => {
+    setPrecision("");
+    onClose();
   };
 
+  if (!isOpen) return null;
+
   return (
-    <Drawer open={isOpen} onOpenChange={handleOpenChange}>
-      <DrawerContent>
-        <DrawerHeader>
-          <DrawerTitle className="text-lg font-serif font-semibold">✏️ Préciser ce bloc</DrawerTitle>
-        </DrawerHeader>
-        <div className="px-4 pb-6 flex flex-col gap-4">
-          {/* Current content preview */}
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 50,
+        display: "flex",
+        flexDirection: "column",
+        background: "linear-gradient(150deg, #F9EDE8 0%, #F0EAF8 45%, #E8EFF8 100%)",
+      }}
+    >
+      {/* Header */}
+      <header
+        className="sticky top-0 z-10 px-4 py-3 flex items-center gap-3"
+        style={{
+          background: "rgba(255,255,255,0.72)",
+          backdropFilter: "blur(20px) saturate(1.5)",
+          WebkitBackdropFilter: "blur(20px) saturate(1.5)",
+          borderBottom: "1px solid rgba(255,255,255,0.6)",
+          boxShadow: "0 2px 12px rgba(0,0,0,0.05)",
+        }}
+      >
+        <button onClick={handleClose} className="flex items-center justify-center" aria-label="Retour">
+          <ArrowLeft size={20} style={{ color: "#1E1A1A" }} />
+        </button>
+        <div>
+          <h1 className="font-serif" style={{ fontSize: 16, fontWeight: 600, color: "#1E1A1A", margin: 0 }}>
+            Préciser ce bloc
+          </h1>
           {bloc && (
-            <div>
-              <span className="text-[12px] font-sans font-medium" style={{ color: "#9A9490" }}>
-                Ce bloc actuellement :
-              </span>
-              <div className="mt-1.5 px-4 py-3" style={glassCard}>
-                <p
-                  className={`text-[13px] font-sans leading-relaxed ${!expanded ? "line-clamp-3" : ""}`}
-                  style={{ color: "#1E1A1A" }}
-                >
-                  {bloc.content}
-                </p>
-              </div>
-              {bloc.content.length > 150 && (
-                <button
-                  onClick={() => setExpanded(!expanded)}
-                  className="mt-1 text-[12px] font-sans font-medium"
-                  style={{ color: "#8B74E0" }}
-                >
-                  {expanded ? "Réduire" : "Voir tout"}
-                </button>
-              )}
-            </div>
+            <p className="font-sans" style={{ fontSize: 11, color: "#9A9490", margin: 0 }}>
+              {bloc.title}
+            </p>
           )}
-
-          {/* Textarea */}
-          <Textarea
-            placeholder="Ajoute ta précision ici..."
-            value={precision}
-            onChange={(e) => setPrecision(e.target.value)}
-            className="text-[14px] font-sans border-none italic placeholder:italic w-full"
-            style={{ ...glassCard, borderRadius: 14, minHeight: 80 }}
-            autoResize
-          />
-
-          {/* Voice input */}
-          <WiredMicOrb
-            disabled={isLoading}
-            onTranscription={(text) => setPrecision((prev) => (prev ? prev + " " : "") + text)}
-          />
-
-          {/* CTA */}
-          <button
-            onClick={handleSubmit}
-            disabled={!precision.trim() || isLoading}
-            className={`w-full py-3.5 text-[15px] font-sans font-semibold transition-opacity ${isLoading ? "animate-pulse" : ""}`}
-            style={{
-              background: "linear-gradient(135deg, #E8736A, #8B74E0)",
-              color: "#fff",
-              borderRadius: 14,
-              border: "none",
-              opacity: precision.trim() && !isLoading ? 1 : 0.45,
-            }}
-          >
-            {isLoading ? "Régénération en cours..." : "Régénérer ce bloc →"}
-          </button>
         </div>
-      </DrawerContent>
-    </Drawer>
+      </header>
+
+      {/* Scrollable content */}
+      <div style={{ flex: 1, overflowY: "auto", padding: 16, paddingBottom: 128 }}>
+        {bloc && (
+          <>
+            {/* Section: Bloc actuel */}
+            <p
+              className="font-sans"
+              style={{
+                fontSize: 11,
+                fontWeight: 500,
+                color: "#9A9490",
+                textTransform: "uppercase",
+                letterSpacing: "0.05em",
+                marginBottom: 8,
+              }}
+            >
+              Bloc actuel
+            </p>
+            <div style={{ ...glassCard, padding: 14, marginBottom: 20 }}>
+              <p className="font-sans" style={{ fontSize: 13, color: "#1E1A1A", lineHeight: 1.6, margin: 0 }}>
+                {bloc.content}
+              </p>
+            </div>
+
+            {/* Section: Ta précision */}
+            <p
+              className="font-sans"
+              style={{
+                fontSize: 11,
+                fontWeight: 500,
+                color: "#9A9490",
+                textTransform: "uppercase",
+                letterSpacing: "0.05em",
+                marginBottom: 8,
+              }}
+            >
+              Ta précision
+            </p>
+            <Textarea
+              placeholder="Ajoute ta précision ici…"
+              value={precision}
+              onChange={(e) => setPrecision(e.target.value)}
+              className="text-[14px] font-sans border-none italic placeholder:italic w-full"
+              style={{ ...glassCard, borderRadius: 14, minHeight: 80 }}
+              autoResize
+            />
+
+            {/* Voice input */}
+            <div className="flex justify-center mt-4">
+              <WiredMicOrb
+                disabled={isLoading}
+                onTranscription={(text) => setPrecision((prev) => (prev ? prev + " " : "") + text)}
+              />
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* Sticky CTA */}
+      <div
+        style={{
+          position: "fixed",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          padding: "12px 16px 24px",
+          background: "rgba(255,255,255,0.72)",
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
+          borderTop: "1px solid rgba(255,255,255,0.6)",
+        }}
+      >
+        <button
+          onClick={handleSubmit}
+          disabled={!precision.trim() || isLoading}
+          className={`w-full py-3.5 text-[15px] font-sans font-semibold transition-opacity ${isLoading ? "animate-pulse" : ""}`}
+          style={{
+            background: "linear-gradient(135deg, #E8736A, #8B74E0)",
+            color: "#fff",
+            borderRadius: 14,
+            border: "none",
+            opacity: precision.trim() && !isLoading ? 1 : 0.45,
+          }}
+        >
+          {isLoading ? "Régénération en cours..." : "Régénérer ce bloc →"}
+        </button>
+      </div>
+    </div>
   );
 }
