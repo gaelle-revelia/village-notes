@@ -291,7 +291,7 @@ const OutilsSyntheseMdph = () => {
         <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, padding: "12px 16px 88px" }}>
           <button
             onClick={() => setIntroSeen(true)}
-            style={{ width: "100%", padding: 15, background: "linear-gradient(135deg, #E8736A, #8B74E0)", color: "#fff", border: "none", borderRadius: 16, fontSize: 15, fontWeight: 600, cursor: "pointer" }}>
+            style={{ width: "100%", padding: "11px 15px", background: "linear-gradient(135deg, #E8736A, #8B74E0)", color: "#fff", border: "none", borderRadius: 16, fontSize: 15, fontWeight: 600, cursor: "pointer" }}>
             On démarre →
           </button>
         </div>
