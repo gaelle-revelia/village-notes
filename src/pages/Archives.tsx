@@ -113,24 +113,31 @@ const Archives = () => {
         </div>
       </header>
 
-      {/* Tabs */}
-      <div className="flex px-4 gap-4" style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
-        {TABS.map((tab) => (
+      {/* Filter pills */}
+      <div style={{ display: "flex", gap: 8, padding: "10px 16px", overflowX: "auto", scrollbarWidth: "none" }}>
+        {[
+          { key: "tous", label: "Tout" },
+          { key: "mdph", label: "MDPH" },
+          { key: "pick_me_up", label: "Remontant" },
+          { key: "transmission", label: "Transmission" },
+        ].map((f) => (
           <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
+            key={f.key}
+            onClick={() => setActiveTab(f.key as Tab)}
             style={{
+              padding: "6px 14px",
+              borderRadius: 999,
               fontSize: 13,
               fontWeight: 500,
-              color: activeTab === tab ? "#8B74E0" : "#9A9490",
-              background: "none",
+              whiteSpace: "nowrap",
               border: "none",
-              borderBottom: `2px solid ${activeTab === tab ? "#8B74E0" : "transparent"}`,
               cursor: "pointer",
-              padding: "10px 0 8px",
+              background: activeTab === f.key ? "#8B74E0" : "rgba(255,255,255,0.58)",
+              color: activeTab === f.key ? "#fff" : "#1E1A1A",
+              boxShadow: activeTab === f.key ? "none" : "0 1px 3px rgba(0,0,0,0.06)",
             }}
           >
-            {TAB_LABELS[tab]}
+            {f.label}
           </button>
         ))}
       </div>
