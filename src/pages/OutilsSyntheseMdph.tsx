@@ -137,9 +137,6 @@ const OutilsSyntheseMdph = () => {
   const showQ0 = true;
   const showQ1 = currentQ >= 1;
   const showQ2 = currentQ >= 2;
-  const showQ0 = true;
-  const showQ1 = currentQ >= 1;
-  const showQ2 = currentQ >= 2;
   const showQ3 = currentQ >= 3;
   const showQ4 = currentQ >= 4;
   const showQ5 = currentQ >= 5;
