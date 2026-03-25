@@ -612,6 +612,24 @@ const OutilsSynthesePickMeUp = () => {
                 {displayContent}
               </p>
             </div>
+            {isReadOnly && (
+              <button
+                onClick={handleCopy}
+                className="w-full mb-6 font-sans"
+                style={{
+                  padding: 9,
+                  borderRadius: 10,
+                  fontSize: 12,
+                  fontWeight: 500,
+                  background: "rgba(255,255,255,0.48)",
+                  border: "1px solid rgba(139,116,224,0.3)",
+                  color: "#8B74E0",
+                }}
+              >
+                <Copy size={13} className="inline mr-1" style={{ verticalAlign: "-2px" }} />
+                Copier
+              </button>
+            )}
             {!isReadOnly && <button
               onClick={() => setRefineBloc({ id: "narrative", title: "Ce qui s'est passé", content: displayContent, cas_usage: "pick_me_up" })}
               className="w-full py-2.5 text-[13px] font-sans font-medium mb-6"
