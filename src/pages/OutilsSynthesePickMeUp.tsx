@@ -221,6 +221,9 @@ const OutilsSynthesePickMeUp = () => {
         }
         if (data.periode_debut) setPeriodDebut(data.periode_debut);
         if (data.periode_fin) setPeriodFin(data.periode_fin);
+        if (data.created_at) {
+          setSyntheseDate(new Date(data.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" }));
+        }
         setPhase("result");
       });
   }, [isReadOnly, locState?.syntheseId]);
