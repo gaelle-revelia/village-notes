@@ -211,7 +211,7 @@ const OutilsSyntheseTransmission = () => {
     const load = async () => {
       const { data } = await supabase
         .from("syntheses")
-        .select("contenu, created_at, metadata")
+        .select("contenu, created_at, metadata, titre")
         .eq("id", incomingSyntheseId)
         .single();
       if (!data?.contenu) return;
