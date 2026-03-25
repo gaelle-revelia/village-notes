@@ -1,21 +1,66 @@
 
 
-## Plan: Dynamic sorting of Traitements, Soins, Matériel sections
+## Diagnostic : Page Archives bloquée sur "Chargement…"
 
-**File**: `src/pages/ChildProfile.tsx` (only)
+### Cause racine identifiée
 
-### Single edit — Lines 270–454
+Le problème vient d'une condition de course (race condition) dans le `useEffect` de `Archives.tsx` :
 
-Replace the three static section blocks (Traitements lines 270-333, Soins lines 335-394, Matériel lines 396-454) with a dynamic sorted render:
+1. Le composant initialise `loading = true` (ligne 76)
+2. `useEnfantId()` retourne `enfantId = null` pendant qu'il charge (le hook est asynchrone)
+3. Le `useEffect` (ligne 80) fait `if (!enfantId) return;` — il sort **sans jamais passer `loading` à `false`**
+4. Quand `enfantId` se résout, l'effet devrait se relancer... mais si `useAuth` ou `useEnfantId` ont un timing particulier (double render, re-mount), le composant peut rester bloqué sur `loading = true`
 
-1. Define a `sections` array containing three entries, each with `key`, `active` flag, and `node` (the existing JSX for that section, unchanged).
-2. Render with `[...sections].sort((a, b) => Number(b.active) - Number(a.active)).map(...)` wrapped in `React.Fragment`.
+De plus, la requête Supabase sur `syntheses` n'a **aucune gestion d'erreur** : si la requête échoue (RLS, réseau), `setLoading(false)` n'est jamais appelé.
 
-### Technical details
+### Plan de correction
 
-- Import `React` if not already imported (needed for `React.Fragment`).
-- The `sections` array is defined inline in the JSX return block (or just above the return).
-- Each section's JSX is moved verbatim into its `node` property — no content changes.
-- Sort is stable in modern JS engines, preserving original order among sections with the same active state.
-- Modals, handlers, state, INFORMATIONS card — all untouched.
+**Fichier unique modifié** : `src/pages/Archives.tsx`
+
+1. **Utiliser le `loading` du hook `useEnfantId`** — Destructurer `{ enfantId, loading: loadingEnfant }` au lieu de `{ enfantId }` seul
+
+2. **Gérer le cas enfantId null après chargement** — Si le hook a fini de charger mais `enfantId` est null, passer `loading` à `false` immédiatement (l'utilisateur verra "Aucune synthèse")
+
+3. **Ajouter un try/catch** autour de `fetchData` pour que `setLoading(false)` soit toujours appelé, même en cas d'erreur réseau ou RLS
+
+4. **Afficher le vrai état de chargement** — Conditionner le "Chargement…" sur `loading || loadingEnfant`
+
+### Détail technique
+
+```typescript
+// Avant
+const { enfantId } = useEnfantId();
+const [loading, setLoading] = useState(true);
+
+useEffect(() => {
+  if (!enfantId) return; // ← BUG: loading reste true si enfantId est null
+  const fetchData = async () => { ... };
+  fetchData();
+}, [enfantId]);
+
+// Après
+const { enfantId, loading: loadingEnfant } = useEnfantId();
+const [loading, setLoading] = useState(true);
+
+useEffect(() => {
+  if (loadingEnfant) return; // attendre que le hook ait fini
+  if (!enfantId) {
+    setLoading(false); // ← FIX: pas d'enfant = pas de données
+    return;
+  }
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      // ... requête syntheses + profiles (inchangé)
+    } catch (e) {
+      console.error("Erreur chargement archives:", e);
+    } finally {
+      setLoading(false); // ← toujours exécuté
+    }
+  };
+  fetchData();
+}, [enfantId, loadingEnfant]);
+```
+
+Aucun autre fichier modifié.
 
