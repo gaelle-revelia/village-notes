@@ -4,6 +4,7 @@ import { ArrowLeft, Trash2, ChevronRight } from "lucide-react";
 import BottomNavBar from "@/components/BottomNavBar";
 import PreciserBlocDrawer from "@/components/synthese/PreciserBlocDrawer";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import { useEnfantId } from "@/hooks/useEnfantId";
 
 const glassCard: React.CSSProperties = {
