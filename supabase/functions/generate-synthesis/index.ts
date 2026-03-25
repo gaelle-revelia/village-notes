@@ -210,7 +210,7 @@ Si les données permettent une comparaison temporelle, l'utiliser explicitement.
 
 ## FORMAT DE SORTIE — JSON STRICT
 Retourne UNIQUEMENT ce JSON, sans markdown, sans commentaire, sans texte avant ou après :
-{"blocks":[{"id":"narrative","title":"Ce qui s'est passé","icon":"Sparkles","content":"..."}]}`;
+{"blocks":[{"id":"narrative","title":"Ce qui s'est passé","icon":"Sparkles","content":"texte narratif propre uniquement, sans signalement"}]}`;
 
       userMessage = `Prenom de l'enfant: ${prenom}
 Sexe: ${isFem ? "fille" : "garçon"} (utilise les pronoms ${pronom_sujet}/${pronom_cod}/${pronom_cod_tonique})
@@ -338,6 +338,8 @@ Si donnée absente, insérer exactement :
 
 - [TIERCE PERSONNE NON PRÉCISÉE — Décris qui intervient et combien d'heures par semaine.]
 
+Les signalements DOIVENT être placés uniquement dans le champ 'signal' du bloc JSON concerné. Ils ne doivent JAMAIS apparaître dans le champ 'content'. Le champ 'content' contient uniquement le texte narratif propre, sans aucun signalement. Le champ 'signal' contient le signalement exact si une donnée manque, null sinon.
+
 ## REGISTRES DE GÉNÉRATION
 
 REGISTRE A — "Première demande" : pose le contexte depuis le début. Pour le bloc zone_b, compare aux capacités d'un enfant ordinaire du même âge — uniquement sur la base des observations documentées.
@@ -360,17 +362,17 @@ Retourne UNIQUEMENT ce JSON, sans markdown, sans commentaire :
 
 {"blocks":[
 
-  {"id":"zone_b","title":"Situation de l'enfant — vie quotidienne et suivi","cerfa_ref":"Zone libre B · Page 8","cerfa_ref_complementaire":"Cases B2 · Page 6 — à cocher par le parent · Cohérence avec le certificat médical joint","icon":"Home","content":"...","editorial_note":"Dans la section B2 (page 6), coche les cases correspondant aux actes où ${prenom} a besoin d'aide — The Village ne les coche pas pour toi.","signal":null},
+  {"id":"zone_b","title":"Situation de l'enfant — vie quotidienne et suivi","cerfa_ref":"Zone libre B · Page 8","cerfa_ref_complementaire":"Cases B2 · Page 6 — à cocher par le parent · Cohérence avec le certificat médical joint","icon":"Home","content":"texte narratif propre uniquement, sans signalement","editorial_note":"Dans la section B2 (page 6), coche les cases correspondant aux actes où ${prenom} a besoin d'aide — The Village ne les coche pas pour toi.","signal":"[SIGNALEMENT EN MAJUSCULES — instruction exacte.] ou null"},
 
-  {"id":"scolarite_c1","title":"Scolarité — situation actuelle","cerfa_ref":"C1 · Page 9","cerfa_ref_complementaire":null,"icon":"BookOpen","content":"...","editorial_note":null,"signal":null},
+  {"id":"scolarite_c1","title":"Scolarité — situation actuelle","cerfa_ref":"C1 · Page 9","cerfa_ref_complementaire":null,"icon":"BookOpen","content":"texte narratif propre uniquement, sans signalement","editorial_note":null,"signal":null},
 
-  {"id":"scolarite_c3","title":"Scolarité — demande","cerfa_ref":"C3 · Page 12","cerfa_ref_complementaire":null,"icon":"BookOpen","content":"...","editorial_note":null,"signal":null},
+  {"id":"scolarite_c3","title":"Scolarité — demande","cerfa_ref":"C3 · Page 12","cerfa_ref_complementaire":null,"icon":"BookOpen","content":"texte narratif propre uniquement, sans signalement","editorial_note":null,"signal":null},
 
-  {"id":"projet_droits","title":"Projet et droits souhaités","cerfa_ref":"E1 + E2 · Pages 17–18","cerfa_ref_complementaire":null,"icon":"Target","content":"...","editorial_note":"Dans la section E2 (page 18), coche les cases correspondant aux droits souhaités — The Village ne les coche pas pour toi.","signal":null},
+  {"id":"projet_droits","title":"Projet et droits souhaités","cerfa_ref":"E1 + E2 · Pages 17–18","cerfa_ref_complementaire":null,"icon":"Target","content":"texte narratif propre uniquement, sans signalement","editorial_note":"Dans la section E2 (page 18), coche les cases correspondant aux droits souhaités — The Village ne les coche pas pour toi.","signal":null},
 
-  {"id":"impact_professionnel","title":"Impact professionnel","cerfa_ref":"F · Pages 19–20","cerfa_ref_complementaire":null,"icon":"Briefcase","content":"...","editorial_note":null,"signal":null},
+  {"id":"impact_professionnel","title":"Impact professionnel","cerfa_ref":"F · Pages 19–20","cerfa_ref_complementaire":null,"icon":"Briefcase","content":"texte narratif propre uniquement, sans signalement","editorial_note":null,"signal":null},
 
-  {"id":"besoins_equipement","title":"Besoins en équipement et accessibilité","cerfa_ref":"B2 · Page 6","cerfa_ref_complementaire":"Pertinent aussi pour la PCH","icon":"Settings","content":"...","editorial_note":null,"signal":null}
+  {"id":"besoins_equipement","title":"Besoins en équipement et accessibilité","cerfa_ref":"B2 · Page 6","cerfa_ref_complementaire":"Pertinent aussi pour la PCH","icon":"Settings","content":"texte narratif propre uniquement, sans signalement","editorial_note":null,"signal":"[SIGNALEMENT EN MAJUSCULES — instruction exacte.] ou null"}
 
 ]}`;
 
@@ -487,7 +489,7 @@ AUTRE / INCONNU : appliquer profil FAMILLE
 
 ## FORMAT DE SORTIE — JSON STRICT
 Retourne UNIQUEMENT ce JSON, sans markdown, sans commentaire, sans texte avant ou après :
-{"blocks":[{"id":"s1","title":"Qui est ${prenom} ?","icon":"User","content":"..."},{"id":"s2","title":"${pronom_poss_maj} histoire et ${pronom_poss} handicap","icon":"Brain","content":"..."},{"id":"s3","title":"Fatigue — signes à repérer","icon":"Moon","content":"..."},{"id":"s4","title":"Comment ${pronom_cod} positionner","icon":"PersonStanding","content":"..."},{"id":"s5","title":"Interaction avec les autres","icon":"Users","content":"..."},{"id":"s6","title":"${pronom_poss_maj} thérapies en cours","icon":"Activity","content":"..."}]}`;
+{"blocks":[{"id":"s1","title":"Qui est ${prenom} ?","icon":"User","content":"texte narratif propre uniquement, sans signalement"},{"id":"s2","title":"${pronom_poss_maj} histoire et ${pronom_poss} handicap","icon":"Brain","content":"texte narratif propre uniquement, sans signalement"},{"id":"s3","title":"Fatigue — signes à repérer","icon":"Moon","content":"texte narratif propre uniquement, sans signalement"},{"id":"s4","title":"Comment ${pronom_cod} positionner","icon":"PersonStanding","content":"texte narratif propre uniquement, sans signalement"},{"id":"s5","title":"Interaction avec les autres","icon":"Users","content":"texte narratif propre uniquement, sans signalement"},{"id":"s6","title":"${pronom_poss_maj} thérapies en cours","icon":"Activity","content":"texte narratif propre uniquement, sans signalement"}]}`;
 
       userMessage = `Prenom de l'enfant: ${prenom}
 Sexe: ${isFem ? "fille" : "garçon"} (utilise les pronoms ${pronom_sujet}/${pronom_cod}/${pronom_cod_tonique})
