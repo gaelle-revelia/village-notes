@@ -656,13 +656,24 @@ const OutilsSynthesePickMeUp = () => {
                 Copier
               </button>
             )}
-            {!isReadOnly && <button
-              onClick={() => setRefineBloc({ id: "narrative", title: "Ce qui s'est passé", content: displayContent, cas_usage: "pick_me_up" })}
-              className="w-full py-2.5 text-[13px] font-sans font-medium mb-6"
-              style={{ border: "1.5px dashed #8B74E0", color: "#8B74E0", borderRadius: 12, background: "transparent" }}
-            >
-              ✏️ Préciser ce bloc
-            </button>}
+            {!isReadOnly && (
+              <button
+                onClick={handleCopy}
+                className="w-full mb-6 font-sans"
+                style={{
+                  padding: 9,
+                  borderRadius: 10,
+                  fontSize: 12,
+                  fontWeight: 500,
+                  background: "rgba(255,255,255,0.48)",
+                  border: "1px solid rgba(139,116,224,0.3)",
+                  color: "#8B74E0",
+                }}
+              >
+                <Copy size={13} className="inline mr-1" style={{ verticalAlign: "-2px" }} />
+                Copier
+              </button>
+            )}
 
             <p className="text-center text-[10px] font-sans mb-6" style={{ color: "#9A9490" }}>
               Synthèse des observations de {parentPrenom ?? "Parent"} pour {displayName} · The Village · Mars 2026
