@@ -363,9 +363,9 @@ REGISTRE B — "Renouvellement" ou "Évolution" : accent sur les changements doc
   § 4 Besoins pour la vie sociale : communication, relations, activités, interactions
   Chaque paragraphe est aussi long que les données le permettent. Si données absentes → signalement.
 
-- scolarite_c3 : 80–100 mots maximum
+- scolarite_c3 : 80–100 mots maximum. Décrire la situation scolaire actuelle ET le futur anticipé. Si l'enfant n'est pas encore scolarisé·e, décrire le travail préparatoire en cours et ce qui est prévu.
 
-- scolarite_e2 : 60–80 mots maximum
+- scolarite_e2 : 60–80 mots maximum. Décrire les demandes liées à la scolarité même si l'entrée à l'école est à venir — se concentrer sur ce qui sera nécessaire quand la scolarisation commencera.
 
 - aidant_f : 100–120 mots maximum
 
@@ -443,8 +443,7 @@ ${JSON.stringify(memos?.map((m: any) => ({
 })) ?? [])}
 
 BLOCS À GÉNÉRER
-Toujours générer : zone_b, aidant_f
-${parent_context.scolarisation !== "Pas encore scolarisé·e" ? "Générer aussi : scolarite_c3, scolarite_e2" : "Ne PAS générer scolarite_c3 ni scolarite_e2 (enfant pas encore scolarisé·e)."}`;
+Toujours générer ces 4 blocs : zone_b, scolarite_c3, scolarite_e2, aidant_f`;
     }
 
     if (type === "transmission") {
