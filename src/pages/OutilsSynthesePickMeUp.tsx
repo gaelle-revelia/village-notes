@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, Copy, Share2, Pencil, RefreshCw, CalendarIcon, Sparkles } from "lucide-react";
 import WiredMicOrb from "@/components/synthese/WiredMicOrb";
 import { format, subMonths, startOfMonth } from "date-fns";
@@ -129,12 +129,17 @@ function computeDateRange(period: string): {start: Date;end: Date;} {
 
 const OutilsSynthesePickMeUp = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const prenom = useEnfantPrenom();
   const { enfantId } = useEnfantId();
   const { user } = useAuth();
   const { toast } = useToast();
   const displayName = prenom ?? "votre enfant";
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  // Read-only mode from Archives
+  const locState = location.state as { syntheseId?: string; readOnly?: boolean } | null;
+  const isReadOnly = !!(locState?.syntheseId && locState?.readOnly);
 
   const EMOTIONS = [
   "Je suis épuisé(e)",
@@ -176,6 +181,28 @@ const OutilsSynthesePickMeUp = () => {
       if (data?.prenom) setParentPrenom(data.prenom);
     });
   }, [user]);
+
+  // Read-only: fetch synthese and jump to result
+  useEffect(() => {
+    if (!isReadOnly || !locState?.syntheseId) return;
+    setSyntheseId(locState.syntheseId);
+    supabase
+      .from("syntheses")
+      .select("contenu, created_at")
+      .eq("id", locState.syntheseId)
+      .single()
+      .then(({ data }) => {
+        if (!data?.contenu) return;
+        try {
+          const parsed = JSON.parse(data.contenu);
+          const text = typeof parsed === "string" ? parsed : parsed?.content ?? parsed?.blocks?.[0]?.content ?? data.contenu;
+          setGeneratedContent(text);
+        } catch {
+          setGeneratedContent(data.contenu);
+        }
+        setPhase("result");
+      });
+  }, [isReadOnly, locState?.syntheseId]);
 
   // Auto-scroll on phase change
   useEffect(() => {
@@ -283,6 +310,27 @@ const OutilsSynthesePickMeUp = () => {
   // --- Sticky CTA / action bar ---
   const renderStickyBottom = () => {
     if (phase === "result") {
+      if (isReadOnly) {
+        return (
+          <div
+            className="fixed bottom-16 left-0 right-0 z-10 px-4 py-3 flex items-center justify-around"
+            style={{
+              background: "rgba(255,255,255,0.72)",
+              backdropFilter: "blur(20px) saturate(1.5)",
+              WebkitBackdropFilter: "blur(20px) saturate(1.5)",
+              borderTop: "1px solid rgba(255,255,255,0.6)",
+              boxShadow: "0 -2px 12px rgba(0,0,0,0.05)"
+            }}>
+            <button
+              onClick={handleCopy}
+              className="flex flex-col items-center gap-1 text-[11px] font-sans"
+              style={{ color: "#1E1A1A" }}>
+              <Copy size={18} />
+              Copier
+            </button>
+          </div>
+        );
+      }
       return (
         <div
           className="fixed bottom-16 left-0 right-0 z-10 px-4 py-3 flex items-center justify-around"
@@ -363,7 +411,7 @@ const OutilsSynthesePickMeUp = () => {
           boxShadow: "0 2px 12px rgba(0,0,0,0.05)"
         }}>
         
-        <button onClick={() => navigate("/outils/synthese")} className="flex items-center justify-center" aria-label="Retour">
+        <button onClick={() => navigate(isReadOnly ? "/archives" : "/outils/synthese")} className="flex items-center justify-center" aria-label="Retour">
           <ArrowLeft size={20} style={{ color: "#1E1A1A" }} />
         </button>
         <h1 className="text-xl font-serif font-semibold" style={{ color: "#1E1A1A" }}>
@@ -372,7 +420,8 @@ const OutilsSynthesePickMeUp = () => {
       </header>
 
       <main className="flex-1 px-4 pt-5 pb-32">
-        {/* ===== BLOCK 1 — always visible ===== */}
+        {/* ===== BLOCK 1 — always visible (hidden in readOnly) ===== */}
+        {!isReadOnly && <>
         <AiBubble text="De quoi as-tu besoin aujourd'hui ?" />
         <UserBubble text="✨ Un remontant" />
         <SectionSeparator text={`Un remontant — ${displayName}`} />
@@ -433,9 +482,10 @@ const OutilsSynthesePickMeUp = () => {
             autoResize />
           
         </div>
+        </>}
 
-        {/* ===== BLOCK 2 — visible when phase >= 'period' ===== */}
-        {(phase === "period" || phase === "result") &&
+        {/* ===== BLOCK 2 — visible when phase >= 'period' (hidden in readOnly) ===== */}
+        {!isReadOnly && (phase === "period" || phase === "result") &&
         <>
             {/* User bubble echoing emotion */}
             <UserBubble text={emotionText} />
@@ -553,7 +603,7 @@ const OutilsSynthesePickMeUp = () => {
         {/* ===== BLOCK 3 — visible when phase === 'result' ===== */}
         {phase === "result" &&
         <>
-            <UserBubble text={periodText!} />
+            {!isReadOnly && periodText && <UserBubble text={periodText} />}
 
             <SectionSeparator text="Ton remontant" />
 
@@ -562,13 +612,13 @@ const OutilsSynthesePickMeUp = () => {
                 {displayContent}
               </p>
             </div>
-            <button
+            {!isReadOnly && <button
               onClick={() => setRefineBloc({ id: "narrative", title: "Ce qui s'est passé", content: displayContent, cas_usage: "pick_me_up" })}
               className="w-full py-2.5 text-[13px] font-sans font-medium mb-6"
               style={{ border: "1.5px dashed #8B74E0", color: "#8B74E0", borderRadius: 12, background: "transparent" }}
             >
               ✏️ Préciser ce bloc
-            </button>
+            </button>}
 
             <p className="text-center text-[10px] font-sans mb-6" style={{ color: "#9A9490" }}>
               Synthèse des observations de {parentPrenom ?? "Parent"} pour {displayName} · The Village · Mars 2026
