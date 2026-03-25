@@ -74,15 +74,7 @@ const Archives = () => {
   const [syntheses, setSyntheses] = useState<any[]>([]);
   const [profilesMap, setProfilesMap] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm("Supprimer cette synthèse ?")) return;
-    setDeletingId(id);
-    await supabase.from("syntheses").delete().eq("id", id);
-    setSyntheses(prev => prev.filter(s => s.id !== id));
-    setDeletingId(null);
-  };
 
   useEffect(() => {
     if (!enfantId) return;
