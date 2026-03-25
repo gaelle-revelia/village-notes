@@ -484,8 +484,8 @@ const OutilsSynthesePickMeUp = () => {
         </div>
         </>}
 
-        {/* ===== BLOCK 2 — visible when phase >= 'period' ===== */}
-        {(phase === "period" || phase === "result") &&
+        {/* ===== BLOCK 2 — visible when phase >= 'period' (hidden in readOnly) ===== */}
+        {!isReadOnly && (phase === "period" || phase === "result") &&
         <>
             {/* User bubble echoing emotion */}
             <UserBubble text={emotionText} />
