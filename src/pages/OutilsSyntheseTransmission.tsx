@@ -473,6 +473,11 @@ const OutilsSyntheseTransmission = () => {
           <>
             {!isReadOnly && <UserBubble text={answers[5] || "…"} />}
             <SectionSeparator text={`Livret de transmission — ${displayName}`} />
+            {isReadOnly && destinataire && (
+              <p style={{ fontSize: 11, color: "#9A9490", textAlign: "center", margin: "0 0 16px", fontFamily: "DM Sans, sans-serif" }}>
+                Livret préparé pour : <span style={{ color: "#8B74E0", fontWeight: 500 }}>{destinataire}</span>
+              </p>
+            )}
             {generatedBlocks ? generatedBlocks.map((block: any, i: number) => {
               const iconMap: Record<string, React.ReactNode> = {
                 User: <User size={18} style={{ color: "#8B74E0" }} />,
