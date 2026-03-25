@@ -134,7 +134,7 @@ const Archives = () => {
         ].map((f) => (
           <button
             key={f.key}
-            onClick={() => setActiveTab(f.key as Tab)}
+            onClick={() => toggleFilter(f.key)}
             style={{
               padding: "6px 14px",
               borderRadius: 999,
@@ -143,9 +143,9 @@ const Archives = () => {
               whiteSpace: "nowrap",
               border: "none",
               cursor: "pointer",
-              background: activeTab === f.key ? "#8B74E0" : "rgba(255,255,255,0.58)",
-              color: activeTab === f.key ? "#fff" : "#1E1A1A",
-              boxShadow: activeTab === f.key ? "none" : "0 1px 3px rgba(0,0,0,0.06)",
+              background: activeFilters.includes(f.key) ? "#8B74E0" : "rgba(255,255,255,0.58)",
+              color: activeFilters.includes(f.key) ? "#fff" : "#1E1A1A",
+              boxShadow: activeFilters.includes(f.key) ? "none" : "0 1px 3px rgba(0,0,0,0.06)",
             }}
           >
             {f.label}
