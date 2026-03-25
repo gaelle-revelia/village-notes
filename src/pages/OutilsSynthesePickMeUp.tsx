@@ -355,35 +355,8 @@ const OutilsSynthesePickMeUp = () => {
           </div>
         );
       }
-      return (
-        <div
-          className="fixed bottom-16 left-0 right-0 z-10 px-4 py-3 flex items-center justify-around"
-          style={{
-            background: "rgba(255,255,255,0.72)",
-            backdropFilter: "blur(20px) saturate(1.5)",
-            WebkitBackdropFilter: "blur(20px) saturate(1.5)",
-            borderTop: "1px solid rgba(255,255,255,0.6)",
-            boxShadow: "0 -2px 12px rgba(0,0,0,0.05)"
-          }}>
-          
-          {[
-          { icon: Copy, label: "Copier", action: handleCopy },
-          { icon: Share2, label: "Partager", action: () => {} },
-          { icon: Pencil, label: "Modifier", action: () => {} },
-          { icon: RefreshCw, label: "Régénérer", action: () => {} }].
-          map(({ icon: Icon, label, action }) =>
-          <button
-            key={label}
-            onClick={action}
-            className="flex flex-col items-center gap-1 text-[11px] font-sans"
-            style={{ color: "#1E1A1A" }}>
-            
-              <Icon size={18} />
-              {label}
-            </button>
-          )}
-        </div>);
-
+      // Non-readOnly result: no sticky bar (inline copy button is rendered in the result block)
+      return null;
     }
 
     const isEmotion = phase === "emotion";
