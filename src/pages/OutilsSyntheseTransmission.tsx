@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, Sparkles, User, Brain, Moon, PersonStanding, Users, Pill, Activity, Mail } from "lucide-react";
+import { ArrowLeft, Sparkles, User, Brain, Moon, PersonStanding, Users, Pill, Activity, Mail, Trash2 } from "lucide-react";
 import WiredMicOrb from "@/components/synthese/WiredMicOrb";
 import BottomNavBar from "@/components/BottomNavBar";
 import { useEnfantPrenom } from "@/hooks/useEnfantPrenom";
@@ -190,6 +190,14 @@ const OutilsSyntheseTransmission = () => {
   const [sent, setSent] = useState(false);
   const [titre, setTitre] = useState<string>("");
   const [editingTitre, setEditingTitre] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    if (!window.confirm("Supprimer cette transmission définitivement ?")) return;
+    setIsDeleting(true);
+    await supabase.from("syntheses").delete().eq("id", syntheseId);
+    navigate("/archives");
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -445,6 +453,11 @@ const OutilsSyntheseTransmission = () => {
               </button>
             )}
           </div>
+        )}
+        {phase === 7 && (
+          <button onClick={handleDelete} disabled={isDeleting} style={{ background: "none", border: "none", cursor: "pointer", padding: 4, marginLeft: "auto", flexShrink: 0 }} aria-label="Supprimer">
+            <Trash2 size={18} color="#E8736A" />
+          </button>
         )}
       </header>
 
