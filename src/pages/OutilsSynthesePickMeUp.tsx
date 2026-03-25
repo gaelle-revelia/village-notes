@@ -420,7 +420,8 @@ const OutilsSynthesePickMeUp = () => {
       </header>
 
       <main className="flex-1 px-4 pt-5 pb-32">
-        {/* ===== BLOCK 1 — always visible ===== */}
+        {/* ===== BLOCK 1 — always visible (hidden in readOnly) ===== */}
+        {!isReadOnly && <>
         <AiBubble text="De quoi as-tu besoin aujourd'hui ?" />
         <UserBubble text="✨ Un remontant" />
         <SectionSeparator text={`Un remontant — ${displayName}`} />
@@ -481,6 +482,7 @@ const OutilsSynthesePickMeUp = () => {
             autoResize />
           
         </div>
+        </>}
 
         {/* ===== BLOCK 2 — visible when phase >= 'period' ===== */}
         {(phase === "period" || phase === "result") &&
