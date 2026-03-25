@@ -684,7 +684,7 @@ VIOLATIONS À CORRIGER :
 - "hypotonie axiale" → "faiblesse musculaire du tronc"
 - Tout terme médical latin ou technique absent du diagnostic et des vocaux parentaux
 
-2. "nous", "notre", "les parents" → "je", "ma", "mon" dans tous les blocs SAUF scolarite_c1 et scolarite_c3
+2. "nous", "notre", "les parents" → "je", "ma", "mon" dans tous les blocs SAUF scolarite_c3 et scolarite_e2
 
 3. Prescriptions :
 "est nécessaire pour compenser", "est envisagé", "sont nécessaires pour" → reformuler en description de besoin sans prescrire la solution
