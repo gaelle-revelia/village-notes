@@ -373,54 +373,58 @@ const OutilsSyntheseTransmission = () => {
       </header>
 
       <main className="flex-1 px-4 pt-5 pb-32">
-        {/* Intro */}
-        <UserBubble text="📖 Transmission" />
-        <SectionSeparator text={`Transmission — ${displayName}`} />
-        <AiBubble text={`Je vais te poser 6 questions pour construire le livret de ${displayName}.`} />
-        <AiBubble text="Tu réponds à la voix ou à l'écrit, librement." />
+        {/* Intro — hidden in readOnly */}
+        {!isReadOnly && (
+          <>
+            <UserBubble text="📖 Transmission" />
+            <SectionSeparator text={`Transmission — ${displayName}`} />
+            <AiBubble text={`Je vais te poser 6 questions pour construire le livret de ${displayName}.`} />
+            <AiBubble text="Tu réponds à la voix ou à l'écrit, librement." />
 
-        {/* Destinataire block */}
-        <SectionSeparator text="POUR QUI CE LIVRET ?" />
-        <AiBubble text="Avant de commencer, dis-moi pour qui tu prépares ce livret." />
-        <AiBubble text="Le ton et les priorités s'adapteront automatiquement." />
-        <div className="grid grid-cols-2 gap-2 mb-5 max-w-[320px] mx-auto">
-          {DESTINATAIRES.map((d) => {
-            const selected = destinataire === d.label;
-            return (
-              <button
-                key={d.label}
-                onClick={() => phase === 0 && setDestinataire(d.label)}
-                disabled={phase > 0}
-                className="py-2.5 px-3 text-[12px] font-sans font-medium transition-all"
-                style={{
-                  ...glassCard,
-                  borderRadius: 999,
-                  background: selected ? "rgba(139,116,224,0.15)" : "rgba(255,255,255,0.55)",
-                  border: selected ? "1.5px solid #8B74E0" : "1px solid rgba(255,255,255,0.85)",
-                  color: selected ? "#8B74E0" : "#1E1A1A",
-                  opacity: phase > 0 && !selected ? 0.4 : 1,
-                }}
-              >
-                {d.emoji ? `${d.emoji} ` : ""}{d.label}
-              </button>
-            );
-          })}
-        </div>
+            {/* Destinataire block */}
+            <SectionSeparator text="POUR QUI CE LIVRET ?" />
+            <AiBubble text="Avant de commencer, dis-moi pour qui tu prépares ce livret." />
+            <AiBubble text="Le ton et les priorités s'adapteront automatiquement." />
+            <div className="grid grid-cols-2 gap-2 mb-5 max-w-[320px] mx-auto">
+              {DESTINATAIRES.map((d) => {
+                const selected = destinataire === d.label;
+                return (
+                  <button
+                    key={d.label}
+                    onClick={() => phase === 0 && setDestinataire(d.label)}
+                    disabled={phase > 0}
+                    className="py-2.5 px-3 text-[12px] font-sans font-medium transition-all"
+                    style={{
+                      ...glassCard,
+                      borderRadius: 999,
+                      background: selected ? "rgba(139,116,224,0.15)" : "rgba(255,255,255,0.55)",
+                      border: selected ? "1.5px solid #8B74E0" : "1px solid rgba(255,255,255,0.85)",
+                      color: selected ? "#8B74E0" : "#1E1A1A",
+                      opacity: phase > 0 && !selected ? 0.4 : 1,
+                    }}
+                  >
+                    {d.emoji ? `${d.emoji} ` : ""}{d.label}
+                  </button>
+                );
+              })}
+            </div>
 
-        {/* Section 1 — visible after destinataire */}
-        {phase >= 1 && renderSection(0)}
+            {/* Section 1 — visible after destinataire */}
+            {phase >= 1 && renderSection(0)}
 
-        {/* Sections 2-6 */}
-        {phase >= 2 && renderSection(1)}
-        {phase >= 3 && renderSection(2)}
-        {phase >= 4 && renderSection(3)}
-        {phase >= 5 && renderSection(4)}
-        {phase >= 6 && renderSection(5)}
+            {/* Sections 2-6 */}
+            {phase >= 2 && renderSection(1)}
+            {phase >= 3 && renderSection(2)}
+            {phase >= 4 && renderSection(3)}
+            {phase >= 5 && renderSection(4)}
+            {phase >= 6 && renderSection(5)}
+          </>
+        )}
 
         {/* Result */}
         {phase === 7 && (
           <>
-            <UserBubble text={answers[5] || "…"} />
+            {!isReadOnly && <UserBubble text={answers[5] || "…"} />}
             <SectionSeparator text={`Livret de transmission — ${displayName}`} />
             {generatedBlocks ? generatedBlocks.map((block: any, i: number) => {
               const iconMap: Record<string, React.ReactNode> = {
@@ -438,6 +442,7 @@ const OutilsSyntheseTransmission = () => {
                   icon={iconMap[block.icon] || <User size={18} style={{ color: "#8B74E0" }} />}
                   title={block.title}
                   body={block.content}
+                  showCopy={isReadOnly}
                   onPreciser={() => setRefineBloc({ id: block.id, title: block.title, content: block.content, cas_usage: "transmission" })}
                 />
               );
