@@ -338,6 +338,8 @@ Si donnée absente, insérer exactement :
 
 - [TIERCE PERSONNE NON PRÉCISÉE — Décris qui intervient et combien d'heures par semaine.]
 
+Les signalements DOIVENT être placés uniquement dans le champ 'signal' du bloc JSON concerné. Ils ne doivent JAMAIS apparaître dans le champ 'content'. Le champ 'content' contient uniquement le texte narratif propre, sans aucun signalement. Le champ 'signal' contient le signalement exact si une donnée manque, null sinon.
+
 ## REGISTRES DE GÉNÉRATION
 
 REGISTRE A — "Première demande" : pose le contexte depuis le début. Pour le bloc zone_b, compare aux capacités d'un enfant ordinaire du même âge — uniquement sur la base des observations documentées.
