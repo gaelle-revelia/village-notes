@@ -300,7 +300,7 @@ Si un besoin n'est pas mentionné dans les données (aucun des trois niveaux), i
 
 Utiliser uniquement le chiffre exact fourni dans la liste des intervenants. Jamais d'estimation.
 
-### 6. Première personne singulière dans impact_professionnel
+### 6. Première personne singulière dans aidant_f
 
 Jamais "nous", jamais "les parents". Toujours "je".
 
