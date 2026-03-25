@@ -323,17 +323,26 @@ const OutilsSyntheseMdph = () => {
       <main className="flex-1 px-4 pt-5 pb-32">
         {/* Intro message */}
         {!introSeen && (
-          <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
-            <div style={{ width: 36, height: 36, borderRadius: "50%", background: "linear-gradient(135deg, #E8736A, #8B74E0)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2">
-                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-              </svg>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <div style={{ display: "flex", gap: 10 }}>
+              <div style={{ width: 36, height: 36, borderRadius: "50%", background: "linear-gradient(135deg, #E8736A, #8B74E0)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                </svg>
+              </div>
+              <div>
+                <p style={{ fontSize: 10, fontWeight: 500, color: "#8B74E0", marginBottom: 3 }}>The Village</p>
+                <div style={{ background: "rgba(255,255,255,0.58)", border: "1px solid rgba(255,255,255,0.9)", borderRadius: "4px 16px 16px 16px", padding: "12px 14px", maxWidth: 260 }}>
+                  <p style={{ fontSize: 13.5, color: "#1E1A1A", lineHeight: 1.6, margin: 0 }}>
+                    The Village, c'est la mémoire vivante du quotidien de {displayName} et de ta famille. Je retranscris l'impact du handicap sur ta vie de tous les jours — à partir de ce que tu m'as confié au fil du temps. Mon rôle s'arrête là : mettre en mots ta réalité pour que le dossier parle pour toi. Pour tout ce qui touche à tes droits, rapproche-toi de la MDPH ou d'une assistante sociale.
+                  </p>
+                </div>
+              </div>
             </div>
-            <div>
-              <p style={{ fontSize: 10, fontWeight: 500, color: "#8B74E0", marginBottom: 3 }}>The Village</p>
+            <div style={{ display: "flex", gap: 10, paddingLeft: 46 }}>
               <div style={{ background: "rgba(255,255,255,0.58)", border: "1px solid rgba(255,255,255,0.9)", borderRadius: "4px 16px 16px 16px", padding: "12px 14px", maxWidth: 260 }}>
                 <p style={{ fontSize: 13.5, color: "#1E1A1A", lineHeight: 1.6, margin: 0 }}>
-                  The Village, c'est la mémoire vivante du quotidien de {displayName} et de ta famille. Je retranscris l'impact du handicap sur ta vie de tous les jours — à partir de ce que tu as documenté dans tes mémos. Je ne connais rien d'autre que ce que tu m'as confié : je ne peux pas te conseiller sur tes droits ni sur ce que tu devrais demander. Ce que je sais faire, c'est mettre en mots ta réalité pour que le dossier parle pour toi.
+                  Je vais te poser quelques questions — sur le quotidien de {displayName}, ton organisation, sa scolarité et son projet. Réponds à l'oral, prends le temps qu'il te faut. À la fin, je génère les textes à coller dans ton formulaire CERFA.
                 </p>
               </div>
             </div>
