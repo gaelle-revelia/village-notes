@@ -789,7 +789,11 @@ FORMAT DE SORTIE — JSON STRICT identique à l'entrée, sans markdown ni commen
         user_id: user.id,
         cas_usage: type,
         contenu,
-        titre: type === "pick_me_up" ? (titreArchive ?? null) : null,
+        titre: type === "pick_me_up"
+          ? (titreArchive ?? null)
+          : type === "transmission"
+            ? (parent_context.destinataire ? `Transmission — ${parent_context.destinataire}` : "Transmission")
+            : null,
         etat_emotionnel: parent_context.etat_emotionnel ?? null,
         vocal_mdph: parent_context.vocal_mdph ?? null,
         reponses_transmission: parent_context.reponses ?? null,
