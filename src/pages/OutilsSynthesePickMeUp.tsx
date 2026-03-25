@@ -155,6 +155,7 @@ const OutilsSynthesePickMeUp = () => {
   const [generatedContent, setGeneratedContent] = useState<string | null>(null);
   const [syntheseId, setSyntheseId] = useState<string | null>(null);
   const [refineBloc, setRefineBloc] = useState<{ id: string; title: string; content: string; cas_usage: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [etatEmotionnel, setEtatEmotionnel] = useState<string | null>(null);
   const [periodDebut, setPeriodDebut] = useState<string | null>(null);
   const [periodFin, setPeriodFin] = useState<string | null>(null);
