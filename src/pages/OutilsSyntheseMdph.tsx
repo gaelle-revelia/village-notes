@@ -204,31 +204,32 @@ const OutilsSyntheseMdph = () => {
   };
 
   // Answer text helpers
-  const q3Answer = (): string | null => {
-    const parts = [...q3Chips];
-    if (q3Vocal.trim()) parts.push("Enregistrement ajouté ✅");
-    return parts.length > 0 ? parts.join(" · ") : null;
+  const q2Answer = () => {
+    if (q2Vocal.trim()) return "Enregistrement ajouté ✅";
+    return null;
+  };
+  const q3Answer = () => {
+    if (q3Vocal.trim()) return "Enregistrement ajouté ✅";
+    return null;
   };
   const q4Answer = () => {
     const parts: string[] = [];
-    if (q4) parts.push(q4);
-    if (q4Vocal.trim()) parts.push("Enregistrement ajouté ✅");
+    if (q4Scolarite) parts.push(q4Scolarite);
+    if (q4ScolariteVocal.trim()) parts.push("Enregistrement ajouté ✅");
     return parts.join(" · ") || "Non précisé";
   };
   const q5Answer = () => {
-    const parts: string[] = [];
-    if (q5) parts.push(q5);
-    if (q5Vocal.trim()) parts.push("Enregistrement ajouté ✅");
-    return parts.join(" · ") || "Non précisé";
-  };
-  const q6Answer = () => {
-    if (q6Vocal.trim()) return "Enregistrement ajouté ✅";
+    if (q5Vocal.trim()) return "Enregistrement ajouté ✅";
     return null;
   };
-  const q8Answer = () => {
+  const q6Answer = () => {
+    if (q6Libre.trim()) return "Enregistrement ajouté ✅";
+    return null;
+  };
+  const q7Answer = () => {
     const parts: string[] = [];
-    if (q8Etat) parts.push(q8Etat);
-    if (q8Etat === "Oui, je l'ai" && q8Vocal.trim()) parts.push("Enregistrement ajouté ✅");
+    if (q7Etat) parts.push(q7Etat);
+    if (q7Etat === "Oui, je l'ai" && q7Vocal.trim()) parts.push("Enregistrement ajouté ✅");
     return parts.join(" · ") || "Rien à ajouter";
   };
 
