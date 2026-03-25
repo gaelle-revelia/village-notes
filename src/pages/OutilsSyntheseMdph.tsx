@@ -407,7 +407,7 @@ const OutilsSyntheseMdph = () => {
         )}
 
         {/* Q3 — Organisation soins */}
-        {showQ3 && (
+        {introSeen && showQ3 && (
           <>
             {currentQ > 2 && q2Answer() && <UserBubble text={q2Answer()!} />}
             <AiBubble text="3 — Qu'est-ce qui a changé depuis ton dernier dossier ?" />
