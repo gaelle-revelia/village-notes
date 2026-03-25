@@ -107,9 +107,9 @@ const Archives = () => {
           <h1 className="text-xl font-serif font-semibold" style={{ color: "#1E1A1A" }}>
             Archives
           </h1>
-          <span className="text-xs font-sans" style={{ color: "#9A9490" }}>
-            {displayName}
-          </span>
+          <p style={{ fontSize: 11, color: "#9A9490", margin: 0 }}>
+            {syntheses.length} synthèse{syntheses.length > 1 ? "s" : ""}
+          </p>
         </div>
       </header>
 
