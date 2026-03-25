@@ -68,40 +68,48 @@ function formatDate(dateStr: string): string {
 
 const Archives = () => {
   const navigate = useNavigate();
-  const { enfantId } = useEnfantId();
+  const { enfantId, loading: loadingEnfant } = useEnfantId();
   const prenom = useEnfantPrenom();
   const [activeFilters, setActiveFilters] = useState<string[]>(["tous"]);
   const [syntheses, setSyntheses] = useState<any[]>([]);
   const [profilesMap, setProfilesMap] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
 
-
   useEffect(() => {
-    if (!enfantId) return;
-    const fetchData = async () => {
-      setLoading(true);
-      const { data } = await supabase
-        .from("syntheses")
-        .select("id, cas_usage, contenu, created_at, etat, user_id, envoye, titre")
-        .eq("enfant_id", enfantId)
-        .order("created_at", { ascending: false });
-      const items = data ?? [];
-      setSyntheses(items);
-
-      const userIds = [...new Set(items.map((s: any) => s.user_id).filter(Boolean))];
-      if (userIds.length > 0) {
-        const { data: profilesData } = await supabase
-          .from("profiles")
-          .select("user_id, prenom")
-          .in("user_id", userIds);
-        setProfilesMap(Object.fromEntries(
-          (profilesData ?? []).map(p => [p.user_id, p.prenom ?? ""])
-        ));
-      }
+    if (loadingEnfant) return;
+    if (!enfantId) {
       setLoading(false);
+      return;
+    }
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const { data } = await supabase
+          .from("syntheses")
+          .select("id, cas_usage, contenu, created_at, etat, user_id, envoye, titre")
+          .eq("enfant_id", enfantId)
+          .order("created_at", { ascending: false });
+        const items = data ?? [];
+        setSyntheses(items);
+
+        const userIds = [...new Set(items.map((s: any) => s.user_id).filter(Boolean))];
+        if (userIds.length > 0) {
+          const { data: profilesData } = await supabase
+            .from("profiles")
+            .select("user_id, prenom")
+            .in("user_id", userIds);
+          setProfilesMap(Object.fromEntries(
+            (profilesData ?? []).map(p => [p.user_id, p.prenom ?? ""])
+          ));
+        }
+      } catch (e) {
+        console.error("Erreur chargement archives:", e);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchData();
-  }, [enfantId]);
+  }, [enfantId, loadingEnfant]);
 
   const toggleFilter = (key: string) => {
     if (key === "tous") { setActiveFilters(["tous"]); return; }
