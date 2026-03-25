@@ -124,18 +124,23 @@ export default function OutilsSyntheseMdphResultats() {
   return (
     <div className="min-h-screen pb-28" style={{ background: "linear-gradient(150deg, #F9EDE8 0%, #F0EAF8 45%, #E8EFF8 100%)" }}>
       {/* Header */}
-      <div className="sticky top-0 z-30 flex items-center gap-3 px-4 py-3" style={{ background: "rgba(255,255,255,0.72)", backdropFilter: "blur(20px) saturate(1.5)", borderBottom: "1px solid rgba(255,255,255,0.6)", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
-        <button onClick={() => navigate("/outils/synthese/mdph")} className="p-1">
-          <ArrowLeft size={22} color="#1E1A1A" />
-        </button>
-        <div>
-          <h1 className="text-[17px] font-semibold" style={{ fontFamily: "Fraunces, serif", color: "#1E1A1A" }}>
-            Dossier MDPH — {enfantPrenom}
-          </h1>
-          <p className="text-[11px]" style={{ fontFamily: "DM Sans, sans-serif", color: "#9A9490" }}>
-            Généré le {syntheseDate}
-          </p>
+      <div className="sticky top-0 z-30 flex items-center justify-between px-4 py-3" style={{ background: "rgba(255,255,255,0.72)", backdropFilter: "blur(20px) saturate(1.5)", borderBottom: "1px solid rgba(255,255,255,0.6)", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
+        <div className="flex items-center gap-3">
+          <button onClick={() => navigate(fromArchives ? "/archives" : "/outils/synthese")} className="p-1" aria-label="Retour">
+            <ArrowLeft size={22} color="#1E1A1A" />
+          </button>
+          <div>
+            <h1 className="text-[17px] font-semibold" style={{ fontFamily: "Fraunces, serif", color: "#1E1A1A" }}>
+              Dossier MDPH — {enfantPrenom}
+            </h1>
+            <p className="text-[11px]" style={{ fontFamily: "DM Sans, sans-serif", color: "#9A9490" }}>
+              Généré le {syntheseDate}
+            </p>
+          </div>
         </div>
+        <button onClick={handleDelete} disabled={isDeleting} style={{ background: "none", border: "none", cursor: "pointer", padding: 4 }} aria-label="Supprimer">
+          <Trash2 size={18} color="#E8736A" />
+        </button>
       </div>
 
       <div style={{ margin: "16px 16px 8px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "10px 13px" }}>
