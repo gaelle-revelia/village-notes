@@ -210,7 +210,7 @@ Si les données permettent une comparaison temporelle, l'utiliser explicitement.
 
 ## FORMAT DE SORTIE — JSON STRICT
 Retourne UNIQUEMENT ce JSON, sans markdown, sans commentaire, sans texte avant ou après :
-{"blocks":[{"id":"narrative","title":"Ce qui s'est passé","icon":"Sparkles","content":"texte narratif propre uniquement, sans signalement"}]}`;
+{"blocks":[{"id":"narrative","title":"Ce qui s'est passé","icon":"Sparkles","content":"texte narratif propre uniquement, sans signalement"}],"etat_emotionnel_resume":"une phrase courte et propre, maximum 8 mots, résumant l'état émotionnel du parent sans guillemets ni ponctuation finale"}`;
 
       userMessage = `Prenom de l'enfant: ${prenom}
 Sexe: ${isFem ? "fille" : "garçon"} (utilise les pronoms ${pronom_sujet}/${pronom_cod}/${pronom_cod_tonique})
@@ -662,6 +662,7 @@ Pronoms: ${pronom_sujet} / ${accord}`;
         .trim();
       const parsed = JSON.parse(clean);
       blocks = parsed.blocks ?? [];
+      var etatResume = parsed.etat_emotionnel_resume ?? null;
     } catch (e) {
       console.error("Failed to parse AI response:", rawText);
       return new Response(
@@ -746,7 +747,9 @@ FORMAT DE SORTIE — JSON STRICT identique à l'entrée, sans markdown ni commen
     }
 
     // 10. DOUBLE WRITE
-    const contenu = JSON.stringify(blocks);
+    const contenu = type === "pick_me_up"
+      ? JSON.stringify({ blocks, etat_emotionnel_resume: etatResume ?? null })
+      : JSON.stringify(blocks);
     const firstBlockTitle = blocks[0]?.title ?? "Synthèse";
 
     const { data: synthese } = await supabase

@@ -195,7 +195,14 @@ const OutilsSynthesePickMeUp = () => {
         if (!data?.contenu) return;
         try {
           const parsed = JSON.parse(data.contenu);
-          const text = Array.isArray(parsed) ? parsed[0]?.content : (parsed?.content ?? data.contenu);
+          let text: string;
+          if (parsed?.blocks && Array.isArray(parsed.blocks)) {
+            text = parsed.blocks[0]?.content ?? data.contenu;
+          } else if (Array.isArray(parsed)) {
+            text = parsed[0]?.content ?? data.contenu;
+          } else {
+            text = parsed?.content ?? data.contenu;
+          }
           setGeneratedContent(text ?? data.contenu);
         } catch {
           setGeneratedContent(data.contenu);
