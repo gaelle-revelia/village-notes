@@ -200,6 +200,10 @@ const Archives = () => {
                 onClick={() => {
                   if (s.cas_usage === "mdph") {
                     navigate("/outils/synthese/mdph/resultats", { state: { syntheseId: s.id } });
+                  } else if (s.cas_usage === "pick_me_up") {
+                    navigate("/outils/synthese/pick-me-up", { state: { syntheseId: s.id, readOnly: true } });
+                  } else if (s.cas_usage === "transmission") {
+                    navigate("/outils/synthese/transmission", { state: { syntheseId: s.id, readOnly: true } });
                   }
                 }}
               >
