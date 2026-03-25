@@ -424,7 +424,7 @@ const OutilsSyntheseMdph = () => {
         )}
 
         {/* Q4 — Situation scolaire */}
-        {showQ4 && (
+        {introSeen && showQ4 && (
           <>
             {currentQ > 3 && q3Answer() && <UserBubble text={q3Answer()!} />}
             <AiBubble text={`4 — Quelle est la situation scolaire actuelle de ${displayName} ?`} />
