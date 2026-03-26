@@ -558,6 +558,15 @@ const OutilsSyntheseTransmission = () => {
             {phase >= 4 && renderSection(3)}
             {phase >= 5 && renderSection(4)}
             {phase >= 6 && renderSection(5)}
+
+            {phase >= 6.5 && (
+              <>
+                <UserBubble text={answers[5] || "…"} />
+                <SectionSeparator text="Profil médical" />
+                <AiBubble text={buildProfileMessage()} />
+                <AiBubble text={`Je vais les intégrer dans cette transmission. Tu pourras ajouter des précisions bloc par bloc après génération.`} />
+              </>
+            )}
           </>
         )}
 
