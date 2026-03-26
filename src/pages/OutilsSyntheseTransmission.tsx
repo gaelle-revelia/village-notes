@@ -160,7 +160,7 @@ const DESTINATAIRES = [
   { emoji: "", label: "Autre" },
 ];
 
-type Phase = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
+type Phase = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 6.5 | 7;
 
 const OutilsSyntheseTransmission = () => {
   const navigate = useNavigate();
@@ -191,6 +191,10 @@ const OutilsSyntheseTransmission = () => {
   const [titre, setTitre] = useState<string>("");
   const [editingTitre, setEditingTitre] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [medCount, setMedCount] = useState(0);
+  const [soinCount, setSoinCount] = useState(0);
+  const [materielCount, setMaterielCount] = useState(0);
+  const [hasProfileData, setHasProfileData] = useState(false);
 
   const handleDelete = async () => {
     if (!window.confirm("Supprimer cette transmission définitivement ?")) return;
@@ -208,6 +212,24 @@ const OutilsSyntheseTransmission = () => {
     if (!enfantId) return;
     supabase.from("enfants").select("sexe").eq("id", enfantId).single().then(({ data }: any) => { if (data?.sexe) setSexe(data.sexe); });
   }, [enfantId]);
+
+  // Fetch medical profile data counts
+  useEffect(() => {
+    if (!enfantId || incomingReadOnly) return;
+    Promise.all([
+      supabase.from("medicaments").select("id").eq("enfant_id", enfantId).eq("actif", true),
+      supabase.from("soins").select("id").eq("enfant_id", enfantId).eq("actif", true),
+      supabase.from("materiel").select("id").eq("enfant_id", enfantId).eq("actif", true),
+    ]).then(([meds, soins, mat]) => {
+      const mc = meds.data?.length ?? 0;
+      const sc = soins.data?.length ?? 0;
+      const mtc = mat.data?.length ?? 0;
+      setMedCount(mc);
+      setSoinCount(sc);
+      setMaterielCount(mtc);
+      setHasProfileData(mc + sc + mtc > 0);
+    });
+  }, [enfantId, incomingReadOnly]);
 
   useEffect(() => {
     setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
@@ -245,6 +267,15 @@ const OutilsSyntheseTransmission = () => {
     setAnswers((prev) => { const n = [...prev]; n[idx] = val; return n; });
   };
 
+  const buildProfileMessage = () => {
+    const parts: string[] = [];
+    if (medCount > 0) parts.push(`${medCount} médicament${medCount > 1 ? "s" : ""}`);
+    if (soinCount > 0) parts.push(`${soinCount} soin${soinCount > 1 ? "s" : ""}`);
+    if (materielCount > 0) parts.push(`${materielCount} équipement${materielCount > 1 ? "s" : ""}`);
+    const joined = parts.length <= 1 ? parts.join("") : parts.slice(0, -1).join(", ") + " et " + parts[parts.length - 1];
+    return `Je vois que ${displayName} a ${joined}.`;
+  };
+
   const handleGenerateTransmission = async () => {
     if (!enfantId || !user) return;
     setIsGenerating(true);
@@ -261,6 +292,7 @@ const OutilsSyntheseTransmission = () => {
           parent_context: {
             destinataire,
             reponses,
+            include_profile_data: hasProfileData,
           },
         },
       });
@@ -361,15 +393,34 @@ const OutilsSyntheseTransmission = () => {
       );
     }
 
+    if (phase === 6.5) {
+      return (
+        <div className="fixed bottom-16 left-0 right-0 z-10 px-4 py-3" style={{ background: "rgba(255,255,255,0.72)", backdropFilter: "blur(20px) saturate(1.5)", WebkitBackdropFilter: "blur(20px) saturate(1.5)" }}>
+          <button
+            onClick={() => handleGenerateTransmission()}
+            disabled={isGenerating}
+            className={`w-full py-3.5 text-[15px] font-sans font-semibold transition-opacity ${isGenerating ? "animate-pulse" : ""}`}
+            style={{ background: "linear-gradient(135deg, #E8736A, #8B74E0)", color: "#fff", borderRadius: 14, border: "none", opacity: isGenerating ? 0.45 : 1 }}
+          >
+            {isGenerating ? "Génération en cours..." : "Générer la transmission →"}
+          </button>
+        </div>
+      );
+    }
+
     const isLast = phase === 6;
-    const enabled = answers[phase - 1].trim().length > 0 && !isGenerating;
+    const enabled = answers[(phase as number) - 1]?.trim().length > 0 && !isGenerating;
     const label = isLast ? (isGenerating ? "Génération en cours..." : "Générer le livret complet →") : "Continuer →";
-    const nextPhase = (phase + 1) as Phase;
+    const nextPhase = ((phase as number) + 1) as Phase;
 
     const handleCtaTap = async () => {
       if (!enabled) return;
       if (isLast) {
-        await handleGenerateTransmission();
+        if (hasProfileData) {
+          setPhase(6.5);
+        } else {
+          await handleGenerateTransmission();
+        }
       } else {
         setPhase(nextPhase);
       }
@@ -507,6 +558,15 @@ const OutilsSyntheseTransmission = () => {
             {phase >= 4 && renderSection(3)}
             {phase >= 5 && renderSection(4)}
             {phase >= 6 && renderSection(5)}
+
+            {phase >= 6.5 && (
+              <>
+                <UserBubble text={answers[5] || "…"} />
+                <SectionSeparator text="Profil médical" />
+                <AiBubble text={buildProfileMessage()} />
+                <AiBubble text={`Je vais les intégrer dans cette transmission. Tu pourras ajouter des précisions bloc par bloc après génération.`} />
+              </>
+            )}
           </>
         )}
 
