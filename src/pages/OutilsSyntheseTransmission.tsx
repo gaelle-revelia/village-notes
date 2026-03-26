@@ -393,15 +393,34 @@ const OutilsSyntheseTransmission = () => {
       );
     }
 
+    if (phase === 6.5) {
+      return (
+        <div className="fixed bottom-16 left-0 right-0 z-10 px-4 py-3" style={{ background: "rgba(255,255,255,0.72)", backdropFilter: "blur(20px) saturate(1.5)", WebkitBackdropFilter: "blur(20px) saturate(1.5)" }}>
+          <button
+            onClick={() => handleGenerateTransmission()}
+            disabled={isGenerating}
+            className={`w-full py-3.5 text-[15px] font-sans font-semibold transition-opacity ${isGenerating ? "animate-pulse" : ""}`}
+            style={{ background: "linear-gradient(135deg, #E8736A, #8B74E0)", color: "#fff", borderRadius: 14, border: "none", opacity: isGenerating ? 0.45 : 1 }}
+          >
+            {isGenerating ? "Génération en cours..." : "Générer la transmission →"}
+          </button>
+        </div>
+      );
+    }
+
     const isLast = phase === 6;
-    const enabled = answers[phase - 1].trim().length > 0 && !isGenerating;
+    const enabled = answers[(phase as number) - 1]?.trim().length > 0 && !isGenerating;
     const label = isLast ? (isGenerating ? "Génération en cours..." : "Générer le livret complet →") : "Continuer →";
-    const nextPhase = (phase + 1) as Phase;
+    const nextPhase = ((phase as number) + 1) as Phase;
 
     const handleCtaTap = async () => {
       if (!enabled) return;
       if (isLast) {
-        await handleGenerateTransmission();
+        if (hasProfileData) {
+          setPhase(6.5);
+        } else {
+          await handleGenerateTransmission();
+        }
       } else {
         setPhase(nextPhase);
       }
