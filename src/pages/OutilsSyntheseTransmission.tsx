@@ -160,7 +160,7 @@ const DESTINATAIRES = [
   { emoji: "", label: "Autre" },
 ];
 
-type Phase = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
+type Phase = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 6.5 | 7;
 
 const OutilsSyntheseTransmission = () => {
   const navigate = useNavigate();
