@@ -520,7 +520,7 @@ Si des soins sont fournis, ajouter un bloc :
 Ton instructif — quoi faire, à quelle fréquence, avec quel matériel, et signes d'alerte à surveiller si renseignés.
 
 Si du matériel est fourni, ajouter un bloc :
-{"id":"s9","title":"Ses équipements","icon":"Package","content":"..."}
+{"id":"s9","title":"Ses équipements","icon":"Bike","content":"..."}
 Ton pratique — nom de l'équipement, conseils d'utilisation si renseignés.
 
 Ces blocs supplémentaires ne sont générés QUE si les données correspondantes sont présentes dans les données fournies. S'il n'y a pas de médicaments, pas de bloc s7. Etc.

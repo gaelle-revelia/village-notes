@@ -589,6 +589,7 @@ const OutilsSyntheseTransmission = () => {
                 Users: <Users size={18} style={{ color: "#8B74E0" }} />,
                 Activity: <Activity size={18} style={{ color: "#8B74E0" }} />,
                 Pill: <Pill size={18} style={{ color: "#8B74E0" }} />,
+                Bike: <Bike size={18} style={{ color: "#8B74E0" }} />,
               };
               return (
                 <ResultCard
