@@ -267,6 +267,15 @@ const OutilsSyntheseTransmission = () => {
     setAnswers((prev) => { const n = [...prev]; n[idx] = val; return n; });
   };
 
+  const buildProfileMessage = () => {
+    const parts: string[] = [];
+    if (medCount > 0) parts.push(`${medCount} médicament${medCount > 1 ? "s" : ""}`);
+    if (soinCount > 0) parts.push(`${soinCount} soin${soinCount > 1 ? "s" : ""}`);
+    if (materielCount > 0) parts.push(`${materielCount} équipement${materielCount > 1 ? "s" : ""}`);
+    const joined = parts.length <= 1 ? parts.join("") : parts.slice(0, -1).join(", ") + " et " + parts[parts.length - 1];
+    return `Je vois que ${displayName} a ${joined}.`;
+  };
+
   const handleGenerateTransmission = async () => {
     if (!enfantId || !user) return;
     setIsGenerating(true);
