@@ -292,6 +292,7 @@ const OutilsSyntheseTransmission = () => {
           parent_context: {
             destinataire,
             reponses,
+            include_profile_data: hasProfileData,
           },
         },
       });
