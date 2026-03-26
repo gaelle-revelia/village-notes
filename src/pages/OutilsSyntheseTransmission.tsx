@@ -191,6 +191,10 @@ const OutilsSyntheseTransmission = () => {
   const [titre, setTitre] = useState<string>("");
   const [editingTitre, setEditingTitre] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [medCount, setMedCount] = useState(0);
+  const [soinCount, setSoinCount] = useState(0);
+  const [materielCount, setMaterielCount] = useState(0);
+  const [hasProfileData, setHasProfileData] = useState(false);
 
   const handleDelete = async () => {
     if (!window.confirm("Supprimer cette transmission définitivement ?")) return;
