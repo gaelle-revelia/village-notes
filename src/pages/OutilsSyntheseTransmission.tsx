@@ -213,6 +213,24 @@ const OutilsSyntheseTransmission = () => {
     supabase.from("enfants").select("sexe").eq("id", enfantId).single().then(({ data }: any) => { if (data?.sexe) setSexe(data.sexe); });
   }, [enfantId]);
 
+  // Fetch medical profile data counts
+  useEffect(() => {
+    if (!enfantId || incomingReadOnly) return;
+    Promise.all([
+      supabase.from("medicaments").select("id").eq("enfant_id", enfantId).eq("actif", true),
+      supabase.from("soins").select("id").eq("enfant_id", enfantId).eq("actif", true),
+      supabase.from("materiel").select("id").eq("enfant_id", enfantId).eq("actif", true),
+    ]).then(([meds, soins, mat]) => {
+      const mc = meds.data?.length ?? 0;
+      const sc = soins.data?.length ?? 0;
+      const mtc = mat.data?.length ?? 0;
+      setMedCount(mc);
+      setSoinCount(sc);
+      setMaterielCount(mtc);
+      setHasProfileData(mc + sc + mtc > 0);
+    });
+  }, [enfantId, incomingReadOnly]);
+
   useEffect(() => {
     setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
   }, [phase]);
