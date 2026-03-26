@@ -447,6 +447,28 @@ Toujours générer ces 4 blocs : zone_b, scolarite_c3, scolarite_e2, aidant_f`;
     }
 
     if (type === "transmission") {
+      // Fetch profile data if requested
+      let transmissionMeds: any[] = [];
+      let transmissionSoins: any[] = [];
+      let transmissionMateriel: any[] = [];
+
+      if (parent_context.include_profile_data) {
+        const [medsRes, soinsRes, matRes] = await Promise.all([
+          supabase.from("medicaments")
+            .select("nom, dosage, frequence, voie, instructions, conditions")
+            .eq("enfant_id", enfant_id).eq("actif", true),
+          supabase.from("soins")
+            .select("nom, description, frequence, instructions, materiel, signes_alerte")
+            .eq("enfant_id", enfant_id).eq("actif", true),
+          supabase.from("materiel")
+            .select("nom, conseils, date_reception")
+            .eq("enfant_id", enfant_id).eq("actif", true),
+        ]);
+        transmissionMeds = medsRes.data ?? [];
+        transmissionSoins = soinsRes.data ?? [];
+        transmissionMateriel = matRes.data ?? [];
+      }
+
       systemPrompt = `Tu es The Village, une IA conçue pour aider les parents d'enfants avec des besoins spécifiques à créer un livret de présentation de leur enfant.
 
 ## TON RÔLE ICI
@@ -486,6 +508,23 @@ Chaque bloc doit servir un objectif précis :
 5. Interagir naturellement sans avoir peur
 6. Savoir qui fait quoi dans son parcours
 
+## BLOCS SUPPLÉMENTAIRES (CONDITIONNELS)
+En plus des 6 blocs fixes, tu peux générer des blocs supplémentaires SI ET SEULEMENT SI les données correspondantes sont présentes dans les données fournies.
+
+Si des médicaments sont fournis, ajouter un bloc :
+{"id":"s7","title":"Ses médicaments","icon":"Pill","content":"..."}
+Ton instructif, pratique — nom, dosage si renseigné, fréquence, mode d'administration (voie), instructions spéciales, conditions particulières. Zéro jargon médical sans explication. Sécurité avant tout.
+
+Si des soins sont fournis, ajouter un bloc :
+{"id":"s8","title":"Ses soins quotidiens","icon":"Activity","content":"..."}
+Ton instructif — quoi faire, à quelle fréquence, avec quel matériel, et signes d'alerte à surveiller si renseignés.
+
+Si du matériel est fourni, ajouter un bloc :
+{"id":"s9","title":"Ses équipements","icon":"Package","content":"..."}
+Ton pratique — nom de l'équipement, conseils d'utilisation si renseignés.
+
+Ces blocs supplémentaires ne sont générés QUE si les données correspondantes sont présentes dans les données fournies. S'il n'y a pas de médicaments, pas de bloc s7. Etc.
+
 ## ADAPTATION AU DESTINATAIRE
 Le champ destinataire oriente ton et priorités. Si absent, appliquer profil FAMILLE.
 
@@ -506,6 +545,16 @@ Diagnostic: ${enfant?.diagnostic_label ?? "non renseigné"}
 Intervenants actifs: ${JSON.stringify(intervenants)}
 Destinataire du livret: ${parent_context.destinataire ?? "non renseigné"}
 Réponses du parent par section: ${JSON.stringify(parent_context.reponses ?? [])}`;
+
+      if (transmissionMeds.length > 0) {
+        userMessage += `\nMédicaments (${transmissionMeds.length}) :\n${JSON.stringify(transmissionMeds)}`;
+      }
+      if (transmissionSoins.length > 0) {
+        userMessage += `\nSoins quotidiens (${transmissionSoins.length}) :\n${JSON.stringify(transmissionSoins)}`;
+      }
+      if (transmissionMateriel.length > 0) {
+        userMessage += `\nMatériel / équipements (${transmissionMateriel.length}) :\n${JSON.stringify(transmissionMateriel)}`;
+      }
     }
 
     if (type === "refine_block") {
