@@ -232,6 +232,7 @@ export default function OutilsQuestions() {
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [recentIds, setRecentIds] = useState<string[]>([]);
   const [filterPanelOpen, setFilterPanelOpen] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
   const saveTimerRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
   const mainRef = useRef<HTMLElement>(null);
 
