@@ -148,11 +148,11 @@ export default function OutilsSyntheseMdphResultats() {
                   await supabase.from("syntheses").update({ titre: titre.trim() || null }).eq("id", syntheseId);
                 }}
                 onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); }}
-                style={{ fontFamily: "Fraunces, serif", fontSize: 17, fontWeight: 600, color: "#1E1A1A", background: "none", border: "none", borderBottom: "1px solid #8B74E0", outline: "none", width: "100%", padding: "2px 0" }}
+                style={{ fontFamily: "'Fraunces', serif", fontSize: 17, fontWeight: 600, color: "#1E1A1A", background: "none", border: "none", borderBottom: "1px solid #8B74E0", outline: "none", width: "100%", padding: "2px 0" }}
               />
             ) : (
               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <h1 style={{ fontFamily: "Fraunces, serif", fontSize: 17, fontWeight: 600, color: "#1E1A1A", margin: 0 }}>
+                <h1 style={{ fontFamily: "'Fraunces', serif", fontSize: 17, fontWeight: 600, color: "#1E1A1A", margin: 0 }}>
                   {titre || `Dossier MDPH — ${enfantPrenom}`}
                 </h1>
                 <button onClick={() => setEditingTitre(true)} style={{ background: "none", border: "none", cursor: "pointer", padding: 2, flexShrink: 0 }}>
@@ -220,7 +220,7 @@ export default function OutilsSyntheseMdphResultats() {
 
         {blocks.map((block) => (
           <div key={block.id} style={{ ...glassCard, padding: "16px" }}>
-            <h2 className="text-[15px] font-semibold mb-1" style={{ fontFamily: "Fraunces, serif", color: "#1E1A1A" }}>
+            <h2 className="text-[15px] font-semibold mb-1" style={{ fontFamily: "'Fraunces', serif", color: "#1E1A1A" }}>
               {block.title}
             </h2>
 

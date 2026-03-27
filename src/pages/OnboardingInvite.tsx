@@ -189,7 +189,7 @@ function ScreenWelcome({
       <h1
         className="text-center mb-8"
         style={{
-          fontFamily: "Fraunces, serif",
+          fontFamily: "'Fraunces', serif",
           fontWeight: 600,
           fontSize: 28,
           color: "#1E1A1A",
@@ -262,7 +262,7 @@ function ScreenPrenom({
       <h2
         className="text-center mb-2"
         style={{
-          fontFamily: "Fraunces, serif",
+          fontFamily: "'Fraunces', serif",
           fontWeight: 600,
           fontSize: 24,
           color: "#1E1A1A",
@@ -428,7 +428,7 @@ function ScreenPassword({
       <h2
         className="text-center mb-2"
         style={{
-          fontFamily: "Fraunces, serif",
+          fontFamily: "'Fraunces', serif",
           fontWeight: 600,
           fontSize: 24,
           color: "#1E1A1A",
@@ -881,7 +881,7 @@ function DiscoverySlide({
         </p>
         <h3
           style={{
-            fontFamily: "Fraunces, serif",
+            fontFamily: "'Fraunces', serif",
             fontWeight: 600,
             fontSize: 22,
             color: "#1E1A1A",
@@ -976,7 +976,7 @@ function DiscoveryCarousel({
         <p style={{ fontFamily: "DM Sans, sans-serif", fontSize: 10, textTransform: "uppercase", letterSpacing: 1, color: "#8B74E0", opacity: 0.7, fontWeight: 500 }}>
           {currentSlide?.label}
         </p>
-        <h3 style={{ fontFamily: "Fraunces, serif", fontWeight: 600, fontSize: 22, color: "#1E1A1A", lineHeight: 1.3 }}>
+        <h3 style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 22, color: "#1E1A1A", lineHeight: 1.3 }}>
           {currentSlide?.title}
         </h3>
         <p style={{ fontFamily: "DM Sans, sans-serif", fontSize: 14, color: "#9A9490", lineHeight: 1.55 }}>
@@ -1019,7 +1019,7 @@ function ScreenReady({
       <h1
         className="text-center mb-3"
         style={{
-          fontFamily: "Fraunces, serif",
+          fontFamily: "'Fraunces', serif",
           fontWeight: 600,
           fontSize: 26,
           color: "#1E1A1A",
@@ -1211,7 +1211,7 @@ export default function OnboardingInvite() {
         <div style={{ fontSize: 48, marginBottom: 16 }}>😔</div>
         <h2
           style={{
-            fontFamily: "Fraunces, serif",
+            fontFamily: "'Fraunces', serif",
             fontWeight: 600,
             fontSize: 22,
             color: "#1E1A1A",

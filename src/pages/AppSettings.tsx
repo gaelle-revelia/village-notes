@@ -71,7 +71,7 @@ export default function AppSettings() {
         </button>
         <h1
           className="text-xl font-semibold"
-          style={{ fontFamily: "Fraunces, serif", color: "#1E1A1A" }}
+          style={{ fontFamily: "'Fraunces', serif", color: "#1E1A1A" }}
         >
           Paramètres
         </h1>
@@ -82,7 +82,7 @@ export default function AppSettings() {
         <section>
           <h2
             className="text-base font-semibold mb-3"
-            style={{ fontFamily: "Fraunces, serif", color: "#1E1A1A" }}
+            style={{ fontFamily: "'Fraunces', serif", color: "#1E1A1A" }}
           >
             Mon compte
           </h2>
@@ -131,7 +131,7 @@ export default function AppSettings() {
         <section>
           <h2
             className="text-base font-semibold mb-3"
-            style={{ fontFamily: "Fraunces, serif", color: "#1E1A1A" }}
+            style={{ fontFamily: "'Fraunces', serif", color: "#1E1A1A" }}
           >
             Zone de danger
           </h2>
@@ -177,7 +177,7 @@ export default function AppSettings() {
         <AlertDialogContent className="rounded-2xl max-w-sm mx-4">
           <AlertDialogHeader>
             <AlertDialogTitle
-              style={{ fontFamily: "Fraunces, serif", color: "#1E1A1A" }}
+              style={{ fontFamily: "'Fraunces', serif", color: "#1E1A1A" }}
             >
               Supprimer mon accès ?
             </AlertDialogTitle>

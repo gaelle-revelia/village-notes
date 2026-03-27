@@ -72,7 +72,7 @@ export function MaterielModal({ open, enfantId, initialData, onSave, onClose }: 
       <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl max-h-[90vh] overflow-y-auto p-6 z-50">
         <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-4" />
 
-        <h2 className="text-xl font-semibold text-card-foreground mb-5" style={{ fontFamily: "Fraunces" }}>
+        <h2 className="text-xl font-semibold text-card-foreground mb-5" style={{ fontFamily: "'Fraunces', serif" }}>
           {initialData ? "Modifier le matériel" : "Nouveau matériel"}
         </h2>
 

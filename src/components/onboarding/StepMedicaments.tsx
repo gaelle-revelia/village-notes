@@ -118,7 +118,7 @@ export function StepMedicaments({ prenomEnfant, enfantId, onNext, onSkip }: Step
         <div className="space-y-2">
           <h1
             className="text-[32px] font-semibold text-card-foreground leading-tight"
-            style={{ fontFamily: "Fraunces" }}
+            style={{ fontFamily: "'Fraunces', serif" }}
           >
             Un traitement en cours&nbsp;?
           </h1>
@@ -176,7 +176,7 @@ export function StepMedicaments({ prenomEnfant, enfantId, onNext, onSkip }: Step
       <div className="space-y-2">
         <h1
           className="text-[32px] font-semibold text-card-foreground leading-tight"
-          style={{ fontFamily: "Fraunces" }}
+          style={{ fontFamily: "'Fraunces', serif" }}
         >
           Traitement de {prenomEnfant}
         </h1>
