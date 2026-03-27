@@ -381,7 +381,7 @@ const AxeDetail = ({
             }}
           >
             {pepites.length === 0
-              ? "Aucune pépite encore — elles arrivent avec tes notes"
+              ? "Aucune pépite pour l'instant — elles apparaissent automatiquement quand vos mémos sont en lien avec cet axe."
               : `${pepites.length} pépite${pepites.length > 1 ? "s" : ""} dans cet axe`}
           </p>
         </div>
