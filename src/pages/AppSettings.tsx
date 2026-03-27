@@ -164,8 +164,7 @@ export default function AppSettings() {
                 className="mt-3 text-xs italic leading-relaxed"
                 style={{ fontFamily: "DM Sans, sans-serif", color: "#9A9490" }}
               >
-                En tant que responsable du village, vous ne pouvez pas supprimer
-                votre accès sans transférer la gestion à un co-parent. Cette
+                En tant que responsable du village, la suppression de votre accès nécessite de transférer la gestion à un co-parent au préalable. Cette
                 fonctionnalité arrive bientôt.
               </p>
             )}
