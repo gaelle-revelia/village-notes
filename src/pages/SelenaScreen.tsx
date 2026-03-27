@@ -175,7 +175,7 @@ const SelenaScreen = () => {
   return (
     <div className="flex min-h-screen flex-col">
       <header
-        className="sticky top-0 z-10 px-4 py-3 flex items-center justify-between"
+        className="sticky top-0 z-10 px-4 py-3"
         style={{
           backdropFilter: "blur(20px) saturate(1.5)",
           WebkitBackdropFilter: "blur(20px) saturate(1.5)",
@@ -183,18 +183,28 @@ const SelenaScreen = () => {
           boxShadow: "0 2px 12px rgba(0,0,0,0.05)",
         }}
       >
-        <h1
-          style={{
-            fontFamily: "'Fraunces', serif",
-            fontSize: 30,
-            fontWeight: 700,
-            color: "#1E1A1A",
-            letterSpacing: -0.5,
-          }}
-        >
-          {prenom || "Enfant"}
-        </h1>
-        <ProfileAvatar />
+        <div className="flex items-center justify-between">
+          <h1
+            style={{
+              fontFamily: "'Fraunces', serif",
+              fontSize: 30,
+              fontWeight: 700,
+              color: "#1E1A1A",
+              letterSpacing: -0.5,
+            }}
+          >
+            {prenom || "Enfant"}
+          </h1>
+          <ProfileAvatar />
+        </div>
+        {hasAxes && axes.length > 0 && !selectedAxeId && (
+          <button onClick={() => setShowHelpSheet(true)} className="flex items-center gap-1 bg-transparent border-none cursor-pointer p-0 mt-1">
+            <Info size={14} color="#8B74E0" />
+            <span style={{ fontSize: 11, color: "#9A9490", fontFamily: "'DM Sans', sans-serif" }}>
+              Comment fonctionne la constellation ?
+            </span>
+          </button>
+        )}
       </header>
 
       <main className="flex-1 px-4 pb-24 pt-5">
@@ -213,12 +223,6 @@ const SelenaScreen = () => {
         ) : hasAxes && axes.length > 0 ? (
           /* ── Main synthèse view ── */
           <div className="flex flex-col gap-5">
-            <button onClick={() => setShowHelpSheet(true)} className="flex items-center gap-1 bg-transparent border-none cursor-pointer p-0">
-              <Info size={14} color="#8B74E0" />
-              <span style={{ fontSize: 11, color: "#9A9490", fontFamily: "'DM Sans', sans-serif" }}>
-                Comment fonctionne la constellation ?
-              </span>
-            </button>
 
             {/* Section header */}
             <div className="flex items-center justify-between mt-1">
