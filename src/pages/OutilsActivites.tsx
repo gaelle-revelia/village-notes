@@ -152,20 +152,12 @@ export default function OutilsActivites() {
   return (
     <div className="flex min-h-screen flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-10 px-4 py-3" style={glassHeader}>
-        <div className="flex items-center gap-3">
-          <button onClick={() => navigate("/outils")} className="flex items-center gap-1 text-sm font-sans" style={{ color: "#8B74E0" }}>
-            <ArrowLeft size={18} />
-            <span>Retour</span>
-          </button>
-          <h1 className="text-lg font-serif font-semibold text-foreground">Activités</h1>
-        </div>
-        <button onClick={() => setShowHelp(true)} className="flex items-center gap-1 bg-transparent border-none cursor-pointer p-0 mt-1">
-          <Info size={14} color="#8B74E0" />
-          <span style={{ fontSize: 11, color: "#9A9490", fontFamily: "'DM Sans', sans-serif" }}>
-            Comment utiliser les activités ?
-          </span>
+      <header className="sticky top-0 z-10 flex items-center gap-3 px-4 py-3" style={glassHeader}>
+        <button onClick={() => navigate("/outils")} className="flex items-center gap-1 text-sm font-sans" style={{ color: "#8B74E0" }}>
+          <ArrowLeft size={18} />
+          <span>Retour</span>
         </button>
+        <h1 className="text-lg font-serif font-semibold text-foreground">Activités</h1>
       </header>
 
       {/* Content */}
@@ -248,6 +240,14 @@ export default function OutilsActivites() {
             );
           })
         )}
+
+        {/* Help trigger */}
+        <button onClick={() => setShowHelp(true)} className="flex items-center gap-1 bg-transparent border-none cursor-pointer p-0 mb-3">
+          <Info size={14} color="#8B74E0" />
+          <span style={{ fontSize: 11, color: "#9A9490", fontFamily: "'DM Sans', sans-serif" }}>
+            Comment utiliser cet espace ?
+          </span>
+        </button>
 
         {/* New activity button */}
         <button
