@@ -30,17 +30,17 @@ const PROCESSING_STEPS: Record<string, { icon: string; title: string; subtitle: 
   uploading: {
     icon: "⬆️",
     title: "Envoi en cours...",
-    subtitle: "Votre mémo est en train d'être envoyé.",
+    subtitle: "Le mémo est en route.",
   },
   transcribing: {
     icon: "🎙",
     title: "Transcription en cours...",
-    subtitle: "On retranscrit ce que vous avez dit.",
+    subtitle: "Transcription en cours...",
   },
   structuring: {
     icon: "✨",
     title: "Organisation en cours...",
-    subtitle: "On structure vos notes automatiquement.",
+    subtitle: "Organisation en cours...",
   },
 };
 
