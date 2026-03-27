@@ -180,7 +180,7 @@ const OutilsSynthese = () => {
                     J'ai <span className="font-semibold">{memoCount}</span> mémo{memoCount !== 1 ? "s" : ""} et{" "}
                     <span className="font-semibold">{activiteCount}</span> activité{activiteCount !== 1 ? "s" : ""} de{" "}
                     <span className="font-semibold">{displayName}</span> dans mes données.
-                    {" "}De quoi as-tu besoin aujourd'hui&nbsp;?
+                    {" "}De quoi avez-vous besoin aujourd'hui&nbsp;?
                   </>
                 ) : (
                   <>Chargement des données de {displayName}…</>
