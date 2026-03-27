@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { differenceInYears, differenceInMonths } from "date-fns";
-import { HelpCircle } from "lucide-react";
-import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import { Info } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import BottomNavBar from "@/components/BottomNavBar";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { useEnfantPrenom } from "@/hooks/useEnfantPrenom";
