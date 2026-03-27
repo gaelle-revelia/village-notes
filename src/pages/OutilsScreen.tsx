@@ -1,6 +1,6 @@
 import { type CSSProperties } from "react";
 import { useNavigate } from "react-router-dom";
-import { Activity, CalendarDays, MessageCircleQuestion, Share2, Sparkles, Wind } from "lucide-react";
+import { Activity, CalendarDays, Share2, Sparkles, Wind } from "lucide-react";
 import BottomNavBar from "@/components/BottomNavBar";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { useAuth } from "@/hooks/useAuth";
