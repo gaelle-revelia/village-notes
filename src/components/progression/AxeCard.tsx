@@ -92,10 +92,10 @@ const AxeCard = ({ axe, pepites, onClick }: AxeCardProps) => {
       onClick={() => onClick(axe.id)}
       className="cursor-pointer transition-transform active:scale-[0.98]"
       style={{
-        background: `${axe.couleur}0F`,
+        background: "rgba(255,255,255,0.55)",
         backdropFilter: "blur(16px) saturate(1.6)",
         WebkitBackdropFilter: "blur(16px) saturate(1.6)",
-        border: `1px solid ${axe.couleur}33`,
+        border: `1px solid ${axe.couleur}40`,
         borderRadius: 18,
         boxShadow: "0 4px 20px rgba(139,116,224,0.07)",
         padding: "14px 16px 10px",
