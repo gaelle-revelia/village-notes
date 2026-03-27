@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { Textarea } from "@/components/ui/textarea";
 import { ChevronLeft, MoreHorizontal, Pencil, Archive } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -172,39 +173,31 @@ const DescTextarea = ({
 }) => {
   useEffect(() => {
     if (descRef.current) {
-      descRef.current.style.height = "auto";
-      descRef.current.style.height = descRef.current.scrollHeight + "px";
       descRef.current.focus();
     }
   }, []);
 
   return (
-    <textarea
+    <Textarea
       ref={descRef}
+      autoResize
       rows={1}
       value={value}
-      onChange={(e) => {
-        onChange(e.target.value);
-        if (descRef.current) {
-          descRef.current.style.height = "auto";
-          descRef.current.style.height = descRef.current.scrollHeight + "px";
-        }
-      }}
+      onChange={(e) => onChange(e.target.value)}
       onBlur={onBlur}
+      className="min-h-0 w-full ml-0"
       style={{
         fontFamily: "'DM Sans', sans-serif",
         fontSize: 13.5,
         color: "#6B6560",
         lineHeight: 1.6,
-        width: "100%",
         border: "none",
         outline: "none",
         background: "rgba(255,255,255,0.5)",
         borderRadius: 8,
         padding: "8px 10px",
-        resize: "none",
-        overflow: "hidden",
         height: "auto",
+        boxShadow: "none",
       }}
     />
   );
