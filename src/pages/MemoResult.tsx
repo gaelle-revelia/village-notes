@@ -350,8 +350,12 @@ const MemoResult = () => {
   if (authLoading || loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="animate-pulse text-muted-foreground">Chargement...</div>
-      </div>);
+        <div
+          className="w-8 h-8 rounded-full border-2 animate-spin"
+          style={{ borderColor: "#8B74E0", borderTopColor: "transparent" }}
+        />
+      </div>
+    );
 
   }
   if (!user) return <Navigate to="/auth" replace />;

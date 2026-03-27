@@ -46,7 +46,10 @@ const NouvelleNote = () => {
   if (authLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="animate-pulse text-muted-foreground">Chargement...</div>
+        <div
+          className="w-8 h-8 rounded-full border-2 animate-spin"
+          style={{ borderColor: "#8B74E0", borderTopColor: "transparent" }}
+        />
       </div>
     );
   }

@@ -81,8 +81,11 @@ export default function VillageProFiche() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-sm text-[#9A9490]">Chargement…</p>
+      <div className="flex min-h-screen items-center justify-center">
+        <div
+          className="w-8 h-8 rounded-full border-2 animate-spin"
+          style={{ borderColor: "#8B74E0", borderTopColor: "transparent" }}
+        />
       </div>
     );
   }
