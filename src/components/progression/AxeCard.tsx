@@ -161,7 +161,7 @@ const AxeCard = ({ axe, pepites, onClick }: AxeCardProps) => {
               <circle
                 key={i}
                 cx={`${15 + i * 17}%`}
-                cy={45}
+                cy={65}
                 r={4}
                 fill="none"
                 stroke={axe.couleur}
