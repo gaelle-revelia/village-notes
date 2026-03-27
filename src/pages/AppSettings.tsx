@@ -185,7 +185,7 @@ export default function AppSettings() {
               className="text-sm leading-relaxed"
               style={{ fontFamily: "DM Sans, sans-serif", color: "#9A9490" }}
             >
-              Vous perdrez l'accès au village. Vos mémos resteront visibles pour
+              Vous n'aurez plus accès au village. Les mémos que vous avez créés resteront visibles pour
               les autres membres. Cette action est irréversible.
             </AlertDialogDescription>
           </AlertDialogHeader>
