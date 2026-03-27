@@ -1297,7 +1297,7 @@ const MemoResult = () => {
 
 
                 <span style={{ color: "#9A9490", fontStyle: "italic", fontSize: 15 }}>
-                    {isTextQuick ? "Ajouter votre note..." : "Ajouter des détails..."}
+                    {isTextQuick ? "Ajouter une note..." : "Ajouter des détails..."}
                   </span>
                 }
               </div>
