@@ -34,7 +34,7 @@ import OutilsSyntheseRdvBriefing from "./pages/OutilsSyntheseRdvBriefing";
 import OutilsSyntheseMdphResultats from "./pages/OutilsSyntheseMdphResultats";
 import OutilsSyntheseTransmission from "./pages/OutilsSyntheseTransmission";
 import OutilsCoherence from "./pages/OutilsCoherence";
-import ExplorerScreen from "./pages/ExplorerScreen";
+
 import OnboardingInvite from "./pages/OnboardingInvite";
 import Vocabulaire from "./pages/Vocabulaire";
 import PlaceholderScreen from "./components/PlaceholderScreen";
@@ -71,7 +71,7 @@ const AppRoutes = () => {
       <Route path="/outils/synthese/rdv/presentation" element={<PlaceholderScreen title="Présenter l'enfant" />} />
       <Route path="/outils/synthese/transmission" element={<OutilsSyntheseTransmission />} />
       <Route path="/outils/coherence" element={<OutilsCoherence />} />
-      <Route path="/explorer" element={<ExplorerScreen />} />
+      
       <Route path="/a-venir" element={<OutilsQuestions />} />
       <Route path="/a-venir/:id" element={<AVenirDetail />} />
       <Route path="/onboarding" element={<Onboarding />} />
