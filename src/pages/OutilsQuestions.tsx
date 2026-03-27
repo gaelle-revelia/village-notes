@@ -1,7 +1,7 @@
 import { type CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { ArrowLeft, Bell, CalendarDays, Check, ChevronRight, Loader2, MessageCircleQuestion, Mic, Plus, Search, SlidersHorizontal, Square, X } from "lucide-react";
+import { ArrowLeft, Bell, CalendarDays, Check, ChevronRight, Info, Loader2, MessageCircleQuestion, Mic, Plus, Search, SlidersHorizontal, Square, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useVocalRecording } from "@/hooks/useVocalRecording";
 import { useNavigate } from "react-router-dom";
@@ -232,6 +232,7 @@ export default function OutilsQuestions() {
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [recentIds, setRecentIds] = useState<string[]>([]);
   const [filterPanelOpen, setFilterPanelOpen] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
   const saveTimerRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
   const mainRef = useRef<HTMLElement>(null);
 
@@ -750,7 +751,15 @@ export default function OutilsQuestions() {
       <header data-filter-header className="sticky top-0 z-10 px-4" style={glassHeader}>
         {/* Row 1: title + avatar */}
         <div className="flex items-center justify-between py-3">
-          <h1 style={{ fontFamily: "'Fraunces', serif", fontSize: 28, fontWeight: 700 }} className="text-foreground">À venir</h1>
+          <div className="flex flex-col">
+            <h1 style={{ fontFamily: "'Fraunces', serif", fontSize: 28, fontWeight: 700 }} className="text-foreground">À venir</h1>
+            <button onClick={() => setShowHelp(true)} className="flex items-center gap-1 bg-transparent border-none cursor-pointer p-0">
+              <Info size={14} color="#8B74E0" />
+              <span style={{ fontSize: 11, color: "#9A9490", fontFamily: "'DM Sans', sans-serif" }}>
+                Comment utiliser cet espace ?
+              </span>
+            </button>
+          </div>
           <ProfileAvatar />
         </div>
         {/* Tab row */}
@@ -1177,6 +1186,61 @@ export default function OutilsQuestions() {
               </button>
             ))}
           </nav>
+        </DialogContent>
+      </Dialog>
+
+      {/* Help dialog */}
+      <Dialog open={showHelp} onOpenChange={setShowHelp}>
+        <DialogContent
+          hideClose
+          className="max-w-[340px]"
+          style={{
+            background: "rgba(255,255,255,0.95)",
+            backdropFilter: "blur(20px)",
+            WebkitBackdropFilter: "blur(20px)",
+            borderRadius: 20,
+            padding: "24px 20px"
+          }}>
+          <h3 style={{ fontFamily: "'Fraunces', serif", fontSize: 16, fontWeight: 600, color: "#1E1A1A", marginBottom: 16 }}>
+            Vos boucles ouvertes
+          </h3>
+          <p style={{ fontSize: 13, color: "#4A4440", fontFamily: "'DM Sans', sans-serif", lineHeight: 1.65, marginBottom: 16 }}>
+            Un appel à passer, une réponse qu'on attend, une question à ne pas oublier — ce sont des boucles ouvertes. Comme des onglets qui tournent en arrière-plan et occupent de la place dans votre tête.
+          </p>
+          <div style={{ height: 1, background: "rgba(0,0,0,0.06)", margin: "16px 0" }} />
+          <div className="space-y-4">
+            {[
+              { color: "#8B74E0", label: "Rendez-vous", desc: "Un RDV à préparer, lié à un professionnel et une date." },
+              { color: "#E8A44A", label: "Rappels", desc: "Un appel, un mail, une démarche à ne pas laisser filer." },
+              { color: "#44A882", label: "Questions", desc: "Ce que vous voulez poser à un professionnel au prochain RDV." },
+            ].map((item, i) => (
+              <div key={i} className="flex items-start gap-3">
+                <div style={{ width: 18, height: 18, borderRadius: "50%", backgroundColor: item.color, flexShrink: 0, marginTop: 2 }} />
+                <div>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: "#1E1A1A", fontFamily: "'DM Sans', sans-serif" }}>
+                    {item.label}
+                  </p>
+                  <p style={{ fontSize: 11, color: "#9A9490", fontFamily: "'DM Sans', sans-serif", lineHeight: 1.4 }}>
+                    {item.desc}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div style={{ height: 1, background: "rgba(0,0,0,0.06)", margin: "16px 0" }} />
+          <p style={{ fontSize: 12, color: "#9A9490", fontFamily: "'DM Sans', sans-serif" }}>
+            Quand c'est réglé, fermez la boucle. Elle rejoint les archives — et votre tête se libère un peu.
+          </p>
+          <button
+            onClick={() => setShowHelp(false)}
+            className="w-full mt-4 py-2.5 rounded-xl text-sm font-medium cursor-pointer"
+            style={{
+              background: "rgba(255,255,255,0.5)",
+              border: "1px solid rgba(255,255,255,0.72)",
+              color: "#1E1A1A"
+            }}>
+            Compris
+          </button>
         </DialogContent>
       </Dialog>
     </div>
