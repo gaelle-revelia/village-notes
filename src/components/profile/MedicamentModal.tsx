@@ -120,7 +120,7 @@ export function MedicamentModal({ open, enfantId, initialData, onSave, onClose }
       <div className="absolute inset-0" style={{ background: "rgba(0,0,0,0.5)" }} onClick={onClose} />
 
       {/* Sheet */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl max-h-[90vh] overflow-y-auto p-6 z-50">
+      <div className="fixed bottom-0 left-0 right-0 rounded-t-2xl max-h-[90vh] overflow-y-auto p-6 z-50" style={{ background: "rgba(255,255,255,0.92)", backdropFilter: "blur(20px) saturate(1.5)", WebkitBackdropFilter: "blur(20px) saturate(1.5)" }}>
         {/* Handle */}
         <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-4" />
 
