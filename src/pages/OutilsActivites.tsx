@@ -86,6 +86,7 @@ export default function OutilsActivites() {
 
   // Archive state
   const [archiving, setArchiving] = useState<Activite | null>(null);
+  const [showHelp, setShowHelp] = useState(false);
 
   useEffect(() => {
     if (!enfantId) return;
