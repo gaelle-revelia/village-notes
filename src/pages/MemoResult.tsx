@@ -118,11 +118,6 @@ const MemoResult = () => {
   const [loading, setLoading] = useState(true);
   const [intervenants, setIntervenants] = useState<Intervenant[]>([]);
 
-  // Swipe navigation between memos
-  const [memoIds, setMemoIds] = useState<string[]>([]);
-  const [swipeFade, setSwipeFade] = useState(false);
-  const swipeStart = useRef<{x: number;y: number;} | null>(null);
-
   // Per-field editing
   const [editingField, setEditingField] = useState<string | null>(null);
   const [intervenantSearch, setIntervenantSearch] = useState("");
