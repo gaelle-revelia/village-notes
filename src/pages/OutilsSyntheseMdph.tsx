@@ -324,7 +324,7 @@ const OutilsSyntheseMdph = () => {
   const renderCta = () => {
     if (!introSeen) {
       return (
-        <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, padding: "6px 16px 76px" }}>
+         <div style={{ position: "sticky", bottom: 0, padding: "6px 16px 76px" }}>
           <button
             onClick={() => setIntroSeen(true)}
             style={{ width: "100%", padding: "11px 15px", background: "linear-gradient(135deg, #E8736A, #8B74E0)", color: "#fff", border: "none", borderRadius: 16, fontSize: 15, fontWeight: 600, cursor: "pointer" }}>
