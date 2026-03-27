@@ -213,45 +213,12 @@ const SelenaScreen = () => {
         ) : hasAxes && axes.length > 0 ? (
           /* ── Main synthèse view ── */
           <div className="flex flex-col gap-5">
-            {/* Badge row */}
-            <div className="flex items-center justify-between w-full">
-              <span
-                style={{
-                  background: "rgba(139,116,224,0.12)",
-                  color: "#8B74E0",
-                  fontFamily: "'DM Sans', sans-serif",
-                  fontSize: 10,
-                  textTransform: "uppercase",
-                  borderRadius: 20,
-                  padding: "4px 10px",
-                  fontWeight: 600,
-                  letterSpacing: 0.5,
-                }}
-              >
-                ✦ Carte de Progression
-              </span>
-            </div>
-            <button onClick={() => setShowHelpSheet(true)} className="flex items-center gap-1 bg-transparent border-none cursor-pointer p-0 mt-1">
+            <button onClick={() => setShowHelpSheet(true)} className="flex items-center gap-1 bg-transparent border-none cursor-pointer p-0">
               <Info size={14} color="#8B74E0" />
               <span style={{ fontSize: 11, color: "#9A9490", fontFamily: "'DM Sans', sans-serif" }}>
                 Comment utiliser la constellation ?
               </span>
             </button>
-
-            {/* Intro text */}
-            <p
-              className="text-center"
-              style={{
-                fontFamily: "'DM Sans', sans-serif",
-                fontSize: 13,
-                color: "#9A9490",
-                fontStyle: "italic",
-                lineHeight: 1.6,
-                padding: "0 24px",
-              }}
-            >
-              Chaque mémo témoignant d'un progrès, même petit, devient une étoile. Ensemble, elles dessinent le chemin de {prenom} — pas une ligne droite, une constellation.
-            </p>
 
             {/* Section header */}
             <div className="flex items-center justify-between mt-1">
