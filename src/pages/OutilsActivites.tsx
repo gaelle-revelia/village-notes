@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Plus, Timer, PenLine, Activity, Brain, Stethoscope, Heart, Ear, MoreVertical, Loader2 } from "lucide-react";
+import { ArrowLeft, Plus, Timer, PenLine, Activity, Brain, Stethoscope, Heart, Ear, MoreVertical, Loader2, Info } from "lucide-react";
 import { icons } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useEnfantId } from "@/hooks/useEnfantId";
