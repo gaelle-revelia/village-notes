@@ -26,7 +26,7 @@ const STEPS = [
   },
   {
     title: (_p: string) => "S'il ne devait y avoir qu'une chose sur laquelle garder le cap ?",
-    subtitle: "L'essentiel, dans tes mots.",
+    subtitle: "L'essentiel, dans vos mots.",
   },
 ];
 
