@@ -112,7 +112,7 @@ export function StepVocabulaire({
       <div className="space-y-2">
         <h1
           className="text-[32px] font-semibold text-card-foreground leading-tight"
-          style={{ fontFamily: "Fraunces" }}
+          style={{ fontFamily: "'Fraunces', serif" }}
         >
           Des mots qui vous appartiennent
         </h1>

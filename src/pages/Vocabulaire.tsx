@@ -202,7 +202,7 @@ const Vocabulaire = () => {
           </button>
           <h1
             className="text-lg font-semibold"
-            style={{ fontFamily: "Fraunces", color: "#1a1512" }}
+            style={{ fontFamily: "'Fraunces', serif", color: "#1a1512" }}
           >
             Mon vocabulaire
           </h1>

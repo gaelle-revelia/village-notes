@@ -73,7 +73,7 @@ export function StepMateriel({ prenomEnfant, enfantId, onNext, onSkip }: StepMat
         <div className="space-y-2">
           <h1
             className="text-[32px] font-semibold text-card-foreground leading-tight"
-            style={{ fontFamily: "Fraunces" }}
+            style={{ fontFamily: "'Fraunces', serif" }}
           >
             Du matériel spécifique&nbsp;?
           </h1>
@@ -131,7 +131,7 @@ export function StepMateriel({ prenomEnfant, enfantId, onNext, onSkip }: StepMat
       <div className="space-y-2">
         <h1
           className="text-[32px] font-semibold text-card-foreground leading-tight"
-          style={{ fontFamily: "Fraunces" }}
+          style={{ fontFamily: "'Fraunces', serif" }}
         >
           Le matériel de {prenomEnfant}
         </h1>

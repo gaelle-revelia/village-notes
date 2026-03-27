@@ -750,7 +750,7 @@ export default function OutilsQuestions() {
       <header data-filter-header className="sticky top-0 z-10 px-4" style={glassHeader}>
         {/* Row 1: title + avatar */}
         <div className="flex items-center justify-between py-3">
-          <h1 style={{ fontFamily: "Fraunces, serif", fontSize: 28, fontWeight: 700 }} className="text-foreground">À venir</h1>
+          <h1 style={{ fontFamily: "'Fraunces', serif", fontSize: 28, fontWeight: 700 }} className="text-foreground">À venir</h1>
           <ProfileAvatar />
         </div>
         {/* Tab row */}

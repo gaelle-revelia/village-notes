@@ -506,7 +506,7 @@ export default function ChildProfile() {
             <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-4" />
             <h2
               className="text-xl font-semibold text-foreground mb-5"
-              style={{ fontFamily: "Fraunces" }}
+              style={{ fontFamily: "'Fraunces', serif" }}
             >
               Modifier les informations
             </h2>

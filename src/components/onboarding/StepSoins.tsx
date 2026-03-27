@@ -83,7 +83,7 @@ export function StepSoins({ prenomEnfant, enfantId, onNext, onSkip }: StepSoinsP
         <div className="space-y-2">
           <h1
             className="text-[32px] font-semibold text-card-foreground leading-tight"
-            style={{ fontFamily: "Fraunces" }}
+            style={{ fontFamily: "'Fraunces', serif" }}
           >
             Des soins spécifiques&nbsp;?
           </h1>
@@ -141,7 +141,7 @@ export function StepSoins({ prenomEnfant, enfantId, onNext, onSkip }: StepSoinsP
       <div className="space-y-2">
         <h1
           className="text-[32px] font-semibold text-card-foreground leading-tight"
-          style={{ fontFamily: "Fraunces" }}
+          style={{ fontFamily: "'Fraunces', serif" }}
         >
           Soins de {prenomEnfant}
         </h1>

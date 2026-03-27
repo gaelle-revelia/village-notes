@@ -126,7 +126,7 @@ export function MedicamentModal({ open, enfantId, initialData, onSave, onClose }
 
         <h2
           className="text-xl font-semibold text-card-foreground mb-5"
-          style={{ fontFamily: "Fraunces" }}
+          style={{ fontFamily: "'Fraunces', serif" }}
         >
           {initialData ? "Modifier le médicament" : "Nouveau médicament"}
         </h2>

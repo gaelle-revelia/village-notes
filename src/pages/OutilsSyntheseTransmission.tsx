@@ -488,7 +488,7 @@ const OutilsSyntheseTransmission = () => {
               await supabase.from("syntheses").update({ titre: titre.trim() || null }).eq("id", syntheseId);
             }}
             onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); }}
-            style={{ fontFamily: "Fraunces, serif", fontSize: 20, fontWeight: 600, color: "#1E1A1A", background: "none", border: "none", borderBottom: "1px solid #8B74E0", outline: "none", width: "100%", padding: "2px 0" }}
+            style={{ fontFamily: "'Fraunces', serif", fontSize: 20, fontWeight: 600, color: "#1E1A1A", background: "none", border: "none", borderBottom: "1px solid #8B74E0", outline: "none", width: "100%", padding: "2px 0" }}
           />
         ) : (
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
