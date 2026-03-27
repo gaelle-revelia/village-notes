@@ -34,7 +34,7 @@ import OutilsSyntheseRdvBriefing from "./pages/OutilsSyntheseRdvBriefing";
 import OutilsSyntheseMdphResultats from "./pages/OutilsSyntheseMdphResultats";
 import OutilsSyntheseTransmission from "./pages/OutilsSyntheseTransmission";
 import OutilsCoherence from "./pages/OutilsCoherence";
-import ExplorerScreen from "./pages/ExplorerScreen";
+
 import OnboardingInvite from "./pages/OnboardingInvite";
 import Vocabulaire from "./pages/Vocabulaire";
 import PlaceholderScreen from "./components/PlaceholderScreen";
