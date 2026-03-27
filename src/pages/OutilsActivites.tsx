@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Plus, Timer, PenLine, Activity, Brain, Stethoscope, Heart, Ear, MoreVertical, Loader2 } from "lucide-react";
+import { ArrowLeft, Plus, Timer, PenLine, Activity, Brain, Stethoscope, Heart, Ear, MoreVertical, Loader2, Info } from "lucide-react";
 import { icons } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useEnfantId } from "@/hooks/useEnfantId";
@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import BottomNavBar from "@/components/BottomNavBar";
 
 const DOMAINS = [
@@ -85,6 +86,7 @@ export default function OutilsActivites() {
 
   // Archive state
   const [archiving, setArchiving] = useState<Activite | null>(null);
+  const [showHelp, setShowHelp] = useState(false);
 
   useEffect(() => {
     if (!enfantId) return;
@@ -150,12 +152,20 @@ export default function OutilsActivites() {
   return (
     <div className="flex min-h-screen flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-10 flex items-center gap-3 px-4 py-3" style={glassHeader}>
-        <button onClick={() => navigate("/outils")} className="flex items-center gap-1 text-sm font-sans" style={{ color: "#8B74E0" }}>
-          <ArrowLeft size={18} />
-          <span>Retour</span>
+      <header className="sticky top-0 z-10 px-4 py-3" style={glassHeader}>
+        <div className="flex items-center gap-3">
+          <button onClick={() => navigate("/outils")} className="flex items-center gap-1 text-sm font-sans" style={{ color: "#8B74E0" }}>
+            <ArrowLeft size={18} />
+            <span>Retour</span>
+          </button>
+          <h1 className="text-lg font-serif font-semibold text-foreground">Activités</h1>
+        </div>
+        <button onClick={() => setShowHelp(true)} className="flex items-center gap-1 bg-transparent border-none cursor-pointer p-0 mt-1">
+          <Info size={14} color="#8B74E0" />
+          <span style={{ fontSize: 11, color: "#9A9490", fontFamily: "'DM Sans', sans-serif" }}>
+            Comment utiliser les activités ?
+          </span>
         </button>
-        <h1 className="text-lg font-serif font-semibold text-foreground">Activités</h1>
       </header>
 
       {/* Content */}
@@ -392,6 +402,35 @@ export default function OutilsActivites() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Help Dialog */}
+      <Dialog open={showHelp} onOpenChange={setShowHelp}>
+        <DialogContent hideClose className="max-w-[340px]" style={{ background: "rgba(255,255,255,0.95)", backdropFilter: "blur(20px) saturate(1.5)", WebkitBackdropFilter: "blur(20px) saturate(1.5)", borderRadius: 20, padding: "24px 20px" }}>
+          <h3 style={{ fontFamily: "'Fraunces', serif", fontSize: 16, fontWeight: 600, color: "#1E1A1A", marginBottom: 12 }}>
+            Vos activités suivies
+          </h3>
+          <div style={{ height: 1, background: "rgba(0,0,0,0.06)", margin: "16px 0" }} />
+          <div className="flex flex-col gap-3">
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#4A4440", lineHeight: 1.65 }}>
+              <span style={{ color: "#8B74E0" }}>✦</span> Pour beaucoup d'enfants avec des besoins spécifiques, la répétition est clé. Ce sont des petites actions répétées, une résilience qui se construit dans le temps.
+            </p>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#4A4440", lineHeight: 1.65 }}>
+              <span style={{ color: "#8B74E0" }}>✦</span> Créez les activités qui comptent pour votre enfant, dans vos mots, à son rythme. Chaque session d'activité laisse une trace dans la timeline.
+            </p>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#4A4440", lineHeight: 1.65 }}>
+              <span style={{ color: "#8B74E0" }}>✦</span> Vous pouvez lancer une activité directement depuis la timeline, en appuyant sur le bouton +.
+            </p>
+          </div>
+          <div style={{ height: 1, background: "rgba(0,0,0,0.06)", margin: "16px 0" }} />
+          <button
+            onClick={() => setShowHelp(false)}
+            className="w-full py-3 rounded-xl text-[14px] font-sans font-semibold transition-transform active:scale-[0.97]"
+            style={{ background: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.72)", color: "#1E1A1A" }}
+          >
+            Compris
+          </button>
+        </DialogContent>
+      </Dialog>
 
       <BottomNavBar />
     </div>
