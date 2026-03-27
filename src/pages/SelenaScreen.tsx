@@ -286,7 +286,7 @@ const SelenaScreen = () => {
           }}
         >
           <h3 style={{ fontFamily: "'Fraunces', serif", fontSize: 16, fontWeight: 600, color: "#1E1A1A", marginBottom: 12 }}>
-            Comment utiliser la constellation ?
+            Comment fonctionne la constellation ?
           </h3>
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#4A4440", lineHeight: 1.65, marginBottom: 16 }}>
             Chaque petit progrès devient une étoile. Ensemble, elles dessinent le chemin de votre enfant — pas une ligne droite, une constellation.
