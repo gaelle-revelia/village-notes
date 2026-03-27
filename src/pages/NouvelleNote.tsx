@@ -143,7 +143,7 @@ const NouvelleNote = () => {
         <h1 className="text-xl font-semibold text-card-foreground">Nouvelle note</h1>
       </header>
 
-      <main className="flex-1 px-4 pt-6 pb-32 overflow-y-auto">
+      <main className="flex-1 px-4 pt-6 pb-24 overflow-y-auto">
         <div className="mx-auto max-w-[400px] space-y-6">
           <div style={glassCard}>
             <MemoDatePicker date={memoDate} onDateChange={setMemoDate} />

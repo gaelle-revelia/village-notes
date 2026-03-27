@@ -364,7 +364,7 @@ const OutilsSyntheseMdph = () => {
 
 
 
-      <main className="flex-1 px-4 pt-5 pb-32">
+      <main className="flex-1 px-4 pt-5 pb-24">
         {/* Intro message */}
         {!introSeen && (
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>

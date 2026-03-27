@@ -119,7 +119,7 @@ export default function OutilsActiviteCreer() {
         <h1 className="text-lg font-serif font-semibold text-foreground">Nouvelle activité</h1>
       </header>
 
-      <main className="flex-1 px-4 pt-5 pb-32 flex flex-col gap-3" style={{ maxWidth: 480, margin: "0 auto", width: "100%" }}>
+      <main className="flex-1 px-4 pt-5 pb-24 flex flex-col gap-3" style={{ maxWidth: 480, margin: "0 auto", width: "100%" }}>
         {/* Nom + icon preview */}
         <div style={{ ...glassCard, padding: "14px 16px" }} className="flex flex-col gap-1.5">
           <label style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", color: "#9A9490" }}>

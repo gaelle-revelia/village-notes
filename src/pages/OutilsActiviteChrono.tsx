@@ -213,7 +213,7 @@ export default function OutilsActiviteChrono() {
         </span>
       </header>
 
-      <main className="flex-1 flex flex-col items-center px-4 pt-8 pb-32">
+      <main className="flex-1 flex flex-col items-center px-4 pt-8 pb-24">
         {!showRecap ? (
           <>
             {/* Chrono circle */}

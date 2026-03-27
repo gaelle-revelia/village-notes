@@ -274,7 +274,7 @@ const OutilsSyntheseRdvBriefing = () => {
         <h1 className="text-xl font-serif font-semibold" style={{ color: "#1E1A1A" }}>Briefing séance</h1>
       </header>
 
-      <main className="flex-1 px-4 pt-5 pb-32">
+      <main className="flex-1 px-4 pt-5 pb-24">
         {/* BLOCK 1 — always visible */}
         <UserBubble text="🩺 Briefing séance" />
         <SectionSeparator text={`Briefing RDV — ${displayName}`} />
