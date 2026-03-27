@@ -1,10 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const allowedOrigins = [
-  "https://the-village.app",
-  "https://thevillage-app.lovable.app",
-];
+const allowedOrigins = ["https://the-village.app", "https://thevillage-app.lovable.app"];
 
 function getCorsHeaders(req: Request) {
   const origin = req.headers.get("origin") || "";
@@ -26,10 +23,10 @@ serve(async (req) => {
     // 1. MANUAL AUTH
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
-      return new Response(
-        JSON.stringify({ error: "Missing authorization header" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: "Missing authorization header" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
@@ -37,21 +34,24 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const token = authHeader.replace("Bearer ", "");
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser(token);
     if (authError || !user) {
-      return new Response(
-        JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     // 2. PARSE BODY
     const { type, enfant_id, parent_context } = await req.json();
     if (!type || !enfant_id) {
-      return new Response(
-        JSON.stringify({ error: "Missing type or enfant_id" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: "Missing type or enfant_id" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     // 3. VERIFY ACCESS
@@ -63,10 +63,10 @@ serve(async (req) => {
       .single();
 
     if (!membre) {
-      return new Response(
-        JSON.stringify({ error: "Access denied" }),
-        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: "Access denied" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     // 4. FETCH CHILD PROFILE
@@ -179,13 +179,13 @@ Générer un document appelé "Un remontant" — un texte narratif chaleureux et
 4. Jamais de jargon médical sans explication immédiate
 5. Jamais de formulation anxiogène ou alarmiste
 6. Jamais de conseil thérapeutique
-7. Si moins de 3 mémos : générer quand même mais ajouter en fin de bloc : "Peu de données sur cette période — ajoute des mémos pour enrichir tes prochains remontants."
-8. Si aucune donnée : content = "Aucune donnée sur cette période. Commence à noter tes observations pour que je puisse générer ton remontant."
+7. Si moins de 3 mémos : générer quand même mais ajouter en fin de bloc : "Peu de données sur cette période — ajoutez des mémos pour enrichir vos prochains remontants."
+8. Si aucune donnée : content = "Aucune donnée sur cette période. Commencez à noter vos observations pour que je puisse générer votre remontant."
 
 ## TON ET STYLE
 - Chaleureux, humain, non clinique
-- S'adresse au parent à la deuxième personne (tu/toi)
-- Parle de l'enfant par son prénom — jamais "votre enfant"
+- S'adresse au parent à la deuxième personne du pluriel (vous/votre)
+- Parle de l'enfant par son prénom — jamais "l'enfant"
 - Valorise les micro-progrès sans les exagérer
 - Ancre le texte dans des faits réels tirés des mémos
 - Longueur : 180-250 mots pour le bloc narratif principal
@@ -218,17 +218,21 @@ Diagnostic: ${enfant?.diagnostic_label ?? "non renseigné"}
 État émotionnel du parent: ${parent_context.etat_emotionnel ?? "non renseigné"}
 Période: du ${parent_context.periode_debut} au ${parent_context.periode_fin}
 Nombre de mémos: ${memos.length}
-Mémos: ${JSON.stringify(memos.map((m: any) => ({
-  date: m.memo_date,
-  resume: m.content_structured?.resume,
-  details: m.content_structured?.details,
-  a_retenir: m.content_structured?.a_retenir,
-})))}
-Activités: ${JSON.stringify(activites.map((a: any) => ({
-  nom: a.activites?.nom,
-  duree_secondes: a.duree_secondes,
-  notes: a.notes,
-})))}`;
+Mémos: ${JSON.stringify(
+        memos.map((m: any) => ({
+          date: m.memo_date,
+          resume: m.content_structured?.resume,
+          details: m.content_structured?.details,
+          a_retenir: m.content_structured?.a_retenir,
+        })),
+      )}
+Activités: ${JSON.stringify(
+        activites.map((a: any) => ({
+          nom: a.activites?.nom,
+          duree_secondes: a.duree_secondes,
+          notes: a.notes,
+        })),
+      )}`;
     }
 
     if (type === "mdph") {
@@ -330,9 +334,9 @@ Ne jamais inventer de chiffres.
 
 Si donnée absente, insérer exactement :
 
-- [DONNÉES CHIFFRÉES MANQUANTES — Ajoute la fréquence ou la durée dans tes mémos.]
+- [DONNÉES CHIFFRÉES MANQUANTES — Ajoutez la fréquence ou la durée dans vos mémos.]
 
-- [FRÉQUENCE DES SÉANCES NON RENSEIGNÉE — Ajoute-la dans tes mémos.]
+- [FRÉQUENCE DES SÉANCES NON RENSEIGNÉE — Ajoutez-la dans vos mémos.]
 
 - [FRAIS ENGAGÉS NON RENSEIGNÉS — Mentionne-les dans la section B1 du formulaire.]
 
@@ -408,39 +412,49 @@ Q7 — Contenu certificat : ${parent_context.certificat_vocal ?? "non disponible
 
 DONNÉES DE L'APPLICATION
 Intervenants actifs (${intervenants?.length ?? 0}) :
-${JSON.stringify(intervenants?.map((i: any) => ({
-  specialite: i.specialite,
-  structure: i.structure,
-  frequence: i.frequence ?? "fréquence non renseignée"
-})) ?? [])}
+${JSON.stringify(
+  intervenants?.map((i: any) => ({
+    specialite: i.specialite,
+    structure: i.structure,
+    frequence: i.frequence ?? "fréquence non renseignée",
+  })) ?? [],
+)}
 
 Médicaments (${medicamentsData?.length ?? 0}) :
-${JSON.stringify(medicamentsData?.map((m: any) => ({
-  nom: m.nom,
-  dosage: m.dosage ?? "non renseigné",
-  frequence: m.frequence ?? "non renseignée"
-})) ?? [])}
+${JSON.stringify(
+  medicamentsData?.map((m: any) => ({
+    nom: m.nom,
+    dosage: m.dosage ?? "non renseigné",
+    frequence: m.frequence ?? "non renseignée",
+  })) ?? [],
+)}
 
 Soins (${soinsData?.length ?? 0}) :
-${JSON.stringify(soinsData?.map((s: any) => ({
-  nom: s.nom,
-  frequence: s.frequence ?? "non renseignée",
-  description: s.description ?? ""
-})) ?? [])}
+${JSON.stringify(
+  soinsData?.map((s: any) => ({
+    nom: s.nom,
+    frequence: s.frequence ?? "non renseignée",
+    description: s.description ?? "",
+  })) ?? [],
+)}
 
 Matériel (${materielData?.length ?? 0}) :
-${JSON.stringify(materielData?.map((m: any) => ({
-  nom: m.nom,
-  conseils: m.conseils ?? ""
-})) ?? [])}
+${JSON.stringify(
+  materielData?.map((m: any) => ({
+    nom: m.nom,
+    conseils: m.conseils ?? "",
+  })) ?? [],
+)}
 
 Mémos des 24 derniers mois (${memos?.length ?? 0}) :
-${JSON.stringify(memos?.map((m: any) => ({
-  date: m.memo_date,
-  resume: m.content_structured?.resume ?? "",
-  details: m.content_structured?.details ?? [],
-  a_retenir: m.content_structured?.a_retenir ?? ""
-})) ?? [])}
+${JSON.stringify(
+  memos?.map((m: any) => ({
+    date: m.memo_date,
+    resume: m.content_structured?.resume ?? "",
+    details: m.content_structured?.details ?? [],
+    a_retenir: m.content_structured?.a_retenir ?? "",
+  })) ?? [],
+)}
 
 BLOCS À GÉNÉRER
 Toujours générer ces 4 blocs : zone_b, scolarite_c3, scolarite_e2, aidant_f`;
@@ -454,15 +468,21 @@ Toujours générer ces 4 blocs : zone_b, scolarite_c3, scolarite_e2, aidant_f`;
 
       if (parent_context.include_profile_data) {
         const [medsRes, soinsRes, matRes] = await Promise.all([
-          supabase.from("medicaments")
+          supabase
+            .from("medicaments")
             .select("nom, dosage, frequence, voie, instructions, conditions")
-            .eq("enfant_id", enfant_id).eq("actif", true),
-          supabase.from("soins")
+            .eq("enfant_id", enfant_id)
+            .eq("actif", true),
+          supabase
+            .from("soins")
             .select("nom, description, frequence, instructions, materiel, signes_alerte")
-            .eq("enfant_id", enfant_id).eq("actif", true),
-          supabase.from("materiel")
+            .eq("enfant_id", enfant_id)
+            .eq("actif", true),
+          supabase
+            .from("materiel")
             .select("nom, conseils, date_reception")
-            .eq("enfant_id", enfant_id).eq("actif", true),
+            .eq("enfant_id", enfant_id)
+            .eq("actif", true),
         ]);
         transmissionMeds = medsRes.data ?? [];
         transmissionSoins = soinsRes.data ?? [];
@@ -560,10 +580,10 @@ Réponses du parent par section: ${JSON.stringify(parent_context.reponses ?? [])
     if (type === "refine_block") {
       const { bloc_id, bloc_title, bloc_content, precision, cas_usage, synthese_id } = parent_context;
       if (!bloc_id || !bloc_content || !precision || !synthese_id) {
-        return new Response(
-          JSON.stringify({ error: "Missing refine_block params" }),
-          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        return new Response(JSON.stringify({ error: "Missing refine_block params" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       }
 
       const refineSystemPrompt = `Tu es The Village. Un parent vient d'apporter une précision sur un bloc déjà généré.
@@ -616,10 +636,10 @@ Pronoms: ${pronom_sujet} / ${accord}`;
 
       const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
       if (!LOVABLE_API_KEY) {
-        return new Response(
-          JSON.stringify({ error: "LOVABLE_API_KEY not configured" }),
-          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        return new Response(JSON.stringify({ error: "LOVABLE_API_KEY not configured" }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       }
 
       const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -636,21 +656,38 @@ Pronoms: ${pronom_sujet} / ${accord}`;
 
       if (!aiResp.ok) {
         const st = aiResp.status;
-        if (st === 429) return new Response(JSON.stringify({ error: "Trop de requêtes — réessaie dans quelques instants." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-        if (st === 402) return new Response(JSON.stringify({ error: "Crédits IA épuisés." }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-        return new Response(JSON.stringify({ error: "AI gateway error" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        if (st === 429)
+          return new Response(JSON.stringify({ error: "Trop de requêtes — réessaie dans quelques instants." }), {
+            status: 429,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        if (st === 402)
+          return new Response(JSON.stringify({ error: "Crédits IA épuisés." }), {
+            status: 402,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        return new Response(JSON.stringify({ error: "AI gateway error" }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       }
 
       const aiD = await aiResp.json();
       const raw = aiD.choices?.[0]?.message?.content ?? "";
       let newContent = "";
       try {
-        const clean = raw.replace(/```json/g, "").replace(/```/g, "").trim();
+        const clean = raw
+          .replace(/```json/g, "")
+          .replace(/```/g, "")
+          .trim();
         const parsed = JSON.parse(clean);
         newContent = parsed.content ?? "";
       } catch {
         console.error("Failed to parse refine response:", raw);
-        return new Response(JSON.stringify({ error: "Failed to parse AI response" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        return new Response(JSON.stringify({ error: "Failed to parse AI response" }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       }
 
       // Update syntheses row
@@ -661,71 +698,73 @@ Pronoms: ${pronom_sujet} / ${accord}`;
           const idx = blocks.findIndex((b: any) => b.id === bloc_id);
           if (idx !== -1) {
             blocks[idx].content = newContent;
-            await supabase.from("syntheses").update({ contenu: JSON.stringify(blocks) }).eq("id", synthese_id);
+            await supabase
+              .from("syntheses")
+              .update({ contenu: JSON.stringify(blocks) })
+              .eq("id", synthese_id);
           }
-        } catch { /* ignore parse error on existing contenu */ }
+        } catch {
+          /* ignore parse error on existing contenu */
+        }
       }
 
-      return new Response(
-        JSON.stringify({ bloc_id, content: newContent }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ bloc_id, content: newContent }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     if (!systemPrompt) {
-      return new Response(
-        JSON.stringify({ error: `Unknown type: ${type}` }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: `Unknown type: ${type}` }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     // 8. CALL AI GATEWAY
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
-      return new Response(
-        JSON.stringify({ error: "LOVABLE_API_KEY not configured" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: "LOVABLE_API_KEY not configured" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    const aiResponse = await fetch(
-      "https://ai.gateway.lovable.dev/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "google/gemini-3-flash-preview",
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: userMessage },
-          ],
-        }),
-      }
-    );
+    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-3-flash-preview",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userMessage },
+        ],
+      }),
+    });
 
     if (!aiResponse.ok) {
       const status = aiResponse.status;
       if (status === 429) {
-        return new Response(
-          JSON.stringify({ error: "Trop de requêtes — réessaie dans quelques instants." }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        return new Response(JSON.stringify({ error: "Trop de requêtes — réessaie dans quelques instants." }), {
+          status: 429,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       }
       if (status === 402) {
-        return new Response(
-          JSON.stringify({ error: "Crédits IA épuisés." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        return new Response(JSON.stringify({ error: "Crédits IA épuisés." }), {
+          status: 402,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       }
       const errorText = await aiResponse.text();
       console.error("AI gateway error:", status, errorText);
-      return new Response(
-        JSON.stringify({ error: "AI gateway error" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: "AI gateway error" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const aiData = await aiResponse.json();
@@ -744,10 +783,10 @@ Pronoms: ${pronom_sujet} / ${accord}`;
       var titreArchive = parsed.titre_archive ?? null;
     } catch (e) {
       console.error("Failed to parse AI response:", rawText);
-      return new Response(
-        JSON.stringify({ error: "Failed to parse AI response", raw: rawText }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: "Failed to parse AI response", raw: rawText }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     // 9b. REVIEW PASS (mdph only)
@@ -787,29 +826,29 @@ FORMAT DE SORTIE — JSON STRICT identique à l'entrée, sans markdown ni commen
       const reviewUserMessage = `Voici les blocs générés à relire et corriger :\n${JSON.stringify({ blocks })}`;
 
       try {
-        const reviewResponse = await fetch(
-          "https://ai.gateway.lovable.dev/v1/chat/completions",
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${LOVABLE_API_KEY}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              model: "google/gemini-3-flash-preview",
-              messages: [
-                { role: "system", content: reviewSystemPrompt },
-                { role: "user", content: reviewUserMessage },
-              ],
-            }),
-          }
-        );
+        const reviewResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${LOVABLE_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "google/gemini-3-flash-preview",
+            messages: [
+              { role: "system", content: reviewSystemPrompt },
+              { role: "user", content: reviewUserMessage },
+            ],
+          }),
+        });
 
         if (reviewResponse.ok) {
           const reviewData = await reviewResponse.json();
           const reviewRaw = reviewData.choices?.[0]?.message?.content ?? "";
           try {
-            const reviewClean = reviewRaw.replace(/```json/g, "").replace(/```/g, "").trim();
+            const reviewClean = reviewRaw
+              .replace(/```json/g, "")
+              .replace(/```/g, "")
+              .trim();
             const reviewParsed = JSON.parse(reviewClean);
             if (reviewParsed.blocks) {
               blocks = reviewParsed.blocks;
@@ -826,9 +865,10 @@ FORMAT DE SORTIE — JSON STRICT identique à l'entrée, sans markdown ni commen
     }
 
     // 10. DOUBLE WRITE
-    const contenu = type === "pick_me_up"
-      ? JSON.stringify({ blocks, etat_emotionnel_resume: etatResume ?? null, titre_archive: titreArchive ?? null })
-      : JSON.stringify(blocks);
+    const contenu =
+      type === "pick_me_up"
+        ? JSON.stringify({ blocks, etat_emotionnel_resume: etatResume ?? null, titre_archive: titreArchive ?? null })
+        : JSON.stringify(blocks);
     const firstBlockTitle = blocks[0]?.title ?? "Synthèse";
 
     const { data: synthese } = await supabase
@@ -838,11 +878,14 @@ FORMAT DE SORTIE — JSON STRICT identique à l'entrée, sans markdown ni commen
         user_id: user.id,
         cas_usage: type,
         contenu,
-        titre: type === "pick_me_up"
-          ? (titreArchive ?? null)
-          : type === "transmission"
-            ? (parent_context.destinataire ? `Transmission — ${parent_context.destinataire}` : "Transmission")
-            : null,
+        titre:
+          type === "pick_me_up"
+            ? (titreArchive ?? null)
+            : type === "transmission"
+              ? parent_context.destinataire
+                ? `Transmission — ${parent_context.destinataire}`
+                : "Transmission"
+              : null,
         etat_emotionnel: parent_context.etat_emotionnel ?? null,
         vocal_mdph: parent_context.vocal_mdph ?? null,
         reponses_transmission: parent_context.reponses ?? null,
@@ -855,30 +898,28 @@ FORMAT DE SORTIE — JSON STRICT identique à l'entrée, sans markdown ni commen
       .select("id")
       .single();
 
-    await supabase
-      .from("memos")
-      .insert({
-        enfant_id,
-        user_id: user.id,
-        type: "synthese",
-        processing_status: "done",
-        content_structured: {
-          resume: firstBlockTitle,
-          details: [contenu],
-        },
-        memo_date: new Date().toISOString().split("T")[0],
-      });
+    await supabase.from("memos").insert({
+      enfant_id,
+      user_id: user.id,
+      type: "synthese",
+      processing_status: "done",
+      content_structured: {
+        resume: firstBlockTitle,
+        details: [contenu],
+      },
+      memo_date: new Date().toISOString().split("T")[0],
+    });
 
     // 11. RETURN
-    return new Response(
-      JSON.stringify({ blocks, synthese_id: synthese?.id }),
-      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ blocks, synthese_id: synthese?.id }), {
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   } catch (error) {
     console.error("generate-synthesis error:", error);
-    return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 });
