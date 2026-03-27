@@ -306,54 +306,52 @@ const SelenaScreen = () => {
       )}
 
       {/* Pedagogical help sheet */}
-      <Sheet open={showHelpSheet} onOpenChange={setShowHelpSheet}>
-        <SheetContent
-          side="bottom"
-          className="rounded-t-2xl px-6 pb-8 pt-3"
+      <Dialog open={showHelpSheet} onOpenChange={setShowHelpSheet}>
+        <DialogContent
+          hideClose
+          className="max-w-[340px]"
           style={{
-            background: "rgba(255,255,255,0.92)",
+            background: "rgba(255,255,255,0.95)",
             backdropFilter: "blur(20px)",
             WebkitBackdropFilter: "blur(20px)",
+            borderRadius: 20,
+            padding: "24px 20px",
           }}
         >
-          {/* Handle bar */}
-          <div className="flex justify-center mb-5">
-            <div style={{ width: 36, height: 4, borderRadius: 2, background: "#E0E0E0" }} />
-          </div>
-          <SheetTitle
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#4A4440", lineHeight: 1.65, marginBottom: 16 }}>
+            Chaque petit progrès devient une étoile. Ensemble, elles dessinent le chemin de votre enfant — pas une ligne droite, une constellation.
+          </p>
+          <div style={{ height: 1, background: "rgba(0,0,0,0.06)", margin: "0 0 16px" }} />
+          {[
+            { label: "Les axes", desc: "c'est vous qui les définissez — dans vos mots, pas le jargon médical. Ce peut être un objectif thérapeutique ou un geste du quotidien qui améliore son autonomie." },
+            { label: "Les pépites", desc: "apparaissent automatiquement quand un mémo témoigne d'un lien avec un axe. Elles ne se gagnent pas — elles révèlent ce qui était déjà là." },
+            { label: "La constellation", desc: "reste vivante même quand les choses ralentissent. Pas de score, pas de jugement. Juste le chemin parcouru, visible." },
+          ].map((item, i) => (
+            <div key={i} className="flex gap-3 items-start mb-3">
+              <span style={{ color: "#8B74E0", fontSize: 13, lineHeight: "1.6", flexShrink: 0 }}>✦</span>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#4A4440", lineHeight: 1.6, margin: 0 }}>
+                <strong>{item.label}</strong> — {item.desc}
+              </p>
+            </div>
+          ))}
+          <div style={{ height: 1, background: "rgba(0,0,0,0.06)", margin: "16px 0" }} />
+          <button
+            onClick={() => setShowHelpSheet(false)}
+            className="w-full rounded-xl py-3 font-medium"
             style={{
-              fontFamily: "'Fraunces', serif",
-              fontSize: 18,
-              fontWeight: 600,
+              background: "rgba(255,255,255,0.7)",
+              backdropFilter: "blur(12px)",
+              border: "1px solid rgba(255,255,255,0.8)",
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: 14,
               color: "#1E1A1A",
-              marginBottom: 16,
+              cursor: "pointer",
             }}
           >
-            Comment ça marche ?
-          </SheetTitle>
-          <div className="flex flex-col gap-4">
-            {[
-              "Chaque mémo que tu notes est analysé et associé à un axe si le lien est évident.",
-              "Les axes sont dans tes mots — jamais du jargon médical.",
-              "Pas de score, pas de jugement. Juste le chemin parcouru, visible.",
-            ].map((text, i) => (
-              <div key={i} className="flex gap-3 items-start">
-                <span style={{ color: "#8B74E0", fontSize: 13, lineHeight: "1.6", flexShrink: 0 }}>✦</span>
-                <p
-                  style={{
-                    fontFamily: "'DM Sans', sans-serif",
-                    fontSize: 13.5,
-                    color: "#1E1A1A",
-                    lineHeight: 1.6,
-                  }}
-                >
-                  {text}
-                </p>
-              </div>
-            ))}
-          </div>
-        </SheetContent>
-      </Sheet>
+            Compris
+          </button>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
