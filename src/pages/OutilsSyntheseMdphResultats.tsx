@@ -130,7 +130,7 @@ export default function OutilsSyntheseMdphResultats() {
   };
 
   return (
-    <div className="min-h-screen pb-28" style={{ background: "linear-gradient(150deg, #F9EDE8 0%, #F0EAF8 45%, #E8EFF8 100%)" }}>
+    <div className="min-h-screen pb-28">
       {/* Header */}
       <div className="sticky top-0 z-30 flex items-center justify-between px-4 py-3" style={{ background: "rgba(255,255,255,0.72)", backdropFilter: "blur(20px) saturate(1.5)", borderBottom: "1px solid rgba(255,255,255,0.6)", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
         <div className="flex items-center gap-3">
