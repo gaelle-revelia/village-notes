@@ -93,17 +93,15 @@ export default function OutilsSyntheseMdphResultats() {
       setTitre(syntheseData.titre ?? "");
       setEnvoye(syntheseData.envoye ?? false);
 
-      // Fetch enfant prenom
-      const { data: enfantData } = await supabase
-        .from("enfants")
-        .select("prenom")
-        .eq("id", syntheseData.enfant_id)
-        .maybeSingle();
+      // Fetch enfant prenom and parent prenom in parallel
+      const [enfantResult, authResult] = await Promise.all([
+        supabase.from("enfants").select("prenom").eq("id", syntheseData.enfant_id).maybeSingle(),
+        supabase.auth.getUser()
+      ]);
 
-      if (enfantData?.prenom) setEnfantPrenom(enfantData.prenom);
+      if (enfantResult.data?.prenom) setEnfantPrenom(enfantResult.data.prenom);
 
-      // Fetch parent prenom
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = authResult.data?.user;
       if (user) {
         const { data: profileData } = await supabase
           .from("profiles")
