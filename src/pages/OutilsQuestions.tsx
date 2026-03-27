@@ -1,7 +1,7 @@
 import { type CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { ArrowLeft, Bell, CalendarDays, Check, ChevronRight, Loader2, MessageCircleQuestion, Mic, Plus, Search, SlidersHorizontal, Square, X } from "lucide-react";
+import { ArrowLeft, Bell, CalendarDays, Check, ChevronRight, Info, Loader2, MessageCircleQuestion, Mic, Plus, Search, SlidersHorizontal, Square, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useVocalRecording } from "@/hooks/useVocalRecording";
 import { useNavigate } from "react-router-dom";
