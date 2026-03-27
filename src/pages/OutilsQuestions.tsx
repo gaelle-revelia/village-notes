@@ -750,7 +750,15 @@ export default function OutilsQuestions() {
       <header data-filter-header className="sticky top-0 z-10 px-4" style={glassHeader}>
         {/* Row 1: title + avatar */}
         <div className="flex items-center justify-between py-3">
-          <h1 style={{ fontFamily: "'Fraunces', serif", fontSize: 28, fontWeight: 700 }} className="text-foreground">À venir</h1>
+          <div className="flex flex-col">
+            <h1 style={{ fontFamily: "'Fraunces', serif", fontSize: 28, fontWeight: 700 }} className="text-foreground">À venir</h1>
+            <button onClick={() => setShowHelp(true)} className="flex items-center gap-1 bg-transparent border-none cursor-pointer p-0">
+              <Info size={14} color="#8B74E0" />
+              <span style={{ fontSize: 11, color: "#9A9490", fontFamily: "'DM Sans', sans-serif" }}>
+                Comment utiliser cet espace ?
+              </span>
+            </button>
+          </div>
           <ProfileAvatar />
         </div>
         {/* Tab row */}
