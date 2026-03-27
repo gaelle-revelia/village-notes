@@ -233,7 +233,7 @@ export default function NouvelleQuestion() {
         setTranscriptionError("Reformulation échouée — réessaie ou utilise la saisie texte.");
         toast({
           title: "Reformulation impossible",
-          description: "Réessaie ou passe en saisie texte.",
+          description: "Veuillez réessayer ou passer en saisie texte.",
           variant: "destructive",
         });
       } finally {
