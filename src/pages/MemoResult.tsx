@@ -1252,7 +1252,7 @@ const MemoResult = () => {
                 onChange={(e) => setTempDetails(e.target.value)}
                 onBlur={saveDetails}
                 rows={1}
-                placeholder={isTextQuick ? "Modifier votre note..." : "Un élément par ligne..."}
+                placeholder={isTextQuick ? "Modifier la note..." : "Un élément par ligne..."}
                 className="w-full outline-none resize-none placeholder:text-[#9A9490] min-h-0"
                 style={{
                   fontFamily: "'DM Sans', sans-serif",
