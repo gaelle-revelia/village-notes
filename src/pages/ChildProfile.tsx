@@ -68,9 +68,7 @@ export default function ChildProfile() {
 
   useEffect(() => {
     if (!enfantId) return;
-    fetchMedicaments();
-    fetchSoins();
-    fetchMateriel();
+    Promise.all([fetchMedicaments(), fetchSoins(), fetchMateriel()]);
   }, [enfantId]);
 
   const handleSexeChange = async (value: string) => {
