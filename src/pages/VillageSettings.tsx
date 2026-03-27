@@ -95,35 +95,23 @@ export default function VillageSettings() {
   const fetchMembers = async () => {
     if (!enfantId) return;
     setLoading(true);
-    const { data } = await supabase
-      .from("intervenants")
-      .select("id, nom, specialite, type, telephone, email, structure, notes")
-      .eq("enfant_id", enfantId)
-      .eq("actif", true)
-      .order("created_at", { ascending: true });
-    setMembers(data ?? []);
+    const [membersRes, invitesRes, questionsRes] = await Promise.all([
+      supabase.from("intervenants").select("id, nom, specialite, type, telephone, email, structure, notes").eq("enfant_id", enfantId).eq("actif", true).order("created_at", { ascending: true }),
+      supabase.from("invitations").select("email, status").eq("enfant_id", enfantId).eq("status", "pending"),
+      supabase.from("questions").select("id, linked_pro_ids").eq("child_id", enfantId).is("archived_at", null)
+    ]);
+
+    setMembers(membersRes.data ?? []);
     setLoading(false);
 
-    // Fetch pending invitations to match by email
-    const { data: invites } = await supabase
-      .from("invitations")
-      .select("email, status")
-      .eq("enfant_id", enfantId)
-      .eq("status", "pending");
     const map: Record<string, boolean> = {};
-    (invites ?? []).forEach((inv) => {
+    (invitesRes.data ?? []).forEach((inv) => {
       map[inv.email.toLowerCase()] = true;
     });
     setPendingInvites(map);
 
-    // Fetch open questions to count per pro
-    const { data: openQuestions } = await supabase
-      .from("questions")
-      .select("id, linked_pro_ids")
-      .eq("child_id", enfantId)
-      .is("archived_at", null);
     const counts: Record<string, number> = {};
-    (openQuestions ?? []).forEach((q: any) => {
+    (questionsRes.data ?? []).forEach((q: any) => {
       const ids: string[] = q.linked_pro_ids ?? [];
       ids.forEach((pid: string) => {
         counts[pid] = (counts[pid] || 0) + 1;
