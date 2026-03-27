@@ -21,12 +21,12 @@ const STEPS = [
     subtitle: "Ce qui occupe vraiment votre quotidien",
   },
   {
-    title: (p: string) => `Qu'est-ce que tu observes en ce moment chez ${p} ?`,
+    title: (p: string) => `Qu'est-ce que vous observez en ce moment chez ${p} ?`,
     subtitle: "Même de petit, même de discret.",
   },
   {
     title: (_p: string) => "S'il ne devait y avoir qu'une chose sur laquelle garder le cap ?",
-    subtitle: "L'essentiel, dans tes mots.",
+    subtitle: "L'essentiel, dans vos mots.",
   },
 ];
 
