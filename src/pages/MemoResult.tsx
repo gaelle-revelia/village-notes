@@ -421,35 +421,8 @@ const MemoResult = () => {
   i.nom.toLowerCase().includes(intervenantSearch.toLowerCase())
   );
 
-  const currentIdx = memoIds.indexOf(id!);
-  const hasPrev = currentIdx > 0;
-  const hasNext = currentIdx >= 0 && currentIdx < memoIds.length - 1;
-
   return (
-    <div
-      className="flex min-h-screen flex-col"
-      style={{
-        opacity: swipeFade ? 0 : 1,
-        transition: "opacity 0.2s ease-out"
-      }}>
-      
-      {/* Swipe arrow indicators */}
-      {hasPrev &&
-      <div
-        className="fixed left-2 top-1/2 -translate-y-1/2 z-20 pointer-events-none"
-        style={{ opacity: 0.3 }}>
-        
-          <ChevronLeft size={24} color="#9A9490" />
-        </div>
-      }
-      {hasNext &&
-      <div
-        className="fixed right-2 top-1/2 -translate-y-1/2 z-20 pointer-events-none"
-        style={{ opacity: 0.3 }}>
-        
-          <ChevronRight size={24} color="#9A9490" />
-        </div>
-      }
+    <div className="flex min-h-screen flex-col">
       {/* Header */}
       <header
         className="sticky top-0 z-10 px-4 py-3 flex items-center justify-between"
