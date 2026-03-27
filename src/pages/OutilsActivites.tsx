@@ -251,13 +251,6 @@ export default function OutilsActivites() {
           })
         )}
 
-        {/* Help trigger */}
-        <button onClick={() => setShowHelp(true)} className="flex items-center gap-1 bg-transparent border-none cursor-pointer p-0 mb-3">
-          <Info size={14} color="#8B74E0" />
-          <span style={{ fontSize: 11, color: "#9A9490", fontFamily: "'DM Sans', sans-serif" }}>
-            Comment utiliser cet espace ?
-          </span>
-        </button>
 
         {/* New activity button */}
         <button
