@@ -165,7 +165,7 @@ export default function OutilsActiviteManuel() {
         </span>
       </header>
 
-      <main className="flex-1 px-4 pt-6 pb-32 flex flex-col gap-3" style={{ maxWidth: 480, margin: "0 auto", width: "100%" }}>
+      <main className="flex-1 px-4 pt-6 pb-24 flex flex-col gap-3" style={{ maxWidth: 480, margin: "0 auto", width: "100%" }}>
         {/* Duration */}
         {activite.track_temps && (
           <div style={{ ...glassCard, padding: "14px 16px" }}>

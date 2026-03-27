@@ -953,7 +953,7 @@ export default function OutilsQuestions() {
         </>)}
       </header>
 
-      <main ref={mainRef} className="flex-1 px-4 pb-28 pt-4" onClick={handleMainClick}>
+      <main ref={mainRef} className="flex-1 px-4 pb-24 pt-4" onClick={handleMainClick}>
         {loading ? (
           <div className="flex min-h-[320px] items-center justify-center">
             <span className="text-sm text-muted-foreground">Chargement…</span>
