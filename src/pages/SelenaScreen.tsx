@@ -230,14 +230,13 @@ const SelenaScreen = () => {
               >
                 ✦ Carte de Progression
               </span>
-              <button
-                onClick={() => setShowHelpSheet(true)}
-                className="p-1"
-                aria-label="Aide"
-              >
-                <HelpCircle size={18} color="#9A9490" />
-              </button>
             </div>
+            <button onClick={() => setShowHelpSheet(true)} className="flex items-center gap-1 bg-transparent border-none cursor-pointer p-0 mt-1">
+              <Info size={14} color="#8B74E0" />
+              <span style={{ fontSize: 11, color: "#9A9490", fontFamily: "'DM Sans', sans-serif" }}>
+                Comment utiliser la constellation ?
+              </span>
+            </button>
 
             {/* Intro text */}
             <p
