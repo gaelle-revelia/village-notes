@@ -185,48 +185,6 @@ const MemoResult = () => {
     then(({ data }) => setIntervenants(data || []));
   }, [enfantId]);
 
-  // Fetch ordered memo IDs for swipe navigation
-  useEffect(() => {
-    if (!user) return;
-    supabase.
-    from("memos").
-    select("id").
-
-    order("memo_date", { ascending: true }).
-    order("created_at", { ascending: true }).
-    then(({ data }) => {
-      if (data) setMemoIds(data.map((m) => m.id));
-    });
-  }, [user]);
-
-  // Swipe touch handler for memo navigation
-  useEffect(() => {
-    const onTouchStart = (e: TouchEvent) => {
-      const t = e.touches[0];
-      swipeStart.current = { x: t.clientX, y: t.clientY };
-    };
-    const onTouchEnd = (e: TouchEvent) => {
-      if (!swipeStart.current || !id || memoIds.length === 0) return;
-      const t = e.changedTouches[0];
-      const dx = t.clientX - swipeStart.current.x;
-      const dy = Math.abs(t.clientY - swipeStart.current.y);
-      swipeStart.current = null;
-      if (Math.abs(dx) < 50 || dy > 100) return;
-      const idx = memoIds.indexOf(id);
-      if (idx === -1) return;
-      const nextIdx = dx < 0 ? idx + 1 : idx - 1;
-      if (nextIdx >= 0 && nextIdx < memoIds.length) {
-        setSwipeFade(true);
-        setTimeout(() => navigate(`/memo-result/${memoIds[nextIdx]}`), 200);
-      }
-    };
-    document.addEventListener("touchstart", onTouchStart, { passive: true });
-    document.addEventListener("touchend", onTouchEnd, { passive: true });
-    return () => {
-      document.removeEventListener("touchstart", onTouchStart);
-      document.removeEventListener("touchend", onTouchEnd);
-    };
-  }, [id, memoIds, navigate]);
 
   // --- Auto-save ---
   const autoSave = async (updates: Record<string, any>) => {
