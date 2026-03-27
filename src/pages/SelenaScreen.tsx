@@ -223,12 +223,6 @@ const SelenaScreen = () => {
         ) : hasAxes && axes.length > 0 ? (
           /* ── Main synthèse view ── */
           <div className="flex flex-col gap-5">
-            <button onClick={() => setShowHelpSheet(true)} className="flex items-center gap-1 bg-transparent border-none cursor-pointer p-0">
-              <Info size={14} color="#8B74E0" />
-              <span style={{ fontSize: 11, color: "#9A9490", fontFamily: "'DM Sans', sans-serif" }}>
-                Comment fonctionne la constellation ?
-              </span>
-            </button>
 
             {/* Section header */}
             <div className="flex items-center justify-between mt-1">
