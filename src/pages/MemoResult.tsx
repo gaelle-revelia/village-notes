@@ -174,11 +174,6 @@ const MemoResult = () => {
     });
   }, [memo?.id, memo?.type, memo?.file_url]);
 
-  // Fade in when memo changes
-  useEffect(() => {
-    setSwipeFade(false);
-  }, [id]);
-
   useEffect(() => {
     if (!enfantId) return;
     supabase.
