@@ -122,7 +122,7 @@ const AxeCard = ({ axe, pepites, onClick }: AxeCardProps) => {
 
       <svg
         width="100%"
-        height={100}
+        height={140}
         className="mt-2"
         style={{ display: "block" }}
       >
