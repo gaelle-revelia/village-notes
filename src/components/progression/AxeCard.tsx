@@ -33,7 +33,7 @@ function placeCircles(
     const r = 3 + p.recency * 3;
     const initCxPct = hashToFloat(p.id, 1) * 90 + 5;
     const initCx = (initCxPct / 100) * REF_WIDTH;
-    const initCy = hashToFloat(p.id, 2) * 76 + 8; // 8–84px for 100px height
+    const initCy = hashToFloat(p.id, 2) * 116 + 8; // 8–124px for 140px height
 
     let bestCx = initCx;
     let bestCy = initCy;
@@ -122,7 +122,7 @@ const AxeCard = ({ axe, pepites, onClick }: AxeCardProps) => {
 
       <svg
         width="100%"
-        height={100}
+        height={140}
         className="mt-2"
         style={{ display: "block" }}
       >
@@ -161,7 +161,7 @@ const AxeCard = ({ axe, pepites, onClick }: AxeCardProps) => {
               <circle
                 key={i}
                 cx={`${15 + i * 17}%`}
-                cy={45}
+                cy={65}
                 r={4}
                 fill="none"
                 stroke={axe.couleur}
