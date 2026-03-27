@@ -476,7 +476,7 @@ export default function AVenirDetail() {
                 rows={1}
                 className="w-full resize-none overflow-hidden rounded-lg px-3 py-2 text-[15px] font-medium text-foreground outline-none"
                 style={glassFieldStyle}
-                placeholder="Votre question"
+                placeholder="La question"
               />
             </div>
 
