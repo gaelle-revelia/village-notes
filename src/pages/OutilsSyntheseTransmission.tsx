@@ -528,7 +528,7 @@ const OutilsSyntheseTransmission = () => {
 
             {/* Destinataire block */}
             <SectionSeparator text="POUR QUI CE LIVRET ?" />
-            <AiBubble text="Avant de commencer, dis-moi pour qui tu prépares ce livret." />
+            <AiBubble text="Avant de commencer, <AiBubble text="Avant de commencer, dites-moi pour qui vous préparez ce livret." />." />
             <AiBubble text="Le ton et les priorités s'adapteront automatiquement." />
             <div className="grid grid-cols-2 gap-2 mb-5 max-w-[320px] mx-auto">
               {DESTINATAIRES.map((d) => {
