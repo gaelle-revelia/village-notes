@@ -180,6 +180,10 @@ export default function OutilsSyntheseTransmissionResultats() {
       if (fnErr) throw fnErr;
       setSent(true);
       toast({ title: "Email envoyé ✅" });
+      setTimeout(() => {
+        setSent(false);
+        setEmailValue("");
+      }, 2000);
     } catch (e) {
       console.error("send-transmission-email error:", e);
       toast({ title: "Une erreur est survenue — réessayez.", variant: "destructive" });
