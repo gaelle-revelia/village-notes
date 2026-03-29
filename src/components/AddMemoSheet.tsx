@@ -90,7 +90,12 @@ export default function AddMemoSheet({ open, onOpenChange, enfantId }: Props) {
         <DialogContent
           hideClose
           className="w-[85vw] max-w-md rounded-2xl border-none shadow-xl p-0 gap-0 [&~[data-state]]:bg-black/40"
-          style={{ overflow: "hidden" }}
+          style={{
+            overflow: "hidden",
+            background: "rgba(255,255,255,0.97)",
+            backdropFilter: "blur(20px) saturate(1.5)",
+            WebkitBackdropFilter: "blur(20px) saturate(1.5)",
+          }}
         >
           <DialogHeader className="flex flex-row items-center justify-end px-4 pt-3 pb-0">
             <DialogTitle className="sr-only">Ajouter</DialogTitle>
