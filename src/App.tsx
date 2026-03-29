@@ -71,6 +71,7 @@ const AppRoutes = () => {
       <Route path="/outils/synthese/rdv/briefing" element={<OutilsSyntheseRdvBriefing />} />
       <Route path="/outils/synthese/rdv/presentation" element={<PlaceholderScreen title="Présenter l'enfant" />} />
       <Route path="/outils/synthese/transmission" element={<OutilsSyntheseTransmission />} />
+      <Route path="/outils/synthese/transmission/resultats" element={<OutilsSyntheseTransmissionResultats />} />
       <Route path="/outils/coherence" element={<OutilsCoherence />} />
       
       <Route path="/a-venir" element={<OutilsQuestions />} />
