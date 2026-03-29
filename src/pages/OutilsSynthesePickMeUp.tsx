@@ -414,9 +414,17 @@ const OutilsSynthesePickMeUp = () => {
         <button onClick={() => navigate(isReadOnly ? "/archives" : "/outils/synthese")} className="flex items-center justify-center" aria-label="Retour">
           <ArrowLeft size={20} style={{ color: "#1E1A1A" }} />
         </button>
-        <h1 className="text-xl font-serif font-semibold flex-1" style={{ color: "#1E1A1A" }}>
-          Remontant
-        </h1>
+        <div className="flex-1">
+          <h1 className="text-xl font-serif font-semibold" style={{ color: "#1E1A1A" }}>
+            Remontant
+          </h1>
+          <button onClick={() => setShowHelp(true)} className="flex items-center gap-1 bg-transparent border-none cursor-pointer p-0 mt-1">
+            <Info size={14} color="#8B74E0" />
+            <span style={{ fontSize: 11, color: "#9A9490", fontFamily: "'DM Sans', sans-serif" }}>
+              Qu'est-ce qu'un Remontant ?
+            </span>
+          </button>
+        </div>
         {phase === "result" && (
           <button
             onClick={async () => {
