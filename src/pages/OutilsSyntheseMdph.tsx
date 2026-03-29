@@ -378,7 +378,7 @@ const OutilsSyntheseMdph = () => {
                 <p style={{ fontSize: 10, fontWeight: 500, color: "#8B74E0", marginBottom: 3 }}>The Village</p>
                 <div style={{ background: "rgba(255,255,255,0.58)", border: "1px solid rgba(255,255,255,0.9)", borderRadius: "4px 16px 16px 16px", padding: "12px 14px", maxWidth: 260 }}>
                   <p style={{ fontSize: 13.5, color: "#1E1A1A", lineHeight: 1.6, margin: 0 }}>
-                    The Village, c'est la mémoire vivante du quotidien de {displayName} et de ta famille. Je retranscris l'impact du handicap sur ta vie de tous les jours — à partir de ce que tu m'as confié au fil du temps. Mon rôle s'arrête là : mettre en mots ta réalité pour que le dossier parle pour toi. Pour tout ce qui touche à tes droits, rapproche-toi de la MDPH ou d'une assistante sociale.
+                    The Village, c'est la mémoire vivante du quotidien de {displayName} et de votre famille. Je retranscris l'impact du handicap sur votre vie de tous les jours — à partir de ce que vous m'avez confié au fil du temps. Mon rôle s'arrête là : mettre en mots votre réalité pour que le dossier parle pour vous. Pour tout ce qui touche à vos droits, rapprochez-vous de la MDPH ou d'une assistante sociale.
                   </p>
                 </div>
               </div>
@@ -387,7 +387,7 @@ const OutilsSyntheseMdph = () => {
               <div style={{ display: "flex", gap: 10, paddingLeft: 46 }}>
                 <div style={{ background: "rgba(255,255,255,0.58)", border: "1px solid rgba(255,255,255,0.9)", borderRadius: "4px 16px 16px 16px", padding: "12px 14px", maxWidth: 260 }}>
                   <p style={{ fontSize: 13.5, color: "#1E1A1A", lineHeight: 1.6, margin: 0 }}>
-                    Je vais te poser quelques questions — sur le quotidien de {displayName}, ton organisation, sa scolarité et son projet. Réponds à l'oral, prends le temps qu'il te faut. À la fin, je génère les textes à coller dans ton formulaire CERFA.
+                    Je vais vous poser quelques questions — sur le quotidien de {displayName}, votre organisation, sa scolarité et son projet. Répondez à l'oral, prenez le temps qu'il vous faut. À la fin, je génère les textes à coller dans votre formulaire CERFA.
                   </p>
                 </div>
               </div>
@@ -411,7 +411,7 @@ const OutilsSyntheseMdph = () => {
                 type="text"
                 value={q0Prenom}
                 onChange={(e) => setQ0Prenom(e.target.value)}
-                placeholder="Ton prénom"
+                placeholder="Votre prénom"
                 className="text-[14px] font-sans"
                 style={{
                   ...glassCard,
@@ -437,7 +437,7 @@ const OutilsSyntheseMdph = () => {
         {introSeen && showQ1 && (
           <>
             {currentQ > 0.5 && q0Lien && <UserBubble text={`${q0Prenom} · ${q0Lien}`} />}
-            <AiBubble text="Pour préparer ton dossier, j'ai besoin de quelques infos que je n'ai pas dans tes mémos." />
+            <AiBubble text="Pour préparer votre dossier, j'ai besoin de quelques informations que je n'ai pas dans vos mémos." />
             <AiBubble text="1 — C'est quel type de demande ?" />
             <ChipGroup chips={Q1_CHIPS} selected={q1 ? [q1] : []} onToggle={(c) => toggleSingle(c, q1, setQ1)} />
           </>
@@ -471,10 +471,10 @@ const OutilsSyntheseMdph = () => {
             {currentQ > 2 && q2Vocal.trim() && (
               <UserBubble text="Enregistrement ajouté ✅" />
             )}
-            <AiBubble text="3 — Comment tu t'organises pour les soins et les rendez-vous ?" />
+            <AiBubble text="3 — Comment vous organisez-vous pour les soins et les rendez-vous ?" />
             <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
               <p style={{ fontSize: 11, color: "#8B74E0", lineHeight: 1.6, margin: 0 }}>
-                La commission a besoin de comprendre ton organisation — les rendez-vous hebdomadaires, les soins à domicile, les exercices de rééducation, l'aide rémunérée si tu en as une. Ta situation professionnelle aussi : est-ce que les soins ont impacté ton activité ?
+                La commission a besoin de comprendre votre organisation — les rendez-vous hebdomadaires, les soins à domicile, les exercices de rééducation, l'aide rémunérée si vous en avez une. Votre situation professionnelle aussi : est-ce que les soins ont impacté votre activité ?
               </p>
             </div>
             {q3Vocal.trim() && (
@@ -570,7 +570,7 @@ const OutilsSyntheseMdph = () => {
               <>
                 <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
                   <p style={{ fontSize: 11, color: "#8B74E0", lineHeight: 1.55 }}>
-                    Le diagnostic principal, les restrictions fonctionnelles, les soins mentionnés, les remarques finales — lis directement ou reformule avec tes mots, pour que le dossier généré soit cohérent avec ce que le médecin a écrit.
+                    Le diagnostic principal, les restrictions fonctionnelles, les soins mentionnés, les remarques finales — lisez directement ou reformulez avec vos mots, pour que le dossier généré soit cohérent avec ce que le médecin a écrit.
                   </p>
                 </div>
                 {q7Vocal.trim() && (
@@ -580,7 +580,7 @@ const OutilsSyntheseMdph = () => {
               </>
             )}
             {(q7Etat === "Pas encore" || q7Etat === "Certificat simplifié") && (
-              <AiBubble text="Pas de problème — je génère avec tes mémos et tes réponses." italic />
+              <AiBubble text="Pas de problème — je génère avec vos mémos et vos réponses." italic />
             )}
           </>
         )}
