@@ -137,11 +137,29 @@ export default function ChildProfile() {
   const deleteMedicament = async (id: string) => {
     await supabase.from("medicaments").update({ actif: false }).eq("id", id);
     fetchMedicaments();
+    const { count } = await supabase
+      .from("medicaments")
+      .select("*", { count: "exact", head: true })
+      .eq("enfant_id", enfantId)
+      .eq("actif", true);
+    if (count === 0) {
+      await supabase.from("enfants").update({ has_medicaments: false }).eq("id", enfantId);
+      setHasMedicaments(false);
+    }
   };
 
   const deleteSoin = async (id: string) => {
     await supabase.from("soins").update({ actif: false }).eq("id", id);
     fetchSoins();
+    const { count } = await supabase
+      .from("soins")
+      .select("*", { count: "exact", head: true })
+      .eq("enfant_id", enfantId)
+      .eq("actif", true);
+    if (count === 0) {
+      await supabase.from("enfants").update({ has_soins: false }).eq("id", enfantId);
+      setHasSoins(false);
+    }
   };
 
   const fetchMateriel = async () => {
@@ -170,6 +188,15 @@ export default function ChildProfile() {
   const deleteMateriel = async (id: string) => {
     await supabase.from("materiel").update({ actif: false }).eq("id", id);
     fetchMateriel();
+    const { count } = await supabase
+      .from("materiel")
+      .select("*", { count: "exact", head: true })
+      .eq("enfant_id", enfantId)
+      .eq("actif", true);
+    if (count === 0) {
+      await supabase.from("enfants").update({ has_materiel: false }).eq("id", enfantId);
+      setHasMateriel(false);
+    }
   };
 
   const handleSaveInfos = async () => {
