@@ -125,7 +125,7 @@ const ResultCard = ({ icon, title, body, onPreciser, showCopy }: ResultCardProps
 };
 
 const SECTIONS = [
-  { number: "01", title: "Qui est {prenom} ?", question: "{ number: "01", title: "Qui est {prenom} ?", question: "Décrivez-nous {prenom} en quelques mots — {pronom_tonique} personnalité, comment {pronom_sujet} communique, ce {pronom_rel} aime." }, — {pronom_tonique} personnalité, comment {pronom_sujet} communique, ce {pronom_rel} aime." },
+  { number: "01", title: "Qui est {prenom} ?", question: "Décrivez-nous {prenom} en quelques mots — {pronom_tonique} personnalité, comment {pronom_sujet} communique, ce {pronom_rel} aime." },
   { number: "02", title: "{pronom_poss_maj} histoire et {pronom_poss} handicap", question: "Comment expliques-tu simplement {pronom_poss} handicap à quelqu'un qui ne connaît pas {prenom} ?" },
   { number: "03", title: "Fatigue — signes à repérer", question: "Comment reconnaît-on que {prenom} est fatigué{accord} ? Qu'est-ce qu'il faut faire dans ce cas ?" },
   { number: "04", title: "Comment {pronom_cod} positionner", question: "Quelles sont les positions importantes pour {prenom} et ce qu'il faut savoir pour bien {pronom_install} ?" },
