@@ -580,7 +580,7 @@ const OutilsSyntheseMdph = () => {
               </>
             )}
             {(q7Etat === "Pas encore" || q7Etat === "Certificat simplifié") && (
-              <AiBubble text="Pas de problème — je génère avec tes mémos et tes réponses." italic />
+              <AiBubble text="Pas de problème — je génère avec vos mémos et vos réponses." italic />
             )}
           </>
         )}
