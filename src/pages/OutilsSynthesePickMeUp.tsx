@@ -136,6 +136,7 @@ const OutilsSynthesePickMeUp = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const displayName = prenom ?? "votre enfant";
+  const [showHelp, setShowHelp] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   // Read-only mode from Archives
