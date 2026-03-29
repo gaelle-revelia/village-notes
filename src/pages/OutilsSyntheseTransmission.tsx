@@ -460,6 +460,11 @@ const OutilsSyntheseTransmission = () => {
             value={answers[idx]}
             disabled={isPast}
             onChange={(e) => !isPast && updateAnswer(idx, e.target.value)}
+            onFocus={(e) => {
+              setTimeout(() => {
+                e.target.scrollIntoView({ behavior: "smooth", block: "center" });
+              }, 300);
+            }}
             className="text-[14px] font-sans border-none italic placeholder:italic"
             style={{ ...glassCard, borderRadius: 14, minHeight: 70, maxWidth: "80%" }}
             autoResize
