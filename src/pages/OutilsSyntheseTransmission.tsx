@@ -456,7 +456,7 @@ const OutilsSyntheseTransmission = () => {
         <OrSeparator />
         <div className="mb-2 flex justify-end">
           <Textarea
-            placeholder="Écris ici si tu préfères..."
+            placeholder="Écrivez ici si vous préférez..."
             value={answers[idx]}
             disabled={isPast}
             onChange={(e) => !isPast && updateAnswer(idx, e.target.value)}
