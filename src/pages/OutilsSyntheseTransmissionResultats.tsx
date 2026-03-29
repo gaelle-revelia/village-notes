@@ -159,6 +159,7 @@ export default function OutilsSyntheseTransmissionResultats() {
   const handleDelete = async () => {
     setIsDeleting(true);
     await supabase.from("syntheses").delete().eq("id", syntheseId);
+    toast({ title: "Livret supprimé." });
     navigate("/archives");
   };
 
@@ -282,7 +283,7 @@ export default function OutilsSyntheseTransmissionResultats() {
                   <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "#9A9490" }} />
                   <input
                     type="email"
-                    placeholder="ton@email.com"
+                    placeholder="votre@email.com"
                     value={emailValue}
                     onChange={(e) => setEmailValue(e.target.value)}
                     style={{ ...glassCard, borderRadius: 999, height: 44, width: "100%", paddingLeft: 36, paddingRight: 12, fontSize: 13, border: "none", outline: "none", fontFamily: "DM Sans, sans-serif" }}
