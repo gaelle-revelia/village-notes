@@ -725,6 +725,35 @@ const OutilsSynthesePickMeUp = () => {
         }}
       />
 
+      <Dialog open={showHelp} onOpenChange={setShowHelp}>
+        <DialogContent hideClose className="max-w-[340px] border-none" style={{ background: "rgba(255,255,255,0.95)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", borderRadius: 20, padding: "24px 20px" }}>
+          <h3 style={{ fontFamily: "'Fraunces', serif", fontSize: 16, fontWeight: 600, color: "#1E1A1A", marginBottom: 12 }}>
+            Qu'est-ce qu'un Remontant ?
+          </h3>
+          <div style={{ height: 1, background: "rgba(0,0,0,0.06)", margin: "16px 0" }} />
+          <div className="flex flex-col gap-4">
+            {[
+              "Quand on vit dedans au quotidien, on ne voit plus ce qui avance. Le Remontant est là pour ça — rappeler ce qui s'est passé sur une période choisie, à partir de vos notes.",
+              "Ce que vous lisez vient uniquement de ce que vous avez noté. Rien n'est inventé, rien n'est extrapolé. Si ce n'est pas dans vos mémos, ce n'est pas dans le Remontant.",
+              "Vous choisissez comment vous vous sentez, puis la période à analyser. The Village adapte le ton — sans jamais forcer une lecture positive si les données ne la soutiennent pas.",
+            ].map((t, i) => (
+              <div key={i} className="flex gap-3">
+                <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#8B74E0", flexShrink: 0, marginTop: 4 }} />
+                <p style={{ fontSize: 13, color: "#4A4440", lineHeight: 1.65, margin: 0, fontFamily: "'DM Sans', sans-serif" }}>{t}</p>
+              </div>
+            ))}
+          </div>
+          <div style={{ height: 1, background: "rgba(0,0,0,0.06)", margin: "16px 0" }} />
+          <button
+            onClick={() => setShowHelp(false)}
+            className="w-full rounded-xl"
+            style={{ background: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.72)", color: "#1E1A1A", padding: "10px 0", fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500, cursor: "pointer" }}
+          >
+            Compris
+          </button>
+        </DialogContent>
+      </Dialog>
+
       <BottomNavBar />
     </div>);
 
