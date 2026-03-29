@@ -171,7 +171,10 @@ export default function PreciserBlocDrawer({ isOpen, onClose, bloc, enfantId, sy
           left: 0,
           right: 0,
           padding: "12px 16px 24px",
-          background: "transparent",
+          background: "rgba(255,255,255,0.72)",
+          backdropFilter: "blur(20px) saturate(1.5)",
+          WebkitBackdropFilter: "blur(20px) saturate(1.5)",
+          borderTop: "1px solid rgba(255,255,255,0.6)",
         }}
       >
         <button
