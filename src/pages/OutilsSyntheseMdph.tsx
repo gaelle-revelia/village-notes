@@ -471,7 +471,7 @@ const OutilsSyntheseMdph = () => {
             {currentQ > 2 && q2Vocal.trim() && (
               <UserBubble text="Enregistrement ajouté ✅" />
             )}
-            <AiBubble text="3 — Comment tu t'organises pour les soins et les rendez-vous ?" />
+            <AiBubble text="3 — Comment vous organisez-vous pour les soins et les rendez-vous ?" />
             <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
               <p style={{ fontSize: 11, color: "#8B74E0", lineHeight: 1.6, margin: 0 }}>
                 La commission a besoin de comprendre ton organisation — les rendez-vous hebdomadaires, les soins à domicile, les exercices de rééducation, l'aide rémunérée si tu en as une. Ta situation professionnelle aussi : est-ce que les soins ont impacté ton activité ?
