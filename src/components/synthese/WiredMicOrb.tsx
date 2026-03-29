@@ -58,7 +58,7 @@ export default function WiredMicOrb({ onTranscription, onRecordingChange, disabl
         )}
       </button>
       <span className="text-[12px] font-sans" style={{ color: "#9A9490" }}>
-        {isRecording ? formatTime(elapsedSeconds) : isTranscribing ? "Transcription..." : "{isRecording ? formatTime(elapsedSeconds) : isTranscribing ? "Transcription..." : "Appuyez pour parler"}"}
+        {isRecording ? formatTime(elapsedSeconds) : isTranscribing ? "Transcription..." : "Appuyez pour parler"}
       </span>
       {error && (
         <span className="text-[12px] font-sans text-center max-w-[240px]" style={{ color: "#E8736A" }}>
