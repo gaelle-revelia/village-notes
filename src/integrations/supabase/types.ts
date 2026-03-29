@@ -566,7 +566,6 @@ export type Database = {
           linked_rdv_id: string | null
           parent_id: string
           precisions: string | null
-          show_in_timeline: boolean
           status: string
           text: string
           type: string
@@ -584,7 +583,6 @@ export type Database = {
           linked_rdv_id?: string | null
           parent_id: string
           precisions?: string | null
-          show_in_timeline?: boolean
           status?: string
           text: string
           type?: string
@@ -602,7 +600,6 @@ export type Database = {
           linked_rdv_id?: string | null
           parent_id?: string
           precisions?: string | null
-          show_in_timeline?: boolean
           status?: string
           text?: string
           type?: string
