@@ -309,6 +309,30 @@ export default function VillageSettings() {
       <div className="flex flex-col gap-3">
         {loading || enfantLoading ? (
           <p className="text-sm text-[#9A9490] text-center py-8">Chargement…</p>
+        ) : members.length === 0 ? (
+          <div className="flex flex-col items-center text-center px-8 mt-16 gap-4">
+            <p style={{ fontFamily: "'Fraunces', serif", fontSize: 17, fontWeight: 600, color: "#1E1A1A", lineHeight: 1.4 }}>
+              Votre village est encore vide.
+            </p>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#9A9490", lineHeight: 1.65 }}>
+              Ajoutez les professionnels et membres de la famille qui accompagnent votre enfant. Ils seront disponibles lors de vos mémos et synthèses.
+            </p>
+            <button
+              onClick={() => setAddOpen(true)}
+              style={{
+                marginTop: 8,
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: 13,
+                fontWeight: 600,
+                color: "#8B74E0",
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+              }}
+            >
+              + Ajouter un membre
+            </button>
+          </div>
         ) : filtered.length === 0 ? (
           <p className="text-sm text-[#9A9490] text-center py-8">
             Aucun membre dans cette catégorie.
