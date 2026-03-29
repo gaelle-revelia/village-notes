@@ -33,6 +33,7 @@ import OutilsSyntheseMdph from "./pages/OutilsSyntheseMdph";
 import OutilsSyntheseRdvBriefing from "./pages/OutilsSyntheseRdvBriefing";
 import OutilsSyntheseMdphResultats from "./pages/OutilsSyntheseMdphResultats";
 import OutilsSyntheseTransmission from "./pages/OutilsSyntheseTransmission";
+import OutilsSyntheseTransmissionResultats from "./pages/OutilsSyntheseTransmissionResultats";
 import OutilsCoherence from "./pages/OutilsCoherence";
 
 import OnboardingInvite from "./pages/OnboardingInvite";
