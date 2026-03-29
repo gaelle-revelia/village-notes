@@ -1,0 +1,1 @@
+ALTER TABLE questions DROP COLUMN IF EXISTS show_in_timeline;
