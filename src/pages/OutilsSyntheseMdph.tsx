@@ -541,7 +541,7 @@ const OutilsSyntheseMdph = () => {
             {currentQ > 5 && q5Vocal.trim() && (
               <UserBubble text="Enregistrement ajouté ✅" />
             )}
-            <AiBubble text="6 — Y a-t-il quelque chose d'important que je ne vois pas dans tes mémos ?" />
+            <AiBubble text="6 — Y a-t-il quelque chose d'important que je ne vois pas <AiBubble text="6 — Y a-t-il quelque chose d'important que je ne vois pas dans vos mémos ?" /> ?" />
             <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
               <p style={{ fontSize: 11, color: "#8B74E0", lineHeight: 1.6, margin: 0 }}>
                 Si vous avez quelque chose d'important à ajouter qui n'est pas encore dans vos mémos, c'est le moment., c'est le moment.
