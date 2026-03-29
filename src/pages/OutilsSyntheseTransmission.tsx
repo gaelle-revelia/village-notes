@@ -524,7 +524,7 @@ const OutilsSyntheseTransmission = () => {
             <UserBubble text="📖 Transmission" />
             <SectionSeparator text={`Transmission — ${displayName}`} />
             <AiBubble text={`Je vais te poser 6 questions pour construire le livret de ${displayName}.`} />
-            <AiBubble text="Tu réponds à la voix ou à l'écrit, librement." />
+            <AiBubble text="Répondez à la voix ou à l'écrit, librement." />
 
             {/* Destinataire block */}
             <SectionSeparator text="POUR QUI CE LIVRET ?" />
