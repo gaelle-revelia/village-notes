@@ -151,6 +151,15 @@ export default function ChildProfile() {
   const deleteSoin = async (id: string) => {
     await supabase.from("soins").update({ actif: false }).eq("id", id);
     fetchSoins();
+    const { count } = await supabase
+      .from("soins")
+      .select("*", { count: "exact", head: true })
+      .eq("enfant_id", enfantId)
+      .eq("actif", true);
+    if (count === 0) {
+      await supabase.from("enfants").update({ has_soins: false }).eq("id", enfantId);
+      setHasSoins(false);
+    }
   };
 
   const fetchMateriel = async () => {
