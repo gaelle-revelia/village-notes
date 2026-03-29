@@ -141,7 +141,7 @@ export default function PreciserBlocDrawer({ isOpen, onClose, bloc, enfantId, sy
                 marginBottom: 8,
               }}
             >
-              Ta précision
+              Votre précision
             </p>
             <Textarea
               placeholder="Ajoute ta précision ici…"
