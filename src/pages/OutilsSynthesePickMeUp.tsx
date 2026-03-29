@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, Copy, Share2, Pencil, RefreshCw, CalendarIcon, Sparkles, Trash2 } from "lucide-react";
+import { ArrowLeft, Copy, Share2, Pencil, RefreshCw, CalendarIcon, Sparkles, Trash2, Info } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import WiredMicOrb from "@/components/synthese/WiredMicOrb";
 import { format, subMonths, startOfMonth } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -135,6 +136,7 @@ const OutilsSynthesePickMeUp = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const displayName = prenom ?? "votre enfant";
+  const [showHelp, setShowHelp] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   // Read-only mode from Archives
@@ -412,9 +414,17 @@ const OutilsSynthesePickMeUp = () => {
         <button onClick={() => navigate(isReadOnly ? "/archives" : "/outils/synthese")} className="flex items-center justify-center" aria-label="Retour">
           <ArrowLeft size={20} style={{ color: "#1E1A1A" }} />
         </button>
-        <h1 className="text-xl font-serif font-semibold flex-1" style={{ color: "#1E1A1A" }}>
-          Remontant
-        </h1>
+        <div className="flex-1">
+          <h1 className="text-xl font-serif font-semibold" style={{ color: "#1E1A1A" }}>
+            Remontant
+          </h1>
+          <button onClick={() => setShowHelp(true)} className="flex items-center gap-1 bg-transparent border-none cursor-pointer p-0 mt-1">
+            <Info size={14} color="#8B74E0" />
+            <span style={{ fontSize: 11, color: "#9A9490", fontFamily: "'DM Sans', sans-serif" }}>
+              Qu'est-ce qu'un Remontant ?
+            </span>
+          </button>
+        </div>
         {phase === "result" && (
           <button
             onClick={async () => {
@@ -714,6 +724,35 @@ const OutilsSynthesePickMeUp = () => {
           if (blocId === "narrative") setGeneratedContent(newContent);
         }}
       />
+
+      <Dialog open={showHelp} onOpenChange={setShowHelp}>
+        <DialogContent hideClose className="max-w-[340px] border-none" style={{ background: "rgba(255,255,255,0.95)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", borderRadius: 20, padding: "24px 20px" }}>
+          <h3 style={{ fontFamily: "'Fraunces', serif", fontSize: 16, fontWeight: 600, color: "#1E1A1A", marginBottom: 12 }}>
+            Qu'est-ce qu'un Remontant ?
+          </h3>
+          <div style={{ height: 1, background: "rgba(0,0,0,0.06)", margin: "16px 0" }} />
+          <div className="flex flex-col gap-4">
+            {[
+              "Quand on vit dedans au quotidien, on ne voit plus ce qui avance. Le Remontant est là pour ça — rappeler ce qui s'est passé sur une période choisie, à partir de vos notes.",
+              "Ce que vous lisez vient uniquement de ce que vous avez noté. Rien n'est inventé, rien n'est extrapolé. Si ce n'est pas dans vos mémos, ce n'est pas dans le Remontant.",
+              "Vous choisissez comment vous vous sentez, puis la période à analyser. The Village adapte le ton — sans jamais forcer une lecture positive si les données ne la soutiennent pas.",
+            ].map((t, i) => (
+              <div key={i} className="flex gap-3">
+                <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#8B74E0", flexShrink: 0, marginTop: 4 }} />
+                <p style={{ fontSize: 13, color: "#4A4440", lineHeight: 1.65, margin: 0, fontFamily: "'DM Sans', sans-serif" }}>{t}</p>
+              </div>
+            ))}
+          </div>
+          <div style={{ height: 1, background: "rgba(0,0,0,0.06)", margin: "16px 0" }} />
+          <button
+            onClick={() => setShowHelp(false)}
+            className="w-full rounded-xl"
+            style={{ background: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.72)", color: "#1E1A1A", padding: "10px 0", fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500, cursor: "pointer" }}
+          >
+            Compris
+          </button>
+        </DialogContent>
+      </Dialog>
 
       <BottomNavBar />
     </div>);
