@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, Copy, Share2, Pencil, RefreshCw, CalendarIcon, Sparkles, Trash2 } from "lucide-react";
+import { ArrowLeft, Copy, Share2, Pencil, RefreshCw, CalendarIcon, Sparkles, Trash2, Info } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import WiredMicOrb from "@/components/synthese/WiredMicOrb";
 import { format, subMonths, startOfMonth } from "date-fns";
 import { fr } from "date-fns/locale";
