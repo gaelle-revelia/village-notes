@@ -141,10 +141,10 @@ export default function PreciserBlocDrawer({ isOpen, onClose, bloc, enfantId, sy
                 marginBottom: 8,
               }}
             >
-              Ta précision
+              Votre précision
             </p>
             <Textarea
-              placeholder="Ajoute ta précision ici…"
+              placeholder="Ajoutez votre précision ici…"
               value={precision}
               onChange={(e) => setPrecision(e.target.value)}
               className="text-[14px] font-sans border-none italic placeholder:italic w-full"
