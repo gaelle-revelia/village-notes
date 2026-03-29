@@ -134,11 +134,11 @@ const SECTIONS = [
 ];
 
 const SECTION_HELPERS = [
-  "Parle-moi {pronom_prep} comme tu le ferais à quelqu'un qui ne {pronom_cod2} jamais rencontré{accord}. Pas de jargon — juste {pronom_cod_tonique}.",
-  "Pas besoin d'être précis médicalement. Comment tu l'expliques, toi, dans ta langue ?",
-  "Tu {pronom_cod} connais mieux que personne. Qu'est-ce que tu as appris à repérer avec le temps ?",
-  "Décris ce que tu fais au quotidien — les gestes, les habitudes, ce qui marche pour {pronom_cod_tonique}.",
-  "Comment tu aimerais que les gens s'approchent {pronom_prep} ? Ce que tu aurais voulu savoir, toi, au début ?",
+  "Parlez-nous {pronom_prep} comme vous le feriez à quelqu'un qui ne {pronom_cod2} jamais rencontré{accord}. Pas de jargon — juste {pronom_cod_tonique}.",
+  "Pas besoin d'être précis médicalement. Comment vous l'expliquez, dans vos mots ?",
+  "Vous {pronom_cod} connaissez mieux que personne. Qu'est-ce que vous avez appris à repérer avec le temps ?",
+  "Décrivez ce que vous faites au quotidien — les gestes, les habitudes, ce qui marche pour {pronom_cod_tonique}.",
+  "Comment aimeriez-vous que les gens s'approchent {pronom_prep} ? Ce que vous auriez voulu savoir, au début ?",
   "Cite juste les noms et la fréquence — le reste, The Village s'en occupe.",
 ];
 
