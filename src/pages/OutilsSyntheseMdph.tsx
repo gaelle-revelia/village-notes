@@ -437,7 +437,7 @@ const OutilsSyntheseMdph = () => {
         {introSeen && showQ1 && (
           <>
             {currentQ > 0.5 && q0Lien && <UserBubble text={`${q0Prenom} · ${q0Lien}`} />}
-            <AiBubble text="Pour préparer ton dossier, j'ai besoin de quelques infos que je n'ai pas dans tes mémos." />
+            <AiBubble text="Pour préparer votre dossier, j'ai besoin de quelques informations que je n'ai pas dans vos mémos." />
             <AiBubble text="1 — C'est quel type de demande ?" />
             <ChipGroup chips={Q1_CHIPS} selected={q1 ? [q1] : []} onToggle={(c) => toggleSingle(c, q1, setQ1)} />
           </>
