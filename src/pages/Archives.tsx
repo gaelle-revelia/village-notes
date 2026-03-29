@@ -239,7 +239,7 @@ const Archives = () => {
                   } else if (s.cas_usage === "pick_me_up") {
                     navigate("/outils/synthese/pick-me-up", { state: { syntheseId: s.id, readOnly: true } });
                   } else if (s.cas_usage === "transmission") {
-                    navigate("/outils/synthese/transmission", { state: { syntheseId: s.id, readOnly: true } });
+                    navigate("/outils/synthese/transmission/resultats", { state: { syntheseId: s.id } });
                   }
                 }}
               >
