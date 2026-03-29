@@ -575,6 +575,27 @@ const OutilsSyntheseTransmission = () => {
           <>
             {!isReadOnly && <UserBubble text={answers[5] || "…"} />}
             <SectionSeparator text={`Livret de transmission — ${displayName}`} />
+            {!isReadOnly && (
+              <p
+                style={{
+                  fontFamily: "'DM Sans', sans-serif",
+                  fontSize: 12,
+                  color: "#9A9490",
+                  textAlign: "center",
+                  margin: "0 0 16px",
+                  lineHeight: 1.5,
+                }}
+              >
+                Ce livret est sauvegardé et consultable à tout moment dans vos{" "}
+                <span
+                  onClick={() => navigate("/archives")}
+                  style={{ color: "#8B74E0", fontWeight: 500, cursor: "pointer" }}
+                >
+                  Archives
+                </span>
+                .
+              </p>
+            )}
             {isReadOnly && destinataire && (
               <p style={{ fontSize: 11, color: "#9A9490", textAlign: "center", margin: "0 0 16px", fontFamily: "DM Sans, sans-serif" }}>
                 Livret préparé pour : <span style={{ color: "#8B74E0", fontWeight: 500 }}>{destinataire}</span>
