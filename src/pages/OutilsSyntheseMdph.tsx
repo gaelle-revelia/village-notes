@@ -378,7 +378,7 @@ const OutilsSyntheseMdph = () => {
                 <p style={{ fontSize: 10, fontWeight: 500, color: "#8B74E0", marginBottom: 3 }}>The Village</p>
                 <div style={{ background: "rgba(255,255,255,0.58)", border: "1px solid rgba(255,255,255,0.9)", borderRadius: "4px 16px 16px 16px", padding: "12px 14px", maxWidth: 260 }}>
                   <p style={{ fontSize: 13.5, color: "#1E1A1A", lineHeight: 1.6, margin: 0 }}>
-                    The Village, c'est la mémoire vivante du quotidien de {displayName} et de ta famille. Je retranscris l'impact du handicap sur ta vie de tous les jours — à partir de ce que tu m'as confié au fil du temps. Mon rôle s'arrête là : mettre en mots ta réalité pour que le dossier parle pour toi. Pour tout ce qui touche à tes droits, rapproche-toi de la MDPH ou d'une assistante sociale.
+                    The Village, c'est la mémoire vivante du quotidien de {displayName} et de votre famille. Je retranscris l'impact du handicap sur votre vie de tous les jours — à partir de ce que vous m'avez confié au fil du temps. Mon rôle s'arrête là : mettre en mots votre réalité pour que le dossier parle pour vous. Pour tout ce qui touche à vos droits, rapprochez-vous de la MDPH ou d'une assistante sociale.
                   </p>
                 </div>
               </div>
