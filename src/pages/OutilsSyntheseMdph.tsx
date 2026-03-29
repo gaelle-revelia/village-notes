@@ -411,7 +411,7 @@ const OutilsSyntheseMdph = () => {
                 type="text"
                 value={q0Prenom}
                 onChange={(e) => setQ0Prenom(e.target.value)}
-                placeholder="Ton prénom"
+                placeholder="Votre prénom"
                 className="text-[14px] font-sans"
                 style={{
                   ...glassCard,
