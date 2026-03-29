@@ -452,7 +452,7 @@ const OutilsSyntheseMdph = () => {
             <AiBubble text={`2 — Comment se passe le quotidien de ${displayName} ?`} />
             <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
               <p style={{ fontSize: 11, color: "#8B74E0", lineHeight: 1.6, margin: 0 }}>
-                C'est la partie la plus importante du dossier. Décris une journée type — le réveil, les repas, le bain, les déplacements, ce qui est impossible sans aide. Plus tu détailles, plus le dossier sera fort. Prends le temps qu'il te faut.
+                C'est la partie la plus importante du dossier. Décris une journée type — le réveil, les repas, le bain, les déplacements, ce qui est impossible sans aide. C'est la partie la plus importante du dossier. Décrivez une journée type — le réveil, les repas, le bain, les déplacements, ce qui est impossible sans aide. Plus vous détaillez, plus le dossier sera fort. Prenez le temps qu'il vous faut.
               </p>
             </div>
             {q2Vocal.trim() && (
