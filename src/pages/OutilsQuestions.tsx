@@ -1097,7 +1097,16 @@ export default function OutilsQuestions() {
                 marginBottom: 8,
               };
 
-              return (
+              return aTraiter.length === 0 && planifiees.length === 0 && sansDate.length === 0 ? (
+                <div className="flex flex-col items-center text-center px-8 mt-16 gap-4">
+                  <p style={{ fontFamily: "'Fraunces', serif", fontSize: 17, fontWeight: 600, color: "#1E1A1A", lineHeight: 1.4 }}>
+                    Aucune boucle ouverte pour l'instant.
+                  </p>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#9A9490", lineHeight: 1.65 }}>
+                    Utilisez cet espace pour décharger ce que vous avez dans la tête — un appel à passer, un rendez-vous à préparer, une question à ne pas oublier. Appuyez sur + pour commencer.
+                  </p>
+                </div>
+              ) : (
                 <>
                   {aTraiter.length > 0 && (
                     <>
