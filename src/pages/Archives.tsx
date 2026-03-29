@@ -194,9 +194,35 @@ const Archives = () => {
             Chargement…
           </p>
         ) : filtered.length === 0 ? (
-          <p className="text-center text-sm font-sans mt-10" style={{ color: "#9A9490" }}>
-            Aucune synthèse pour l'instant.
-          </p>
+          syntheses.length === 0 ? (
+            <div className="flex flex-col items-center text-center px-8 mt-16 gap-4">
+              <p style={{ fontFamily: "'Fraunces', serif", fontSize: 17, fontWeight: 600, color: "#1E1A1A", lineHeight: 1.4 }}>
+                Vos archives sont vides pour l'instant.
+              </p>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#9A9490", lineHeight: 1.65 }}>
+                Remontants, dossiers MDPH, livrets de transmission — chaque document généré est conservé ici et consultable à tout moment.
+              </p>
+              <button
+                onClick={() => navigate("/outils/synthese")}
+                style={{
+                  marginTop: 8,
+                  fontFamily: "'DM Sans', sans-serif",
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: "#8B74E0",
+                  background: "transparent",
+                  border: "none",
+                  cursor: "pointer",
+                }}
+              >
+                → Synthèse Magique
+              </button>
+            </div>
+          ) : (
+            <p className="text-center text-sm font-sans mt-10" style={{ color: "#9A9490" }}>
+              Aucune synthèse de ce type pour l'instant.
+            </p>
+          )
         ) : (
           filtered.map((s) => {
             const badgeLabel = getBadgeLabel(s);
