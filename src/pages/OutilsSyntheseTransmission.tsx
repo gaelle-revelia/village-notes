@@ -517,7 +517,7 @@ const OutilsSyntheseTransmission = () => {
         )}
       </header>
 
-      <main className="flex-1 px-4 pt-5 pb-24">
+      <main className="flex-1 px-4 pt-5 pb-40">
         {/* Intro — hidden in readOnly */}
         {!isReadOnly && (
           <>
