@@ -159,6 +159,7 @@ export default function OutilsSyntheseTransmissionResultats() {
   const handleDelete = async () => {
     setIsDeleting(true);
     await supabase.from("syntheses").delete().eq("id", syntheseId);
+    toast({ title: "Livret supprimé." });
     navigate("/archives");
   };
 
