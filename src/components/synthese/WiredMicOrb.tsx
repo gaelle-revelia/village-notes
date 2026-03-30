@@ -12,10 +12,11 @@ interface WiredMicOrbProps {
   onTranscription: (text: string) => void;
   onRecordingChange?: (recording: boolean) => void;
   disabled?: boolean;
+  childId?: string;
 }
 
-export default function WiredMicOrb({ onTranscription, onRecordingChange, disabled }: WiredMicOrbProps) {
-  const { isRecording, isTranscribing, error, elapsedSeconds, startRecording, stopRecording } = useVocalRecording();
+export default function WiredMicOrb({ onTranscription, onRecordingChange, disabled, childId }: WiredMicOrbProps) {
+  const { isRecording, isTranscribing, error, elapsedSeconds, startRecording, stopRecording } = useVocalRecording("clean_transcription", childId);
 
   const handleTap = useCallback(async () => {
     if (disabled || isTranscribing) return;
