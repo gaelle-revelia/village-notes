@@ -405,7 +405,7 @@ const OutilsSyntheseMdph = () => {
             <SectionSeparator text={`Dossier MDPH — ${displayName}`} />
             <div className="flex items-start gap-0">
               <div className="flex-1"><AiBubble text="Avant de commencer — qui dépose ce dossier ?" /></div>
-              <button onClick={() => toggleHelper(1)} style={{ background: "none", border: "none", cursor: "pointer", padding: "0 4px", display: "flex", alignItems: "center", marginTop: 28 }}><Info size={16} color="#8B74E0" /></button>
+              <button onClick={() => toggleHelper(1)} style={{ background: "rgba(139,116,224,0.12)", border: "1px solid rgba(139,116,224,0.3)", borderRadius: 20, padding: "2px 8px", cursor: "pointer", fontSize: 11, color: "#8B74E0", fontFamily: "'DM Sans', sans-serif", fontWeight: 500, flexShrink: 0 }}>i</button>
             </div>
             {openHelper === 1 && (
             <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
@@ -459,7 +459,7 @@ const OutilsSyntheseMdph = () => {
             )}
             <div className="flex items-start gap-0">
               <div className="flex-1"><AiBubble text={`2 — Comment se passe le quotidien de ${displayName} ?`} /></div>
-              <button onClick={() => toggleHelper(2)} style={{ background: "none", border: "none", cursor: "pointer", padding: "0 4px", display: "flex", alignItems: "center", marginTop: 28 }}><Info size={16} color="#8B74E0" /></button>
+              <button onClick={() => toggleHelper(2)} style={{ background: "rgba(139,116,224,0.12)", border: "1px solid rgba(139,116,224,0.3)", borderRadius: 20, padding: "2px 8px", cursor: "pointer", fontSize: 11, color: "#8B74E0", fontFamily: "'DM Sans', sans-serif", fontWeight: 500, flexShrink: 0 }}>i</button>
             </div>
             {openHelper === 2 && (
             <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
@@ -494,7 +494,7 @@ const OutilsSyntheseMdph = () => {
             )}
             <div className="flex items-start gap-0">
               <div className="flex-1"><AiBubble text="3 — Comment vous organisez-vous pour les soins et les rendez-vous ?" /></div>
-              <button onClick={() => toggleHelper(3)} style={{ background: "none", border: "none", cursor: "pointer", padding: "0 4px", display: "flex", alignItems: "center", marginTop: 28 }}><Info size={16} color="#8B74E0" /></button>
+              <button onClick={() => toggleHelper(3)} style={{ background: "rgba(139,116,224,0.12)", border: "1px solid rgba(139,116,224,0.3)", borderRadius: 20, padding: "2px 8px", cursor: "pointer", fontSize: 11, color: "#8B74E0", fontFamily: "'DM Sans', sans-serif", fontWeight: 500, flexShrink: 0 }}>i</button>
             </div>
             {openHelper === 3 && (
             <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
@@ -529,7 +529,7 @@ const OutilsSyntheseMdph = () => {
             )}
             <div className="flex items-start gap-0">
               <div className="flex-1"><AiBubble text={`4 — Quelle est la situation scolaire actuelle de ${displayName} ?`} /></div>
-              <button onClick={() => toggleHelper(4)} style={{ background: "none", border: "none", cursor: "pointer", padding: "0 4px", display: "flex", alignItems: "center", marginTop: 28 }}><Info size={16} color="#8B74E0" /></button>
+              <button onClick={() => toggleHelper(4)} style={{ background: "rgba(139,116,224,0.12)", border: "1px solid rgba(139,116,224,0.3)", borderRadius: 20, padding: "2px 8px", cursor: "pointer", fontSize: 11, color: "#8B74E0", fontFamily: "'DM Sans', sans-serif", fontWeight: 500, flexShrink: 0 }}>i</button>
             </div>
             <ChipGroup chips={Q5_CHIPS} selected={q4Scolarite ? [q4Scolarite] : []} onToggle={(c) => toggleSingle(c, q4Scolarite, setQ4Scolarite)} />
             {q4Scolarite === "Milieu ordinaire" && q1 === "Renouvellement" && (
@@ -568,7 +568,7 @@ const OutilsSyntheseMdph = () => {
             )}
             <div className="flex items-start gap-0">
               <div className="flex-1"><AiBubble text={`5 — Quel est le projet pour ${displayName} dans les 2-3 prochaines années ?`} /></div>
-              <button onClick={() => toggleHelper(5)} style={{ background: "none", border: "none", cursor: "pointer", padding: "0 4px", display: "flex", alignItems: "center", marginTop: 28 }}><Info size={16} color="#8B74E0" /></button>
+              <button onClick={() => toggleHelper(5)} style={{ background: "rgba(139,116,224,0.12)", border: "1px solid rgba(139,116,224,0.3)", borderRadius: 20, padding: "2px 8px", cursor: "pointer", fontSize: 11, color: "#8B74E0", fontFamily: "'DM Sans', sans-serif", fontWeight: 500, flexShrink: 0 }}>i</button>
             </div>
             {openHelper === 5 && (
             <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
@@ -599,7 +599,7 @@ const OutilsSyntheseMdph = () => {
             )}
             <div className="flex items-start gap-0">
               <div className="flex-1"><AiBubble text="6 — Y a-t-il quelque chose d'important que je ne vois pas dans vos mémos ?" /></div>
-              <button onClick={() => toggleHelper(6)} style={{ background: "none", border: "none", cursor: "pointer", padding: "0 4px", display: "flex", alignItems: "center", marginTop: 28 }}><Info size={16} color="#8B74E0" /></button>
+              <button onClick={() => toggleHelper(6)} style={{ background: "rgba(139,116,224,0.12)", border: "1px solid rgba(139,116,224,0.3)", borderRadius: 20, padding: "2px 8px", cursor: "pointer", fontSize: 11, color: "#8B74E0", fontFamily: "'DM Sans', sans-serif", fontWeight: 500, flexShrink: 0 }}>i</button>
             </div>
             {openHelper === 6 && (
             <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
@@ -630,7 +630,7 @@ const OutilsSyntheseMdph = () => {
             )}
             <div className="flex items-start gap-0">
               <div className="flex-1"><AiBubble text="7 — Avez-vous le certificat médical sous la main ?" /></div>
-              <button onClick={() => toggleHelper(8)} style={{ background: "none", border: "none", cursor: "pointer", padding: "0 4px", display: "flex", alignItems: "center", marginTop: 28 }}><Info size={16} color="#8B74E0" /></button>
+              <button onClick={() => toggleHelper(8)} style={{ background: "rgba(139,116,224,0.12)", border: "1px solid rgba(139,116,224,0.3)", borderRadius: 20, padding: "2px 8px", cursor: "pointer", fontSize: 11, color: "#8B74E0", fontFamily: "'DM Sans', sans-serif", fontWeight: 500, flexShrink: 0 }}>i</button>
             </div>
             <ChipGroup
               chips={Q8_CHIPS}
