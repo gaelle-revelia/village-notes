@@ -501,7 +501,7 @@ export default function NouvelleQuestion() {
 
             {/* Intervenant — simple search, no auto-suggestions */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">
+              <label style={{ fontSize: 13, fontWeight: 500, color: "#1E1A1A", fontFamily: "'DM Sans', sans-serif" }}>
                 Pour quel intervenant ?
               </label>
 
