@@ -143,6 +143,23 @@ export default function AVenirDetail() {
         setDraftPrecisions(b.precisions ?? "");
         setDraftAnswer(b.answer ?? "");
         setLoading(false);
+
+        if (data.type === "rdv") {
+          const { data: linked } = await supabase
+            .from("questions")
+            .select("id, text, type")
+            .eq("linked_rdv_id", id)
+            .is("archived_at", null);
+          if (linked) setLinkedQuestions(linked);
+          const { data: all } = await supabase
+            .from("questions")
+            .select("id, text, type")
+            .eq("child_id", data.child_id)
+            .in("type", ["question", "rappel"])
+            .is("archived_at", null)
+            .is("linked_rdv_id", null);
+          if (all) setAllQuestions(all);
+        }
       });
   }, [id, user, authLoading, enfantLoading, navigate]);
 
