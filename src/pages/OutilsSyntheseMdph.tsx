@@ -597,12 +597,17 @@ const OutilsSyntheseMdph = () => {
             {currentQ > 5 && q5Vocal.trim() && (
               <UserBubble text={q5Vocal.length > 80 ? q5Vocal.slice(0, 80) + "…" : q5Vocal} />
             )}
-            <AiBubble text="6 — Y a-t-il quelque chose d'important que je ne vois pas dans vos mémos ?" />
+            <div className="flex items-start gap-0">
+              <div className="flex-1"><AiBubble text="6 — Y a-t-il quelque chose d'important que je ne vois pas dans vos mémos ?" /></div>
+              <button onClick={() => toggleHelper(6)} style={{ background: "none", border: "none", cursor: "pointer", padding: "0 4px", display: "flex", alignItems: "center", marginTop: 28 }}><Info size={14} color="#8B74E0" style={{ opacity: 0.6 }} /></button>
+            </div>
+            {openHelper === 6 && (
             <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
               <p style={{ fontSize: 11, color: "#8B74E0", lineHeight: 1.6, margin: 0 }}>
                 Si vous avez quelque chose d'important à ajouter qui n'est pas encore dans vos mémos, c'est le moment.
               </p>
             </div>
+            )}
             {q6Libre.trim() && (
               <Textarea
                 value={q6Libre}
