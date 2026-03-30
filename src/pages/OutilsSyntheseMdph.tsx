@@ -629,7 +629,17 @@ const OutilsSyntheseMdph = () => {
                 {q7Vocal.trim() && (
                   <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
                 )}
-                <WiredMicOrb onTranscription={(text) => setQ7Vocal((prev) => prev ? prev + " " + text : text)} onRecordingChange={setIsRecording} />
+                {q7Vocal.trim() && (
+                  <Textarea
+                    value={q7Vocal}
+                    onChange={(e) => setQ7Vocal(e.target.value)}
+                    placeholder="Résumez le certificat médical…"
+                    className="min-h-[80px] rounded-xl resize-none mb-3 text-[14px]"
+                    style={glassCard}
+                    autoResize
+                  />
+                )}
+                <WiredMicOrb onTranscription={(text) => setQ7Vocal((prev) => prev ? prev + " " + text : text)} onRecordingChange={setIsRecording} childId={enfantId ?? undefined} />
               </>
             )}
             {(q7Etat === "Pas encore" || q7Etat === "Certificat simplifié") && (
