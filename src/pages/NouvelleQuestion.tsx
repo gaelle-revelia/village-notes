@@ -570,9 +570,7 @@ export default function NouvelleQuestion() {
 
             {/* Précisions */}
             <div className="space-y-2">
-              <label htmlFor="question-precisions" style={{ fontSize: 13, fontWeight: 500, color: "#1E1A1A", fontFamily: "'DM Sans', sans-serif" }}>
-                Précisions complémentaires (optionnel)
-              </label>
+              <p style={{ fontSize: 13, fontWeight: 500, color: "#1E1A1A", fontFamily: "'DM Sans', sans-serif", marginBottom: 6 }}>Précisions complémentaires <span style={{ fontWeight: 400, color: "#9A9490" }}>(optionnel)</span></p>
               <Textarea
                 id="question-precisions"
                 value={precisions}
