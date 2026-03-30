@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Check, Plus } from "lucide-react";
+import { ArrowLeft, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useEnfantId } from "@/hooks/useEnfantId";
 import { toast } from "sonner";
@@ -10,23 +10,18 @@ import { SoinCard } from "@/components/profile/SoinCard";
 import { SoinModal } from "@/components/profile/SoinModal";
 import { MaterielCard } from "@/components/profile/MaterielCard";
 import { MaterielModal } from "@/components/profile/MaterielModal";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function ChildProfile() {
   const { enfantId } = useEnfantId();
   const navigate = useNavigate();
   const [prenom, setPrenom] = useState<string | null>(null);
   const [sexe, setSexe] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
   const [dateNaissance, setDateNaissance] = useState<string | null>(null);
   const [diagnostic, setDiagnostic] = useState<string | null>(null);
 
-  // Edit infos state
-  const [editingInfos, setEditingInfos] = useState(false);
-  const [editPrenom, setEditPrenom] = useState("");
-  const [editDateNaissance, setEditDateNaissance] = useState("");
-  const [editDiagnostic, setEditDiagnostic] = useState("");
-  const [savingInfos, setSavingInfos] = useState(false);
-  const [editSexe, setEditSexe] = useState<string | null>(null);
+  // Inline editing
+  const [editingField, setEditingField] = useState<string | null>(null);
 
   // Medicaments state
   const [medicaments, setMedicaments] = useState<any[]>([]);
@@ -75,16 +70,12 @@ export default function ChildProfile() {
     if (!enfantId) return;
     const newValue = value === sexe ? null : value;
     setSexe(newValue);
-    setSaving(true);
     const { error } = await supabase
       .from("enfants")
       .update({ sexe: newValue })
       .eq("id", enfantId);
-    setSaving(false);
     if (error) {
-      toast.error("Erreur lors de la sauvegarde");
-    } else {
-      toast.success("Profil mis à jour");
+      toast.error("Erreur de sauvegarde");
     }
   };
 
@@ -199,34 +190,16 @@ export default function ChildProfile() {
     }
   };
 
-  const handleSaveInfos = async () => {
+  const saveInlineField = async (field: string, value: string | null) => {
     if (!enfantId) return;
-    setSavingInfos(true);
-    const { error } = await supabase
-      .from("enfants")
-      .update({
-        prenom: editPrenom.trim() || prenom,
-        date_naissance: editDateNaissance || null,
-        diagnostic_label: editDiagnostic.trim() || null,
-        sexe: editSexe,
-      })
-      .eq("id", enfantId);
-    setSavingInfos(false);
-    if (!error) {
-      setPrenom(editPrenom.trim() || prenom);
-      setDateNaissance(editDateNaissance || null);
-      setDiagnostic(editDiagnostic.trim() || null);
-      setSexe(editSexe);
-      setEditingInfos(false);
-    }
+    const updateData: Record<string, string | null> = {};
+    if (field === "prenom") updateData.prenom = value;
+    else if (field === "date") updateData.date_naissance = value || null;
+    else if (field === "diagnostic") updateData.diagnostic_label = value || null;
+    const { error } = await supabase.from("enfants").update(updateData).eq("id", enfantId);
+    if (error) toast.error("Erreur de sauvegarde");
+    setEditingField(null);
   };
-
-  const pillClass = (value: string) =>
-    `px-4 py-2 rounded-full text-sm font-sans transition-all border ${
-      sexe === value
-        ? "bg-primary/10 border-primary text-primary font-medium"
-        : "bg-white/50 border-white/60 text-muted-foreground"
-    }`;
 
   return (
     <div className="flex min-h-screen flex-col" style={{ background: "linear-gradient(160deg, #EDE8F5 0%, #F5EEF0 40%, #EEF0F8 100%)", minHeight: "100vh" }}>
@@ -241,26 +214,11 @@ export default function ChildProfile() {
 
         {/* ── INFORMATIONS ── */}
         <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-between w-full mb-1">
-            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider" style={{ fontFamily: "DM Sans" }}>
-              Informations
-            </span>
-            <button
-              onClick={() => {
-                setEditPrenom(prenom ?? "");
-                setEditDateNaissance(dateNaissance ?? "");
-                setEditDiagnostic(diagnostic ?? "");
-                setEditSexe(sexe);
-                setEditingInfos(true);
-              }}
-              className="text-sm font-medium text-[#534AB7]"
-              style={{ fontFamily: "DM Sans" }}
-            >
-              Modifier
-            </button>
-          </div>
+          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1" style={{ fontFamily: "DM Sans" }}>
+            Informations
+          </span>
           <div
-            className="rounded-2xl p-4 flex flex-col divide-y divide-[rgba(139,116,224,0.1)]"
+            className="rounded-2xl p-4 flex flex-col gap-3"
             style={{
               background: "rgba(255,255,255,0.55)",
               backdropFilter: "blur(16px)",
@@ -269,29 +227,93 @@ export default function ChildProfile() {
               boxShadow: "0 2px 12px rgba(139,116,224,0.06)",
             }}
           >
-            <div className="flex items-center justify-between py-2.5 first:pt-0 last:pb-0">
-              <span className="text-sm text-muted-foreground" style={{ fontFamily: "DM Sans" }}>Prénom</span>
-              <span className="text-sm font-medium text-foreground" style={{ fontFamily: "DM Sans" }}>{prenom ?? "—"}</span>
+            {/* Prénom */}
+            <div onClick={() => editingField !== "prenom" && setEditingField("prenom")} className={editingField !== "prenom" ? "cursor-pointer" : ""}>
+              <p className="text-[10px] font-semibold tracking-wide text-muted-foreground mb-0.5 uppercase" style={{ fontFamily: "DM Sans" }}>PRÉNOM</p>
+              {editingField === "prenom" ? (
+                <input
+                  autoFocus
+                  className="w-full text-sm text-foreground bg-transparent border-b border-muted-foreground/30 outline-none py-0.5"
+                  style={{ fontFamily: "DM Sans" }}
+                  defaultValue={prenom ?? ""}
+                  onBlur={(e) => {
+                    const v = e.target.value.trim();
+                    if (!v) { setEditingField(null); return; }
+                    setPrenom(v);
+                    saveInlineField("prenom", v);
+                  }}
+                  onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+                />
+              ) : (
+                <p className="text-sm font-medium text-foreground" style={{ fontFamily: "DM Sans" }}>{prenom ?? "—"}</p>
+              )}
             </div>
-            {dateNaissance && (
-              <div className="flex items-center justify-between py-2.5">
-                <span className="text-sm text-muted-foreground" style={{ fontFamily: "DM Sans" }}>Date de naissance</span>
-                <span className="text-sm font-medium text-foreground" style={{ fontFamily: "DM Sans" }}>
-                  {new Date(dateNaissance).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
-                </span>
+
+            {/* Date de naissance */}
+            <div onClick={() => editingField !== "date" && setEditingField("date")} className={editingField !== "date" ? "cursor-pointer" : ""}>
+              <p className="text-[10px] font-semibold tracking-wide text-muted-foreground mb-0.5 uppercase" style={{ fontFamily: "DM Sans" }}>DATE DE NAISSANCE</p>
+              {editingField === "date" ? (
+                <input
+                  autoFocus
+                  type="date"
+                  className="text-sm text-foreground bg-transparent border-b border-muted-foreground/30 outline-none py-0.5"
+                  style={{ fontFamily: "DM Sans" }}
+                  defaultValue={dateNaissance ?? ""}
+                  onBlur={(e) => {
+                    setDateNaissance(e.target.value || null);
+                    saveInlineField("date", e.target.value);
+                  }}
+                />
+              ) : (
+                <p className="text-sm font-medium text-foreground" style={{ fontFamily: "DM Sans" }}>
+                  {dateNaissance ? new Date(dateNaissance).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }) : <span className="text-muted-foreground italic">Ajouter…</span>}
+                </p>
+              )}
+            </div>
+
+            {/* Diagnostic */}
+            <div onClick={() => editingField !== "diagnostic" && setEditingField("diagnostic")} className={editingField !== "diagnostic" ? "cursor-pointer" : ""}>
+              <p className="text-[10px] font-semibold tracking-wide text-muted-foreground mb-0.5 uppercase" style={{ fontFamily: "DM Sans" }}>SITUATION</p>
+              {editingField === "diagnostic" ? (
+                <Textarea
+                  autoFocus
+                  autoResize
+                  className="w-full text-sm text-foreground bg-transparent border border-muted-foreground/30 outline-none rounded-md px-2 py-1"
+                  style={{ fontFamily: "DM Sans", minHeight: 40 }}
+                  defaultValue={diagnostic ?? ""}
+                  onBlur={(e) => {
+                    setDiagnostic(e.target.value.trim() || null);
+                    saveInlineField("diagnostic", e.target.value.trim());
+                  }}
+                />
+              ) : (
+                <p className="text-sm font-medium text-foreground" style={{ fontFamily: "DM Sans" }}>
+                  {diagnostic ?? <span className="text-muted-foreground italic">Ajouter…</span>}
+                </p>
+              )}
+            </div>
+
+            {/* Genre */}
+            <div>
+              <p className="text-[10px] font-semibold tracking-wide text-muted-foreground mb-1 uppercase" style={{ fontFamily: "DM Sans" }}>GENRE</p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handleSexeChange("F")}
+                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all border ${
+                    sexe === "F" ? "bg-primary/10 border-primary text-primary" : "bg-white/50 border-white/60 text-muted-foreground"
+                  }`}
+                >
+                  Fille
+                </button>
+                <button
+                  onClick={() => handleSexeChange("M")}
+                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all border ${
+                    sexe === "M" ? "bg-primary/10 border-primary text-primary" : "bg-white/50 border-white/60 text-muted-foreground"
+                  }`}
+                >
+                  Garçon
+                </button>
               </div>
-            )}
-            {diagnostic && (
-              <div className="flex items-center justify-between py-2.5 last:pb-0">
-                <span className="text-sm text-muted-foreground" style={{ fontFamily: "DM Sans" }}>Situation</span>
-                <span className="text-sm font-medium text-foreground text-right max-w-[60%]" style={{ fontFamily: "DM Sans" }}>{diagnostic}</span>
-              </div>
-            )}
-            <div className="flex items-center justify-between py-2.5 last:pb-0">
-              <span className="text-sm text-muted-foreground" style={{ fontFamily: "DM Sans" }}>Genre</span>
-              <span className="text-sm font-medium text-foreground" style={{ fontFamily: "DM Sans" }}>
-                {sexe === "F" ? "Fille" : sexe === "M" ? "Garçon" : "—"}
-              </span>
             </div>
           </div>
         </div>
@@ -522,112 +544,6 @@ export default function ChildProfile() {
         onClose={() => { setMaterielModalOpen(false); setEditingMateriel(null); }}
       />
 
-      {editingInfos && (
-        <div className="fixed inset-0 z-50">
-          <div
-            className="absolute inset-0"
-            style={{ background: "rgba(0,0,0,0.5)" }}
-            onClick={() => setEditingInfos(false)}
-          />
-          <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl max-h-[90vh] overflow-y-auto p-6 z-50">
-            <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-4" />
-            <h2
-              className="text-xl font-semibold text-foreground mb-5"
-              style={{ fontFamily: "'Fraunces', serif" }}
-            >
-              Modifier les informations
-            </h2>
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm font-medium text-foreground mb-1.5 block" style={{ fontFamily: "DM Sans" }}>
-                  Prénom
-                </label>
-                <input
-                  type="text"
-                  value={editPrenom}
-                  onChange={(e) => setEditPrenom(e.target.value)}
-                  className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#8B74E0] focus:ring-2 focus:ring-[#8B74E0]/10"
-                  style={{ fontFamily: "DM Sans" }}
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-foreground mb-1.5 block" style={{ fontFamily: "DM Sans" }}>
-                  Date de naissance
-                </label>
-                <input
-                  type="date"
-                  value={editDateNaissance ?? ""}
-                  onChange={(e) => setEditDateNaissance(e.target.value)}
-                  className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#8B74E0] focus:ring-2 focus:ring-[#8B74E0]/10"
-                  style={{ fontFamily: "DM Sans" }}
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-foreground mb-1.5 block" style={{ fontFamily: "DM Sans" }}>
-                  Situation ou diagnostic
-                </label>
-                <input
-                  type="text"
-                  value={editDiagnostic}
-                  onChange={(e) => setEditDiagnostic(e.target.value)}
-                  placeholder="ex : Paralysie cérébrale..."
-                  className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#8B74E0] focus:ring-2 focus:ring-[#8B74E0]/10"
-                  style={{ fontFamily: "DM Sans" }}
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-foreground mb-1.5 block" style={{ fontFamily: "DM Sans" }}>
-                  Genre
-                </label>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setEditSexe(editSexe === "F" ? null : "F")}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all border ${
-                      editSexe === "F"
-                        ? "bg-primary/10 border-primary text-primary"
-                        : "bg-white/50 border-white/60 text-muted-foreground"
-                    }`}
-                  >
-                    Fille
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setEditSexe(editSexe === "M" ? null : "M")}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all border ${
-                      editSexe === "M"
-                        ? "bg-primary/10 border-primary text-primary"
-                        : "bg-white/50 border-white/60 text-muted-foreground"
-                    }`}
-                  >
-                    Garçon
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div className="space-y-3 mt-6">
-              <button
-                onClick={handleSaveInfos}
-                disabled={savingInfos}
-                className="w-full rounded-xl h-12 text-base text-white font-medium flex items-center justify-center disabled:opacity-50"
-                style={{
-                  background: "linear-gradient(135deg, #E8736A, #8B74E0)",
-                  fontFamily: "DM Sans",
-                }}
-              >
-                {savingInfos ? "Enregistrement..." : "Enregistrer"}
-              </button>
-              <button
-                onClick={() => setEditingInfos(false)}
-                className="w-full text-center text-sm text-muted-foreground hover:text-foreground py-2"
-                style={{ fontFamily: "DM Sans" }}
-              >
-                Annuler
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
