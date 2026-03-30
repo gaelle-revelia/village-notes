@@ -450,8 +450,7 @@ export default function NouvelleQuestion() {
 
             {/* Date — RDV (required) */}
             {type === "rdv" && (
-              <div className="space-y-2">
-                <label style={{ fontSize: 13, fontWeight: 500, color: "#1E1A1A", fontFamily: "'DM Sans', sans-serif" }}>Date</label>
+              <div>
                 <MemoDatePicker date={dueDate ?? new Date()} onDateChange={(d) => setDueDate(d)} />
               </div>
             )}
