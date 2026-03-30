@@ -590,7 +590,7 @@ export default function NouvelleQuestion() {
           </form>
         </div>
       </main>
-      <div style={{ position: "sticky", bottom: 0, padding: "6px 16px 76px" }}>
+      <div style={{ position: "sticky", bottom: 0, padding: "12px 16px 24px" }}>
         <button
           type="submit"
           form={undefined}
