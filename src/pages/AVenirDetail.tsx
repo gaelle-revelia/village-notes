@@ -123,7 +123,7 @@ export default function AVenirDetail() {
       .select("id, text, precisions, linked_pro_ids, due_date, is_approximate_date, linked_rdv_id, archived_at, answer, child_id, type")
       .eq("id", id)
       .single()
-      .then(({ data, error }) => {
+      .then(async ({ data, error }) => {
         if (error || !data) { navigate("/a-venir"); return; }
         const b: BoucleItem = {
           id: data.id,
