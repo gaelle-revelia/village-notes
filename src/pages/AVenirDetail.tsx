@@ -405,7 +405,7 @@ export default function AVenirDetail() {
                         {q.type === "question" ? "Question" : "To-Do"}
                       </span>
                       <span style={{ fontSize: 12, color: "#534AB7", fontWeight: 500, maxWidth: 140, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{q.text}</span>
-                      <button onClick={(e) => { e.stopPropagation(); supabase.from("questions").update({ linked_rdv_id: null }).eq("id", q.id); setLinkedQuestions(prev => prev.filter(x => x.id !== q.id)); setAllQuestions(prev => [...prev, q]); }} style={{ background: "none", border: "none", color: "#8B74E0", cursor: "pointer", padding: 0, fontSize: 14, lineHeight: 1 }}>×</button>
+                      <button onClick={async (e) => { e.stopPropagation(); await supabase.from("questions").update({ linked_rdv_id: null }).eq("id", q.id); setLinkedQuestions(prev => prev.filter(x => x.id !== q.id)); setAllQuestions(prev => [...prev, q]); }} style={{ background: "none", border: "none", color: "#8B74E0", cursor: "pointer", padding: 0, fontSize: 14, lineHeight: 1 }}>×</button>
                     </div>
                   ))}
                 </div>
@@ -424,8 +424,8 @@ export default function AVenirDetail() {
                   <div style={{ position: "absolute", top: "calc(100% + 4px)", left: 0, right: 0, background: "rgba(255,255,255,0.97)", border: "1px solid rgba(255,255,255,0.9)", borderRadius: 12, zIndex: 50, boxShadow: "0 4px 16px rgba(0,0,0,0.08)", overflow: "hidden" }}>
                     {allQuestions.filter(q => q.text.toLowerCase().includes(questionSearch.toLowerCase())).slice(0, 5).map(q => (
                       <div key={q.id}
-                        onMouseDown={() => {
-                          supabase.from("questions").update({ linked_rdv_id: item.id }).eq("id", q.id);
+                        onMouseDown={async () => {
+                          await supabase.from("questions").update({ linked_rdv_id: item.id }).eq("id", q.id);
                           setLinkedQuestions(prev => [...prev, q]);
                           setAllQuestions(prev => prev.filter(x => x.id !== q.id));
                           setQuestionSearch("");
