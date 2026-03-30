@@ -355,7 +355,7 @@ export default function NouvelleQuestion() {
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <h1 className="text-xl font-semibold text-card-foreground">Nouveau</h1>
+        <h1 className="text-xl text-card-foreground" style={{ fontFamily: "'Fraunces', serif", fontWeight: 600 }}>Nouvelle boucle</h1>
       </header>
 
       <main className="flex-1 px-4 py-6">
