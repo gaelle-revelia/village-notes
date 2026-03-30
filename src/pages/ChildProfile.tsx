@@ -70,16 +70,12 @@ export default function ChildProfile() {
     if (!enfantId) return;
     const newValue = value === sexe ? null : value;
     setSexe(newValue);
-    setSaving(true);
     const { error } = await supabase
       .from("enfants")
       .update({ sexe: newValue })
       .eq("id", enfantId);
-    setSaving(false);
     if (error) {
-      toast.error("Erreur lors de la sauvegarde");
-    } else {
-      toast.success("Profil mis à jour");
+      toast.error("Erreur de sauvegarde");
     }
   };
 
