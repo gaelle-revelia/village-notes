@@ -441,7 +441,7 @@ export default function AVenirDetail() {
                     {allQuestions.filter(q => q.text.toLowerCase().includes(questionSearch.toLowerCase())).length === 0 && (
                       <div
                         onMouseDown={async () => {
-                          const { data: newQ } = await supabase.from("questions").insert({ text: questionSearch.trim(), type: "question", child_id: item.child_id, parent_id: (await supabase.auth.getUser()).data.user?.id!, linked_rdv_id: item.id, status: "to_ask", archived_at: null, linked_pro_ids: [] }).select("id, text, type").single();
+                          const { data: newQ } = await supabase.from("questions").insert({ text: questionSearch.trim(), type: "question", child_id: item.child_id, parent_id: user?.id ?? "", linked_rdv_id: item.id, status: "to_ask", archived_at: null, linked_pro_ids: [] }).select("id, text, type").single();
                           if (newQ) setLinkedQuestions(prev => [...prev, newQ]);
                           setQuestionSearch("");
                           setShowDropdown(false);
