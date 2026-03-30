@@ -450,8 +450,7 @@ export default function NouvelleQuestion() {
 
             {/* Date — RDV (required) */}
             {type === "rdv" && (
-              <div className="space-y-2">
-                <label style={{ fontSize: 13, fontWeight: 500, color: "#1E1A1A", fontFamily: "'DM Sans', sans-serif" }}>Date</label>
+              <div>
                 <MemoDatePicker date={dueDate ?? new Date()} onDateChange={(d) => setDueDate(d)} />
               </div>
             )}
@@ -459,7 +458,7 @@ export default function NouvelleQuestion() {
             {/* Date — Rappel (optional, with approximate toggle) */}
             {type === "rappel" && (
               <div className="space-y-3">
-                <label style={{ fontSize: 13, fontWeight: 500, color: "#1E1A1A", fontFamily: "'DM Sans', sans-serif" }}>Date (optionnelle)</label>
+                <label style={{ fontSize: 13, fontWeight: 500, color: "#1E1A1A", fontFamily: "'DM Sans', sans-serif" }}>Échéance (optionnelle)</label>
                 <div className="flex items-center gap-2">
                   <Switch
                     checked={isApproximate}
@@ -591,7 +590,7 @@ export default function NouvelleQuestion() {
           </form>
         </div>
       </main>
-      <div style={{ position: "sticky", bottom: 0, padding: "6px 16px 76px" }}>
+      <div style={{ position: "sticky", bottom: 0, padding: "12px 16px 24px" }}>
         <button
           type="submit"
           form={undefined}
