@@ -459,9 +459,20 @@ const OutilsSyntheseMdph = () => {
             {q2Vocal.trim() && (
               <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
             )}
+            {q2Vocal.trim() && (
+              <Textarea
+                value={q2Vocal}
+                onChange={(e) => setQ2Vocal(e.target.value)}
+                placeholder="Décrivez le quotidien…"
+                className="min-h-[80px] rounded-xl resize-none mb-3 text-[14px]"
+                style={glassCard}
+                autoResize
+              />
+            )}
             <WiredMicOrb
               onTranscription={(text) => setQ2Vocal(prev => prev ? prev + " " + text : text)}
               onRecordingChange={setIsRecording}
+              childId={enfantId ?? undefined}
             />
           </>
         )}
