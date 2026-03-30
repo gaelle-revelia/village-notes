@@ -483,7 +483,7 @@ export default function NouvelleQuestion() {
                       </SelectContent>
                     </Select>
                     <Select value={String(approxYear)} onValueChange={(v) => setApproxYear(Number(v))}>
-                      <SelectTrigger className="rounded-xl" style={glassFieldStyle}>
+                      <SelectTrigger className="" style={{ background: "rgba(255,255,255,0.52)", border: "1px solid rgba(255,255,255,0.72)", borderRadius: 12, padding: "11px 13px", fontSize: 14, fontFamily: "'DM Sans', sans-serif", color: "#1E1A1A", width: "100%" }}>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
