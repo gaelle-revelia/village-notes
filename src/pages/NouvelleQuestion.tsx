@@ -500,9 +500,7 @@ export default function NouvelleQuestion() {
 
             {/* Intervenant — simple search, no auto-suggestions */}
             <div className="space-y-2">
-              <label style={{ fontSize: 13, fontWeight: 500, color: "#1E1A1A", fontFamily: "'DM Sans', sans-serif" }}>
-                Pour quel intervenant ?
-              </label>
+              <p style={{ fontSize: 13, fontWeight: 500, color: "#1E1A1A", fontFamily: "'DM Sans', sans-serif", marginBottom: 6 }}>Pour quel intervenant ?</p>
 
               {selectedIntervenants.length > 0 && (
                 <div className="flex flex-wrap gap-2">
