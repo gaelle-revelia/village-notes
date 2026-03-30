@@ -8,6 +8,7 @@ import { useEnfantId } from "@/hooks/useEnfantId";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Textarea } from "@/components/ui/textarea";
 
 // --- Shared styles ---
 const glassCard: React.CSSProperties = {
