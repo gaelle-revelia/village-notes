@@ -37,6 +37,26 @@ const AiBubble = ({ text, italic }: { text: string; italic?: boolean }) => (
   </div>
 );
 
+const AiBubbleWithHelper = ({ text, helperN, openHelper, toggleHelper }: { text: string; helperN: number; openHelper: number | null; toggleHelper: (n: number) => void }) => (
+  <div className="flex items-end gap-3 mb-3">
+    <div className="flex-shrink-0 flex items-center justify-center" style={{ width: 40, height: 40, borderRadius: "50%", background: "linear-gradient(135deg, #E8736A, #8B74E0)", boxShadow: "0 0 16px rgba(139,116,224,0.4)" }}>
+      <Sparkles size={18} color="#fff" />
+    </div>
+    <div className="flex-1 min-w-0">
+      <span className="block mb-1 font-sans font-medium" style={{ color: "#8B74E0", fontSize: 11 }}>The Village</span>
+      <div className="px-4 py-3 inline-flex items-center gap-2" style={{ ...glassCard, background: "rgba(255,255,255,0.55)", border: "1px solid rgba(255,255,255,0.85)", maxWidth: "85%" }}>
+        <p className="text-[14px] font-sans leading-snug" style={{ color: "#1E1A1A", margin: 0 }}>{text}</p>
+        <button
+          onClick={() => toggleHelper(helperN)}
+          style={{ background: openHelper === helperN ? "rgba(139,116,224,0.2)" : "rgba(139,116,224,0.1)", border: "1px solid rgba(139,116,224,0.3)", borderRadius: "50%", width: 20, height: 20, cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, color: "#8B74E0", fontWeight: 700, fontFamily: "'DM Sans', sans-serif", padding: 0 }}
+        >
+          i
+        </button>
+      </div>
+    </div>
+  </div>
+);
+
 const UserBubble = ({ text }: { text: string }) => (
   <div className="flex justify-end mb-4">
     <div className="px-4 py-3 inline-block" style={{ background: "linear-gradient(135deg, #E8736A, #8B74E0)", borderRadius: 16, maxWidth: "70%" }}>
@@ -403,10 +423,7 @@ const OutilsSyntheseMdph = () => {
           <>
             <UserBubble text="📋 Dossier MDPH" />
             <SectionSeparator text={`Dossier MDPH — ${displayName}`} />
-            <div className="flex items-start gap-0">
-              <div className="flex-1"><AiBubble text="Avant de commencer — qui dépose ce dossier ?" /></div>
-              <button onClick={() => toggleHelper(1)} style={{ background: "rgba(139,116,224,0.12)", border: "1px solid rgba(139,116,224,0.3)", borderRadius: 20, padding: "2px 8px", cursor: "pointer", fontSize: 11, color: "#8B74E0", fontFamily: "'DM Sans', sans-serif", fontWeight: 500, flexShrink: 0 }}>i</button>
-            </div>
+            <AiBubbleWithHelper text="Avant de commencer — qui dépose ce dossier ?" helperN={1} openHelper={openHelper} toggleHelper={toggleHelper} />
             {openHelper === 1 && (
             <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
               <p style={{ fontSize: 11, color: "#8B74E0", lineHeight: 1.55 }}>
@@ -457,10 +474,7 @@ const OutilsSyntheseMdph = () => {
             {currentQ > 1 && q1 && (
               <UserBubble text={q1} />
             )}
-            <div className="flex items-start gap-0">
-              <div className="flex-1"><AiBubble text={`2 — Comment se passe le quotidien de ${displayName} ?`} /></div>
-              <button onClick={() => toggleHelper(2)} style={{ background: "rgba(139,116,224,0.12)", border: "1px solid rgba(139,116,224,0.3)", borderRadius: 20, padding: "2px 8px", cursor: "pointer", fontSize: 11, color: "#8B74E0", fontFamily: "'DM Sans', sans-serif", fontWeight: 500, flexShrink: 0 }}>i</button>
-            </div>
+            <AiBubbleWithHelper text={`2 — Comment se passe le quotidien de ${displayName} ?`} helperN={2} openHelper={openHelper} toggleHelper={toggleHelper} />
             {openHelper === 2 && (
             <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
               <p style={{ fontSize: 11, color: "#8B74E0", lineHeight: 1.6, margin: 0 }}>
@@ -492,10 +506,7 @@ const OutilsSyntheseMdph = () => {
             {currentQ > 2 && q2Vocal.trim() && (
               <UserBubble text={q2Vocal.length > 80 ? q2Vocal.slice(0, 80) + "…" : q2Vocal} />
             )}
-            <div className="flex items-start gap-0">
-              <div className="flex-1"><AiBubble text="3 — Comment vous organisez-vous pour les soins et les rendez-vous ?" /></div>
-              <button onClick={() => toggleHelper(3)} style={{ background: "rgba(139,116,224,0.12)", border: "1px solid rgba(139,116,224,0.3)", borderRadius: 20, padding: "2px 8px", cursor: "pointer", fontSize: 11, color: "#8B74E0", fontFamily: "'DM Sans', sans-serif", fontWeight: 500, flexShrink: 0 }}>i</button>
-            </div>
+            <AiBubbleWithHelper text="3 — Comment vous organisez-vous pour les soins et les rendez-vous ?" helperN={3} openHelper={openHelper} toggleHelper={toggleHelper} />
             {openHelper === 3 && (
             <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
               <p style={{ fontSize: 11, color: "#8B74E0", lineHeight: 1.6, margin: 0 }}>
@@ -527,10 +538,7 @@ const OutilsSyntheseMdph = () => {
             {currentQ > 3 && q3Vocal.trim() && (
               <UserBubble text={q3Vocal.length > 80 ? q3Vocal.slice(0, 80) + "…" : q3Vocal} />
             )}
-            <div className="flex items-start gap-0">
-              <div className="flex-1"><AiBubble text={`4 — Quelle est la situation scolaire actuelle de ${displayName} ?`} /></div>
-              <button onClick={() => toggleHelper(4)} style={{ background: "rgba(139,116,224,0.12)", border: "1px solid rgba(139,116,224,0.3)", borderRadius: 20, padding: "2px 8px", cursor: "pointer", fontSize: 11, color: "#8B74E0", fontFamily: "'DM Sans', sans-serif", fontWeight: 500, flexShrink: 0 }}>i</button>
-            </div>
+            <AiBubbleWithHelper text={`4 — Quelle est la situation scolaire actuelle de ${displayName} ?`} helperN={4} openHelper={openHelper} toggleHelper={toggleHelper} />
             <ChipGroup chips={Q5_CHIPS} selected={q4Scolarite ? [q4Scolarite] : []} onToggle={(c) => toggleSingle(c, q4Scolarite, setQ4Scolarite)} />
             {q4Scolarite === "Milieu ordinaire" && q1 === "Renouvellement" && (
               <div style={{ margin: "0 4px 14px", background: "rgba(68,168,130,0.07)", borderLeft: "2.5px solid #44A882", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
@@ -566,10 +574,7 @@ const OutilsSyntheseMdph = () => {
             {currentQ > 4 && q4Scolarite && (
               <UserBubble text={q4Answer()} />
             )}
-            <div className="flex items-start gap-0">
-              <div className="flex-1"><AiBubble text={`5 — Quel est le projet pour ${displayName} dans les 2-3 prochaines années ?`} /></div>
-              <button onClick={() => toggleHelper(5)} style={{ background: "rgba(139,116,224,0.12)", border: "1px solid rgba(139,116,224,0.3)", borderRadius: 20, padding: "2px 8px", cursor: "pointer", fontSize: 11, color: "#8B74E0", fontFamily: "'DM Sans', sans-serif", fontWeight: 500, flexShrink: 0 }}>i</button>
-            </div>
+            <AiBubbleWithHelper text={`5 — Quel est le projet pour ${displayName} dans les 2-3 prochaines années ?`} helperN={5} openHelper={openHelper} toggleHelper={toggleHelper} />
             {openHelper === 5 && (
             <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
               <p style={{ fontSize: 11, color: "#8B74E0", lineHeight: 1.55 }}>
@@ -597,10 +602,7 @@ const OutilsSyntheseMdph = () => {
             {currentQ > 5 && q5Vocal.trim() && (
               <UserBubble text={q5Vocal.length > 80 ? q5Vocal.slice(0, 80) + "…" : q5Vocal} />
             )}
-            <div className="flex items-start gap-0">
-              <div className="flex-1"><AiBubble text="6 — Y a-t-il quelque chose d'important que je ne vois pas dans vos mémos ?" /></div>
-              <button onClick={() => toggleHelper(6)} style={{ background: "rgba(139,116,224,0.12)", border: "1px solid rgba(139,116,224,0.3)", borderRadius: 20, padding: "2px 8px", cursor: "pointer", fontSize: 11, color: "#8B74E0", fontFamily: "'DM Sans', sans-serif", fontWeight: 500, flexShrink: 0 }}>i</button>
-            </div>
+            <AiBubbleWithHelper text="6 — Y a-t-il quelque chose d'important que je ne vois pas dans vos mémos ?" helperN={6} openHelper={openHelper} toggleHelper={toggleHelper} />
             {openHelper === 6 && (
             <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
               <p style={{ fontSize: 11, color: "#8B74E0", lineHeight: 1.6, margin: 0 }}>
@@ -628,10 +630,7 @@ const OutilsSyntheseMdph = () => {
             {currentQ > 6 && q6Libre.trim() && (
               <UserBubble text={q6Libre.length > 80 ? q6Libre.slice(0, 80) + "…" : q6Libre} />
             )}
-            <div className="flex items-start gap-0">
-              <div className="flex-1"><AiBubble text="7 — Avez-vous le certificat médical sous la main ?" /></div>
-              <button onClick={() => toggleHelper(8)} style={{ background: "rgba(139,116,224,0.12)", border: "1px solid rgba(139,116,224,0.3)", borderRadius: 20, padding: "2px 8px", cursor: "pointer", fontSize: 11, color: "#8B74E0", fontFamily: "'DM Sans', sans-serif", fontWeight: 500, flexShrink: 0 }}>i</button>
-            </div>
+            <AiBubbleWithHelper text="7 — Avez-vous le certificat médical sous la main ?" helperN={8} openHelper={openHelper} toggleHelper={toggleHelper} />
             <ChipGroup
               chips={Q8_CHIPS}
               selected={q7Etat ? [q7Etat] : []}
