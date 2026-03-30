@@ -380,6 +380,7 @@ export default function AVenirDetail() {
               <MemoDatePicker
                 date={item.due_date ? new Date(item.due_date) : new Date()}
                 onDateChange={handleDateChange}
+                showLabel={false}
               />
             </div>
 
