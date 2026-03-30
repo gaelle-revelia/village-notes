@@ -659,9 +659,8 @@ export default function NouvelleQuestion() {
             </div>
 
             {/* Submit */}
-            <Button
+            <button
               type="submit"
-              className="h-12 w-full rounded-xl text-base"
               disabled={
                 submitting ||
                 !question.trim() ||
@@ -669,9 +668,22 @@ export default function NouvelleQuestion() {
                 !enfantId ||
                 (type === "rdv" && !dueDate)
               }
+              style={{
+                width: "100%",
+                padding: "14px",
+                borderRadius: 14,
+                border: "none",
+                background: question.trim() ? "linear-gradient(135deg, #E8736A, #8B74E0)" : "rgba(139,116,224,0.3)",
+                color: "#fff",
+                fontSize: 15,
+                fontWeight: 600,
+                fontFamily: "'DM Sans', sans-serif",
+                cursor: question.trim() ? "pointer" : "not-allowed",
+                opacity: 1,
+              }}
             >
-              {submitting ? "Ajout…" : "Ajouter"}
-            </Button>
+              {submitting ? "Ajout…" : "Ajouter →"}
+            </button>
           </form>
         </div>
       </main>
