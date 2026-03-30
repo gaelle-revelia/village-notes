@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Sparkles } from "lucide-react";
+import { ArrowLeft, Sparkles, Info } from "lucide-react";
 import WiredMicOrb from "@/components/synthese/WiredMicOrb";
 import BottomNavBar from "@/components/BottomNavBar";
 import { useEnfantPrenom } from "@/hooks/useEnfantPrenom";
@@ -131,6 +131,8 @@ const OutilsSyntheseMdph = () => {
   
   const [isGenerating, setIsGenerating] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  const [openHelper, setOpenHelper] = useState<number | null>(null);
+  const toggleHelper = (n: number) => setOpenHelper(prev => prev === n ? null : n);
   const [loadingMessage, setLoadingMessage] = useState("Préparation du dossier en cours…");
   const [syntheseId, setSyntheseId] = useState<string | null>(null);
   const [introSeen, setIntroSeen] = useState(false);
@@ -401,12 +403,17 @@ const OutilsSyntheseMdph = () => {
           <>
             <UserBubble text="📋 Dossier MDPH" />
             <SectionSeparator text={`Dossier MDPH — ${displayName}`} />
-            <AiBubble text="Avant de commencer — qui dépose ce dossier ?" />
+            <div className="flex items-start gap-0">
+              <div className="flex-1"><AiBubble text="Avant de commencer — qui dépose ce dossier ?" /></div>
+              <button onClick={() => toggleHelper(1)} style={{ background: "none", border: "none", cursor: "pointer", padding: "0 4px", display: "flex", alignItems: "center", marginTop: 28 }}><Info size={14} color="#8B74E0" style={{ opacity: 0.6 }} /></button>
+            </div>
+            {openHelper === 1 && (
             <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
               <p style={{ fontSize: 11, color: "#8B74E0", lineHeight: 1.55 }}>
                 La CDAPH traite une demande faite par un représentant légal. Le dossier doit être rédigé à la première personne par la personne qui signe.
               </p>
             </div>
+            )}
             <div className="flex justify-end mb-3">
               <input
                 type="text"
@@ -450,12 +457,17 @@ const OutilsSyntheseMdph = () => {
             {currentQ > 1 && q1 && (
               <UserBubble text={q1} />
             )}
-            <AiBubble text={`2 — Comment se passe le quotidien de ${displayName} ?`} />
+            <div className="flex items-start gap-0">
+              <div className="flex-1"><AiBubble text={`2 — Comment se passe le quotidien de ${displayName} ?`} /></div>
+              <button onClick={() => toggleHelper(2)} style={{ background: "none", border: "none", cursor: "pointer", padding: "0 4px", display: "flex", alignItems: "center", marginTop: 28 }}><Info size={14} color="#8B74E0" style={{ opacity: 0.6 }} /></button>
+            </div>
+            {openHelper === 2 && (
             <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
               <p style={{ fontSize: 11, color: "#8B74E0", lineHeight: 1.6, margin: 0 }}>
                 C'est la partie la plus importante du dossier. Décrivez une journée type — le réveil, les repas, le bain, les déplacements, ce qui est impossible sans aide. Plus vous détaillez, plus le dossier sera fort. Prenez le temps qu'il vous faut.
               </p>
             </div>
+            )}
             {q2Vocal.trim() && (
               <Textarea
                 value={q2Vocal}
@@ -480,12 +492,17 @@ const OutilsSyntheseMdph = () => {
             {currentQ > 2 && q2Vocal.trim() && (
               <UserBubble text={q2Vocal.length > 80 ? q2Vocal.slice(0, 80) + "…" : q2Vocal} />
             )}
-            <AiBubble text="3 — Comment vous organisez-vous pour les soins et les rendez-vous ?" />
+            <div className="flex items-start gap-0">
+              <div className="flex-1"><AiBubble text="3 — Comment vous organisez-vous pour les soins et les rendez-vous ?" /></div>
+              <button onClick={() => toggleHelper(3)} style={{ background: "none", border: "none", cursor: "pointer", padding: "0 4px", display: "flex", alignItems: "center", marginTop: 28 }}><Info size={14} color="#8B74E0" style={{ opacity: 0.6 }} /></button>
+            </div>
+            {openHelper === 3 && (
             <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
               <p style={{ fontSize: 11, color: "#8B74E0", lineHeight: 1.6, margin: 0 }}>
                 La commission a besoin de comprendre votre organisation — les rendez-vous hebdomadaires, les soins à domicile, les exercices de rééducation, l'aide rémunérée si vous en avez une. Votre situation professionnelle aussi : est-ce que les soins ont impacté votre activité ?
               </p>
             </div>
+            )}
             {q3Vocal.trim() && (
               <Textarea
                 value={q3Vocal}
@@ -510,7 +527,10 @@ const OutilsSyntheseMdph = () => {
             {currentQ > 3 && q3Vocal.trim() && (
               <UserBubble text={q3Vocal.length > 80 ? q3Vocal.slice(0, 80) + "…" : q3Vocal} />
             )}
-            <AiBubble text={`4 — Quelle est la situation scolaire actuelle de ${displayName} ?`} />
+            <div className="flex items-start gap-0">
+              <div className="flex-1"><AiBubble text={`4 — Quelle est la situation scolaire actuelle de ${displayName} ?`} /></div>
+              <button onClick={() => toggleHelper(4)} style={{ background: "none", border: "none", cursor: "pointer", padding: "0 4px", display: "flex", alignItems: "center", marginTop: 28 }}><Info size={14} color="#8B74E0" style={{ opacity: 0.6 }} /></button>
+            </div>
             <ChipGroup chips={Q5_CHIPS} selected={q4Scolarite ? [q4Scolarite] : []} onToggle={(c) => toggleSingle(c, q4Scolarite, setQ4Scolarite)} />
             {q4Scolarite === "Milieu ordinaire" && q1 === "Renouvellement" && (
               <div style={{ margin: "0 4px 14px", background: "rgba(68,168,130,0.07)", borderLeft: "2.5px solid #44A882", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
@@ -519,11 +539,13 @@ const OutilsSyntheseMdph = () => {
                 </p>
               </div>
             )}
+            {openHelper === 4 && (
             <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
               <p style={{ fontSize: 11, color: "#8B74E0", lineHeight: 1.55 }}>
                 Coche la situation aujourd'hui — si une orientation est en cours ou prévue, précise-le à l'oral.
               </p>
             </div>
+            )}
             {q4ScolariteVocal.trim() && (
               <Textarea
                 value={q4ScolariteVocal}
@@ -544,12 +566,17 @@ const OutilsSyntheseMdph = () => {
             {currentQ > 4 && q4Scolarite && (
               <UserBubble text={q4Answer()} />
             )}
-            <AiBubble text={`5 — Quel est le projet pour ${displayName} dans les 2-3 prochaines années ?`} />
+            <div className="flex items-start gap-0">
+              <div className="flex-1"><AiBubble text={`5 — Quel est le projet pour ${displayName} dans les 2-3 prochaines années ?`} /></div>
+              <button onClick={() => toggleHelper(5)} style={{ background: "none", border: "none", cursor: "pointer", padding: "0 4px", display: "flex", alignItems: "center", marginTop: 28 }}><Info size={14} color="#8B74E0" style={{ opacity: 0.6 }} /></button>
+            </div>
+            {openHelper === 5 && (
             <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
               <p style={{ fontSize: 11, color: "#8B74E0", lineHeight: 1.55 }}>
                 Précise à l'oral : dispositifs visés (SESSAD, AESH…), fréquence souhaitée, projet scolaire, objectif thérapeutique, horizon de temps…
               </p>
             </div>
+            )}
             {q5Vocal.trim() && (
               <Textarea
                 value={q5Vocal}
@@ -570,12 +597,17 @@ const OutilsSyntheseMdph = () => {
             {currentQ > 5 && q5Vocal.trim() && (
               <UserBubble text={q5Vocal.length > 80 ? q5Vocal.slice(0, 80) + "…" : q5Vocal} />
             )}
-            <AiBubble text="6 — Y a-t-il quelque chose d'important que je ne vois pas dans vos mémos ?" />
+            <div className="flex items-start gap-0">
+              <div className="flex-1"><AiBubble text="6 — Y a-t-il quelque chose d'important que je ne vois pas dans vos mémos ?" /></div>
+              <button onClick={() => toggleHelper(6)} style={{ background: "none", border: "none", cursor: "pointer", padding: "0 4px", display: "flex", alignItems: "center", marginTop: 28 }}><Info size={14} color="#8B74E0" style={{ opacity: 0.6 }} /></button>
+            </div>
+            {openHelper === 6 && (
             <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
               <p style={{ fontSize: 11, color: "#8B74E0", lineHeight: 1.6, margin: 0 }}>
                 Si vous avez quelque chose d'important à ajouter qui n'est pas encore dans vos mémos, c'est le moment.
               </p>
             </div>
+            )}
             {q6Libre.trim() && (
               <Textarea
                 value={q6Libre}
@@ -596,7 +628,10 @@ const OutilsSyntheseMdph = () => {
             {currentQ > 6 && q6Libre.trim() && (
               <UserBubble text={q6Libre.length > 80 ? q6Libre.slice(0, 80) + "…" : q6Libre} />
             )}
-            <AiBubble text="7 — Avez-vous le certificat médical sous la main ?" />
+            <div className="flex items-start gap-0">
+              <div className="flex-1"><AiBubble text="7 — Avez-vous le certificat médical sous la main ?" /></div>
+              <button onClick={() => toggleHelper(8)} style={{ background: "none", border: "none", cursor: "pointer", padding: "0 4px", display: "flex", alignItems: "center", marginTop: 28 }}><Info size={14} color="#8B74E0" style={{ opacity: 0.6 }} /></button>
+            </div>
             <ChipGroup
               chips={Q8_CHIPS}
               selected={q7Etat ? [q7Etat] : []}
@@ -604,11 +639,13 @@ const OutilsSyntheseMdph = () => {
             />
             {q7Etat === "Oui, je l'ai" && (
               <>
+                {openHelper === 8 && (
                 <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
                   <p style={{ fontSize: 11, color: "#8B74E0", lineHeight: 1.55 }}>
                     Le diagnostic principal, les restrictions fonctionnelles, les soins mentionnés, les remarques finales — lisez directement ou reformulez avec vos mots, pour que le dossier généré soit cohérent avec ce que le médecin a écrit.
                   </p>
                 </div>
+                )}
                 {q7Vocal.trim() && (
                   <Textarea
                     value={q7Vocal}
