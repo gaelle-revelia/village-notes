@@ -402,7 +402,35 @@ const Timeline = () => {
           </div>
         ) : (
           <div>
-            {grouped.map((group) => (
+          {hasMore && searchQuery === "" && !isFilterActive && (
+            <button
+              onClick={async () => {
+                const newOffset = offset + 50;
+                setOffset(newOffset);
+                setLoadingMore(true);
+                await fetchMemos(newOffset, true);
+                setLoadingMore(false);
+              }}
+              disabled={loadingMore}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "100%",
+                padding: "10px 0",
+                marginBottom: 8,
+                background: "none",
+                border: "none",
+                cursor: loadingMore ? "default" : "pointer",
+                fontSize: 13,
+                fontFamily: "'DM Sans', sans-serif",
+                fontWeight: 500,
+                color: "#8B74E0",
+              }}
+            >
+              {loadingMore ? "Chargement..." : "← Charger les mémos plus anciens"}
+            </button>
+          )}
               <div key={group.key}>
                 {/* Month header */}
                 <div className="sticky top-[100px] z-[5]"
