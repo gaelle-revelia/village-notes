@@ -628,7 +628,10 @@ const OutilsSyntheseMdph = () => {
             {currentQ > 6 && q6Libre.trim() && (
               <UserBubble text={q6Libre.length > 80 ? q6Libre.slice(0, 80) + "…" : q6Libre} />
             )}
-            <AiBubble text="7 — Avez-vous le certificat médical sous la main ?" />
+            <div className="flex items-start gap-0">
+              <div className="flex-1"><AiBubble text="7 — Avez-vous le certificat médical sous la main ?" /></div>
+              <button onClick={() => toggleHelper(8)} style={{ background: "none", border: "none", cursor: "pointer", padding: "0 4px", display: "flex", alignItems: "center", marginTop: 28 }}><Info size={14} color="#8B74E0" style={{ opacity: 0.6 }} /></button>
+            </div>
             <ChipGroup
               chips={Q8_CHIPS}
               selected={q7Etat ? [q7Etat] : []}
