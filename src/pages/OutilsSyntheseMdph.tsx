@@ -535,7 +535,17 @@ const OutilsSyntheseMdph = () => {
             {q4ScolariteVocal.trim() && (
               <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
             )}
-            <WiredMicOrb onTranscription={(text) => setQ4ScolariteVocal((prev) => prev ? prev + " " + text : text)} onRecordingChange={setIsRecording} />
+            {q4ScolariteVocal.trim() && (
+              <Textarea
+                value={q4ScolariteVocal}
+                onChange={(e) => setQ4ScolariteVocal(e.target.value)}
+                placeholder="Précisions sur la scolarité…"
+                className="min-h-[80px] rounded-xl resize-none mb-3 text-[14px]"
+                style={glassCard}
+                autoResize
+              />
+            )}
+            <WiredMicOrb onTranscription={(text) => setQ4ScolariteVocal((prev) => prev ? prev + " " + text : text)} onRecordingChange={setIsRecording} childId={enfantId ?? undefined} />
           </>
         )}
 
