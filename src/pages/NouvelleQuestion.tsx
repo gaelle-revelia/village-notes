@@ -450,7 +450,7 @@ export default function NouvelleQuestion() {
 
             {/* Date — RDV (required) */}
             {type === "rdv" && (
-              <div>
+              <div style={{ background: "rgba(255,255,255,0.52)", border: "1px solid rgba(255,255,255,0.72)", borderRadius: 12, overflow: "hidden" }}>
                 <MemoDatePicker date={dueDate ?? new Date()} onDateChange={(d) => setDueDate(d)} />
               </div>
             )}
@@ -500,9 +500,7 @@ export default function NouvelleQuestion() {
 
             {/* Intervenant — simple search, no auto-suggestions */}
             <div className="space-y-2">
-              <label style={{ fontSize: 13, fontWeight: 500, color: "#1E1A1A", fontFamily: "'DM Sans', sans-serif" }}>
-                Pour quel intervenant ?
-              </label>
+              <p style={{ fontSize: 13, fontWeight: 500, color: "#1E1A1A", fontFamily: "'DM Sans', sans-serif", marginBottom: 6 }}>Pour quel intervenant ?</p>
 
               {selectedIntervenants.length > 0 && (
                 <div className="flex flex-wrap gap-2">
@@ -572,9 +570,7 @@ export default function NouvelleQuestion() {
 
             {/* Précisions */}
             <div className="space-y-2">
-              <label htmlFor="question-precisions" style={{ fontSize: 13, fontWeight: 500, color: "#1E1A1A", fontFamily: "'DM Sans', sans-serif" }}>
-                Précisions complémentaires (optionnel)
-              </label>
+              <p style={{ fontSize: 13, fontWeight: 500, color: "#1E1A1A", fontFamily: "'DM Sans', sans-serif", marginBottom: 6 }}>Précisions complémentaires <span style={{ fontWeight: 400, color: "#9A9490" }}>(optionnel)</span></p>
               <Textarea
                 id="question-precisions"
                 value={precisions}
