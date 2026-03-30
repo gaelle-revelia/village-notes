@@ -355,7 +355,7 @@ export default function NouvelleQuestion() {
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <h1 className="text-xl font-semibold text-card-foreground">Nouveau</h1>
+        <h1 className="text-xl text-card-foreground" style={{ fontFamily: "'Fraunces', serif", fontWeight: 600 }}>Nouvelle boucle</h1>
       </header>
 
       <main className="flex-1 px-4 py-6">
@@ -659,9 +659,8 @@ export default function NouvelleQuestion() {
             </div>
 
             {/* Submit */}
-            <Button
+            <button
               type="submit"
-              className="h-12 w-full rounded-xl text-base"
               disabled={
                 submitting ||
                 !question.trim() ||
@@ -669,9 +668,22 @@ export default function NouvelleQuestion() {
                 !enfantId ||
                 (type === "rdv" && !dueDate)
               }
+              style={{
+                width: "100%",
+                padding: "14px",
+                borderRadius: 14,
+                border: "none",
+                background: question.trim() ? "linear-gradient(135deg, #E8736A, #8B74E0)" : "rgba(139,116,224,0.3)",
+                color: "#fff",
+                fontSize: 15,
+                fontWeight: 600,
+                fontFamily: "'DM Sans', sans-serif",
+                cursor: question.trim() ? "pointer" : "not-allowed",
+                opacity: 1,
+              }}
             >
-              {submitting ? "Ajout…" : "Ajouter"}
-            </Button>
+              {submitting ? "Ajout…" : "Ajouter →"}
+            </button>
           </form>
         </div>
       </main>
