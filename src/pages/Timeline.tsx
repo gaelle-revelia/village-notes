@@ -405,11 +405,17 @@ const Timeline = () => {
           {hasMore && searchQuery === "" && !isFilterActive && (
             <button
               onClick={async () => {
+                const scrollContainer = document.documentElement;
+                const previousScrollHeight = scrollContainer.scrollHeight;
                 const newOffset = offset + 50;
                 setOffset(newOffset);
                 setLoadingMore(true);
                 await fetchMemos(newOffset, true);
                 setLoadingMore(false);
+                requestAnimationFrame(() => {
+                  const newScrollHeight = scrollContainer.scrollHeight;
+                  window.scrollTo(0, newScrollHeight - previousScrollHeight);
+                });
               }}
               disabled={loadingMore}
               style={{
