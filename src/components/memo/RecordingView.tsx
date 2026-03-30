@@ -60,25 +60,36 @@ export function RecordingView({ onComplete, onSwitchToText }: RecordingViewProps
       </div>
 
       {/* Pulsating mic button */}
-      <div className="relative">
+      <div className="relative" style={{ width: 80, height: 80 }}>
         {isRecording && (
           <>
-            <div className="absolute inset-0 rounded-full bg-destructive/20 animate-ping" />
-            <div className="absolute -inset-3 rounded-full bg-destructive/10 animate-pulse" />
+            <div style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "rgba(232,115,106,0.2)", animation: "ping 1s cubic-bezier(0,0,0.2,1) infinite" }} />
+            <div style={{ position: "absolute", inset: -12, borderRadius: "50%", background: "rgba(139,116,224,0.1)", animation: "pulse 1.5s ease-in-out infinite" }} />
           </>
         )}
         <button
           onClick={isRecording ? stop : start}
-          className={`relative z-10 flex h-24 w-24 items-center justify-center rounded-full transition-all ${
-            isRecording
-              ? "bg-destructive text-destructive-foreground shadow-lg shadow-destructive/30"
-              : "bg-primary text-primary-foreground shadow-lg shadow-primary/30 hover:scale-105"
-          }`}
+          className="relative z-10"
+          style={{
+            width: 80,
+            height: 80,
+            borderRadius: "50%",
+            background: "linear-gradient(135deg, #E8736A, #8B74E0)",
+            boxShadow: isRecording
+              ? "0 0 0 8px rgba(232,115,106,0.2), 0 0 24px rgba(139,116,224,0.5)"
+              : "0 0 24px rgba(139,116,224,0.4)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            border: "none",
+            transition: "box-shadow 0.3s",
+          }}
         >
           {isRecording ? (
-            <Square className="h-8 w-8" fill="currentColor" />
+            <Square className="h-8 w-8" color="white" fill="white" />
           ) : (
-            <Mic className="h-10 w-10" />
+            <Mic className="h-10 w-10" color="white" />
           )}
         </button>
       </div>
