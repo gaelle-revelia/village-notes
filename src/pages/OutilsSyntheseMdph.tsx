@@ -582,7 +582,7 @@ const OutilsSyntheseMdph = () => {
         {introSeen && showQ6 && (
           <>
             {currentQ > 5 && q5Vocal.trim() && (
-              <UserBubble text="Enregistrement ajouté ✅" />
+              <UserBubble text={q5Vocal.length > 80 ? q5Vocal.slice(0, 80) + "…" : q5Vocal} />
             )}
             <AiBubble text="6 — Y a-t-il quelque chose d'important que je ne vois pas dans vos mémos ?" />
             <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
