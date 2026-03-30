@@ -431,6 +431,7 @@ const Timeline = () => {
               {loadingMore ? "Chargement..." : "← Charger les mémos plus anciens"}
             </button>
           )}
+          {grouped.map((group) => (
               <div key={group.key}>
                 {/* Month header */}
                 <div className="sticky top-[100px] z-[5]"
