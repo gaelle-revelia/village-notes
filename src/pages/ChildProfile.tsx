@@ -190,34 +190,16 @@ export default function ChildProfile() {
     }
   };
 
-  const handleSaveInfos = async () => {
+  const saveInlineField = async (field: string, value: string | null) => {
     if (!enfantId) return;
-    setSavingInfos(true);
-    const { error } = await supabase
-      .from("enfants")
-      .update({
-        prenom: editPrenom.trim() || prenom,
-        date_naissance: editDateNaissance || null,
-        diagnostic_label: editDiagnostic.trim() || null,
-        sexe: editSexe,
-      })
-      .eq("id", enfantId);
-    setSavingInfos(false);
-    if (!error) {
-      setPrenom(editPrenom.trim() || prenom);
-      setDateNaissance(editDateNaissance || null);
-      setDiagnostic(editDiagnostic.trim() || null);
-      setSexe(editSexe);
-      setEditingInfos(false);
-    }
+    const updateData: Record<string, string | null> = {};
+    if (field === "prenom") updateData.prenom = value;
+    else if (field === "date") updateData.date_naissance = value || null;
+    else if (field === "diagnostic") updateData.diagnostic_label = value || null;
+    const { error } = await supabase.from("enfants").update(updateData).eq("id", enfantId);
+    if (error) toast.error("Erreur de sauvegarde");
+    setEditingField(null);
   };
-
-  const pillClass = (value: string) =>
-    `px-4 py-2 rounded-full text-sm font-sans transition-all border ${
-      sexe === value
-        ? "bg-primary/10 border-primary text-primary font-medium"
-        : "bg-white/50 border-white/60 text-muted-foreground"
-    }`;
 
   return (
     <div className="flex min-h-screen flex-col" style={{ background: "linear-gradient(160deg, #EDE8F5 0%, #F5EEF0 40%, #EEF0F8 100%)", minHeight: "100vh" }}>
