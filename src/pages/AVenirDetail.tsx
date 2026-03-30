@@ -392,6 +392,68 @@ export default function AVenirDetail() {
                 onChange={handleIntervenantChange}
               />
             </div>
+
+            {/* Questions liées */}
+            <div style={glassCard} className="space-y-3">
+              <p style={sectionLabel}>QUESTIONS LIÉES</p>
+              {linkedQuestions.length > 0 && (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
+                  {linkedQuestions.map((q) => (
+                    <div key={q.id} style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "rgba(139,116,224,0.1)", border: "1px solid rgba(139,116,224,0.25)", borderRadius: 20, padding: "4px 10px", cursor: "pointer" }}
+                      onClick={() => navigate(`/a-venir/${q.id}`)}>
+                      <span style={{ fontSize: 9, fontWeight: 600, padding: "2px 6px", borderRadius: 20, background: q.type === "question" ? "#E1F5EE" : "#FAEEDA", color: q.type === "question" ? "#0F6E56" : "#854F0B" }}>
+                        {q.type === "question" ? "Question" : "To-Do"}
+                      </span>
+                      <span style={{ fontSize: 12, color: "#534AB7", fontWeight: 500, maxWidth: 140, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{q.text}</span>
+                      <button onClick={(e) => { e.stopPropagation(); supabase.from("questions").update({ linked_rdv_id: null }).eq("id", q.id); setLinkedQuestions(prev => prev.filter(x => x.id !== q.id)); setAllQuestions(prev => [...prev, q]); }} style={{ background: "none", border: "none", color: "#8B74E0", cursor: "pointer", padding: 0, fontSize: 14, lineHeight: 1 }}>×</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div style={{ position: "relative" }}>
+                <input
+                  type="text"
+                  placeholder="Rechercher ou créer une question..."
+                  value={questionSearch}
+                  onChange={(e) => { setQuestionSearch(e.target.value); setShowDropdown(true); }}
+                  onFocus={() => setShowDropdown(true)}
+                  onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
+                  style={{ width: "100%", background: "rgba(255,255,255,0.6)", border: "1px solid rgba(139,116,224,0.3)", borderRadius: 10, padding: "8px 11px", fontSize: 13, fontFamily: "'DM Sans', sans-serif", color: "#1E1A1A", boxSizing: "border-box" as const }}
+                />
+                {showDropdown && questionSearch.trim() && (
+                  <div style={{ position: "absolute", top: "calc(100% + 4px)", left: 0, right: 0, background: "rgba(255,255,255,0.97)", border: "1px solid rgba(255,255,255,0.9)", borderRadius: 12, zIndex: 50, boxShadow: "0 4px 16px rgba(0,0,0,0.08)", overflow: "hidden" }}>
+                    {allQuestions.filter(q => q.text.toLowerCase().includes(questionSearch.toLowerCase())).slice(0, 5).map(q => (
+                      <div key={q.id}
+                        onMouseDown={() => {
+                          supabase.from("questions").update({ linked_rdv_id: item.id }).eq("id", q.id);
+                          setLinkedQuestions(prev => [...prev, q]);
+                          setAllQuestions(prev => prev.filter(x => x.id !== q.id));
+                          setQuestionSearch("");
+                          setShowDropdown(false);
+                        }}
+                        style={{ padding: "9px 12px", fontSize: 12, color: "#1E1A1A", display: "flex", alignItems: "center", gap: 7, borderBottom: "1px solid rgba(0,0,0,0.04)", cursor: "pointer" }}>
+                        <span style={{ fontSize: 9, fontWeight: 600, padding: "2px 6px", borderRadius: 20, background: q.type === "question" ? "#E1F5EE" : "#FAEEDA", color: q.type === "question" ? "#0F6E56" : "#854F0B", flexShrink: 0 }}>
+                          {q.type === "question" ? "Question" : "To-Do"}
+                        </span>
+                        {q.text}
+                      </div>
+                    ))}
+                    {allQuestions.filter(q => q.text.toLowerCase().includes(questionSearch.toLowerCase())).length === 0 && (
+                      <div
+                        onMouseDown={async () => {
+                          const { data: newQ } = await supabase.from("questions").insert({ text: questionSearch.trim(), type: "question", child_id: item.child_id, parent_id: (await supabase.auth.getUser()).data.user?.id!, linked_rdv_id: item.id, status: "to_ask", archived_at: null, linked_pro_ids: [] }).select("id, text, type").single();
+                          if (newQ) setLinkedQuestions(prev => [...prev, newQ]);
+                          setQuestionSearch("");
+                          setShowDropdown(false);
+                        }}
+                        style={{ padding: "9px 12px", fontSize: 12, color: "#8B74E0", fontWeight: 500, display: "flex", alignItems: "center", gap: 7, cursor: "pointer" }}>
+                        <span style={{ fontSize: 14 }}>+</span> Créer &quot;{questionSearch.trim()}&quot;
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
           </>
         )}
 
