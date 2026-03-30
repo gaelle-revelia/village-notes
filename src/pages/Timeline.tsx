@@ -241,13 +241,12 @@ const Timeline = () => {
 
   // Scroll to bottom on initial load (most recent memo visible)
   useEffect(() => {
-    if (!loadingMemos && filteredMemos.length > 0) {
-      // Small delay to let DOM render
+    if (!loadingMemos && filteredMemos.length > 0 && offset === 0) {
       requestAnimationFrame(() => {
         bottomRef.current?.scrollIntoView({ behavior: "instant" as ScrollBehavior });
       });
     }
-  }, [loadingMemos, filteredMemos.length]);
+  }, [loadingMemos, filteredMemos.length, offset]);
 
   if (loading) {
     return (
