@@ -566,12 +566,17 @@ const OutilsSyntheseMdph = () => {
             {currentQ > 4 && q4Scolarite && (
               <UserBubble text={q4Answer()} />
             )}
-            <AiBubble text={`5 — Quel est le projet pour ${displayName} dans les 2-3 prochaines années ?`} />
+            <div className="flex items-start gap-0">
+              <div className="flex-1"><AiBubble text={`5 — Quel est le projet pour ${displayName} dans les 2-3 prochaines années ?`} /></div>
+              <button onClick={() => toggleHelper(5)} style={{ background: "none", border: "none", cursor: "pointer", padding: "0 4px", display: "flex", alignItems: "center", marginTop: 28 }}><Info size={14} color="#8B74E0" style={{ opacity: 0.6 }} /></button>
+            </div>
+            {openHelper === 5 && (
             <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
               <p style={{ fontSize: 11, color: "#8B74E0", lineHeight: 1.55 }}>
                 Précise à l'oral : dispositifs visés (SESSAD, AESH…), fréquence souhaitée, projet scolaire, objectif thérapeutique, horizon de temps…
               </p>
             </div>
+            )}
             {q5Vocal.trim() && (
               <Textarea
                 value={q5Vocal}
