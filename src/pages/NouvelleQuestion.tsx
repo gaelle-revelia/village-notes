@@ -3,7 +3,7 @@ import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, CalendarDays, List, Loader2, MessageCircleQuestion, Mic, Square, X } from "lucide-react";
 import { format } from "date-fns";
 import { MemoDatePicker } from "@/components/memo/MemoDatePicker";
-import { Label } from "@/components/ui/label";
+
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -360,7 +360,7 @@ export default function NouvelleQuestion() {
       </header>
 
       <main className="flex-1 px-4 py-6">
-        <div className="mx-auto max-w-[400px] space-y-5">
+        <div className="mx-auto max-w-[400px] space-y-3">
           {/* Type selector */}
           <div className="grid grid-cols-3 gap-3">
             {([
@@ -424,10 +424,10 @@ export default function NouvelleQuestion() {
           </div>
 
           {/* Form — always visible */}
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4">
             {/* Title field */}
             <div className="space-y-2">
-              <label htmlFor="question-text" className="text-sm font-medium text-foreground">
+              <label htmlFor="question-text" style={{ fontSize: 13, fontWeight: 500, color: "#1E1A1A", fontFamily: "'DM Sans', sans-serif" }}>
                 Titre
               </label>
               <input
@@ -443,15 +443,15 @@ export default function NouvelleQuestion() {
                       : "Ex : Continuer les retournements ?"
                 }
                 required
-                className="h-12 w-full rounded-xl px-3 py-2 text-base font-medium text-foreground outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                style={glassFieldStyle}
+                className="outline-none placeholder:text-muted-foreground"
+                style={{ background: "rgba(255,255,255,0.52)", border: "1px solid rgba(255,255,255,0.72)", borderRadius: 12, padding: "11px 13px", fontSize: 14, fontFamily: "'DM Sans', sans-serif", color: "#1E1A1A", width: "100%" }}
               />
             </div>
 
             {/* Date — RDV (required) */}
             {type === "rdv" && (
               <div className="space-y-2">
-                <Label className="text-sm font-medium">Date</Label>
+                <label style={{ fontSize: 13, fontWeight: 500, color: "#1E1A1A", fontFamily: "'DM Sans', sans-serif" }}>Date</label>
                 <MemoDatePicker date={dueDate ?? new Date()} onDateChange={(d) => setDueDate(d)} />
               </div>
             )}
@@ -459,7 +459,7 @@ export default function NouvelleQuestion() {
             {/* Date — Rappel (optional, with approximate toggle) */}
             {type === "rappel" && (
               <div className="space-y-3">
-                <Label className="text-sm font-medium">Date (optionnelle)</Label>
+                <label style={{ fontSize: 13, fontWeight: 500, color: "#1E1A1A", fontFamily: "'DM Sans', sans-serif" }}>Date (optionnelle)</label>
                 <div className="flex items-center gap-2">
                   <Switch
                     checked={isApproximate}
@@ -473,7 +473,7 @@ export default function NouvelleQuestion() {
                 {isApproximate ? (
                   <div className="grid grid-cols-2 gap-3">
                     <Select value={String(approxMonth)} onValueChange={(v) => setApproxMonth(Number(v))}>
-                      <SelectTrigger className="rounded-xl" style={glassFieldStyle}>
+                      <SelectTrigger className="" style={{ background: "rgba(255,255,255,0.52)", border: "1px solid rgba(255,255,255,0.72)", borderRadius: 12, padding: "11px 13px", fontSize: 14, fontFamily: "'DM Sans', sans-serif", color: "#1E1A1A", width: "100%" }}>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -483,7 +483,7 @@ export default function NouvelleQuestion() {
                       </SelectContent>
                     </Select>
                     <Select value={String(approxYear)} onValueChange={(v) => setApproxYear(Number(v))}>
-                      <SelectTrigger className="rounded-xl" style={glassFieldStyle}>
+                      <SelectTrigger className="" style={{ background: "rgba(255,255,255,0.52)", border: "1px solid rgba(255,255,255,0.72)", borderRadius: 12, padding: "11px 13px", fontSize: 14, fontFamily: "'DM Sans', sans-serif", color: "#1E1A1A", width: "100%" }}>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -501,7 +501,7 @@ export default function NouvelleQuestion() {
 
             {/* Intervenant — simple search, no auto-suggestions */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">
+              <label style={{ fontSize: 13, fontWeight: 500, color: "#1E1A1A", fontFamily: "'DM Sans', sans-serif" }}>
                 Pour quel intervenant ?
               </label>
 
@@ -545,16 +545,8 @@ export default function NouvelleQuestion() {
                 placeholder="Chercher un professionnel…"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: "10px 12px",
-                  borderRadius: 11,
-                  border: "1px solid rgba(255,255,255,0.72)",
-                  background: "rgba(255,255,255,0.52)",
-                  fontSize: 13,
-                  color: "#1E1A1A",
-                  outline: "none",
-                }}
+                className="outline-none placeholder:text-muted-foreground"
+                style={{ background: "rgba(255,255,255,0.52)", border: "1px solid rgba(255,255,255,0.72)", borderRadius: 12, padding: "11px 13px", fontSize: 14, fontFamily: "'DM Sans', sans-serif", color: "#1E1A1A", width: "100%" }}
               />
 
               {searchQuery.trim() && (
@@ -581,7 +573,7 @@ export default function NouvelleQuestion() {
 
             {/* Précisions */}
             <div className="space-y-2">
-              <label htmlFor="question-precisions" className="text-sm font-medium text-foreground">
+              <label htmlFor="question-precisions" style={{ fontSize: 13, fontWeight: 500, color: "#1E1A1A", fontFamily: "'DM Sans', sans-serif" }}>
                 Précisions complémentaires (optionnel)
               </label>
               <Textarea
@@ -590,41 +582,48 @@ export default function NouvelleQuestion() {
                 onChange={(event) => setPrecisions(event.target.value)}
                 placeholder="Ajoutez un contexte utile si besoin"
                 rows={1}
-                className="w-full rounded-xl resize-none"
-                style={glassFieldStyle}
+                className="resize-none outline-none placeholder:text-muted-foreground"
+                style={{ background: "rgba(255,255,255,0.52)", border: "1px solid rgba(255,255,255,0.72)", borderRadius: 12, padding: "11px 13px", fontSize: 14, fontFamily: "'DM Sans', sans-serif", color: "#1E1A1A", width: "100%" }}
                 autoResize
               />
             </div>
 
-            {/* Submit */}
-            <button
-              type="submit"
-              disabled={
-                submitting ||
-                !question.trim() ||
-                !user ||
-                !enfantId ||
-                (type === "rdv" && !dueDate)
-              }
-              style={{
-                width: "100%",
-                padding: "14px",
-                borderRadius: 14,
-                border: "none",
-                background: question.trim() ? "linear-gradient(135deg, #E8736A, #8B74E0)" : "rgba(139,116,224,0.3)",
-                color: "#fff",
-                fontSize: 15,
-                fontWeight: 600,
-                fontFamily: "'DM Sans', sans-serif",
-                cursor: question.trim() ? "pointer" : "not-allowed",
-                opacity: 1,
-              }}
-            >
-              {submitting ? "Ajout…" : "Ajouter →"}
-            </button>
           </form>
         </div>
       </main>
+      <div style={{ position: "sticky", bottom: 0, padding: "6px 16px 76px" }}>
+        <button
+          type="submit"
+          form={undefined}
+          disabled={
+            submitting ||
+            !question.trim() ||
+            !user ||
+            !enfantId ||
+            (type === "rdv" && !dueDate)
+          }
+          onClick={(e) => {
+            e.preventDefault();
+            const form = document.querySelector<HTMLFormElement>("form");
+            if (form) form.requestSubmit();
+          }}
+          style={{
+            width: "100%",
+            padding: "14px",
+            borderRadius: 14,
+            border: "none",
+            background: question.trim() ? "linear-gradient(135deg, #E8736A, #8B74E0)" : "rgba(139,116,224,0.3)",
+            color: "#fff",
+            fontSize: 15,
+            fontWeight: 600,
+            fontFamily: "'DM Sans', sans-serif",
+            cursor: question.trim() ? "pointer" : "not-allowed",
+            opacity: 1,
+          }}
+        >
+          {submitting ? "Ajout…" : "Ajouter →"}
+        </button>
+      </div>
     </div>
   );
 }
