@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Check, Plus } from "lucide-react";
+import { ArrowLeft, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useEnfantId } from "@/hooks/useEnfantId";
 import { toast } from "sonner";
@@ -10,23 +10,18 @@ import { SoinCard } from "@/components/profile/SoinCard";
 import { SoinModal } from "@/components/profile/SoinModal";
 import { MaterielCard } from "@/components/profile/MaterielCard";
 import { MaterielModal } from "@/components/profile/MaterielModal";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function ChildProfile() {
   const { enfantId } = useEnfantId();
   const navigate = useNavigate();
   const [prenom, setPrenom] = useState<string | null>(null);
   const [sexe, setSexe] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
   const [dateNaissance, setDateNaissance] = useState<string | null>(null);
   const [diagnostic, setDiagnostic] = useState<string | null>(null);
 
-  // Edit infos state
-  const [editingInfos, setEditingInfos] = useState(false);
-  const [editPrenom, setEditPrenom] = useState("");
-  const [editDateNaissance, setEditDateNaissance] = useState("");
-  const [editDiagnostic, setEditDiagnostic] = useState("");
-  const [savingInfos, setSavingInfos] = useState(false);
-  const [editSexe, setEditSexe] = useState<string | null>(null);
+  // Inline editing
+  const [editingField, setEditingField] = useState<string | null>(null);
 
   // Medicaments state
   const [medicaments, setMedicaments] = useState<any[]>([]);
