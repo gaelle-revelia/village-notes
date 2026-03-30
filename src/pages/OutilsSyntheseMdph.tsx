@@ -8,6 +8,7 @@ import { useEnfantId } from "@/hooks/useEnfantId";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Textarea } from "@/components/ui/textarea";
 
 // --- Shared styles ---
 const glassCard: React.CSSProperties = {
@@ -456,11 +457,19 @@ const OutilsSyntheseMdph = () => {
               </p>
             </div>
             {q2Vocal.trim() && (
-              <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
+              <Textarea
+                value={q2Vocal}
+                onChange={(e) => setQ2Vocal(e.target.value)}
+                placeholder="Décrivez le quotidien…"
+                className="min-h-[80px] rounded-xl resize-none mb-3 text-[14px]"
+                style={glassCard}
+                autoResize
+              />
             )}
             <WiredMicOrb
               onTranscription={(text) => setQ2Vocal(prev => prev ? prev + " " + text : text)}
               onRecordingChange={setIsRecording}
+              childId={enfantId ?? undefined}
             />
           </>
         )}
@@ -469,7 +478,7 @@ const OutilsSyntheseMdph = () => {
         {introSeen && showQ3 && (
           <>
             {currentQ > 2 && q2Vocal.trim() && (
-              <UserBubble text="Enregistrement ajouté ✅" />
+              <UserBubble text={q2Vocal.length > 80 ? q2Vocal.slice(0, 80) + "…" : q2Vocal} />
             )}
             <AiBubble text="3 — Comment vous organisez-vous pour les soins et les rendez-vous ?" />
             <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
@@ -478,13 +487,19 @@ const OutilsSyntheseMdph = () => {
               </p>
             </div>
             {q3Vocal.trim() && (
-              <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>
-                ✓ Enregistrement capté
-              </p>
+              <Textarea
+                value={q3Vocal}
+                onChange={(e) => setQ3Vocal(e.target.value)}
+                placeholder="Décrivez l'organisation des soins…"
+                className="min-h-[80px] rounded-xl resize-none mb-3 text-[14px]"
+                style={glassCard}
+                autoResize
+              />
             )}
             <WiredMicOrb
               onTranscription={(text) => setQ3Vocal(prev => prev ? prev + " " + text : text)}
               onRecordingChange={setIsRecording}
+              childId={enfantId ?? undefined}
             />
           </>
         )}
@@ -493,7 +508,7 @@ const OutilsSyntheseMdph = () => {
         {introSeen && showQ4 && (
           <>
             {currentQ > 3 && q3Vocal.trim() && (
-              <UserBubble text="Enregistrement ajouté ✅" />
+              <UserBubble text={q3Vocal.length > 80 ? q3Vocal.slice(0, 80) + "…" : q3Vocal} />
             )}
             <AiBubble text={`4 — Quelle est la situation scolaire actuelle de ${displayName} ?`} />
             <ChipGroup chips={Q5_CHIPS} selected={q4Scolarite ? [q4Scolarite] : []} onToggle={(c) => toggleSingle(c, q4Scolarite, setQ4Scolarite)} />
@@ -510,9 +525,16 @@ const OutilsSyntheseMdph = () => {
               </p>
             </div>
             {q4ScolariteVocal.trim() && (
-              <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
+              <Textarea
+                value={q4ScolariteVocal}
+                onChange={(e) => setQ4ScolariteVocal(e.target.value)}
+                placeholder="Précisions sur la scolarité…"
+                className="min-h-[80px] rounded-xl resize-none mb-3 text-[14px]"
+                style={glassCard}
+                autoResize
+              />
             )}
-            <WiredMicOrb onTranscription={(text) => setQ4ScolariteVocal((prev) => prev ? prev + " " + text : text)} onRecordingChange={setIsRecording} />
+            <WiredMicOrb onTranscription={(text) => setQ4ScolariteVocal((prev) => prev ? prev + " " + text : text)} onRecordingChange={setIsRecording} childId={enfantId ?? undefined} />
           </>
         )}
 
@@ -529,9 +551,16 @@ const OutilsSyntheseMdph = () => {
               </p>
             </div>
             {q5Vocal.trim() && (
-              <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
+              <Textarea
+                value={q5Vocal}
+                onChange={(e) => setQ5Vocal(e.target.value)}
+                placeholder="Décrivez le projet à 2-3 ans…"
+                className="min-h-[80px] rounded-xl resize-none mb-3 text-[14px]"
+                style={glassCard}
+                autoResize
+              />
             )}
-            <WiredMicOrb onTranscription={(text) => setQ5Vocal((prev) => prev ? prev + " " + text : text)} onRecordingChange={setIsRecording} />
+            <WiredMicOrb onTranscription={(text) => setQ5Vocal((prev) => prev ? prev + " " + text : text)} onRecordingChange={setIsRecording} childId={enfantId ?? undefined} />
           </>
         )}
 
@@ -539,7 +568,7 @@ const OutilsSyntheseMdph = () => {
         {introSeen && showQ6 && (
           <>
             {currentQ > 5 && q5Vocal.trim() && (
-              <UserBubble text="Enregistrement ajouté ✅" />
+              <UserBubble text={q5Vocal.length > 80 ? q5Vocal.slice(0, 80) + "…" : q5Vocal} />
             )}
             <AiBubble text="6 — Y a-t-il quelque chose d'important que je ne vois pas dans vos mémos ?" />
             <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
@@ -548,9 +577,16 @@ const OutilsSyntheseMdph = () => {
               </p>
             </div>
             {q6Libre.trim() && (
-              <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
+              <Textarea
+                value={q6Libre}
+                onChange={(e) => setQ6Libre(e.target.value)}
+                placeholder="Ajoutez ce qui vous semble important…"
+                className="min-h-[80px] rounded-xl resize-none mb-3 text-[14px]"
+                style={glassCard}
+                autoResize
+              />
             )}
-            <WiredMicOrb onTranscription={(text) => setQ6Libre((prev) => prev ? prev + " " + text : text)} onRecordingChange={setIsRecording} />
+            <WiredMicOrb onTranscription={(text) => setQ6Libre((prev) => prev ? prev + " " + text : text)} onRecordingChange={setIsRecording} childId={enfantId ?? undefined} />
           </>
         )}
 
@@ -558,7 +594,7 @@ const OutilsSyntheseMdph = () => {
         {introSeen && showQ7 && (
           <>
             {currentQ > 6 && q6Libre.trim() && (
-              <UserBubble text="Enregistrement ajouté ✅" />
+              <UserBubble text={q6Libre.length > 80 ? q6Libre.slice(0, 80) + "…" : q6Libre} />
             )}
             <AiBubble text="7 — Avez-vous le certificat médical sous la main ?" />
             <ChipGroup
@@ -574,9 +610,16 @@ const OutilsSyntheseMdph = () => {
                   </p>
                 </div>
                 {q7Vocal.trim() && (
-                  <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
+                  <Textarea
+                    value={q7Vocal}
+                    onChange={(e) => setQ7Vocal(e.target.value)}
+                    placeholder="Résumez le certificat médical…"
+                    className="min-h-[80px] rounded-xl resize-none mb-3 text-[14px]"
+                    style={glassCard}
+                    autoResize
+                  />
                 )}
-                <WiredMicOrb onTranscription={(text) => setQ7Vocal((prev) => prev ? prev + " " + text : text)} onRecordingChange={setIsRecording} />
+                <WiredMicOrb onTranscription={(text) => setQ7Vocal((prev) => prev ? prev + " " + text : text)} onRecordingChange={setIsRecording} childId={enfantId ?? undefined} />
               </>
             )}
             {(q7Etat === "Pas encore" || q7Etat === "Certificat simplifié") && (
