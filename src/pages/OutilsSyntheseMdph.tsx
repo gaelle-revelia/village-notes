@@ -492,12 +492,17 @@ const OutilsSyntheseMdph = () => {
             {currentQ > 2 && q2Vocal.trim() && (
               <UserBubble text={q2Vocal.length > 80 ? q2Vocal.slice(0, 80) + "…" : q2Vocal} />
             )}
-            <AiBubble text="3 — Comment vous organisez-vous pour les soins et les rendez-vous ?" />
+            <div className="flex items-start gap-0">
+              <div className="flex-1"><AiBubble text="3 — Comment vous organisez-vous pour les soins et les rendez-vous ?" /></div>
+              <button onClick={() => toggleHelper(3)} style={{ background: "none", border: "none", cursor: "pointer", padding: "0 4px", display: "flex", alignItems: "center", marginTop: 28 }}><Info size={14} color="#8B74E0" style={{ opacity: 0.6 }} /></button>
+            </div>
+            {openHelper === 3 && (
             <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
               <p style={{ fontSize: 11, color: "#8B74E0", lineHeight: 1.6, margin: 0 }}>
                 La commission a besoin de comprendre votre organisation — les rendez-vous hebdomadaires, les soins à domicile, les exercices de rééducation, l'aide rémunérée si vous en avez une. Votre situation professionnelle aussi : est-ce que les soins ont impacté votre activité ?
               </p>
             </div>
+            )}
             {q3Vocal.trim() && (
               <Textarea
                 value={q3Vocal}
