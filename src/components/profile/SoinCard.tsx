@@ -116,11 +116,6 @@ export function SoinCard({
             )}
           </EditableField>
 
-          {draftSignesAlerte && (
-            <div className="bg-[#FAECE7] text-[#E8736A] rounded-lg px-3 py-2 text-xs font-medium">
-              ⚠ Protocole urgence
-            </div>
-          )}
 
           {!confirmDelete ? (
             <div className="flex gap-2 pt-2">
