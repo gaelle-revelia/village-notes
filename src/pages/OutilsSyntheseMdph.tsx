@@ -494,9 +494,20 @@ const OutilsSyntheseMdph = () => {
                 ✓ Enregistrement capté
               </p>
             )}
+            {q3Vocal.trim() && (
+              <Textarea
+                value={q3Vocal}
+                onChange={(e) => setQ3Vocal(e.target.value)}
+                placeholder="Décrivez l'organisation des soins…"
+                className="min-h-[80px] rounded-xl resize-none mb-3 text-[14px]"
+                style={glassCard}
+                autoResize
+              />
+            )}
             <WiredMicOrb
               onTranscription={(text) => setQ3Vocal(prev => prev ? prev + " " + text : text)}
               onRecordingChange={setIsRecording}
+              childId={enfantId ?? undefined}
             />
           </>
         )}
