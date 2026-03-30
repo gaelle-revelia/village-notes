@@ -481,7 +481,7 @@ const OutilsSyntheseMdph = () => {
         {introSeen && showQ3 && (
           <>
             {currentQ > 2 && q2Vocal.trim() && (
-              <UserBubble text="Enregistrement ajouté ✅" />
+              <UserBubble text={q2Vocal.length > 80 ? q2Vocal.slice(0, 80) + "…" : q2Vocal} />
             )}
             <AiBubble text="3 — Comment vous organisez-vous pour les soins et les rendez-vous ?" />
             <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
