@@ -468,9 +468,9 @@ export default function ChildProfile() {
                             <MaterielCard
                               key={item.id}
                               {...item}
-                              onEdit={(id) => {
-                                setEditingMateriel(materiel.find((m) => m.id === id));
-                                setMaterielModalOpen(true);
+                              onEdit={async (id, data) => {
+                                await supabase.from("materiel").update(data).eq("id", id);
+                                fetchMateriel();
                               }}
                               onDelete={deleteMateriel}
                             />
