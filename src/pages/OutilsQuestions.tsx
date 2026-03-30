@@ -1173,7 +1173,7 @@ export default function OutilsQuestions() {
           <nav className="px-2 pb-4 pt-1">
             {([
               { icon: <CalendarDays size={18} />, color: "#8B74E0", label: "Rendez-vous", description: "Préparer un RDV à venir", type: "rdv" },
-              { icon: <Bell size={18} />, color: "#E8A44A", label: "Rappel", description: "Ne pas oublier de faire quelque chose", type: "rappel" },
+              { icon: <Bell size={18} />, color: "#E8A44A", label: "To-Do", description: "Une action à ne pas oublier", type: "rappel" },
               { icon: <MessageCircleQuestion size={18} />, color: "#44A882", label: "Question", description: "Ce que je veux demander au pro", type: "question" },
             ] as const).map((item) => (
               <button
