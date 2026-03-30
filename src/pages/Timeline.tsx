@@ -110,42 +110,52 @@ const Timeline = () => {
   }, [filterPanelOpen]);
 
 
+  const fetchMemos = async (currentOffset: number, append: boolean) => {
+    const { data } = await supabase
+      .from("memos")
+      .select("id, created_at, memo_date, type, processing_status, transcription_raw, content_structured, intervenant_id")
+      .not("enfant_id", "is", null)
+      .order("memo_date", { ascending: false })
+      .order("created_at", { ascending: false })
+      .range(currentOffset, currentOffset + 49);
+
+    if (data && data.length > 0) {
+      const intervenantIds = [...new Set(data.filter(m => m.intervenant_id).map(m => m.intervenant_id!))];
+      let intervenantsMap: Record<string, { nom: string; specialite: string | null; photo_url: string | null }> = {};
+
+      if (intervenantIds.length > 0) {
+        const { data: intervenants } = await supabase
+          .from("intervenants")
+          .select("id, nom, specialite, photo_url")
+          .in("id", intervenantIds);
+
+        if (intervenants) {
+          intervenantsMap = Object.fromEntries(intervenants.map(i => [i.id, { nom: i.nom, specialite: i.specialite, photo_url: (i as any).photo_url || null }]));
+        }
+      }
+
+      const mapped = data.map(m => ({
+        ...m,
+        intervenant: m.intervenant_id ? intervenantsMap[m.intervenant_id] || null : null,
+      }));
+
+      if (append) {
+        setMemos(prev => [...mapped, ...prev]);
+      } else {
+        setMemos(mapped);
+      }
+
+      if (data.length < 50) setHasMore(false);
+    } else {
+      setHasMore(false);
+      if (!append) setMemos([]);
+    }
+    setLoadingMemos(false);
+  };
+
   useEffect(() => {
     if (!user) return;
-
-    const fetchMemos = async () => {
-      const { data } = await supabase
-        .from("memos")
-        .select("id, created_at, memo_date, type, processing_status, transcription_raw, content_structured, intervenant_id")
-        .not("enfant_id", "is", null)
-        .order("memo_date", { ascending: false })
-        .order("created_at", { ascending: false })
-        .limit(50);
-
-      if (data && data.length > 0) {
-        const intervenantIds = [...new Set(data.filter(m => m.intervenant_id).map(m => m.intervenant_id!))];
-        let intervenantsMap: Record<string, { nom: string; specialite: string | null; photo_url: string | null }> = {};
-
-        if (intervenantIds.length > 0) {
-          const { data: intervenants } = await supabase
-            .from("intervenants")
-            .select("id, nom, specialite, photo_url")
-            .in("id", intervenantIds);
-
-          if (intervenants) {
-            intervenantsMap = Object.fromEntries(intervenants.map(i => [i.id, { nom: i.nom, specialite: i.specialite, photo_url: (i as any).photo_url || null }]));
-          }
-        }
-
-        setMemos(data.map(m => ({
-          ...m,
-          intervenant: m.intervenant_id ? intervenantsMap[m.intervenant_id] || null : null,
-        })));
-      }
-      setLoadingMemos(false);
-    };
-
-    fetchMemos();
+    fetchMemos(0, false);
   }, [user, location.key]);
 
   const isFilterActive = !activeFilters.has("tous");
