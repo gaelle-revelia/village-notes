@@ -82,6 +82,9 @@ const Timeline = () => {
   const location = useLocation();
   const [memos, setMemos] = useState<Memo[]>([]);
   const [loadingMemos, setLoadingMemos] = useState(true);
+  const [offset, setOffset] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [sheetOpen, setSheetOpen] = useState(false);
   const [filterPanelOpen, setFilterPanelOpen] = useState(false);
@@ -107,42 +110,52 @@ const Timeline = () => {
   }, [filterPanelOpen]);
 
 
+  const fetchMemos = async (currentOffset: number, append: boolean) => {
+    const { data } = await supabase
+      .from("memos")
+      .select("id, created_at, memo_date, type, processing_status, transcription_raw, content_structured, intervenant_id")
+      .not("enfant_id", "is", null)
+      .order("memo_date", { ascending: false })
+      .order("created_at", { ascending: false })
+      .range(currentOffset, currentOffset + 49);
+
+    if (data && data.length > 0) {
+      const intervenantIds = [...new Set(data.filter(m => m.intervenant_id).map(m => m.intervenant_id!))];
+      let intervenantsMap: Record<string, { nom: string; specialite: string | null; photo_url: string | null }> = {};
+
+      if (intervenantIds.length > 0) {
+        const { data: intervenants } = await supabase
+          .from("intervenants")
+          .select("id, nom, specialite, photo_url")
+          .in("id", intervenantIds);
+
+        if (intervenants) {
+          intervenantsMap = Object.fromEntries(intervenants.map(i => [i.id, { nom: i.nom, specialite: i.specialite, photo_url: (i as any).photo_url || null }]));
+        }
+      }
+
+      const mapped = data.map(m => ({
+        ...m,
+        intervenant: m.intervenant_id ? intervenantsMap[m.intervenant_id] || null : null,
+      }));
+
+      if (append) {
+        setMemos(prev => [...mapped, ...prev]);
+      } else {
+        setMemos(mapped);
+      }
+
+      if (data.length < 50) setHasMore(false);
+    } else {
+      setHasMore(false);
+      if (!append) setMemos([]);
+    }
+    setLoadingMemos(false);
+  };
+
   useEffect(() => {
     if (!user) return;
-
-    const fetchMemos = async () => {
-      const { data } = await supabase
-        .from("memos")
-        .select("id, created_at, memo_date, type, processing_status, transcription_raw, content_structured, intervenant_id")
-        .not("enfant_id", "is", null)
-        .order("memo_date", { ascending: false })
-        .order("created_at", { ascending: false })
-        .limit(50);
-
-      if (data && data.length > 0) {
-        const intervenantIds = [...new Set(data.filter(m => m.intervenant_id).map(m => m.intervenant_id!))];
-        let intervenantsMap: Record<string, { nom: string; specialite: string | null; photo_url: string | null }> = {};
-
-        if (intervenantIds.length > 0) {
-          const { data: intervenants } = await supabase
-            .from("intervenants")
-            .select("id, nom, specialite, photo_url")
-            .in("id", intervenantIds);
-
-          if (intervenants) {
-            intervenantsMap = Object.fromEntries(intervenants.map(i => [i.id, { nom: i.nom, specialite: i.specialite, photo_url: (i as any).photo_url || null }]));
-          }
-        }
-
-        setMemos(data.map(m => ({
-          ...m,
-          intervenant: m.intervenant_id ? intervenantsMap[m.intervenant_id] || null : null,
-        })));
-      }
-      setLoadingMemos(false);
-    };
-
-    fetchMemos();
+    fetchMemos(0, false);
   }, [user, location.key]);
 
   const isFilterActive = !activeFilters.has("tous");
@@ -389,7 +402,36 @@ const Timeline = () => {
           </div>
         ) : (
           <div>
-            {grouped.map((group) => (
+          {hasMore && searchQuery === "" && !isFilterActive && (
+            <button
+              onClick={async () => {
+                const newOffset = offset + 50;
+                setOffset(newOffset);
+                setLoadingMore(true);
+                await fetchMemos(newOffset, true);
+                setLoadingMore(false);
+              }}
+              disabled={loadingMore}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "100%",
+                padding: "10px 0",
+                marginBottom: 8,
+                background: "none",
+                border: "none",
+                cursor: loadingMore ? "default" : "pointer",
+                fontSize: 13,
+                fontFamily: "'DM Sans', sans-serif",
+                fontWeight: 500,
+                color: "#8B74E0",
+              }}
+            >
+              {loadingMore ? "Chargement..." : "← Charger les mémos plus anciens"}
+            </button>
+          )}
+          {grouped.map((group) => (
               <div key={group.key}>
                 {/* Month header */}
                 <div className="sticky top-[100px] z-[5]"
