@@ -506,10 +506,7 @@ const OutilsSyntheseMdph = () => {
             {currentQ > 2 && q2Vocal.trim() && (
               <UserBubble text={q2Vocal.length > 80 ? q2Vocal.slice(0, 80) + "…" : q2Vocal} />
             )}
-            <div className="flex items-start gap-0">
-              <div className="flex-1"><AiBubble text="3 — Comment vous organisez-vous pour les soins et les rendez-vous ?" /></div>
-              <button onClick={() => toggleHelper(3)} style={{ background: "rgba(139,116,224,0.12)", border: "1px solid rgba(139,116,224,0.3)", borderRadius: 20, padding: "2px 8px", cursor: "pointer", fontSize: 11, color: "#8B74E0", fontFamily: "'DM Sans', sans-serif", fontWeight: 500, flexShrink: 0 }}>i</button>
-            </div>
+            <AiBubbleWithHelper text="3 — Comment vous organisez-vous pour les soins et les rendez-vous ?" helperN={3} openHelper={openHelper} toggleHelper={toggleHelper} />
             {openHelper === 3 && (
             <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
               <p style={{ fontSize: 11, color: "#8B74E0", lineHeight: 1.6, margin: 0 }}>
