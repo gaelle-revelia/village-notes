@@ -13,6 +13,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useEnfantId } from "@/hooks/useEnfantId";
 import { useAudioRecorder } from "@/hooks/useAudioRecorder";
 import { supabase } from "@/integrations/supabase/client";
+import WiredMicOrb from "@/components/synthese/WiredMicOrb";
 
 type Intervenant = {
   id: string;
@@ -402,78 +403,15 @@ export default function NouvelleQuestion() {
             })}
           </div>
 
-          {/* Vocal strip */}
-          {permissionDenied ? (
-            <p style={{ fontSize: 12, color: "#9A9490", textAlign: "center" }}>
-              Microphone non disponible — utilisez la saisie texte.
-            </p>
-          ) : (
-            <div
-              onClick={!isTranscribing ? (isRecording ? handleStopRecording : handleStartRecording) : undefined}
-              style={{
-                background: isRecording
-                  ? "rgba(232,115,106,0.15)"
-                  : "linear-gradient(135deg, rgba(232,115,106,0.1), rgba(139,116,224,0.1))",
-                border: isRecording
-                  ? "1px solid rgba(232,115,106,0.3)"
-                  : "1px solid rgba(255,255,255,0.8)",
-                borderRadius: 14,
-                padding: "12px 14px",
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-                cursor: isTranscribing ? "wait" : "pointer",
+          {/* Vocal orb */}
+          <div style={{ display: "flex", justifyContent: "center", padding: "8px 0" }}>
+            <WiredMicOrb
+              childId={enfantId ?? undefined}
+              onTranscription={(text) => {
+                setQuestion((prev) => prev ? prev + " " + text : text);
               }}
-            >
-              <button
-                type="button"
-                onClick={isRecording ? handleStopRecording : handleStartRecording}
-                disabled={isTranscribing}
-                style={{
-                  width: 42,
-                  height: 42,
-                  borderRadius: "50%",
-                  background: isRecording ? "#E8736A" : "linear-gradient(135deg, #E8736A, #8B74E0)",
-                  border: "none",
-                  cursor: isTranscribing ? "wait" : "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  boxShadow: "0 4px 12px rgba(139,116,224,0.3)",
-                  flexShrink: 0,
-                  opacity: isTranscribing ? 0.6 : 1,
-                }}
-              >
-                {isTranscribing ? (
-                  <Loader2 size={18} color="white" className="animate-spin" />
-                ) : isRecording ? (
-                  <Square size={16} color="white" fill="white" />
-                ) : (
-                  <Mic size={18} color="white" />
-                )}
-              </button>
-
-              {isRecording ? (
-                <div style={{ fontFamily: "monospace", fontSize: 22, fontWeight: 500, color: "#1E1A1A", letterSpacing: 3 }}>
-                  {formatTime(elapsedSeconds)}
-                </div>
-              ) : isTranscribing ? (
-                <div style={{ fontSize: 13, fontWeight: 500, color: "#9A9490" }}>
-                  Reformulation en cours...
-                </div>
-              ) : (
-                <div>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: "#1E1A1A" }}>
-                    {type === "rdv" ? "Dicter le RDV" : type === "rappel" ? "Dicter le rappel" : "Dicter la question"}
-                  </div>
-                  <div style={{ fontSize: 11, color: "#9A9490" }}>
-                    The Village structure automatiquement
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
+            />
+          </div>
           {transcriptionError && (
             <p className="text-xs text-destructive text-center">{transcriptionError}</p>
           )}
