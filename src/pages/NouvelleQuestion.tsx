@@ -582,8 +582,8 @@ export default function NouvelleQuestion() {
                 onChange={(event) => setPrecisions(event.target.value)}
                 placeholder="Ajoutez un contexte utile si besoin"
                 rows={1}
-                className="w-full rounded-xl resize-none"
-                style={glassFieldStyle}
+                className="resize-none outline-none placeholder:text-muted-foreground"
+                style={{ background: "rgba(255,255,255,0.52)", border: "1px solid rgba(255,255,255,0.72)", borderRadius: 12, padding: "11px 13px", fontSize: 14, fontFamily: "'DM Sans', sans-serif", color: "#1E1A1A", width: "100%" }}
                 autoResize
               />
             </div>
