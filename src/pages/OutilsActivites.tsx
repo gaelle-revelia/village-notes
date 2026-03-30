@@ -291,19 +291,6 @@ export default function OutilsActivites() {
                         ))}
                       </div>
                     </div>
-
-                    {/* Icône (display only) */}
-                    <div>
-                      <p className="text-[10px] font-semibold tracking-wide text-muted-foreground mb-0.5 uppercase" style={{ fontFamily: "DM Sans" }}>ICÔNE</p>
-                      <div className="flex items-center gap-2">
-                        <div className="flex items-center justify-center rounded-xl" style={{ width: 32, height: 32, background: `${d.color}18` }}>
-                          <RenderIcon name={a.icone ?? "Activity"} size={18} color={d.color} />
-                        </div>
-                        <span className="text-xs text-muted-foreground italic" style={{ fontFamily: "DM Sans" }}>
-                          Mise à jour automatique
-                        </span>
-                      </div>
-                    </div>
                   </div>
                 )}
               </div>
