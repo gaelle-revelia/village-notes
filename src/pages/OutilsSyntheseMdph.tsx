@@ -577,9 +577,6 @@ const OutilsSyntheseMdph = () => {
               </p>
             </div>
             {q6Libre.trim() && (
-              <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
-            )}
-            {q6Libre.trim() && (
               <Textarea
                 value={q6Libre}
                 onChange={(e) => setQ6Libre(e.target.value)}
