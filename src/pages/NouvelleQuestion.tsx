@@ -493,7 +493,7 @@ export default function NouvelleQuestion() {
                     </Select>
                   </div>
                 ) : (
-                  <MemoDatePicker date={dueDate ?? new Date()} onDateChange={(d) => setDueDate(d)} />
+                  <MemoDatePicker date={dueDate ?? new Date()} onDateChange={(d) => setDueDate(d)} showLabel={false} />
                 )}
               </div>
             )}
