@@ -459,7 +459,7 @@ export default function NouvelleQuestion() {
             {/* Date — Rappel (optional, with approximate toggle) */}
             {type === "rappel" && (
               <div className="space-y-3">
-                <Label className="text-sm font-medium">Date (optionnelle)</Label>
+                <label style={{ fontSize: 13, fontWeight: 500, color: "#1E1A1A", fontFamily: "'DM Sans', sans-serif" }}>Date (optionnelle)</label>
                 <div className="flex items-center gap-2">
                   <Switch
                     checked={isApproximate}
