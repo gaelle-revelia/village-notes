@@ -37,6 +37,26 @@ const AiBubble = ({ text, italic }: { text: string; italic?: boolean }) => (
   </div>
 );
 
+const AiBubbleWithHelper = ({ text, helperN, openHelper, toggleHelper }: { text: string; helperN: number; openHelper: number | null; toggleHelper: (n: number) => void }) => (
+  <div className="flex items-end gap-3 mb-3">
+    <div className="flex-shrink-0 flex items-center justify-center" style={{ width: 40, height: 40, borderRadius: "50%", background: "linear-gradient(135deg, #E8736A, #8B74E0)", boxShadow: "0 0 16px rgba(139,116,224,0.4)" }}>
+      <Sparkles size={18} color="#fff" />
+    </div>
+    <div className="flex-1 min-w-0">
+      <span className="block mb-1 font-sans font-medium" style={{ color: "#8B74E0", fontSize: 11 }}>The Village</span>
+      <div className="px-4 py-3 inline-flex items-center gap-2" style={{ ...glassCard, background: "rgba(255,255,255,0.55)", border: "1px solid rgba(255,255,255,0.85)", maxWidth: "85%" }}>
+        <p className="text-[14px] font-sans leading-snug" style={{ color: "#1E1A1A", margin: 0 }}>{text}</p>
+        <button
+          onClick={() => toggleHelper(helperN)}
+          style={{ background: openHelper === helperN ? "rgba(139,116,224,0.2)" : "rgba(139,116,224,0.1)", border: "1px solid rgba(139,116,224,0.3)", borderRadius: "50%", width: 20, height: 20, cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, color: "#8B74E0", fontWeight: 700, fontFamily: "'DM Sans', sans-serif", padding: 0 }}
+        >
+          i
+        </button>
+      </div>
+    </div>
+  </div>
+);
+
 const UserBubble = ({ text }: { text: string }) => (
   <div className="flex justify-end mb-4">
     <div className="px-4 py-3 inline-block" style={{ background: "linear-gradient(135deg, #E8736A, #8B74E0)", borderRadius: 16, maxWidth: "70%" }}>
