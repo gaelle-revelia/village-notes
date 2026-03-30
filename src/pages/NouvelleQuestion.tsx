@@ -424,7 +424,7 @@ export default function NouvelleQuestion() {
           </div>
 
           {/* Form — always visible */}
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4">
             {/* Title field */}
             <div className="space-y-2">
               <label htmlFor="question-text" className="text-sm font-medium text-foreground">
