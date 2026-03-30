@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Plus, Timer, PenLine, Activity, Brain, Stethoscope, Heart, Ear, MoreVertical, Loader2, Info } from "lucide-react";
+import { ArrowLeft, Plus, Activity, Brain, Stethoscope, Heart, Ear, MoreVertical, Loader2, Info, ChevronRight } from "lucide-react";
 import { icons } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useEnfantId } from "@/hooks/useEnfantId";
 import { useToast } from "@/hooks/use-toast";
-import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -73,15 +72,10 @@ export default function OutilsActivites() {
   const { toast } = useToast();
   const [activites, setActivites] = useState<Activite[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selected, setSelected] = useState<Activite | null>(null);
 
-  // Edit state
-  const [editing, setEditing] = useState<Activite | null>(null);
-  const [editNom, setEditNom] = useState("");
-  const [editDomaine, setEditDomaine] = useState("Moteur");
-  const [editIcone, setEditIcone] = useState("Activity");
-  const [showIconPicker, setShowIconPicker] = useState(false);
-  const [savingEdit, setSavingEdit] = useState(false);
+  // Inline editing
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [draftNoms, setDraftNoms] = useState<Record<string, string>>({});
   const [suggestingIcon, setSuggestingIcon] = useState(false);
 
   // Archive state
@@ -102,35 +96,47 @@ export default function OutilsActivites() {
       });
   }, [enfantId]);
 
-  const openEdit = (a: Activite) => {
-    setEditNom(a.nom);
-    setEditDomaine(a.domaine);
-    setEditIcone(a.icone ?? "Activity");
-    setShowIconPicker(false);
-    setEditing(a);
+  const handleExpand = (a: Activite) => {
+    if (expandedId === a.id) {
+      setExpandedId(null);
+    } else {
+      setExpandedId(a.id);
+      setDraftNoms((prev) => ({ ...prev, [a.id]: a.nom }));
+    }
   };
 
-  const suggestIcon = async () => {
-    if (!editNom.trim()) return;
-    setSuggestingIcon(true);
+  const saveNom = async (a: Activite) => {
+    const newNom = (draftNoms[a.id] ?? a.nom).trim();
+    if (!newNom) {
+      setDraftNoms((prev) => ({ ...prev, [a.id]: a.nom }));
+      return;
+    }
+    if (newNom === a.nom) return;
+    const { error } = await supabase.from("activites").update({ nom: newNom }).eq("id", a.id);
+    if (error) {
+      toast({ title: "Erreur", description: "Impossible de modifier le nom.", variant: "destructive" });
+      return;
+    }
+    setActivites((prev) => prev.map((x) => x.id === a.id ? { ...x, nom: newNom } : x));
+    // Suggest icon silently
     try {
-      const { data, error } = await supabase.functions.invoke("suggest-icon", { body: { nom: editNom.trim(), domaine: editDomaine } });
-      if (!error && data?.icon) setEditIcone(data.icon);
+      setSuggestingIcon(true);
+      const { data } = await supabase.functions.invoke("suggest-icon", { body: { nom: newNom, domaine: a.domaine } });
+      if (data?.icon) {
+        await supabase.from("activites").update({ icone: data.icon }).eq("id", a.id);
+        setActivites((prev) => prev.map((x) => x.id === a.id ? { ...x, icone: data.icon } : x));
+      }
     } catch {} finally { setSuggestingIcon(false); }
   };
 
-  const handleSaveEdit = async () => {
-    if (!editing || !editNom.trim()) return;
-    setSavingEdit(true);
-    const { error } = await supabase.from("activites").update({ nom: editNom.trim(), domaine: editDomaine, icone: editIcone }).eq("id", editing.id);
+  const saveDomaine = async (a: Activite, newDomaine: string) => {
+    if (newDomaine === a.domaine) return;
+    const { error } = await supabase.from("activites").update({ domaine: newDomaine }).eq("id", a.id);
     if (error) {
-      toast({ title: "Erreur", description: "Impossible de modifier l'activité.", variant: "destructive" });
-    } else {
-      setActivites((prev) => prev.map((a) => a.id === editing.id ? { ...a, nom: editNom.trim(), domaine: editDomaine, icone: editIcone } : a));
-      toast({ title: "Activité modifiée" });
+      toast({ title: "Erreur", description: "Impossible de modifier le domaine.", variant: "destructive" });
+      return;
     }
-    setSavingEdit(false);
-    setEditing(null);
+    setActivites((prev) => prev.map((x) => x.id === a.id ? { ...x, domaine: newDomaine } : x));
   };
 
   const handleArchive = async () => {
@@ -145,9 +151,7 @@ export default function OutilsActivites() {
     setArchiving(null);
   };
 
-  const editDomainColor = DOMAINS.find((d) => d.label === editDomaine)?.color ?? "#8A9BAE";
   const domain = (d: string) => DOMAIN_CONFIG[d] ?? DOMAIN_CONFIG["Médical"];
-
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -191,21 +195,26 @@ export default function OutilsActivites() {
             const units: string[] = [];
             if (a.track_temps) units.push("Temps");
             if (a.track_distance) units.push(a.unite_distance === "km" ? "Distance en km" : "Distance en mètres");
+            const isExpanded = expandedId === a.id;
             return (
               <div
                 key={a.id}
-                className="flex items-center gap-3 text-left transition-transform active:scale-[0.98]"
+                className="transition-all"
                 style={{ ...glassCard, padding: "11px 13px" }}
               >
-                <button
-                  onClick={() => setSelected(a)}
-                  className="flex items-center gap-3 flex-1 min-w-0 text-left"
+                <div
+                  className="flex items-center gap-3 cursor-pointer transition-transform active:scale-[0.98]"
+                  onClick={() => handleExpand(a)}
                 >
                   <div
                     className="flex items-center justify-center rounded-xl shrink-0"
                     style={{ width: 40, height: 40, background: `${d.color}20` }}
                   >
-                    <Icon size={20} color={d.color} strokeWidth={2} />
+                    {suggestingIcon && isExpanded ? (
+                      <Loader2 size={20} className="animate-spin" color={d.color} />
+                    ) : (
+                      <Icon size={20} color={d.color} strokeWidth={2} />
+                    )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="truncate" style={{ fontFamily: "'Fraunces', serif", fontSize: 16, fontWeight: 600, color: "#1E1A1A" }}>{a.nom}</p>
@@ -226,31 +235,81 @@ export default function OutilsActivites() {
                       )}
                     </div>
                   </div>
-                </button>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button
-                      onClick={(e) => e.stopPropagation()}
-                      className="shrink-0 flex items-center justify-center rounded-lg"
-                      style={{ width: 32, height: 32 }}
-                    >
-                      <MoreVertical size={18} color="#9A9490" />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="min-w-[140px]">
-                    <DropdownMenuItem onClick={() => openEdit(a)} className="text-[13px] font-sans">
-                      Modifier
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setArchiving(a)} className="text-[13px] font-sans" style={{ color: "#E8736A" }}>
-                      Archiver
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                  <ChevronRight
+                    size={16}
+                    className={`text-muted-foreground shrink-0 transition-transform duration-200 ${isExpanded ? "rotate-90" : ""}`}
+                  />
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        onClick={(e) => e.stopPropagation()}
+                        className="shrink-0 flex items-center justify-center rounded-lg"
+                        style={{ width: 32, height: 32 }}
+                      >
+                        <MoreVertical size={18} color="#9A9490" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="min-w-[140px]">
+                      <DropdownMenuItem onClick={() => setArchiving(a)} className="text-[13px] font-sans" style={{ color: "#E8736A" }}>
+                        Archiver
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+
+                {isExpanded && (
+                  <div className="mt-4 space-y-3" onClick={(e) => e.stopPropagation()}>
+                    {/* Nom */}
+                    <div>
+                      <p className="text-[10px] font-semibold tracking-wide text-muted-foreground mb-0.5 uppercase" style={{ fontFamily: "DM Sans" }}>NOM</p>
+                      <input
+                        autoFocus
+                        className="w-full text-sm text-foreground bg-transparent border-b border-muted-foreground/30 outline-none py-0.5"
+                        style={{ fontFamily: "DM Sans" }}
+                        value={draftNoms[a.id] ?? a.nom}
+                        onChange={(e) => setDraftNoms((prev) => ({ ...prev, [a.id]: e.target.value }))}
+                        onBlur={() => saveNom(a)}
+                        onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+                      />
+                    </div>
+
+                    {/* Domaine */}
+                    <div>
+                      <p className="text-[10px] font-semibold tracking-wide text-muted-foreground mb-1.5 uppercase" style={{ fontFamily: "DM Sans" }}>DOMAINE</p>
+                      <div className="flex items-center justify-between" style={{ gap: 8 }}>
+                        {DOMAINS.map((dd) => (
+                          <button key={dd.label} onClick={() => saveDomaine(a, dd.label)} className="flex flex-col items-center gap-1">
+                            <div className="rounded-full transition-all" style={{
+                              width: 24, height: 24,
+                              background: a.domaine === dd.label ? dd.color : "transparent",
+                              border: `2.5px solid ${dd.color}`,
+                              opacity: a.domaine === dd.label ? 1 : 0.35,
+                              boxShadow: a.domaine === dd.label ? `0 0 0 4px ${dd.color}38` : "none",
+                            }} />
+                            <span className="text-[10px] font-sans font-medium" style={{ color: a.domaine === dd.label ? dd.color : "#9A9490" }}>{dd.label}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Icône (display only) */}
+                    <div>
+                      <p className="text-[10px] font-semibold tracking-wide text-muted-foreground mb-0.5 uppercase" style={{ fontFamily: "DM Sans" }}>ICÔNE</p>
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center justify-center rounded-xl" style={{ width: 32, height: 32, background: `${d.color}18` }}>
+                          <RenderIcon name={a.icone ?? "Activity"} size={18} color={d.color} />
+                        </div>
+                        <span className="text-xs text-muted-foreground italic" style={{ fontFamily: "DM Sans" }}>
+                          Mise à jour automatique
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })
         )}
-
 
         {/* New activity button */}
         <button
@@ -262,131 +321,6 @@ export default function OutilsActivites() {
           <span className="text-[13px] font-sans font-medium">Nouvelle activité</span>
         </button>
       </main>
-
-      {/* Drawer */}
-      <Drawer open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
-        <DrawerContent>
-          <div className="pt-2 pb-6 flex flex-col gap-3" style={{ maxWidth: 400, margin: "0 auto", padding: "8px 20px 24px" }}>
-            <DrawerTitle className="text-base font-serif font-semibold text-foreground text-center">
-              {selected?.nom}
-            </DrawerTitle>
-            <button
-              onClick={() => { navigate(`/outils/activites/${selected!.id}/chrono`); setSelected(null); }}
-              className="flex items-center gap-3 rounded-2xl transition-transform active:scale-[0.97]"
-              style={{ ...glassCard, padding: "12px 14px" }}
-            >
-              <div className="flex items-center justify-center rounded-xl shrink-0" style={{ width: 40, height: 40, background: "rgba(232,115,106,0.15)" }}>
-                <Timer size={20} color="#E8736A" />
-              </div>
-              <div className="flex flex-col text-left">
-                <span className="text-[14px] font-sans font-medium text-foreground">Lancer le chrono</span>
-                <span className="text-[11px] font-sans text-muted-foreground">Démarre un minuteur en temps réel</span>
-              </div>
-            </button>
-            <button
-              onClick={() => { navigate(`/outils/activites/${selected!.id}/manuel`); setSelected(null); }}
-              className="flex items-center gap-3 rounded-2xl transition-transform active:scale-[0.97]"
-              style={{ ...glassCard, padding: "12px 14px" }}
-            >
-              <div className="flex items-center justify-center rounded-xl shrink-0" style={{ width: 40, height: 40, background: "rgba(139,116,224,0.15)" }}>
-                <PenLine size={20} color="#8B74E0" />
-              </div>
-              <div className="flex flex-col text-left">
-                <span className="text-[14px] font-sans font-medium text-foreground">Ajouter manuellement</span>
-                <span className="text-[11px] font-sans text-muted-foreground">Saisir durée et distance après la séance</span>
-              </div>
-            </button>
-          </div>
-        </DrawerContent>
-      </Drawer>
-
-      {/* Edit Drawer */}
-      <Drawer open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
-        <DrawerContent>
-          <div className="pt-2 pb-6 flex flex-col gap-3" style={{ maxWidth: 400, margin: "0 auto", padding: "8px 20px 24px" }}>
-            <DrawerTitle className="text-base font-serif font-semibold text-foreground text-center">
-              Modifier l'activité
-            </DrawerTitle>
-
-            {/* Nom */}
-            <div style={{ ...glassCard, padding: "12px 14px" }} className="flex flex-col gap-1.5">
-              <label style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", color: "#9A9490" }}>
-                Nom
-              </label>
-              <input
-                value={editNom}
-                onChange={(e) => setEditNom(e.target.value)}
-                onBlur={suggestIcon}
-                className="bg-transparent border-none outline-none text-[15px] font-sans text-foreground placeholder:text-muted-foreground"
-                style={{ padding: "6px 0" }}
-              />
-            </div>
-
-            {/* Icône */}
-            <div style={{ ...glassCard, padding: "12px 14px" }} className="flex flex-col gap-2">
-              <label style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", color: "#9A9490" }}>
-                Icône
-              </label>
-              {suggestingIcon ? (
-                <div className="flex items-center gap-2">
-                  <Loader2 size={16} className="animate-spin" style={{ color: "#9A9490" }} />
-                  <span className="text-[12px] font-sans" style={{ color: "#9A9490" }}>Suggestion…</span>
-                </div>
-              ) : (
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center rounded-xl" style={{ width: 40, height: 40, background: editDomainColor + "18" }}>
-                    <RenderIcon name={editIcone} size={22} color={editDomainColor} />
-                  </div>
-                  <span className="text-[13px] font-sans font-medium text-foreground flex-1">{editIcone}</span>
-                  <button type="button" onClick={() => setShowIconPicker(!showIconPicker)} className="text-[13px] font-sans font-semibold" style={{ color: "#8B74E0" }}>
-                    {showIconPicker ? "Fermer" : "Changer"}
-                  </button>
-                </div>
-              )}
-              {showIconPicker && (
-                <div className="grid grid-cols-6 gap-2 pt-2">
-                  {ICON_NAMES.map((name) => {
-                    const isActive = editIcone === name;
-                    return (
-                      <button key={name} type="button" onClick={() => { setEditIcone(name); setShowIconPicker(false); }}
-                        className="flex items-center justify-center rounded-xl transition-all"
-                        style={{ width: 40, height: 40, background: isActive ? editDomainColor + "18" : "rgba(255,255,255,0.5)", border: isActive ? `2px solid ${editDomainColor}` : "1px solid rgba(255,255,255,0.85)" }}
-                      >
-                        <RenderIcon name={name} size={20} color={isActive ? editDomainColor : "#9A9490"} />
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
-            {/* Domaine */}
-            <div style={{ ...glassCard, padding: "12px 14px" }} className="flex flex-col gap-2.5">
-              <label style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", color: "#9A9490" }}>
-                Domaine
-              </label>
-              <div className="flex items-center justify-between" style={{ gap: 12 }}>
-                {DOMAINS.map((dd) => (
-                  <button key={dd.label} onClick={() => setEditDomaine(dd.label)} className="flex flex-col items-center gap-1">
-                    <div className="rounded-full transition-all" style={{ width: 28, height: 28, background: editDomaine === dd.label ? dd.color : "transparent", border: `2.5px solid ${dd.color}`, opacity: editDomaine === dd.label ? 1 : 0.35, boxShadow: editDomaine === dd.label ? `0 0 0 5px ${dd.color}38` : "none" }} />
-                    <span className="text-[11px] font-sans font-medium" style={{ color: editDomaine === dd.label ? dd.color : "#9A9490" }}>{dd.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Save */}
-            <button
-              disabled={!editNom.trim() || savingEdit}
-              onClick={handleSaveEdit}
-              className="w-full py-3 rounded-2xl text-[14px] font-sans font-semibold text-white transition-opacity disabled:opacity-40 mt-1"
-              style={{ background: "linear-gradient(135deg, #E8736A, #8B74E0)" }}
-            >
-              {savingEdit ? "Enregistrement…" : "Enregistrer"}
-            </button>
-          </div>
-        </DrawerContent>
-      </Drawer>
 
       {/* Archive confirmation */}
       <AlertDialog open={!!archiving} onOpenChange={(o) => !o && setArchiving(null)}>
