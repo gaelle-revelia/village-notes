@@ -516,7 +516,7 @@ const OutilsSyntheseMdph = () => {
         {introSeen && showQ4 && (
           <>
             {currentQ > 3 && q3Vocal.trim() && (
-              <UserBubble text="Enregistrement ajouté ✅" />
+              <UserBubble text={q3Vocal.length > 80 ? q3Vocal.slice(0, 80) + "…" : q3Vocal} />
             )}
             <AiBubble text={`4 — Quelle est la situation scolaire actuelle de ${displayName} ?`} />
             <ChipGroup chips={Q5_CHIPS} selected={q4Scolarite ? [q4Scolarite] : []} onToggle={(c) => toggleSingle(c, q4Scolarite, setQ4Scolarite)} />
