@@ -165,7 +165,7 @@ export default function OutilsActivites() {
       </header>
 
       {/* Content */}
-      <main className="flex-1 px-4 pt-4 pb-28 flex flex-col gap-3">
+      <main className="flex-1 px-4 pt-4 pb-28 flex flex-col gap-3" onClick={(e) => { if (e.target === e.currentTarget) setExpandedId(null); }}>
         {/* Help trigger */}
         {!(loading || enfantLoading) && (
           <button onClick={() => setShowHelp(true)} className="flex items-center gap-1 bg-transparent border-none cursor-pointer p-0">
