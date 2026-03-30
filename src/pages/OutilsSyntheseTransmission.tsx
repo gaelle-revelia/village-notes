@@ -452,7 +452,7 @@ const OutilsSyntheseTransmission = () => {
         <SectionTag number={s.number} title={q(s.title)} />
         <AiBubble text={q(s.question)} />
         <AiBubble text={q(SECTION_HELPERS[idx])} />
-        <WiredMicOrb disabled={isPast} onTranscription={(text) => !isPast && updateAnswer(idx, (answers[idx] ? answers[idx] + " " : "") + text)} />
+        <WiredMicOrb disabled={isPast} onTranscription={(text) => !isPast && updateAnswer(idx, (answers[idx] ? answers[idx] + " " : "") + text)} childId={enfantId ?? undefined} />
         <OrSeparator />
         <div className="mb-2 flex justify-end">
           <Textarea
