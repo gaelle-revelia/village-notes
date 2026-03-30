@@ -13,6 +13,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useEnfantId } from "@/hooks/useEnfantId";
 import { useAudioRecorder } from "@/hooks/useAudioRecorder";
 import { supabase } from "@/integrations/supabase/client";
+import WiredMicOrb from "@/components/synthese/WiredMicOrb";
 
 type Intervenant = {
   id: string;
