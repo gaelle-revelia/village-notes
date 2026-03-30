@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Sparkles, Info } from "lucide-react";
+import { ArrowLeft, Sparkles } from "lucide-react";
 import WiredMicOrb from "@/components/synthese/WiredMicOrb";
 import BottomNavBar from "@/components/BottomNavBar";
 import { useEnfantPrenom } from "@/hooks/useEnfantPrenom";
