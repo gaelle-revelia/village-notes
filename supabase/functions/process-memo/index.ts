@@ -368,7 +368,7 @@ serve(async (req) => {
     const body = await req.json();
     const { memo_id, mode, text_input, audio_path, boucle_type, child_id } = body;
 
-    if (mode === "transcription_only" || mode === "question_reformulation" || mode === "answer_reformulation") {
+    if (mode === "transcription_only" || mode === "clean_transcription" || mode === "question_reformulation" || mode === "answer_reformulation") {
       if (!audio_path) {
         return jsonResponse({ error: `audio_path required for ${mode} mode` }, corsHeaders, 400);
       }
@@ -378,6 +378,60 @@ serve(async (req) => {
 
       if (mode === "transcription_only") {
         return jsonResponse({ transcription }, corsHeaders);
+      }
+
+      if (mode === "clean_transcription") {
+        let lexiqueFormatted: string | null = null;
+        if (child_id) {
+          const supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
+          const { data: lexiqueEntries } = await supabaseClient
+            .from("enfant_lexique")
+            .select("mot_transcrit, mot_correct")
+            .eq("enfant_id", child_id);
+          if (lexiqueEntries?.length) {
+            lexiqueFormatted = lexiqueEntries
+              .map((e: any) => `${e.mot_transcrit} → ${e.mot_correct}`)
+              .join("\n");
+          }
+        }
+
+        const cleanPrompt = `Tu nettoies une transcription vocale d'un parent d'enfant en situation de handicap.
+
+RÈGLES ABSOLUES :
+- Supprimer uniquement les mots parasites : euh, hum, hein, bah, ben, voilà voilà, donc euh, en fait, genre, ok ok, etc.
+- Corriger la ponctuation basique (majuscule en début, point en fin)
+- Appliquer le lexique phonétique fourni pour corriger les erreurs de transcription
+- NE JAMAIS reformuler, résumer, restructurer ou réinterpréter
+- NE JAMAIS ajouter d'informations
+- Conserver exactement les mots et l'ordre des idées du parent
+- Retourner uniquement le texte nettoyé, sans commentaire, sans guillemets`;
+
+        const userMessage = lexiqueFormatted
+          ? `Transcription : ${transcription}\n\nLexique phonétique :\n${lexiqueFormatted}`
+          : `Transcription : ${transcription}`;
+
+        const cleanResponse = await fetch(AI_GATEWAY_URL, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${lovableApiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: AI_MODEL,
+            messages: [
+              { role: "system", content: cleanPrompt },
+              { role: "user", content: userMessage },
+            ],
+          }),
+        });
+
+        if (!cleanResponse.ok) {
+          return jsonResponse({ transcription }, corsHeaders);
+        }
+
+        const cleanData = await cleanResponse.json();
+        const cleaned = cleanData.choices?.[0]?.message?.content?.trim() || transcription;
+        return jsonResponse({ transcription: cleaned }, corsHeaders);
       }
 
       if (mode === "question_reformulation") {
