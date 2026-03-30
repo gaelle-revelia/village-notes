@@ -443,8 +443,8 @@ export default function NouvelleQuestion() {
                       : "Ex : Continuer les retournements ?"
                 }
                 required
-                className="h-12 w-full rounded-xl px-3 py-2 text-base font-medium text-foreground outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                style={glassFieldStyle}
+                className="outline-none placeholder:text-muted-foreground"
+                style={{ background: "rgba(255,255,255,0.52)", border: "1px solid rgba(255,255,255,0.72)", borderRadius: 12, padding: "11px 13px", fontSize: 14, fontFamily: "'DM Sans', sans-serif", color: "#1E1A1A", width: "100%" }}
               />
             </div>
 
