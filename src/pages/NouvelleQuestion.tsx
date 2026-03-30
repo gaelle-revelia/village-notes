@@ -1,6 +1,6 @@
 import { type CSSProperties, useEffect, useMemo, useState } from "react";
 import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Loader2, Mic, Square, X } from "lucide-react";
+import { ArrowLeft, CalendarDays, List, Loader2, MessageCircleQuestion, Mic, Square, X } from "lucide-react";
 import { format } from "date-fns";
 import { MemoDatePicker } from "@/components/memo/MemoDatePicker";
 import { Label } from "@/components/ui/label";
@@ -363,11 +363,12 @@ export default function NouvelleQuestion() {
           {/* Type selector */}
           <div className="grid grid-cols-3 gap-3">
             {([
-              { value: "rdv" as const, emoji: "📅", label: "RDV" },
-              { value: "rappel" as const, emoji: "🔔", label: "Rappel" },
-              { value: "question" as const, emoji: "❓", label: "Question" },
+              { value: "rdv" as const, icon: CalendarDays, label: "RDV" },
+              { value: "rappel" as const, icon: List, label: "To-Do" },
+              { value: "question" as const, icon: MessageCircleQuestion, label: "Question" },
             ]).map((item) => {
               const isActive = type === item.value;
+              const Icon = item.icon;
               return (
                 <button
                   key={item.value}
@@ -380,9 +381,12 @@ export default function NouvelleQuestion() {
                     padding: "12px 8px",
                     textAlign: "center",
                     cursor: "pointer",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
                   }}
                 >
-                  <div style={{ fontSize: 24 }}>{item.emoji}</div>
+                  <Icon size={22} color={isActive ? "#8B74E0" : "#9A9490"} />
                   <div
                     style={{
                       fontSize: 12,
