@@ -360,7 +360,7 @@ export default function NouvelleQuestion() {
       </header>
 
       <main className="flex-1 px-4 py-6">
-        <div className="mx-auto max-w-[400px] space-y-5">
+        <div className="mx-auto max-w-[400px] space-y-3">
           {/* Type selector */}
           <div className="grid grid-cols-3 gap-3">
             {([
