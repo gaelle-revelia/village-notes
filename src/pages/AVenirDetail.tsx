@@ -405,7 +405,7 @@ export default function AVenirDetail() {
                         {q.type === "question" ? "Question" : "To-Do"}
                       </span>
                       <span style={{ fontSize: 12, color: "#534AB7", fontWeight: 500, maxWidth: 140, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{q.text}</span>
-                      <button onClick={(e) => { e.stopPropagation(); supabase.from("questions").update({ linked_rdv_id: null }).eq("id", q.id); setLinkedQuestions(prev => prev.filter(x => x.id !== q.id)); setAllQuestions(prev => [...prev, q]); }} style={{ background: "none", border: "none", color: "#8B74E0", cursor: "pointer", padding: 0, fontSize: 14, lineHeight: 1 }}>×</button>
+                      <button onClick={async (e) => { e.stopPropagation(); await supabase.from("questions").update({ linked_rdv_id: null }).eq("id", q.id); setLinkedQuestions(prev => prev.filter(x => x.id !== q.id)); setAllQuestions(prev => [...prev, q]); }} style={{ background: "none", border: "none", color: "#8B74E0", cursor: "pointer", padding: 0, fontSize: 14, lineHeight: 1 }}>×</button>
                     </div>
                   ))}
                 </div>
