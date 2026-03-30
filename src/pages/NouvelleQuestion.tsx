@@ -3,7 +3,7 @@ import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, CalendarDays, List, Loader2, MessageCircleQuestion, Mic, Square, X } from "lucide-react";
 import { format } from "date-fns";
 import { MemoDatePicker } from "@/components/memo/MemoDatePicker";
-import { Label } from "@/components/ui/label";
+
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
