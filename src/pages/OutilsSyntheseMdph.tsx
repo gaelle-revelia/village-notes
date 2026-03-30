@@ -538,10 +538,7 @@ const OutilsSyntheseMdph = () => {
             {currentQ > 3 && q3Vocal.trim() && (
               <UserBubble text={q3Vocal.length > 80 ? q3Vocal.slice(0, 80) + "…" : q3Vocal} />
             )}
-            <div className="flex items-start gap-0">
-              <div className="flex-1"><AiBubble text={`4 — Quelle est la situation scolaire actuelle de ${displayName} ?`} /></div>
-              <button onClick={() => toggleHelper(4)} style={{ background: "rgba(139,116,224,0.12)", border: "1px solid rgba(139,116,224,0.3)", borderRadius: 20, padding: "2px 8px", cursor: "pointer", fontSize: 11, color: "#8B74E0", fontFamily: "'DM Sans', sans-serif", fontWeight: 500, flexShrink: 0 }}>i</button>
-            </div>
+            <AiBubbleWithHelper text={`4 — Quelle est la situation scolaire actuelle de ${displayName} ?`} helperN={4} openHelper={openHelper} toggleHelper={toggleHelper} />
             <ChipGroup chips={Q5_CHIPS} selected={q4Scolarite ? [q4Scolarite] : []} onToggle={(c) => toggleSingle(c, q4Scolarite, setQ4Scolarite)} />
             {q4Scolarite === "Milieu ordinaire" && q1 === "Renouvellement" && (
               <div style={{ margin: "0 4px 14px", background: "rgba(68,168,130,0.07)", borderLeft: "2.5px solid #44A882", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
