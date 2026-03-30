@@ -397,15 +397,13 @@ export default function AVenirDetail() {
             <div style={glassCard} className="space-y-3">
               <p style={sectionLabel}>QUESTIONS LIÉES</p>
               {linkedQuestions.length > 0 && (
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
+                <div style={{ marginBottom: 8 }}>
                   {linkedQuestions.map((q) => (
-                    <div key={q.id} style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "rgba(139,116,224,0.1)", border: "1px solid rgba(139,116,224,0.25)", borderRadius: 20, padding: "4px 10px", cursor: "pointer" }}
+                    <div key={q.id} style={{ display: "flex", alignItems: "center", gap: 8, background: "rgba(139,116,224,0.08)", border: "1px solid rgba(139,116,224,0.2)", borderRadius: 12, padding: "10px 12px", marginBottom: 6, cursor: "pointer" }}
                       onClick={() => navigate(`/a-venir/${q.id}`)}>
-                      <span style={{ fontSize: 9, fontWeight: 600, padding: "2px 6px", borderRadius: 20, background: q.type === "question" ? "#E1F5EE" : "#FAEEDA", color: q.type === "question" ? "#0F6E56" : "#854F0B" }}>
-                        {q.type === "question" ? "Question" : "To-Do"}
-                      </span>
-                      <span style={{ fontSize: 12, color: "#534AB7", fontWeight: 500, maxWidth: 140, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{q.text}</span>
-                      <button onClick={async (e) => { e.stopPropagation(); await supabase.from("questions").update({ linked_rdv_id: null }).eq("id", q.id); setLinkedQuestions(prev => prev.filter(x => x.id !== q.id)); setAllQuestions(prev => [...prev, q]); }} style={{ background: "none", border: "none", color: "#8B74E0", cursor: "pointer", padding: 0, fontSize: 14, lineHeight: 1 }}>×</button>
+                      <span style={{ flex: 1, fontSize: 13, color: "#1E1A1A", fontFamily: "'DM Sans', sans-serif", lineHeight: 1.4 }}>{q.text}</span>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9A9490" strokeWidth="2" strokeLinecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+                      <button onClick={async (e) => { e.stopPropagation(); await supabase.from("questions").update({ linked_rdv_id: null }).eq("id", q.id); setLinkedQuestions(prev => prev.filter(x => x.id !== q.id)); setAllQuestions(prev => [...prev, q]); }} style={{ background: "none", border: "none", color: "#9A9490", cursor: "pointer", padding: 0, fontSize: 16, lineHeight: 1 }}>×</button>
                     </div>
                   ))}
                 </div>
