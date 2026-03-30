@@ -527,7 +527,10 @@ const OutilsSyntheseMdph = () => {
             {currentQ > 3 && q3Vocal.trim() && (
               <UserBubble text={q3Vocal.length > 80 ? q3Vocal.slice(0, 80) + "…" : q3Vocal} />
             )}
-            <AiBubble text={`4 — Quelle est la situation scolaire actuelle de ${displayName} ?`} />
+            <div className="flex items-start gap-0">
+              <div className="flex-1"><AiBubble text={`4 — Quelle est la situation scolaire actuelle de ${displayName} ?`} /></div>
+              <button onClick={() => toggleHelper(4)} style={{ background: "none", border: "none", cursor: "pointer", padding: "0 4px", display: "flex", alignItems: "center", marginTop: 28 }}><Info size={14} color="#8B74E0" style={{ opacity: 0.6 }} /></button>
+            </div>
             <ChipGroup chips={Q5_CHIPS} selected={q4Scolarite ? [q4Scolarite] : []} onToggle={(c) => toggleSingle(c, q4Scolarite, setQ4Scolarite)} />
             {q4Scolarite === "Milieu ordinaire" && q1 === "Renouvellement" && (
               <div style={{ margin: "0 4px 14px", background: "rgba(68,168,130,0.07)", borderLeft: "2.5px solid #44A882", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
@@ -536,11 +539,13 @@ const OutilsSyntheseMdph = () => {
                 </p>
               </div>
             )}
+            {openHelper === 4 && (
             <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
               <p style={{ fontSize: 11, color: "#8B74E0", lineHeight: 1.55 }}>
                 Coche la situation aujourd'hui — si une orientation est en cours ou prévue, précise-le à l'oral.
               </p>
             </div>
+            )}
             {q4ScolariteVocal.trim() && (
               <Textarea
                 value={q4ScolariteVocal}
