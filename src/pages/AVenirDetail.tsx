@@ -95,6 +95,12 @@ export default function AVenirDetail() {
   const [loading, setLoading] = useState(true);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
+  // Linked questions (RDV type)
+  const [linkedQuestions, setLinkedQuestions] = useState<{ id: string; text: string; type: string }[]>([]);
+  const [allQuestions, setAllQuestions] = useState<{ id: string; text: string; type: string }[]>([]);
+  const [questionSearch, setQuestionSearch] = useState("");
+  const [showDropdown, setShowDropdown] = useState(false);
+
   // Draft fields
   const [draftText, setDraftText] = useState("");
   const [draftPrecisions, setDraftPrecisions] = useState("");
