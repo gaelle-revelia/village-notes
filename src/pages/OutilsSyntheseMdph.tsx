@@ -131,6 +131,8 @@ const OutilsSyntheseMdph = () => {
   
   const [isGenerating, setIsGenerating] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  const [openHelper, setOpenHelper] = useState<number | null>(null);
+  const toggleHelper = (n: number) => setOpenHelper(prev => prev === n ? null : n);
   const [loadingMessage, setLoadingMessage] = useState("Préparation du dossier en cours…");
   const [syntheseId, setSyntheseId] = useState<string | null>(null);
   const [introSeen, setIntroSeen] = useState(false);
