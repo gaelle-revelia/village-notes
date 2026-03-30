@@ -214,26 +214,11 @@ export default function ChildProfile() {
 
         {/* ── INFORMATIONS ── */}
         <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-between w-full mb-1">
-            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider" style={{ fontFamily: "DM Sans" }}>
-              Informations
-            </span>
-            <button
-              onClick={() => {
-                setEditPrenom(prenom ?? "");
-                setEditDateNaissance(dateNaissance ?? "");
-                setEditDiagnostic(diagnostic ?? "");
-                setEditSexe(sexe);
-                setEditingInfos(true);
-              }}
-              className="text-sm font-medium text-[#534AB7]"
-              style={{ fontFamily: "DM Sans" }}
-            >
-              Modifier
-            </button>
-          </div>
+          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1" style={{ fontFamily: "DM Sans" }}>
+            Informations
+          </span>
           <div
-            className="rounded-2xl p-4 flex flex-col divide-y divide-[rgba(139,116,224,0.1)]"
+            className="rounded-2xl p-4 flex flex-col gap-3"
             style={{
               background: "rgba(255,255,255,0.55)",
               backdropFilter: "blur(16px)",
@@ -242,29 +227,93 @@ export default function ChildProfile() {
               boxShadow: "0 2px 12px rgba(139,116,224,0.06)",
             }}
           >
-            <div className="flex items-center justify-between py-2.5 first:pt-0 last:pb-0">
-              <span className="text-sm text-muted-foreground" style={{ fontFamily: "DM Sans" }}>Prénom</span>
-              <span className="text-sm font-medium text-foreground" style={{ fontFamily: "DM Sans" }}>{prenom ?? "—"}</span>
+            {/* Prénom */}
+            <div onClick={() => editingField !== "prenom" && setEditingField("prenom")} className={editingField !== "prenom" ? "cursor-pointer" : ""}>
+              <p className="text-[10px] font-semibold tracking-wide text-muted-foreground mb-0.5 uppercase" style={{ fontFamily: "DM Sans" }}>PRÉNOM</p>
+              {editingField === "prenom" ? (
+                <input
+                  autoFocus
+                  className="w-full text-sm text-foreground bg-transparent border-b border-muted-foreground/30 outline-none py-0.5"
+                  style={{ fontFamily: "DM Sans" }}
+                  defaultValue={prenom ?? ""}
+                  onBlur={(e) => {
+                    const v = e.target.value.trim();
+                    if (!v) { setEditingField(null); return; }
+                    setPrenom(v);
+                    saveInlineField("prenom", v);
+                  }}
+                  onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+                />
+              ) : (
+                <p className="text-sm font-medium text-foreground" style={{ fontFamily: "DM Sans" }}>{prenom ?? "—"}</p>
+              )}
             </div>
-            {dateNaissance && (
-              <div className="flex items-center justify-between py-2.5">
-                <span className="text-sm text-muted-foreground" style={{ fontFamily: "DM Sans" }}>Date de naissance</span>
-                <span className="text-sm font-medium text-foreground" style={{ fontFamily: "DM Sans" }}>
-                  {new Date(dateNaissance).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
-                </span>
+
+            {/* Date de naissance */}
+            <div onClick={() => editingField !== "date" && setEditingField("date")} className={editingField !== "date" ? "cursor-pointer" : ""}>
+              <p className="text-[10px] font-semibold tracking-wide text-muted-foreground mb-0.5 uppercase" style={{ fontFamily: "DM Sans" }}>DATE DE NAISSANCE</p>
+              {editingField === "date" ? (
+                <input
+                  autoFocus
+                  type="date"
+                  className="text-sm text-foreground bg-transparent border-b border-muted-foreground/30 outline-none py-0.5"
+                  style={{ fontFamily: "DM Sans" }}
+                  defaultValue={dateNaissance ?? ""}
+                  onBlur={(e) => {
+                    setDateNaissance(e.target.value || null);
+                    saveInlineField("date", e.target.value);
+                  }}
+                />
+              ) : (
+                <p className="text-sm font-medium text-foreground" style={{ fontFamily: "DM Sans" }}>
+                  {dateNaissance ? new Date(dateNaissance).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }) : <span className="text-muted-foreground italic">Ajouter…</span>}
+                </p>
+              )}
+            </div>
+
+            {/* Diagnostic */}
+            <div onClick={() => editingField !== "diagnostic" && setEditingField("diagnostic")} className={editingField !== "diagnostic" ? "cursor-pointer" : ""}>
+              <p className="text-[10px] font-semibold tracking-wide text-muted-foreground mb-0.5 uppercase" style={{ fontFamily: "DM Sans" }}>SITUATION</p>
+              {editingField === "diagnostic" ? (
+                <Textarea
+                  autoFocus
+                  autoResize
+                  className="w-full text-sm text-foreground bg-transparent border border-muted-foreground/30 outline-none rounded-md px-2 py-1"
+                  style={{ fontFamily: "DM Sans", minHeight: 40 }}
+                  defaultValue={diagnostic ?? ""}
+                  onBlur={(e) => {
+                    setDiagnostic(e.target.value.trim() || null);
+                    saveInlineField("diagnostic", e.target.value.trim());
+                  }}
+                />
+              ) : (
+                <p className="text-sm font-medium text-foreground" style={{ fontFamily: "DM Sans" }}>
+                  {diagnostic ?? <span className="text-muted-foreground italic">Ajouter…</span>}
+                </p>
+              )}
+            </div>
+
+            {/* Genre */}
+            <div>
+              <p className="text-[10px] font-semibold tracking-wide text-muted-foreground mb-1 uppercase" style={{ fontFamily: "DM Sans" }}>GENRE</p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handleSexeChange("F")}
+                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all border ${
+                    sexe === "F" ? "bg-primary/10 border-primary text-primary" : "bg-white/50 border-white/60 text-muted-foreground"
+                  }`}
+                >
+                  Fille
+                </button>
+                <button
+                  onClick={() => handleSexeChange("M")}
+                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all border ${
+                    sexe === "M" ? "bg-primary/10 border-primary text-primary" : "bg-white/50 border-white/60 text-muted-foreground"
+                  }`}
+                >
+                  Garçon
+                </button>
               </div>
-            )}
-            {diagnostic && (
-              <div className="flex items-center justify-between py-2.5 last:pb-0">
-                <span className="text-sm text-muted-foreground" style={{ fontFamily: "DM Sans" }}>Situation</span>
-                <span className="text-sm font-medium text-foreground text-right max-w-[60%]" style={{ fontFamily: "DM Sans" }}>{diagnostic}</span>
-              </div>
-            )}
-            <div className="flex items-center justify-between py-2.5 last:pb-0">
-              <span className="text-sm text-muted-foreground" style={{ fontFamily: "DM Sans" }}>Genre</span>
-              <span className="text-sm font-medium text-foreground" style={{ fontFamily: "DM Sans" }}>
-                {sexe === "F" ? "Fille" : sexe === "M" ? "Garçon" : "—"}
-              </span>
             </div>
           </div>
         </div>
