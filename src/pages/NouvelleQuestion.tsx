@@ -588,35 +588,42 @@ export default function NouvelleQuestion() {
               />
             </div>
 
-            {/* Submit */}
-            <button
-              type="submit"
-              disabled={
-                submitting ||
-                !question.trim() ||
-                !user ||
-                !enfantId ||
-                (type === "rdv" && !dueDate)
-              }
-              style={{
-                width: "100%",
-                padding: "14px",
-                borderRadius: 14,
-                border: "none",
-                background: question.trim() ? "linear-gradient(135deg, #E8736A, #8B74E0)" : "rgba(139,116,224,0.3)",
-                color: "#fff",
-                fontSize: 15,
-                fontWeight: 600,
-                fontFamily: "'DM Sans', sans-serif",
-                cursor: question.trim() ? "pointer" : "not-allowed",
-                opacity: 1,
-              }}
-            >
-              {submitting ? "Ajout…" : "Ajouter →"}
-            </button>
           </form>
         </div>
       </main>
+      <div style={{ position: "sticky", bottom: 0, padding: "6px 16px 76px" }}>
+        <button
+          type="submit"
+          form={undefined}
+          disabled={
+            submitting ||
+            !question.trim() ||
+            !user ||
+            !enfantId ||
+            (type === "rdv" && !dueDate)
+          }
+          onClick={(e) => {
+            e.preventDefault();
+            const form = document.querySelector<HTMLFormElement>("form");
+            if (form) form.requestSubmit();
+          }}
+          style={{
+            width: "100%",
+            padding: "14px",
+            borderRadius: 14,
+            border: "none",
+            background: question.trim() ? "linear-gradient(135deg, #E8736A, #8B74E0)" : "rgba(139,116,224,0.3)",
+            color: "#fff",
+            fontSize: 15,
+            fontWeight: 600,
+            fontFamily: "'DM Sans', sans-serif",
+            cursor: question.trim() ? "pointer" : "not-allowed",
+            opacity: 1,
+          }}
+        >
+          {submitting ? "Ajout…" : "Ajouter →"}
+        </button>
+      </div>
     </div>
   );
 }
