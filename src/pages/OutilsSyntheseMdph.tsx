@@ -611,7 +611,7 @@ const OutilsSyntheseMdph = () => {
         {introSeen && showQ7 && (
           <>
             {currentQ > 6 && q6Libre.trim() && (
-              <UserBubble text="Enregistrement ajouté ✅" />
+              <UserBubble text={q6Libre.length > 80 ? q6Libre.slice(0, 80) + "…" : q6Libre} />
             )}
             <AiBubble text="7 — Avez-vous le certificat médical sous la main ?" />
             <ChipGroup
