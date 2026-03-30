@@ -157,6 +157,7 @@ export default function PreciserBlocDrawer({ isOpen, onClose, bloc, enfantId, sy
               <WiredMicOrb
                 disabled={isLoading}
                 onTranscription={(text) => setPrecision((prev) => (prev ? prev + " " : "") + text)}
+                childId={enfantId}
               />
             </div>
           </>
