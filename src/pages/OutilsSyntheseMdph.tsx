@@ -403,12 +403,17 @@ const OutilsSyntheseMdph = () => {
           <>
             <UserBubble text="📋 Dossier MDPH" />
             <SectionSeparator text={`Dossier MDPH — ${displayName}`} />
-            <AiBubble text="Avant de commencer — qui dépose ce dossier ?" />
+            <div className="flex items-start gap-0">
+              <div className="flex-1"><AiBubble text="Avant de commencer — qui dépose ce dossier ?" /></div>
+              <button onClick={() => toggleHelper(1)} style={{ background: "none", border: "none", cursor: "pointer", padding: "0 4px", display: "flex", alignItems: "center", marginTop: 28 }}><Info size={14} color="#8B74E0" style={{ opacity: 0.6 }} /></button>
+            </div>
+            {openHelper === 1 && (
             <div style={{ margin: "0 4px 12px", background: "rgba(139,116,224,0.07)", borderLeft: "2.5px solid #8B74E0", borderRadius: "0 10px 10px 0", padding: "9px 13px" }}>
               <p style={{ fontSize: 11, color: "#8B74E0", lineHeight: 1.55 }}>
                 La CDAPH traite une demande faite par un représentant légal. Le dossier doit être rédigé à la première personne par la personne qui signe.
               </p>
             </div>
+            )}
             <div className="flex justify-end mb-3">
               <input
                 type="text"
