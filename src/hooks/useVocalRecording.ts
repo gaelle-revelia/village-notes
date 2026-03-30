@@ -97,7 +97,7 @@ export function useVocalRecording(mode: string = "transcription_only", childId?:
           if (uploadError) throw uploadError;
 
           const { data, error: fnError } = await supabase.functions.invoke("process-memo", {
-            body: { mode, audio_path: audioPath },
+            body: { mode, audio_path: audioPath, ...(childId ? { child_id: childId } : {}) },
           });
 
           if (fnError) throw fnError;
