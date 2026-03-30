@@ -405,9 +405,9 @@ export default function ChildProfile() {
                             <SoinCard
                               key={soin.id}
                               {...soin}
-                              onEdit={(id) => {
-                                setEditingSoin(soins.find((s) => s.id === id));
-                                setSoinModalOpen(true);
+                              onEdit={async (id, data) => {
+                                await supabase.from("soins").update(data).eq("id", id);
+                                fetchSoins();
                               }}
                               onDelete={deleteSoin}
                             />
