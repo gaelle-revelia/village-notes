@@ -378,7 +378,7 @@ export default function NouvelleQuestion() {
                     background: isActive ? "rgba(139,116,224,0.1)" : "rgba(255,255,255,0.52)",
                     border: isActive ? "1.5px solid #8B74E0" : "1px solid rgba(255,255,255,0.72)",
                     borderRadius: 14,
-                    padding: "12px 8px",
+                    padding: "16px 8px",
                     textAlign: "center",
                     cursor: "pointer",
                     display: "flex",
@@ -386,13 +386,13 @@ export default function NouvelleQuestion() {
                     alignItems: "center",
                   }}
                 >
-                  <Icon size={22} color={isActive ? "#8B74E0" : "#9A9490"} />
+                  <Icon size={26} color={isActive ? "#8B74E0" : "#9A9490"} />
                   <div
                     style={{
-                      fontSize: 12,
+                      fontSize: 13,
                       fontWeight: 500,
                       color: isActive ? "#534AB7" : "#9A9490",
-                      marginTop: 4,
+                      marginTop: 8,
                     }}
                   >
                     {item.label}
