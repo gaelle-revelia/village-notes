@@ -525,9 +525,6 @@ const OutilsSyntheseMdph = () => {
               </p>
             </div>
             {q4ScolariteVocal.trim() && (
-              <p style={{ textAlign: "center", fontSize: 12, color: "#44A882", margin: "4px 0 8px" }}>✓ Enregistrement capté</p>
-            )}
-            {q4ScolariteVocal.trim() && (
               <Textarea
                 value={q4ScolariteVocal}
                 onChange={(e) => setQ4ScolariteVocal(e.target.value)}
