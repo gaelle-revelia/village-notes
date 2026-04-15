@@ -713,6 +713,35 @@ export default function NouvelleQuestion() {
           {submitting ? "Ajout…" : "Ajouter →"}
         </button>
       </div>
+
+      <Dialog open={showRdvSuggestionDialog} onOpenChange={setShowRdvSuggestionDialog}>
+        <DialogContent style={{ background: "rgba(255,255,255,0.92)", borderRadius: 20 }}>
+          <DialogHeader>
+            <DialogTitle style={{ fontFamily: "'Fraunces', serif" }}>Associer à un RDV ?</DialogTitle>
+          </DialogHeader>
+          <p style={{ fontSize: 13, color: "#9A9490", marginBottom: 12 }}>Plusieurs RDV sont planifiés avec ce professionnel. Voulez-vous lier cette question à l'un d'eux ?</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {pendingRdvList.map(r => (
+              <button key={r.id} type="button"
+                onClick={async () => {
+                  if (newQuestionId) await supabase.from("questions").update({ linked_rdv_id: r.id }).eq("id", newQuestionId);
+                  setShowRdvSuggestionDialog(false);
+                  toast({ title: "Question liée au RDV ✓", duration: 2000 });
+                  navigate("/a-venir");
+                }}
+                style={{ background: "rgba(139,116,224,0.08)", border: "1px solid rgba(139,116,224,0.2)", borderRadius: 12, padding: "10px 14px", textAlign: "left", cursor: "pointer" }}>
+                <p style={{ fontSize: 13, fontWeight: 600, color: "#1E1A1A", margin: 0 }}>{r.text}</p>
+                {r.due_date && <p style={{ fontSize: 11, color: "#9A9490", margin: 0 }}>{new Date(r.due_date).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}</p>}
+              </button>
+            ))}
+            <button type="button"
+              onClick={() => { setShowRdvSuggestionDialog(false); toast({ title: "Question ajoutée", duration: 2000 }); navigate("/a-venir"); }}
+              style={{ background: "none", border: "none", color: "#9A9490", fontSize: 13, cursor: "pointer", padding: "8px 0" }}>
+              Ne pas lier
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
