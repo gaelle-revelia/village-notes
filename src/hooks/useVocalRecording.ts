@@ -10,7 +10,7 @@ interface UseVocalRecordingReturn {
   stopRecording: () => Promise<string | null>;
 }
 
-export function useVocalRecording(mode: string = "transcription_only", childId?: string): UseVocalRecordingReturn {
+export function useVocalRecording(mode: string = "transcription_only", childId?: string, minDuration: number = 10): UseVocalRecordingReturn {
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -74,9 +74,9 @@ export function useVocalRecording(mode: string = "transcription_only", childId?:
         const blob = new Blob(chunksRef.current, { type: mimeType });
         chunksRef.current = [];
 
-        if (blob.size === 0 || finalElapsed < 10) {
-          if (finalElapsed < 10) {
-            setError("Enregistrement trop court — parle au moins 10 secondes.");
+        if (blob.size === 0 || finalElapsed < minDuration) {
+          if (finalElapsed < minDuration) {
+            setError(`Enregistrement trop court — parlez au moins ${minDuration} secondes.`);
           } else {
             setError("Transcription échouée — réessaie ou utilise la saisie texte.");
           }

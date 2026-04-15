@@ -109,9 +109,16 @@ export default function AVenirDetail() {
 
   // Vocal
   const {
-    isRecording, isTranscribing, startRecording, stopRecording,
-  } = useVocalRecording("answer_reformulation");
+    isRecording, isTranscribing, error: vocalError, elapsedSeconds, startRecording, stopRecording,
+  } = useVocalRecording("clean_transcription", enfantId ?? undefined, 2);
   const vocalTargetRef = useRef<"text" | "precisions" | "answer" | null>(null);
+
+  // Show vocal errors as toast
+  useEffect(() => {
+    if (vocalError) {
+      toast({ title: "Erreur", description: vocalError, variant: "destructive" });
+    }
+  }, [vocalError, toast]);
 
   /* ── fetch ── */
 
@@ -292,25 +299,37 @@ export default function AVenirDetail() {
 
   const MicButton = ({ field }: { field: "text" | "precisions" | "answer" }) => {
     const isActive = isRecording && vocalTargetRef.current === field;
+    const formatTime = (s: number) => {
+      const m = Math.floor(s / 60).toString().padStart(2, "0");
+      const sec = (s % 60).toString().padStart(2, "0");
+      return `${m}:${sec}`;
+    };
     return (
-      <button
-        type="button"
-        onClick={() => handleMicTap(field)}
-        className="flex-shrink-0 flex items-center justify-center rounded-full"
-        style={{
-          width: 32, height: 32,
-          background: isActive ? "rgba(232,115,106,0.15)" : "rgba(139,116,224,0.08)",
-          border: isActive ? "1px solid rgba(232,115,106,0.3)" : "1px solid rgba(139,116,224,0.15)",
-        }}
-      >
-        {isTranscribing && vocalTargetRef.current === field ? (
-          <Loader2 size={14} className="animate-spin" style={{ color: "#8B74E0" }} />
-        ) : isActive ? (
-          <Square size={12} style={{ color: "#E8736A" }} />
-        ) : (
-          <Mic size={14} style={{ color: "#8B74E0" }} />
+      <div className="flex items-center gap-1.5">
+        {isActive && (
+          <span style={{ fontSize: 11, fontFamily: "monospace", color: "#E8736A", fontWeight: 600 }}>
+            {formatTime(elapsedSeconds)}
+          </span>
         )}
-      </button>
+        <button
+          type="button"
+          onClick={() => handleMicTap(field)}
+          className="flex-shrink-0 flex items-center justify-center rounded-full"
+          style={{
+            width: 32, height: 32,
+            background: isActive ? "rgba(232,115,106,0.15)" : "rgba(139,116,224,0.08)",
+            border: isActive ? "1px solid rgba(232,115,106,0.3)" : "1px solid rgba(139,116,224,0.15)",
+          }}
+        >
+          {isTranscribing && vocalTargetRef.current === field ? (
+            <Loader2 size={14} className="animate-spin" style={{ color: "#8B74E0" }} />
+          ) : isActive ? (
+            <Square size={12} style={{ color: "#E8736A" }} />
+          ) : (
+            <Mic size={14} style={{ color: "#8B74E0" }} />
+          )}
+        </button>
+      </div>
     );
   };
 
