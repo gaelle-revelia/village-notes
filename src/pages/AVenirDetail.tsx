@@ -105,6 +105,7 @@ export default function AVenirDetail() {
   const [draftText, setDraftText] = useState("");
   const [draftPrecisions, setDraftPrecisions] = useState("");
   const [draftAnswer, setDraftAnswer] = useState("");
+  const [linkedRdv, setLinkedRdv] = useState<{ id: string; text: string; due_date: string | null } | null>(null);
 
   // Vocal
   const {
@@ -143,6 +144,15 @@ export default function AVenirDetail() {
         setDraftPrecisions(b.precisions ?? "");
         setDraftAnswer(b.answer ?? "");
         setLoading(false);
+
+        if (data.linked_rdv_id) {
+          const { data: rdv } = await supabase
+            .from("questions")
+            .select("id, text, due_date")
+            .eq("id", data.linked_rdv_id)
+            .single();
+          if (rdv) setLinkedRdv(rdv);
+        }
 
         if (data.type === "rdv") {
           const { data: linked } = await supabase
@@ -596,6 +606,29 @@ export default function AVenirDetail() {
                 onChange={handleIntervenantChange}
               />
             </div>
+
+            {/* RDV lié */}
+            {(linkedRdv || item.linked_rdv_id) && (
+              <div style={glassCard} className="space-y-2">
+                <p style={sectionLabel}>RDV LIÉ</p>
+                {linkedRdv ? (
+                  <div
+                    onClick={() => navigate(`/a-venir/${linkedRdv.id}`)}
+                    style={{ display: "flex", alignItems: "center", gap: 8, background: "rgba(139,116,224,0.08)", border: "1px solid rgba(139,116,224,0.2)", borderRadius: 12, padding: "10px 12px", cursor: "pointer" }}
+                  >
+                    <span style={{ flex: 1, fontSize: 13, color: "#534AB7", fontWeight: 500 }}>{linkedRdv.text}</span>
+                    {linkedRdv.due_date && (
+                      <span style={{ fontSize: 11, color: "#9A9490" }}>
+                        {new Date(linkedRdv.due_date).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}
+                      </span>
+                    )}
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9A9490" strokeWidth="2" strokeLinecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+                  </div>
+                ) : (
+                  <p style={{ fontSize: 13, color: "#9A9490", fontStyle: "italic" }}>Chargement...</p>
+                )}
+              </div>
+            )}
 
             {/* Réponse reçue */}
             <div style={glassCard} className="space-y-2">
