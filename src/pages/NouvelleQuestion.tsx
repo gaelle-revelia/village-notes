@@ -133,6 +133,14 @@ export default function NouvelleQuestion() {
   const [submitting, setSubmitting] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
 
+  const [selectedRdvId, setSelectedRdvId] = useState<string | null>(null);
+  const [rdvList, setRdvList] = useState<{ id: string; text: string; due_date: string | null; linked_pro_ids: string[] }[]>([]);
+  const [rdvSearch, setRdvSearch] = useState("");
+  const [showRdvDropdown, setShowRdvDropdown] = useState(false);
+  const [pendingRdvList, setPendingRdvList] = useState<{ id: string; text: string; due_date: string | null }[]>([]);
+  const [newQuestionId, setNewQuestionId] = useState<string | null>(null);
+  const [showRdvSuggestionDialog, setShowRdvSuggestionDialog] = useState(false);
+
   const [dueDate, setDueDate] = useState<Date | null>(null);
   const [isApproximate, setIsApproximate] = useState(type === "rappel");
   const [approxMonth, setApproxMonth] = useState(new Date().getMonth());
