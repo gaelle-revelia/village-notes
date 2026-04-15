@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useEnfantId } from "@/hooks/useEnfantId";
@@ -132,6 +133,14 @@ export default function NouvelleQuestion() {
   const [submitting, setSubmitting] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
 
+  const [selectedRdvId, setSelectedRdvId] = useState<string | null>(null);
+  const [rdvList, setRdvList] = useState<{ id: string; text: string; due_date: string | null; linked_pro_ids: string[] }[]>([]);
+  const [rdvSearch, setRdvSearch] = useState("");
+  const [showRdvDropdown, setShowRdvDropdown] = useState(false);
+  const [pendingRdvList, setPendingRdvList] = useState<{ id: string; text: string; due_date: string | null }[]>([]);
+  const [newQuestionId, setNewQuestionId] = useState<string | null>(null);
+  const [showRdvSuggestionDialog, setShowRdvSuggestionDialog] = useState(false);
+
   const [dueDate, setDueDate] = useState<Date | null>(null);
   const [isApproximate, setIsApproximate] = useState(type === "rappel");
   const [approxMonth, setApproxMonth] = useState(new Date().getMonth());
@@ -178,6 +187,17 @@ export default function NouvelleQuestion() {
         }
 
         setLoadingIntervenants(false);
+      });
+
+    supabase
+      .from("questions")
+      .select("id, text, due_date, linked_pro_ids")
+      .eq("child_id", enfantId)
+      .eq("type", "rdv")
+      .is("archived_at", null)
+      .order("due_date", { ascending: true })
+      .then(({ data: rdvs }) => {
+        if (!cancelled && rdvs) setRdvList(rdvs as any);
       });
 
     return () => {
@@ -305,7 +325,7 @@ export default function NouvelleQuestion() {
             ? format(dueDate, "yyyy-MM-dd")
             : null;
 
-    const { error: insertError } = await supabase.from("questions").insert({
+    const { data: inserted, error: insertError } = await supabase.from("questions").insert({
       parent_id: user.id,
       child_id: enfantId,
       text: trimmedQuestion,
@@ -316,7 +336,8 @@ export default function NouvelleQuestion() {
       due_date: computedDueDate,
       is_approximate_date: type === "rappel" && isApproximate,
       archived_at: null,
-    });
+      linked_rdv_id: selectedRdvId,
+    }).select("id").single();
 
     setSubmitting(false);
 
@@ -329,10 +350,37 @@ export default function NouvelleQuestion() {
       return;
     }
 
-    toast({
-      title: type === "rdv" ? "RDV ajouté" : type === "rappel" ? "Rappel ajouté" : "Question ajoutée",
-    });
-    navigate("/a-venir");
+    const insertedId = (inserted as any)?.id;
+    if (insertedId && !selectedRdvId && selectedIds.length > 0 && type !== "rdv") {
+      const proId = selectedIds[0];
+      const today = new Date().toISOString().split("T")[0];
+      const { data: matchingRdvs } = await supabase
+        .from("questions")
+        .select("id, text, due_date")
+        .eq("child_id", enfantId)
+        .eq("type", "rdv")
+        .is("archived_at", null)
+        .gte("due_date", today)
+        .contains("linked_pro_ids", [proId]);
+
+      if (matchingRdvs && matchingRdvs.length === 1) {
+        await supabase.from("questions").update({ linked_rdv_id: matchingRdvs[0].id }).eq("id", insertedId);
+        const rdvDate = matchingRdvs[0].due_date ? new Date(matchingRdvs[0].due_date).toLocaleDateString("fr-FR", { day: "numeric", month: "long" }) : "";
+        toast({ title: `Liée au RDV du ${rdvDate} ✓`, duration: 4000 });
+        navigate("/a-venir");
+      } else if (matchingRdvs && matchingRdvs.length > 1) {
+        setNewQuestionId(insertedId);
+        setPendingRdvList(matchingRdvs);
+        setShowRdvSuggestionDialog(true);
+        return;
+      } else {
+        toast({ title: type === "rappel" ? "Rappel ajouté" : "Question ajoutée", duration: 2000 });
+        navigate("/a-venir");
+      }
+    } else {
+      toast({ title: type === "rdv" ? "RDV ajouté" : type === "rappel" ? "Rappel ajouté" : "Question ajoutée", duration: 2000 });
+      navigate("/a-venir");
+    }
   };
 
   if (authLoading || enfantLoading) {
@@ -567,6 +615,53 @@ export default function NouvelleQuestion() {
               )}
             </div>
 
+            {/* Lié à un RDV */}
+            {type !== "rdv" && (
+              <div className="space-y-2">
+                <p style={{ fontSize: 13, fontWeight: 500, color: "#1E1A1A", fontFamily: "'DM Sans', sans-serif", marginBottom: 6 }}>
+                  Lié à un RDV <span style={{ fontWeight: 400, color: "#9A9490" }}>(optionnel)</span>
+                </p>
+                {selectedRdvId ? (
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, background: "rgba(139,116,224,0.08)", border: "1px solid rgba(139,116,224,0.2)", borderRadius: 12, padding: "10px 12px" }}>
+                    <span style={{ flex: 1, fontSize: 13, color: "#534AB7", fontWeight: 500 }}>
+                      {rdvList.find(r => r.id === selectedRdvId)?.text ?? "RDV sélectionné"}
+                    </span>
+                    <button type="button" onClick={() => { setSelectedRdvId(null); setRdvSearch(""); }} style={{ background: "none", border: "none", color: "#8B74E0", cursor: "pointer", fontSize: 16 }}>×</button>
+                  </div>
+                ) : (
+                  <div style={{ position: "relative" }}>
+                    <input
+                      type="text"
+                      placeholder="Rechercher un rendez-vous..."
+                      value={rdvSearch}
+                      onChange={(e) => { setRdvSearch(e.target.value); setShowRdvDropdown(true); }}
+                      onFocus={() => setShowRdvDropdown(true)}
+                      onBlur={() => setTimeout(() => setShowRdvDropdown(false), 150)}
+                      style={{ width: "100%", background: "rgba(255,255,255,0.52)", border: "1px solid rgba(255,255,255,0.72)", borderRadius: 12, padding: "11px 13px", fontSize: 14, fontFamily: "'DM Sans', sans-serif", color: "#1E1A1A", boxSizing: "border-box" }}
+                    />
+                    {showRdvDropdown && (
+                      <div style={{ position: "absolute", top: "calc(100% + 4px)", left: 0, right: 0, background: "rgba(255,255,255,0.97)", border: "1px solid rgba(255,255,255,0.9)", borderRadius: 12, zIndex: 50, boxShadow: "0 4px 16px rgba(0,0,0,0.08)", overflow: "hidden" }}>
+                        {rdvList
+                          .filter(r => !rdvSearch.trim() || r.text.toLowerCase().includes(rdvSearch.toLowerCase()))
+                          .slice(0, 5)
+                          .map(r => (
+                            <div key={r.id}
+                              onMouseDown={() => { setSelectedRdvId(r.id); setRdvSearch(""); setShowRdvDropdown(false); }}
+                              style={{ padding: "9px 12px", fontSize: 12, color: "#1E1A1A", display: "flex", flexDirection: "column", gap: 2, borderBottom: "1px solid rgba(0,0,0,0.04)", cursor: "pointer" }}>
+                              <span style={{ fontWeight: 500 }}>{r.text}</span>
+                              {r.due_date && <span style={{ fontSize: 11, color: "#9A9490" }}>{new Date(r.due_date).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}</span>}
+                            </div>
+                          ))}
+                        {rdvList.filter(r => !rdvSearch.trim() || r.text.toLowerCase().includes(rdvSearch.toLowerCase())).length === 0 && (
+                          <p style={{ padding: "9px 12px", fontSize: 12, color: "#9A9490", fontStyle: "italic" }}>Aucun RDV trouvé</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Précisions */}
             <div className="space-y-2">
               <p style={{ fontSize: 13, fontWeight: 500, color: "#1E1A1A", fontFamily: "'DM Sans', sans-serif", marginBottom: 6 }}>Précisions complémentaires <span style={{ fontWeight: 400, color: "#9A9490" }}>(optionnel)</span></p>
@@ -618,6 +713,35 @@ export default function NouvelleQuestion() {
           {submitting ? "Ajout…" : "Ajouter →"}
         </button>
       </div>
+
+      <Dialog open={showRdvSuggestionDialog} onOpenChange={setShowRdvSuggestionDialog}>
+        <DialogContent style={{ background: "rgba(255,255,255,0.92)", borderRadius: 20 }}>
+          <DialogHeader>
+            <DialogTitle style={{ fontFamily: "'Fraunces', serif" }}>Associer à un RDV ?</DialogTitle>
+          </DialogHeader>
+          <p style={{ fontSize: 13, color: "#9A9490", marginBottom: 12 }}>Plusieurs RDV sont planifiés avec ce professionnel. Voulez-vous lier cette question à l'un d'eux ?</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {pendingRdvList.map(r => (
+              <button key={r.id} type="button"
+                onClick={async () => {
+                  if (newQuestionId) await supabase.from("questions").update({ linked_rdv_id: r.id }).eq("id", newQuestionId);
+                  setShowRdvSuggestionDialog(false);
+                  toast({ title: "Question liée au RDV ✓", duration: 2000 });
+                  navigate("/a-venir");
+                }}
+                style={{ background: "rgba(139,116,224,0.08)", border: "1px solid rgba(139,116,224,0.2)", borderRadius: 12, padding: "10px 14px", textAlign: "left", cursor: "pointer" }}>
+                <p style={{ fontSize: 13, fontWeight: 600, color: "#1E1A1A", margin: 0 }}>{r.text}</p>
+                {r.due_date && <p style={{ fontSize: 11, color: "#9A9490", margin: 0 }}>{new Date(r.due_date).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}</p>}
+              </button>
+            ))}
+            <button type="button"
+              onClick={() => { setShowRdvSuggestionDialog(false); toast({ title: "Question ajoutée", duration: 2000 }); navigate("/a-venir"); }}
+              style={{ background: "none", border: "none", color: "#9A9490", fontSize: 13, cursor: "pointer", padding: "8px 0" }}>
+              Ne pas lier
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
