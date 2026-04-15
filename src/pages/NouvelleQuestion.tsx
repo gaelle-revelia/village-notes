@@ -189,6 +189,17 @@ export default function NouvelleQuestion() {
         setLoadingIntervenants(false);
       });
 
+    supabase
+      .from("questions")
+      .select("id, text, due_date, linked_pro_ids")
+      .eq("child_id", enfantId)
+      .eq("type", "rdv")
+      .is("archived_at", null)
+      .order("due_date", { ascending: true })
+      .then(({ data: rdvs }) => {
+        if (!cancelled && rdvs) setRdvList(rdvs as any);
+      });
+
     return () => {
       cancelled = true;
     };
