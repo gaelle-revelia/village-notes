@@ -615,6 +615,53 @@ export default function NouvelleQuestion() {
               )}
             </div>
 
+            {/* Lié à un RDV */}
+            {type !== "rdv" && (
+              <div className="space-y-2">
+                <p style={{ fontSize: 13, fontWeight: 500, color: "#1E1A1A", fontFamily: "'DM Sans', sans-serif", marginBottom: 6 }}>
+                  Lié à un RDV <span style={{ fontWeight: 400, color: "#9A9490" }}>(optionnel)</span>
+                </p>
+                {selectedRdvId ? (
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, background: "rgba(139,116,224,0.08)", border: "1px solid rgba(139,116,224,0.2)", borderRadius: 12, padding: "10px 12px" }}>
+                    <span style={{ flex: 1, fontSize: 13, color: "#534AB7", fontWeight: 500 }}>
+                      {rdvList.find(r => r.id === selectedRdvId)?.text ?? "RDV sélectionné"}
+                    </span>
+                    <button type="button" onClick={() => { setSelectedRdvId(null); setRdvSearch(""); }} style={{ background: "none", border: "none", color: "#8B74E0", cursor: "pointer", fontSize: 16 }}>×</button>
+                  </div>
+                ) : (
+                  <div style={{ position: "relative" }}>
+                    <input
+                      type="text"
+                      placeholder="Rechercher un rendez-vous..."
+                      value={rdvSearch}
+                      onChange={(e) => { setRdvSearch(e.target.value); setShowRdvDropdown(true); }}
+                      onFocus={() => setShowRdvDropdown(true)}
+                      onBlur={() => setTimeout(() => setShowRdvDropdown(false), 150)}
+                      style={{ width: "100%", background: "rgba(255,255,255,0.52)", border: "1px solid rgba(255,255,255,0.72)", borderRadius: 12, padding: "11px 13px", fontSize: 14, fontFamily: "'DM Sans', sans-serif", color: "#1E1A1A", boxSizing: "border-box" }}
+                    />
+                    {showRdvDropdown && (
+                      <div style={{ position: "absolute", top: "calc(100% + 4px)", left: 0, right: 0, background: "rgba(255,255,255,0.97)", border: "1px solid rgba(255,255,255,0.9)", borderRadius: 12, zIndex: 50, boxShadow: "0 4px 16px rgba(0,0,0,0.08)", overflow: "hidden" }}>
+                        {rdvList
+                          .filter(r => !rdvSearch.trim() || r.text.toLowerCase().includes(rdvSearch.toLowerCase()))
+                          .slice(0, 5)
+                          .map(r => (
+                            <div key={r.id}
+                              onMouseDown={() => { setSelectedRdvId(r.id); setRdvSearch(""); setShowRdvDropdown(false); }}
+                              style={{ padding: "9px 12px", fontSize: 12, color: "#1E1A1A", display: "flex", flexDirection: "column", gap: 2, borderBottom: "1px solid rgba(0,0,0,0.04)", cursor: "pointer" }}>
+                              <span style={{ fontWeight: 500 }}>{r.text}</span>
+                              {r.due_date && <span style={{ fontSize: 11, color: "#9A9490" }}>{new Date(r.due_date).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}</span>}
+                            </div>
+                          ))}
+                        {rdvList.filter(r => !rdvSearch.trim() || r.text.toLowerCase().includes(rdvSearch.toLowerCase())).length === 0 && (
+                          <p style={{ padding: "9px 12px", fontSize: 12, color: "#9A9490", fontStyle: "italic" }}>Aucun RDV trouvé</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Précisions */}
             <div className="space-y-2">
               <p style={{ fontSize: 13, fontWeight: 500, color: "#1E1A1A", fontFamily: "'DM Sans', sans-serif", marginBottom: 6 }}>Précisions complémentaires <span style={{ fontWeight: 400, color: "#9A9490" }}>(optionnel)</span></p>
