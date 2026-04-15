@@ -325,7 +325,7 @@ export default function NouvelleQuestion() {
             ? format(dueDate, "yyyy-MM-dd")
             : null;
 
-    const { error: insertError } = await supabase.from("questions").insert({
+    const { data: inserted, error: insertError } = await supabase.from("questions").insert({
       parent_id: user.id,
       child_id: enfantId,
       text: trimmedQuestion,
@@ -336,7 +336,8 @@ export default function NouvelleQuestion() {
       due_date: computedDueDate,
       is_approximate_date: type === "rappel" && isApproximate,
       archived_at: null,
-    });
+      linked_rdv_id: selectedRdvId,
+    }).select("id").single();
 
     setSubmitting(false);
 
@@ -349,10 +350,37 @@ export default function NouvelleQuestion() {
       return;
     }
 
-    toast({
-      title: type === "rdv" ? "RDV ajouté" : type === "rappel" ? "Rappel ajouté" : "Question ajoutée",
-    });
-    navigate("/a-venir");
+    const insertedId = (inserted as any)?.id;
+    if (insertedId && !selectedRdvId && selectedIds.length > 0 && type !== "rdv") {
+      const proId = selectedIds[0];
+      const today = new Date().toISOString().split("T")[0];
+      const { data: matchingRdvs } = await supabase
+        .from("questions")
+        .select("id, text, due_date")
+        .eq("child_id", enfantId)
+        .eq("type", "rdv")
+        .is("archived_at", null)
+        .gte("due_date", today)
+        .contains("linked_pro_ids", [proId]);
+
+      if (matchingRdvs && matchingRdvs.length === 1) {
+        await supabase.from("questions").update({ linked_rdv_id: matchingRdvs[0].id }).eq("id", insertedId);
+        const rdvDate = matchingRdvs[0].due_date ? new Date(matchingRdvs[0].due_date).toLocaleDateString("fr-FR", { day: "numeric", month: "long" }) : "";
+        toast({ title: `Liée au RDV du ${rdvDate} ✓`, duration: 4000 });
+        navigate("/a-venir");
+      } else if (matchingRdvs && matchingRdvs.length > 1) {
+        setNewQuestionId(insertedId);
+        setPendingRdvList(matchingRdvs);
+        setShowRdvSuggestionDialog(true);
+        return;
+      } else {
+        toast({ title: type === "rappel" ? "Rappel ajouté" : "Question ajoutée", duration: 2000 });
+        navigate("/a-venir");
+      }
+    } else {
+      toast({ title: type === "rdv" ? "RDV ajouté" : type === "rappel" ? "Rappel ajouté" : "Question ajoutée", duration: 2000 });
+      navigate("/a-venir");
+    }
   };
 
   if (authLoading || enfantLoading) {
