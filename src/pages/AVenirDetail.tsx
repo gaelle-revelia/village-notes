@@ -109,8 +109,8 @@ export default function AVenirDetail() {
 
   // Vocal
   const {
-    isRecording, isTranscribing, startRecording, stopRecording,
-  } = useVocalRecording("answer_reformulation");
+    isRecording, isTranscribing, error: vocalError, elapsedSeconds, startRecording, stopRecording,
+  } = useVocalRecording("clean_transcription", enfantId ?? undefined, 2);
   const vocalTargetRef = useRef<"text" | "precisions" | "answer" | null>(null);
 
   /* ── fetch ── */
