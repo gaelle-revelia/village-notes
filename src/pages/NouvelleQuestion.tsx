@@ -615,11 +615,11 @@ export default function NouvelleQuestion() {
               )}
             </div>
 
-            {/* Lié à un RDV */}
+            {/* Lier à un RDV */}
             {type !== "rdv" && (
               <div className="space-y-2">
                 <p style={{ fontSize: 13, fontWeight: 500, color: "#1E1A1A", fontFamily: "'DM Sans', sans-serif", marginBottom: 6 }}>
-                  Lié à un RDV <span style={{ fontWeight: 400, color: "#9A9490" }}>(optionnel)</span>
+                  Lier à un RDV <span style={{ fontWeight: 400, color: "#9A9490" }}>(optionnel)</span>
                 </p>
                 {selectedRdvId ? (
                   <div style={{ display: "flex", alignItems: "center", gap: 8, background: "rgba(139,116,224,0.08)", border: "1px solid rgba(139,116,224,0.2)", borderRadius: 12, padding: "10px 12px" }}>
