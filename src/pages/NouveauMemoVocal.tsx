@@ -255,24 +255,64 @@ const NouveauMemoVocal = () => {
   // Processing overlay
   if (processingStatus !== "idle") {
     if (processingStatus === "error") {
+      const showRetry = lastFailureWasNetwork && !!audioBlob;
       return (
         <div className="flex min-h-screen flex-col items-center justify-center px-4">
           <div className="w-full max-w-[360px] rounded-2xl p-8 text-center" style={{ background: "rgba(255,255,255,0.52)", backdropFilter: "blur(16px) saturate(1.6)", WebkitBackdropFilter: "blur(16px) saturate(1.6)", border: "1px solid rgba(255,255,255,0.72)", boxShadow: "0 4px 16px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8)" }}>
-            <div className="text-4xl mb-4">⚠️</div>
-            <h2 className="font-serif text-xl font-semibold text-card-foreground mb-2">
-              Une erreur est survenue
-            </h2>
-            <p className="text-sm text-muted-foreground mb-6">
-              Votre enregistrement a bien été reçu. Nous réessaierons de le traiter automatiquement.
-            </p>
+            {showRetry ? (
+              <>
+                <WifiOff size={32} className="mx-auto mb-4" style={{ color: "#8A9BAE" }} />
+                <h2 className="font-serif text-xl font-semibold text-card-foreground mb-2">
+                  Connexion instable
+                </h2>
+                <p className="text-sm text-muted-foreground mb-6">
+                  Rien n'est perdu. L'enregistrement peut être renvoyé dès que la connexion est bonne.
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="text-4xl mb-4">⚠️</div>
+                <h2 className="font-serif text-xl font-semibold text-card-foreground mb-2">
+                  Une erreur est survenue
+                </h2>
+                <p className="text-sm text-muted-foreground mb-6">
+                  Votre enregistrement a bien été reçu. Nous réessaierons de le traiter automatiquement.
+                </p>
+              </>
+            )}
             <p className="text-xs text-muted-foreground mb-6">{errorMessage}</p>
-            <Button
-              onClick={() => navigate("/timeline")}
-              className="w-full rounded-xl"
-              style={{ backgroundColor: "hsl(var(--primary))" }}
-            >
-              Retour à la timeline
-            </Button>
+            {showRetry ? (
+              <div className="flex gap-3">
+                <Button
+                  variant="ghost"
+                  className="flex-1 rounded-xl"
+                  onClick={() => {
+                    reset();
+                    navigate("/timeline");
+                  }}
+                >
+                  Annuler
+                </Button>
+                <Button
+                  className="flex-1 rounded-xl text-white"
+                  style={{ background: "linear-gradient(135deg, #E8736A, #8B74E0)" }}
+                  onClick={() => {
+                    setProcessingStatus("idle");
+                    processMemo(audioBlob);
+                  }}
+                >
+                  Renvoyer le mémo
+                </Button>
+              </div>
+            ) : (
+              <Button
+                onClick={() => navigate("/timeline")}
+                className="w-full rounded-xl"
+                style={{ backgroundColor: "hsl(var(--primary))" }}
+              >
+                Retour à la timeline
+              </Button>
+            )}
           </div>
         </div>
       );
@@ -280,14 +320,18 @@ const NouveauMemoVocal = () => {
 
     const step = PROCESSING_STEPS[processingStatus];
     if (step) {
+      const isRetrying = retryAttempt >= 1 && (processingStatus === "uploading" || processingStatus === "transcribing");
+      const displayTitle = isRetrying ? "On vérifie la connexion…" : step.title;
+      const displaySubtitle = isRetrying ? "L'enregistrement est bien là." : step.subtitle;
+      const displayIcon = isRetrying ? "📡" : step.icon;
       return (
         <div className="flex min-h-screen flex-col items-center justify-center px-4">
           <div className="w-full max-w-[360px] rounded-2xl p-8 text-center" style={{ background: "rgba(255,255,255,0.52)", backdropFilter: "blur(16px) saturate(1.6)", WebkitBackdropFilter: "blur(16px) saturate(1.6)", border: "1px solid rgba(255,255,255,0.72)", boxShadow: "0 4px 16px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8)" }}>
-            <div className="text-4xl mb-4 animate-pulse">{step.icon}</div>
+            <div className="text-4xl mb-4 animate-pulse">{displayIcon}</div>
             <h2 className="font-serif text-xl font-semibold text-card-foreground mb-2">
-              {step.title}
+              {displayTitle}
             </h2>
-            <p className="text-sm text-muted-foreground">{step.subtitle}</p>
+            <p className="text-sm text-muted-foreground">{displaySubtitle}</p>
           </div>
         </div>
       );
