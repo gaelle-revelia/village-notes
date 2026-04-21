@@ -1,5 +1,12 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { isNetworkError, retryOnNetworkError } from "@/lib/network";
+
+interface PendingBlob {
+  blob: Blob;
+  mimeType: string;
+  durationMs: number;
+}
 
 interface UseVocalRecordingReturn {
   isRecording: boolean;
@@ -8,6 +15,10 @@ interface UseVocalRecordingReturn {
   elapsedSeconds: number;
   startRecording: () => Promise<void>;
   stopRecording: () => Promise<string | null>;
+  retry: () => Promise<string | null>;
+  cancelPendingRetry: () => void;
+  canRetry: boolean;
+  retryAttempt: number;
 }
 
 export function useVocalRecording(mode: string = "transcription_only", childId?: string, minDuration: number = 10): UseVocalRecordingReturn {
@@ -15,12 +26,15 @@ export function useVocalRecording(mode: string = "transcription_only", childId?:
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [pendingRetry, setPendingRetry] = useState(false);
+  const [retryAttempt, setRetryAttempt] = useState(0);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const elapsedSecondsRef = useRef(0);
+  const lastBlobRef = useRef<PendingBlob | null>(null);
 
   const startRecording = useCallback(async () => {
     setError(null);
@@ -51,6 +65,62 @@ export function useVocalRecording(mode: string = "transcription_only", childId?:
       setError("Microphone non disponible — utilise la saisie texte.");
     }
   }, []);
+
+  /**
+   * Internal: upload + invoke wrapped with network retry.
+   * Generates a fresh UUID per attempt (upsert: false strategy).
+   */
+  const executeUploadAndInvoke = useCallback(
+    async (pending: PendingBlob): Promise<string> => {
+      return retryOnNetworkError(
+        async (attempt) => {
+          const uuid = crypto.randomUUID();
+          const audioPath = `synthesis/${uuid}.webm`;
+
+          const { error: uploadError } = await supabase.storage
+            .from("audio-temp")
+            .upload(audioPath, pending.blob, { contentType: pending.mimeType, upsert: false });
+
+          if (uploadError) throw uploadError;
+
+          if (attempt === 0) {
+            console.info("[vocal-recording] invoke process-memo", {
+              hook: "useVocalRecording",
+              mode,
+              mimeType: pending.mimeType,
+              blobSizeBytes: pending.blob.size,
+              durationMs: pending.durationMs,
+              audioPath,
+              timestamp: new Date().toISOString(),
+            });
+          }
+
+          const { data, error: fnError } = await supabase.functions.invoke("process-memo", {
+            body: { mode, audio_path: audioPath, ...(childId ? { child_id: childId } : {}) },
+          });
+
+          if (fnError) throw fnError;
+
+          const result = data?.answer || data?.transcription || "";
+          return result;
+        },
+        {
+          delays: [500, 2000],
+          onRetry: (attempt, reason) => {
+            setRetryAttempt(attempt);
+            console.info("[vocal-recording] retry attempt", {
+              hook: "useVocalRecording",
+              mode,
+              attempt,
+              reason,
+              timestamp: new Date().toISOString(),
+            });
+          },
+        }
+      );
+    },
+    [mode, childId]
+  );
 
   const stopRecording = useCallback(async (): Promise<string | null> => {
     setError(null);
@@ -85,41 +155,21 @@ export function useVocalRecording(mode: string = "transcription_only", childId?:
         }
 
         setIsTranscribing(true);
+        setRetryAttempt(0);
 
-        let audioPath = "";
+        const pending: PendingBlob = { blob, mimeType, durationMs: finalElapsed * 1000 };
+
         try {
-          const uuid = crypto.randomUUID();
-          audioPath = `synthesis/${uuid}.webm`;
-
-          const { error: uploadError } = await supabase.storage
-            .from("audio-temp")
-            .upload(audioPath, blob, { contentType: mimeType, upsert: false });
-
-          if (uploadError) throw uploadError;
-
-          console.info("[vocal-recording] invoke process-memo", {
-            hook: "useVocalRecording",
-            mode,
-            mimeType: recorder.mimeType ?? "unknown",
-            blobSizeBytes: blob.size,
-            durationMs: finalElapsed * 1000,
-            audioPath,
-            timestamp: new Date().toISOString(),
-          });
-
-          const { data, error: fnError } = await supabase.functions.invoke("process-memo", {
-            body: { mode, audio_path: audioPath, ...(childId ? { child_id: childId } : {}) },
-          });
-
-          if (fnError) throw fnError;
-
-          const result = data?.answer || data?.transcription || "";
+          const result = await executeUploadAndInvoke(pending);
           console.info("[vocal-recording] process-memo success", {
             hook: "useVocalRecording",
             mode,
-            durationMs: finalElapsed * 1000,
+            durationMs: pending.durationMs,
             timestamp: new Date().toISOString(),
           });
+          lastBlobRef.current = null;
+          setPendingRetry(false);
+          setRetryAttempt(0);
           setIsTranscribing(false);
           resolve(result);
         } catch (err) {
@@ -127,16 +177,25 @@ export function useVocalRecording(mode: string = "transcription_only", childId?:
           console.error("[vocal-recording] process-memo failed", {
             hook: "useVocalRecording",
             mode,
-            mimeType: recorder.mimeType ?? "unknown",
-            blobSizeBytes: blob.size,
-            audioPath,
+            mimeType: pending.mimeType,
+            blobSizeBytes: pending.blob.size,
             errorMessage: err2?.message ?? String(err),
             errorStatus: err2?.status ?? null,
             errorBody: err2?.context?.body ?? err2?.body ?? null,
             timestamp: new Date().toISOString(),
           });
           console.error("Vocal recording error:", err);
-          setError("Transcription échouée — réessaie ou utilise la saisie texte.");
+
+          if (isNetworkError(err)) {
+            lastBlobRef.current = pending;
+            setPendingRetry(true);
+            setError("Connexion instable");
+          } else {
+            lastBlobRef.current = null;
+            setPendingRetry(false);
+            setError("Transcription échouée — réessaie ou utilise la saisie texte.");
+          }
+          setRetryAttempt(0);
           setIsTranscribing(false);
           resolve(null);
         }
@@ -144,7 +203,76 @@ export function useVocalRecording(mode: string = "transcription_only", childId?:
 
       recorder.stop();
     });
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [executeUploadAndInvoke, minDuration, mode]);
+
+  const retry = useCallback(async (): Promise<string | null> => {
+    if (!lastBlobRef.current || isTranscribing) return null;
+    const pending = lastBlobRef.current;
+
+    console.info("[vocal-recording] manual retry requested", {
+      hook: "useVocalRecording",
+      mode,
+      timestamp: new Date().toISOString(),
+    });
+
+    setIsTranscribing(true);
+    setError(null);
+    setRetryAttempt(0);
+
+    try {
+      const result = await executeUploadAndInvoke(pending);
+      console.info("[vocal-recording] process-memo success", {
+        hook: "useVocalRecording",
+        mode,
+        durationMs: pending.durationMs,
+        timestamp: new Date().toISOString(),
+      });
+      lastBlobRef.current = null;
+      setPendingRetry(false);
+      setRetryAttempt(0);
+      return result;
+    } catch (err) {
+      const err2 = err as { message?: string; status?: number; context?: { body?: unknown }; body?: unknown };
+      console.error("[vocal-recording] process-memo failed", {
+        hook: "useVocalRecording",
+        mode,
+        mimeType: pending.mimeType,
+        blobSizeBytes: pending.blob.size,
+        errorMessage: err2?.message ?? String(err),
+        errorStatus: err2?.status ?? null,
+        errorBody: err2?.context?.body ?? err2?.body ?? null,
+        timestamp: new Date().toISOString(),
+      });
+      console.error("Vocal recording error:", err);
+
+      if (isNetworkError(err)) {
+        lastBlobRef.current = pending;
+        setPendingRetry(true);
+        setError("Connexion instable");
+      } else {
+        lastBlobRef.current = null;
+        setPendingRetry(false);
+        setError("Transcription échouée — réessaie ou utilise la saisie texte.");
+      }
+      setRetryAttempt(0);
+      return null;
+    } finally {
+      setIsTranscribing(false);
+    }
+  }, [executeUploadAndInvoke, isTranscribing, mode]);
+
+  const cancelPendingRetry = useCallback(() => {
+    console.info("[vocal-recording] manual retry cancelled", {
+      hook: "useVocalRecording",
+      mode,
+      timestamp: new Date().toISOString(),
+    });
+    lastBlobRef.current = null;
+    setPendingRetry(false);
+    setError(null);
+    setRetryAttempt(0);
+  }, [mode]);
 
   useEffect(() => {
     return () => {
@@ -156,5 +284,16 @@ export function useVocalRecording(mode: string = "transcription_only", childId?:
     };
   }, []);
 
-  return { isRecording, isTranscribing, error, elapsedSeconds, startRecording, stopRecording };
+  return {
+    isRecording,
+    isTranscribing,
+    error,
+    elapsedSeconds,
+    startRecording,
+    stopRecording,
+    retry,
+    cancelPendingRetry,
+    canRetry: pendingRetry && !!lastBlobRef.current,
+    retryAttempt,
+  };
 }

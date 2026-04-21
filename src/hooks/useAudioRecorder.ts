@@ -9,6 +9,7 @@ interface UseAudioRecorderReturn {
   start: () => Promise<void>;
   stop: () => void;
   reset: () => void;
+  clearLastBlob: () => void;
 }
 
 const MAX_DURATION = 600; // 10 minutes
@@ -113,6 +114,10 @@ export function useAudioRecorder(onWarning?: () => void): UseAudioRecorderReturn
     };
   }, [clearTimer]);
 
+  const clearLastBlob = useCallback(() => {
+    setAudioBlob(null);
+  }, []);
+
   return {
     isRecording,
     isPaused,
@@ -122,5 +127,6 @@ export function useAudioRecorder(onWarning?: () => void): UseAudioRecorderReturn
     start,
     stop,
     reset,
+    clearLastBlob,
   };
 }
