@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
-import { ArrowLeft, Mic, Square, Keyboard } from "lucide-react";
+import { ArrowLeft, Mic, Square, Keyboard, WifiOff } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useEnfantId } from "@/hooks/useEnfantId";
 import { useToast } from "@/hooks/use-toast";
@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { MemoDatePicker } from "@/components/memo/MemoDatePicker";
 import { IntervenantSearchPicker } from "@/components/memo/IntervenantSearchPicker";
 import { useAudioRecorder } from "@/hooks/useAudioRecorder";
+import { isNetworkError, retryOnNetworkError } from "@/lib/network";
 import {
   Dialog,
   DialogContent,
@@ -56,10 +57,12 @@ const NouveauMemoVocal = () => {
   const [textInput, setTextInput] = useState("");
   const [processingStatus, setProcessingStatus] = useState<ProcessingStatus>("idle");
   const [errorMessage, setErrorMessage] = useState("");
+  const [lastFailureWasNetwork, setLastFailureWasNetwork] = useState(false);
+  const [retryAttempt, setRetryAttempt] = useState(0);
   const [freemiumModalOpen, setFreemiumModalOpen] = useState(false);
   const [freemiumChecked, setFreemiumChecked] = useState(false);
 
-  const { isRecording, elapsedSeconds, audioBlob, permissionDenied, start, stop } =
+  const { isRecording, elapsedSeconds, audioBlob, permissionDenied, start, stop, reset } =
     useAudioRecorder(() => {
       toast({
         title: "Attention",
@@ -119,6 +122,7 @@ const NouveauMemoVocal = () => {
   const processMemo = async (blob: Blob | null, text?: string) => {
     if (!user) return;
     setProcessingStatus("uploading");
+    setRetryAttempt(0);
 
     try {
       // 1. Create memo row
@@ -138,35 +142,59 @@ const NouveauMemoVocal = () => {
       if (memoError || !memo) throw new Error("Impossible de créer le mémo");
 
       const isTextMode = !blob && text;
+      const storagePath = `${user.id}/${memo.id}.webm`;
 
-      // 2. Upload audio if voice mode
+      const onRetry = (attempt: number, reason: string) => {
+        setRetryAttempt(attempt);
+        console.info("[vocal-recording] retry attempt", {
+          hook: "NouveauMemoVocal",
+          mode: isTextMode ? "text" : "voice",
+          attempt,
+          reason,
+          timestamp: new Date().toISOString(),
+        });
+      };
+
+      // 2. Upload audio if voice mode (wrapped with network retry, upsert: true → reuse same path)
       if (!isTextMode && blob) {
-        const storagePath = `${user.id}/${memo.id}.webm`;
-        const { error: uploadError } = await supabase.storage
-          .from("audio-temp")
-          .upload(storagePath, blob, { contentType: "audio/webm", upsert: true });
-        if (uploadError) throw new Error("Échec de l'envoi : " + uploadError.message);
+        await retryOnNetworkError(
+          async () => {
+            const { error: uploadError } = await supabase.storage
+              .from("audio-temp")
+              .upload(storagePath, blob, { contentType: "audio/webm", upsert: true });
+            if (uploadError) throw uploadError;
+          },
+          { delays: [500, 2000], onRetry }
+        );
       }
 
-      // 3. Invoke edge function
+      // 3. Invoke edge function (wrapped with network retry)
       setProcessingStatus("transcribing");
       console.info("[vocal-recording] invoke process-memo", {
         hook: "NouveauMemoVocal",
         mode: isTextMode ? "text" : "voice",
         mimeType: blob?.type ?? "unknown",
         blobSizeBytes: blob?.size ?? 0,
-        audioPath: isTextMode ? null : `${user.id}/${memo.id}.webm`,
+        audioPath: isTextMode ? null : storagePath,
         timestamp: new Date().toISOString(),
       });
-      const { data: fnData, error: fnError } = await supabase.functions.invoke("process-memo", {
-        body: {
-          memo_id: memo.id,
-          mode: isTextMode ? "text" : "voice",
-          text_input: text || undefined,
-        },
-      });
 
-      if (fnError) throw new Error(fnError.message || "Échec du traitement");
+      const { fnData, fnError } = await retryOnNetworkError(
+        async () => {
+          const res = await supabase.functions.invoke("process-memo", {
+            body: {
+              memo_id: memo.id,
+              mode: isTextMode ? "text" : "voice",
+              text_input: text || undefined,
+            },
+          });
+          if (res.error) throw res.error;
+          return { fnData: res.data, fnError: res.error };
+        },
+        { delays: [500, 2000], onRetry }
+      );
+
+      if (fnError) throw new Error((fnError as { message?: string }).message || "Échec du traitement");
       if (fnData?.error) throw new Error(fnData.error);
 
       console.info("[vocal-recording] process-memo success", {
@@ -175,6 +203,8 @@ const NouveauMemoVocal = () => {
         timestamp: new Date().toISOString(),
       });
 
+      setRetryAttempt(0);
+      setLastFailureWasNetwork(false);
       setProcessingStatus("structuring");
       // Brief delay to show structuring step
       await new Promise((r) => setTimeout(r, 800));
@@ -195,6 +225,13 @@ const NouveauMemoVocal = () => {
         timestamp: new Date().toISOString(),
       });
       console.error("Process memo error:", err);
+
+      if (isNetworkError(err)) {
+        setLastFailureWasNetwork(true);
+      } else {
+        setLastFailureWasNetwork(false);
+      }
+
       const msg = err instanceof Error ? err.message : "Une erreur est survenue";
       setErrorMessage(msg);
       setProcessingStatus("error");
@@ -218,24 +255,64 @@ const NouveauMemoVocal = () => {
   // Processing overlay
   if (processingStatus !== "idle") {
     if (processingStatus === "error") {
+      const showRetry = lastFailureWasNetwork && !!audioBlob;
       return (
         <div className="flex min-h-screen flex-col items-center justify-center px-4">
           <div className="w-full max-w-[360px] rounded-2xl p-8 text-center" style={{ background: "rgba(255,255,255,0.52)", backdropFilter: "blur(16px) saturate(1.6)", WebkitBackdropFilter: "blur(16px) saturate(1.6)", border: "1px solid rgba(255,255,255,0.72)", boxShadow: "0 4px 16px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8)" }}>
-            <div className="text-4xl mb-4">⚠️</div>
-            <h2 className="font-serif text-xl font-semibold text-card-foreground mb-2">
-              Une erreur est survenue
-            </h2>
-            <p className="text-sm text-muted-foreground mb-6">
-              Votre enregistrement a bien été reçu. Nous réessaierons de le traiter automatiquement.
-            </p>
+            {showRetry ? (
+              <>
+                <WifiOff size={32} className="mx-auto mb-4" style={{ color: "#8A9BAE" }} />
+                <h2 className="font-serif text-xl font-semibold text-card-foreground mb-2">
+                  Connexion instable
+                </h2>
+                <p className="text-sm text-muted-foreground mb-6">
+                  Rien n'est perdu. L'enregistrement peut être renvoyé dès que la connexion est bonne.
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="text-4xl mb-4">⚠️</div>
+                <h2 className="font-serif text-xl font-semibold text-card-foreground mb-2">
+                  Une erreur est survenue
+                </h2>
+                <p className="text-sm text-muted-foreground mb-6">
+                  Votre enregistrement a bien été reçu. Nous réessaierons de le traiter automatiquement.
+                </p>
+              </>
+            )}
             <p className="text-xs text-muted-foreground mb-6">{errorMessage}</p>
-            <Button
-              onClick={() => navigate("/timeline")}
-              className="w-full rounded-xl"
-              style={{ backgroundColor: "hsl(var(--primary))" }}
-            >
-              Retour à la timeline
-            </Button>
+            {showRetry ? (
+              <div className="flex gap-3">
+                <Button
+                  variant="ghost"
+                  className="flex-1 rounded-xl"
+                  onClick={() => {
+                    reset();
+                    navigate("/timeline");
+                  }}
+                >
+                  Annuler
+                </Button>
+                <Button
+                  className="flex-1 rounded-xl text-white"
+                  style={{ background: "linear-gradient(135deg, #E8736A, #8B74E0)" }}
+                  onClick={() => {
+                    setProcessingStatus("idle");
+                    processMemo(audioBlob);
+                  }}
+                >
+                  Renvoyer le mémo
+                </Button>
+              </div>
+            ) : (
+              <Button
+                onClick={() => navigate("/timeline")}
+                className="w-full rounded-xl"
+                style={{ backgroundColor: "hsl(var(--primary))" }}
+              >
+                Retour à la timeline
+              </Button>
+            )}
           </div>
         </div>
       );
@@ -243,14 +320,18 @@ const NouveauMemoVocal = () => {
 
     const step = PROCESSING_STEPS[processingStatus];
     if (step) {
+      const isRetrying = retryAttempt >= 1 && (processingStatus === "uploading" || processingStatus === "transcribing");
+      const displayTitle = isRetrying ? "On vérifie la connexion…" : step.title;
+      const displaySubtitle = isRetrying ? "L'enregistrement est bien là." : step.subtitle;
+      const displayIcon = isRetrying ? "📡" : step.icon;
       return (
         <div className="flex min-h-screen flex-col items-center justify-center px-4">
           <div className="w-full max-w-[360px] rounded-2xl p-8 text-center" style={{ background: "rgba(255,255,255,0.52)", backdropFilter: "blur(16px) saturate(1.6)", WebkitBackdropFilter: "blur(16px) saturate(1.6)", border: "1px solid rgba(255,255,255,0.72)", boxShadow: "0 4px 16px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.8)" }}>
-            <div className="text-4xl mb-4 animate-pulse">{step.icon}</div>
+            <div className="text-4xl mb-4 animate-pulse">{displayIcon}</div>
             <h2 className="font-serif text-xl font-semibold text-card-foreground mb-2">
-              {step.title}
+              {displayTitle}
             </h2>
-            <p className="text-sm text-muted-foreground">{step.subtitle}</p>
+            <p className="text-sm text-muted-foreground">{displaySubtitle}</p>
           </div>
         </div>
       );
