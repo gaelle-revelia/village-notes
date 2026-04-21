@@ -1,203 +1,222 @@
 
 
-# Lot 1 — Résilience réseau : retry auto + CTA manuel (final)
+# Plan finalisé — Code d'accès partenaire
 
-## Vérifications confirmées
+## Précisions intégrées
 
-- **`NouveauMemoVocal.tsx`** : `upsert: true` confirmé (ligne 147), `storagePath = ${user.id}/${memo.id}.webm`. → **Réutilisation** du même path à chaque retry.
-- **`useVocalRecording.ts`** : `upsert: false` avec UUID (`synthesis/${uuid}.webm`). → **Nouveau UUID** à chaque tentative.
-- **"Connexion instable"** : strictement réservé aux erreurs réseau. Tous les autres messages (mic indisponible, durée trop courte, transcription vide, quota) sont préservés sur tous les call-sites, modifiés ou non.
+- **Uppercase** : `code.trim().toUpperCase()` côté client avant envoi. Secret reste en majuscules. Comparaison serveur stricte inchangée.
+- **Ordre d'exécution** : `add_secret("ACCESS_CODE_PARTNERS", "VILLAGE-ILDYS-26")` AVANT déploiement de l'edge function.
 
-## Fichiers (5)
+## Ordre d'exécution
+
+1. **`add_secret`** → `ACCESS_CODE_PARTNERS = "VILLAGE-ILDYS-26"` (bloquant — attendre confirmation utilisateur)
+2. Création `supabase/functions/verify-access-code/index.ts`
+3. Mise à jour `supabase/config.toml` (bloc `[functions.verify-access-code]` avec `verify_jwt = false`)
+4. Déploiement automatique de l'edge function
+5. Création `src/pages/CodeAcces.tsx`
+6. Modification `src/App.tsx` (route `/code-acces`)
+7. Modification `src/pages/Waitlist.tsx` (lien discret sous formulaire)
+8. Modification `src/pages/Auth.tsx` (useEffect détection flag + câblage `<SignupForm>`)
+9. Modification `src/components/auth/SignupForm.tsx` (suppression flag avant `navigate("/onboarding")`)
+
+## Fichiers (5 modifs + 1 nouveau + 1 secret)
 
 | # | Fichier | Nature |
 |---|---|---|
-| 1 | `src/lib/network.ts` | **Nouveau** — `isNetworkError` + `retryOnNetworkError` |
-| 2 | `src/hooks/useVocalRecording.ts` | Refactor + API étendue |
-| 3 | `src/hooks/useAudioRecorder.ts` | Ajout `clearLastBlob()` minimal |
-| 4 | `src/pages/NouveauMemoVocal.tsx` | Wrapper retry + écran erreur enrichi |
-| 5 | `src/components/synthese/WiredMicOrb.tsx` | Bloc erreur conditionnel + sous-texte |
+| 1 | `supabase/functions/verify-access-code/index.ts` | **Nouveau** |
+| 2 | `supabase/config.toml` | Ajout `[functions.verify-access-code]` |
+| 3 | `src/pages/CodeAcces.tsx` | **Nouveau** |
+| 4 | `src/App.tsx` | Import + route `/code-acces` |
+| 5 | `src/pages/Waitlist.tsx` | Lien discret sous formulaire (uniquement si `!submitted`) |
+| 6 | `src/pages/Auth.tsx` | useEffect détection flag + câblage `<SignupForm>` |
+| 7 | `src/components/auth/SignupForm.tsx` | `sessionStorage.removeItem("access_code_valid")` avant navigation |
+| — | Secret runtime | `ACCESS_CODE_PARTNERS = "VILLAGE-ILDYS-26"` via `add_secret` |
 
-## 1. `src/lib/network.ts` (nouveau)
+## 1. Edge function `verify-access-code/index.ts`
 
 ```text
-isNetworkError(err): boolean
-  - err.status numérique >= 400 → false (jamais retry HTTP)
-  - err.name === "FunctionsFetchError" → true
-  - msg.toLowerCase() contient "failed to fetch" | "networkerror" | "network changed" | "err_network" → true
-  - sinon → false
-
-retryOnNetworkError<T>(fn: (attempt: number) => Promise<T>, opts?: { delays?: number[], onRetry?: (attempt, reason) => void }): Promise<T>
-  - delays par défaut [500, 2000] → 3 tentatives max
-  - try fn(attempt) ; catch err : si !isNetworkError ou dernière → throw ; sinon onRetry + sleep + continue
+- Helper getCorsHeaders(req) identique à verify-invite-token (allowlist: the-village.app + thevillage-app.lovable.app)
+- Deno.serve(async req => {
+    - OPTIONS → 200 avec corsHeaders
+    - method !== POST → 405 { error: "Method not allowed" }
+    - try parse body { code: string }
+    - !code ou typeof !== "string" → 400 { error: "Code requis" }
+    - submitted = code.trim()  (préserve la casse — l'uppercase est déjà fait côté client)
+    - expected = Deno.env.get("ACCESS_CODE_PARTNERS")
+    - !expected → 500 + console.error("ACCESS_CODE_PARTNERS not set"), pas de log du code soumis
+    - valid = submitted === expected
+    - return 200 { valid: boolean }
+    - catch → 500 { error: "Internal server error" }
+  })
 ```
 
-Pas d'import `FunctionsFetchError` — check par `err.name`.
+**verify_jwt = false** dans `config.toml` (route pré-auth).
+**Pas de log du code soumis** (principe de minimisation).
 
-## 2. `src/hooks/useVocalRecording.ts`
+## 2. `supabase/config.toml`
 
-**Imports** : `isNetworkError, retryOnNetworkError` depuis `@/lib/network`.
-
-**Nouveaux internes** :
-- `lastBlobRef = useRef<{ blob, mimeType, durationMs } | null>(null)`
-- `[pendingRetry, setPendingRetry] = useState(false)`
-- `[retryAttempt, setRetryAttempt] = useState(0)`
-
-**Refactor** : extraire upload+invoke du `recorder.onstop` en `executeUploadAndInvoke(blob, mimeType, durationMs)` :
-- Wrapping `retryOnNetworkError(async (attempt) => { uuid frais ; upload ; invoke ; return result }, { delays: [500, 2000], onRetry: (attempt, reason) => { setRetryAttempt(attempt); console.info("[vocal-recording] retry attempt", { hook: "useVocalRecording", mode, attempt, reason: reason.slice(0, 120), timestamp }) } })`
-
-**Branches d'erreur** dans `onstop` et `retry()` :
-- ✅ Succès → `lastBlobRef.current = null`, `setPendingRetry(false)`, `setRetryAttempt(0)`
-- ❌ **Réseau** (après tous retries) → `lastBlobRef.current = { blob, mimeType, durationMs }`, `setPendingRetry(true)`, `setError("Connexion instable")`, log existant conservé
-- ❌ **Non-réseau** → `lastBlobRef.current = null`, `setPendingRetry(false)`, `setError("Transcription échouée — réessaie ou utilise la saisie texte.")` (message existant inchangé)
-
-**Méthodes exposées** :
-```text
-retry(): Promise<string|null>
-  - if (!lastBlobRef.current || isTranscribing) return null
-  - log "manual retry requested"
-  - setIsTranscribing(true); setError(null); setRetryAttempt(0)
-  - try → executeUploadAndInvoke → succès branche
-  - catch → mêmes branches que onstop
-  - finally → setIsTranscribing(false)
-
-cancelPendingRetry(): void
-  - log "manual retry cancelled"
-  - lastBlobRef.current = null ; setPendingRetry(false) ; setError(null) ; setRetryAttempt(0)
+Ajout :
+```toml
+[functions.verify-access-code]
+verify_jwt = false
 ```
 
-**Retour étendu** :
-```text
-{ ...existant, retry, canRetry: pendingRetry && !!lastBlobRef.current, cancelPendingRetry, retryAttempt }
-```
+## 3. `src/pages/CodeAcces.tsx`
 
-✅ Signature `useVocalRecording(mode, childId?, minDuration?)` inchangée. Call-sites non modifiés ignorent les nouveaux champs et bénéficient du retry auto silencieux. Leurs messages d'erreur existants (mic, durée trop courte, métier) sont préservés.
-
-## 3. `src/hooks/useAudioRecorder.ts`
-
-Modif minimale (option ultra-minimale validée) :
-- Ajout au retour : `clearLastBlob: () => setAudioBlob(null)` (équivalent partiel à `reset()`).
-- Pas de nouveau `useRef`.
-
-## 4. `src/pages/NouveauMemoVocal.tsx`
-
-**Imports** : `WifiOff` (lucide), `isNetworkError, retryOnNetworkError` (`@/lib/network`).
-
-**Nouveaux state** :
-- `[lastFailureWasNetwork, setLastFailureWasNetwork] = useState(false)`
-- `[retryAttempt, setRetryAttempt] = useState(0)`
-
-**Refactor `processMemo`** :
-- Wrapper l'appel `supabase.functions.invoke("process-memo", ...)` via `retryOnNetworkError(..., { delays: [500, 2000], onRetry: (attempt, reason) => { setRetryAttempt(attempt); console.info("[vocal-recording] retry attempt", { hook: "NouveauMemoVocal", mode, attempt, reason, timestamp }) } })`.
-- **`storagePath` inchangé** entre tentatives (`upsert: true` confirmé). Pas de nouveau UUID.
-- L'`upload` peut aussi être wrappé avec la même stratégie (toujours réutilisation du même path grâce à `upsert: true`).
-- Sur succès : `setRetryAttempt(0)`, `setLastFailureWasNetwork(false)`.
-- Catch enrichi :
-  ```text
-  if (isNetworkError(err)) setLastFailureWasNetwork(true);   // ne pas reset audioBlob
-  else setLastFailureWasNetwork(false);                       // comportement actuel
-  ```
-
-**Wording dynamique** (`PROCESSING_STEPS`) :
-- Si `retryAttempt >= 1` pendant `uploading`/`transcribing` → titre `"On vérifie la connexion…"`, subtitle `"L'enregistrement est bien là."`. Sinon textes actuels.
-
-**Écran d'erreur** (remplace lignes 220-241) :
+Layout glassmorphism identique à `Auth.tsx` (rgba 0.52, blur 16px saturate 1.6).
 
 ```text
-<bloc glass existant inchangé>
-  <WifiOff size={32} className="mx-auto mb-4" style={{ color: "#8A9BAE" }} />     // si network
-  <h2>Connexion instable</h2>                                                      // si network
-  <h2>Une erreur est survenue</h2>                                                 // sinon (existant)
-  <p>Rien n'est perdu. L'enregistrement peut être renvoyé dès que la connexion est bonne.</p>  // si network
-  <p>Votre enregistrement a bien été reçu. Nous réessaierons...</p>                // sinon (existant)
-  <p text-xs muted>{errorMessage}</p>
-
-  {lastFailureWasNetwork && audioBlob ? (
-    <div flex gap-3>
-      <Button variant="ghost" onClick={() => { reset(); navigate("/timeline"); }}>Annuler</Button>
-      <Button onClick={() => { setProcessingStatus("idle"); processMemo(audioBlob); }} primary>
-        Renvoyer le mémo
-      </Button>
+<main min-h-screen flex items-center justify-center px-4 py-8>
+  <div max-w-[400px] glassmorphism>
+    <div text-center space-y-2 mb-6>
+      <h1 font-serif text-[28px] font-semibold>Accès partenaire</h1>
+      <p text-sm text-muted-foreground>
+        Saisissez le code qui vous a été communiqué pour accéder à l'inscription.
+      </p>
     </div>
-  ) : (
-    <Button onClick={() => navigate("/timeline")}>Retour à la timeline</Button>
-  )}
-</bloc>
+
+    <form onSubmit={handleSubmit} space-y-4>
+      <Input
+        autoFocus
+        type="text"
+        placeholder="Votre code d'accès"
+        value={code}
+        onChange={e => setCode(e.target.value)}
+        className="rounded-lg text-center tracking-wider"
+      />
+      {error && <p text-sm text-center style={{color:"#E8736A"}}>{error}</p>}
+
+      <Button type="submit" disabled={loading || !code.trim()}
+              className="w-full rounded-xl h-12 text-base"
+              style={{background:"linear-gradient(135deg, #E8736A, #8B74E0)", color:"white"}}>
+        {loading ? "Vérification..." : "Valider"}
+      </Button>
+    </form>
+
+    <p text-center text-sm mt-6>
+      <a href="/waitlist" className="text-muted-foreground hover:underline">
+        Retour à la liste d'attente
+      </a>
+    </p>
+  </div>
+</main>
+
+handleSubmit:
+  e.preventDefault()
+  setError(""); setLoading(true)
+  try {
+    const codeToSend = code.trim().toUpperCase()   // ← variante tolérante
+    const { data, error } = await supabase.functions.invoke("verify-access-code", {
+      body: { code: codeToSend }
+    })
+    if (error) throw error
+    if (data?.valid === true) {
+      sessionStorage.setItem("access_code_valid", "true")
+      navigate("/auth")
+    } else {
+      setError("Ce code ne semble pas valide")
+    }
+  } catch {
+    setError("Une erreur est survenue. Veuillez réessayer.")
+  } finally {
+    setLoading(false)
+  }
 ```
 
-## 5. `src/components/synthese/WiredMicOrb.tsx`
+## 4. `src/App.tsx`
 
-**Imports** : `WifiOff` (lucide).
-
-**Destructurer** : `retry`, `canRetry`, `cancelPendingRetry`, `retryAttempt`.
-
-**Orb** : si `canRetry` → `opacity: 0.55`, `pointerEvents: "none"`. Sinon comportement actuel.
-
-**Label `<span>` principal** :
-```text
-isRecording                              → formatTime(elapsedSeconds)
-isTranscribing && retryAttempt === 0     → "Envoi en cours…"
-isTranscribing && retryAttempt >= 1      → "On vérifie la connexion…"
-canRetry                                 → masqué
-sinon                                    → "Appuyez pour parler"
+```tsx
+import CodeAcces from "./pages/CodeAcces";
+// ...
+<Route path="/code-acces" element={<CodeAcces />} />
 ```
 
-**Sous-texte secondaire NOUVEAU** (décision 3) :
-```text
-{isTranscribing && retryAttempt >= 1 && (
-  <span className="text-[11px] font-sans mt-0.5" style={{ color: "#9A9490", opacity: 0.75 }}>
-    L'enregistrement est bien là.
-  </span>
+Position : juste après `<Route path="/waitlist" ... />`.
+
+## 5. `src/pages/Waitlist.tsx`
+
+Dans la branche `!submitted`, à la fin du `<form>` (juste avant `</form>`, après le `<p>` "Pas de spam") :
+
+```tsx
+<div style={{ textAlign: "center", marginTop: 16 }}>
+  <a href="/code-acces"
+     style={{ fontSize: 13, color: "#8B74E0", textDecoration: "underline", opacity: 0.85 }}>
+    Vous avez reçu un code d'accès ?
+  </a>
+</div>
+```
+
+✅ Visible uniquement avant soumission. Pas affiché dans le message de confirmation.
+
+## 6. `src/pages/Auth.tsx`
+
+**Imports** : ajouter `import { SignupForm } from "@/components/auth/SignupForm";`
+
+**Nouveau useEffect** (après le useEffect existant ligne 27) :
+```tsx
+useEffect(() => {
+  const accessCodeValid = sessionStorage.getItem("access_code_valid");
+  if (accessCodeValid === "true") {
+    setView("signup");
+  }
+}, []);
+```
+
+**Ajout rendu signup** (entre les blocs login et forgot-password) :
+```tsx
+{view === "signup" && (
+  <SignupForm
+    onSwitchToLogin={() => setView("login")}
+    onSuccess={handleSignupSuccess}
+  />
 )}
 ```
 
-**Bloc d'erreur** :
-```text
-{canRetry ? (
-  <div className="mt-2 w-full max-w-[300px] rounded-2xl p-4 text-center" style={glassmorphism}>
-    <WifiOff size={22} ... />
-    <p font-serif font-semibold>Connexion instable</p>
-    <p text-[12px]>Rien n'est perdu. L'enregistrement peut être renvoyé dès que la connexion est bonne.</p>
-    <div flex gap-2 justify-center>
-      <button onClick={cancelPendingRetry}>Annuler</button>
-      <button onClick={async () => { const text = await retry(); if (text) onTranscription(text); }}
-        gradient corail-lavande>Renvoyer le mémo</button>
-    </div>
-  </div>
-) : error ? (
-  <span text-[12px] color="#E8736A">{error}</span>     // ← messages mic/durée/métier inchangés
-) : null}
+**Comportement défensif** : `onSwitchToSignup={() => navigate("/waitlist")}` conservé (jamais atteignable si flag actif puisque useEffect bascule auto).
+
+## 7. `src/components/auth/SignupForm.tsx`
+
+**Ajout unique** : juste avant `navigate("/onboarding")` (ligne 80) :
+```ts
+sessionStorage.removeItem("access_code_valid");
+navigate("/onboarding");
 ```
 
-**Préservation des messages existants** :
-- Mic indisponible (`"Microphone non disponible — utilise la saisie texte."`) → branche `error` (rouge), pas de bloc CTA.
-- Durée trop courte (`"Enregistrement trop court — parlez au moins X secondes."`) → branche `error`, pas de bloc CTA.
-- Transcription vide / quota / autre métier (`"Transcription échouée — réessaie ou utilise la saisie texte."`) → branche `error`, pas de bloc CTA.
-- Réseau (`"Connexion instable"` + `pendingRetry=true`) → branche `canRetry`, bloc CTA.
+Une seule ligne. Pas de modif de logique signup.
 
-## Logs ajoutés
+## Wording final
 
-- `console.info("[vocal-recording] retry attempt", { hook, mode, attempt, reason, timestamp })`
-- `console.info("[vocal-recording] manual retry requested", { hook, mode, timestamp })`
-- `console.info("[vocal-recording] manual retry cancelled", { hook, mode, timestamp })`
-
-Pas de PII.
+| Élément | Texte |
+|---|---|
+| Titre page CodeAcces | "Accès partenaire" |
+| Sous-titre | "Saisissez le code qui vous a été communiqué pour accéder à l'inscription." |
+| Placeholder | "Votre code d'accès" |
+| Bouton | "Valider" / "Vérification..." |
+| Erreur code invalide | "Ce code ne semble pas valide" |
+| Erreur réseau | "Une erreur est survenue. Veuillez réessayer." |
+| Lien retour CodeAcces | "Retour à la liste d'attente" |
+| Lien Waitlist → CodeAcces | "Vous avez reçu un code d'accès ?" |
 
 ## Garanties
 
-- ✅ `upsert: true` côté NouveauMemoVocal : même `storagePath` réutilisé.
-- ✅ `upsert: false` côté useVocalRecording : nouveau UUID par tentative.
-- ✅ "Connexion instable" exclusivement sur erreurs réseau matchées par `isNetworkError`.
-- ✅ Tous les autres messages d'erreur (mic, durée, métier) préservés sur tous les call-sites.
-- ✅ Aucune nouvelle dépendance npm.
-- ✅ Signature publique `useVocalRecording` inchangée.
-- ✅ Pattern matching strict : pas de retry sur 4xx/5xx applicatifs.
-- ✅ Blob libéré sur succès, annulation explicite, erreur non-réseau. Conservé uniquement sur erreur réseau persistante.
-- ✅ Logs `[vocal-recording]` existants conservés.
+- ✅ Aucune table BDD créée, aucune migration, aucune RLS modifiée
+- ✅ Aucune dépendance npm ajoutée
+- ✅ Pas de log du code soumis (PII minimisation)
+- ✅ CORS restreint aux 2 domaines The Village (pattern verify-invite-token)
+- ✅ `verify_jwt = false` (route pré-auth)
+- ✅ Comptes créés = owner standard, indistinguables (aucune colonne ajoutée)
+- ✅ Règle 31 (signup bloqué par défaut) respectée : Waitlist reste l'entrée principale, CodeAcces est un détour discret
+- ✅ Règle 24 (pas d'IA dans l'UI) : aucune IA dans cette feature
+- ✅ Uppercase tolérant côté client : `VILLAGE-ILDYS-26`, `village-ildys-26`, `Village-Ildys-26` → tous valides
+- ✅ Secret configuré AVANT déploiement edge function (premier test fonctionnel)
 
-## Hors scope
+## Cas limites
 
-- IndexedDB / persistance cross-session.
-- Autres call-sites WiredMicOrb (Lots 2/3).
-- Modification seuil `minDuration` ou fallback `mimeType`.
+- ✅ Refresh sur `/auth` après code valide → useEffect rebascule en signup tant que flag présent
+- ✅ Signup réussi → flag supprimé → refresh ramène en login
+- ✅ Fermeture onglet → flag perdu (sessionStorage) → demande à refaire le code
+- ✅ Code soumis avec espaces → `.trim()` côté client + serveur
+- ✅ Code en minuscules → `.toUpperCase()` côté client → match
+- ✅ Edge function sans secret → 500 explicite serveur, message générique côté client
+- ✅ Erreur réseau → message générique, pas de retry custom
 
