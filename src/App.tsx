@@ -42,6 +42,7 @@ import PlaceholderScreen from "./components/PlaceholderScreen";
 import NotFound from "./pages/NotFound";
 import PolitiqueConfidentialite from "./pages/PolitiqueConfidentialite";
 import Waitlist from "./pages/Waitlist";
+import CodeAcces from "./pages/CodeAcces";
 import AVenirDetail from "./pages/AVenirDetail";
 import VillageProFiche from "./pages/VillageProFiche";
 import VillageProEdit from "./pages/VillageProEdit";
@@ -96,6 +97,7 @@ const AppRoutes = () => {
       <Route path="/archives" element={<Archives />} />
       <Route path="/politique-confidentialite" element={<PolitiqueConfidentialite />} />
       <Route path="/waitlist" element={<Waitlist />} />
+      <Route path="/code-acces" element={<CodeAcces />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

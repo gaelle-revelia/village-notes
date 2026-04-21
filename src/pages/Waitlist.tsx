@@ -144,6 +144,20 @@ const Waitlist = () => {
             <p className="font-sans text-xs text-[#9A9490] text-center">
               Pas de spam. Un seul message, quand c'est prêt.
             </p>
+
+            <div style={{ textAlign: "center", marginTop: 16 }}>
+              <a
+                href="/code-acces"
+                style={{
+                  fontSize: 13,
+                  color: "#8B74E0",
+                  textDecoration: "underline",
+                  opacity: 0.85,
+                }}
+              >
+                Vous avez reçu un code d'accès ?
+              </a>
+            </div>
           </form>
         )}
       </div>

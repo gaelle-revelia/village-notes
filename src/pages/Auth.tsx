@@ -3,6 +3,7 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 
 import { LoginForm } from "@/components/auth/LoginForm";
+import { SignupForm } from "@/components/auth/SignupForm";
 import { ForgotPasswordForm } from "@/components/auth/ForgotPasswordForm";
 import { EmailConfirmation } from "@/components/auth/EmailConfirmation";
 
@@ -25,6 +26,14 @@ const Auth = () => {
       navigate("/onboarding-invite" + hash, { replace: true });
     }
   }, [navigate]);
+
+  // Partner access code: switch to signup if flag is present
+  useEffect(() => {
+    const accessCodeValid = sessionStorage.getItem("access_code_valid");
+    if (accessCodeValid === "true") {
+      setView("signup");
+    }
+  }, []);
 
   if (loading) {
     return (
@@ -50,6 +59,12 @@ const Auth = () => {
           <LoginForm
             onSwitchToSignup={() => navigate("/waitlist")}
             onForgotPassword={() => setView("forgot-password")}
+          />
+        )}
+        {view === "signup" && (
+          <SignupForm
+            onSwitchToLogin={() => setView("login")}
+            onSuccess={handleSignupSuccess}
           />
         )}
         {view === "forgot-password" && (

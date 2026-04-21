@@ -77,6 +77,7 @@ export function SignupForm({ onSwitchToLogin, onSuccess }: SignupFormProps) {
       }
     }
 
+    sessionStorage.removeItem("access_code_valid");
     navigate("/onboarding");
   };
 
