@@ -54,6 +54,12 @@ export function useAudioRecorder(onWarning?: () => void): UseAudioRecorderReturn
       recorder.onstop = () => {
         const blob = new Blob(chunksRef.current, { type: mimeType });
         setAudioBlob(blob);
+        console.info("[vocal-recording] recording stopped, blob ready", {
+          hook: "useAudioRecorder",
+          mimeType,
+          blobSizeBytes: blob.size,
+          timestamp: new Date().toISOString(),
+        });
         stream.getTracks().forEach((t) => t.stop());
         clearTimer();
       };

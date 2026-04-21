@@ -86,15 +86,26 @@ export function useVocalRecording(mode: string = "transcription_only", childId?:
 
         setIsTranscribing(true);
 
+        let audioPath = "";
         try {
           const uuid = crypto.randomUUID();
-          const audioPath = `synthesis/${uuid}.webm`;
+          audioPath = `synthesis/${uuid}.webm`;
 
           const { error: uploadError } = await supabase.storage
             .from("audio-temp")
             .upload(audioPath, blob, { contentType: mimeType, upsert: false });
 
           if (uploadError) throw uploadError;
+
+          console.info("[vocal-recording] invoke process-memo", {
+            hook: "useVocalRecording",
+            mode,
+            mimeType: recorder.mimeType ?? "unknown",
+            blobSizeBytes: blob.size,
+            durationMs: finalElapsed * 1000,
+            audioPath,
+            timestamp: new Date().toISOString(),
+          });
 
           const { data, error: fnError } = await supabase.functions.invoke("process-memo", {
             body: { mode, audio_path: audioPath, ...(childId ? { child_id: childId } : {}) },
@@ -103,9 +114,27 @@ export function useVocalRecording(mode: string = "transcription_only", childId?:
           if (fnError) throw fnError;
 
           const result = data?.answer || data?.transcription || "";
+          console.info("[vocal-recording] process-memo success", {
+            hook: "useVocalRecording",
+            mode,
+            durationMs: finalElapsed * 1000,
+            timestamp: new Date().toISOString(),
+          });
           setIsTranscribing(false);
           resolve(result);
         } catch (err) {
+          const err2 = err as { message?: string; status?: number; context?: { body?: unknown }; body?: unknown };
+          console.error("[vocal-recording] process-memo failed", {
+            hook: "useVocalRecording",
+            mode,
+            mimeType: recorder.mimeType ?? "unknown",
+            blobSizeBytes: blob.size,
+            audioPath,
+            errorMessage: err2?.message ?? String(err),
+            errorStatus: err2?.status ?? null,
+            errorBody: err2?.context?.body ?? err2?.body ?? null,
+            timestamp: new Date().toISOString(),
+          });
           console.error("Vocal recording error:", err);
           setError("Transcription échouée — réessaie ou utilise la saisie texte.");
           setIsTranscribing(false);
