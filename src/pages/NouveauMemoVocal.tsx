@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
-import { ArrowLeft, Mic, Square, Keyboard } from "lucide-react";
+import { ArrowLeft, Mic, Square, Keyboard, WifiOff } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useEnfantId } from "@/hooks/useEnfantId";
 import { useToast } from "@/hooks/use-toast";
@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { MemoDatePicker } from "@/components/memo/MemoDatePicker";
 import { IntervenantSearchPicker } from "@/components/memo/IntervenantSearchPicker";
 import { useAudioRecorder } from "@/hooks/useAudioRecorder";
+import { isNetworkError, retryOnNetworkError } from "@/lib/network";
 import {
   Dialog,
   DialogContent,
@@ -56,10 +57,12 @@ const NouveauMemoVocal = () => {
   const [textInput, setTextInput] = useState("");
   const [processingStatus, setProcessingStatus] = useState<ProcessingStatus>("idle");
   const [errorMessage, setErrorMessage] = useState("");
+  const [lastFailureWasNetwork, setLastFailureWasNetwork] = useState(false);
+  const [retryAttempt, setRetryAttempt] = useState(0);
   const [freemiumModalOpen, setFreemiumModalOpen] = useState(false);
   const [freemiumChecked, setFreemiumChecked] = useState(false);
 
-  const { isRecording, elapsedSeconds, audioBlob, permissionDenied, start, stop } =
+  const { isRecording, elapsedSeconds, audioBlob, permissionDenied, start, stop, reset } =
     useAudioRecorder(() => {
       toast({
         title: "Attention",
@@ -119,6 +122,7 @@ const NouveauMemoVocal = () => {
   const processMemo = async (blob: Blob | null, text?: string) => {
     if (!user) return;
     setProcessingStatus("uploading");
+    setRetryAttempt(0);
 
     try {
       // 1. Create memo row
@@ -138,35 +142,59 @@ const NouveauMemoVocal = () => {
       if (memoError || !memo) throw new Error("Impossible de créer le mémo");
 
       const isTextMode = !blob && text;
+      const storagePath = `${user.id}/${memo.id}.webm`;
 
-      // 2. Upload audio if voice mode
+      const onRetry = (attempt: number, reason: string) => {
+        setRetryAttempt(attempt);
+        console.info("[vocal-recording] retry attempt", {
+          hook: "NouveauMemoVocal",
+          mode: isTextMode ? "text" : "voice",
+          attempt,
+          reason,
+          timestamp: new Date().toISOString(),
+        });
+      };
+
+      // 2. Upload audio if voice mode (wrapped with network retry, upsert: true → reuse same path)
       if (!isTextMode && blob) {
-        const storagePath = `${user.id}/${memo.id}.webm`;
-        const { error: uploadError } = await supabase.storage
-          .from("audio-temp")
-          .upload(storagePath, blob, { contentType: "audio/webm", upsert: true });
-        if (uploadError) throw new Error("Échec de l'envoi : " + uploadError.message);
+        await retryOnNetworkError(
+          async () => {
+            const { error: uploadError } = await supabase.storage
+              .from("audio-temp")
+              .upload(storagePath, blob, { contentType: "audio/webm", upsert: true });
+            if (uploadError) throw uploadError;
+          },
+          { delays: [500, 2000], onRetry }
+        );
       }
 
-      // 3. Invoke edge function
+      // 3. Invoke edge function (wrapped with network retry)
       setProcessingStatus("transcribing");
       console.info("[vocal-recording] invoke process-memo", {
         hook: "NouveauMemoVocal",
         mode: isTextMode ? "text" : "voice",
         mimeType: blob?.type ?? "unknown",
         blobSizeBytes: blob?.size ?? 0,
-        audioPath: isTextMode ? null : `${user.id}/${memo.id}.webm`,
+        audioPath: isTextMode ? null : storagePath,
         timestamp: new Date().toISOString(),
       });
-      const { data: fnData, error: fnError } = await supabase.functions.invoke("process-memo", {
-        body: {
-          memo_id: memo.id,
-          mode: isTextMode ? "text" : "voice",
-          text_input: text || undefined,
-        },
-      });
 
-      if (fnError) throw new Error(fnError.message || "Échec du traitement");
+      const { fnData, fnError } = await retryOnNetworkError(
+        async () => {
+          const res = await supabase.functions.invoke("process-memo", {
+            body: {
+              memo_id: memo.id,
+              mode: isTextMode ? "text" : "voice",
+              text_input: text || undefined,
+            },
+          });
+          if (res.error) throw res.error;
+          return { fnData: res.data, fnError: res.error };
+        },
+        { delays: [500, 2000], onRetry }
+      );
+
+      if (fnError) throw new Error((fnError as { message?: string }).message || "Échec du traitement");
       if (fnData?.error) throw new Error(fnData.error);
 
       console.info("[vocal-recording] process-memo success", {
@@ -175,6 +203,8 @@ const NouveauMemoVocal = () => {
         timestamp: new Date().toISOString(),
       });
 
+      setRetryAttempt(0);
+      setLastFailureWasNetwork(false);
       setProcessingStatus("structuring");
       // Brief delay to show structuring step
       await new Promise((r) => setTimeout(r, 800));
@@ -195,6 +225,13 @@ const NouveauMemoVocal = () => {
         timestamp: new Date().toISOString(),
       });
       console.error("Process memo error:", err);
+
+      if (isNetworkError(err)) {
+        setLastFailureWasNetwork(true);
+      } else {
+        setLastFailureWasNetwork(false);
+      }
+
       const msg = err instanceof Error ? err.message : "Une erreur est survenue";
       setErrorMessage(msg);
       setProcessingStatus("error");
