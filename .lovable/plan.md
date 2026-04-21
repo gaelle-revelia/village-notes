@@ -1,66 +1,41 @@
 
 
-## Diagnostic : Page Archives bloquée sur "Chargement…"
+# Logs client structurés autour de `process-memo` — Plan d'exécution
 
-### Cause racine identifiée
+## Fichiers modifiés
 
-Le problème vient d'une condition de course (race condition) dans le `useEffect` de `Archives.tsx` :
+1. `src/hooks/useVocalRecording.ts`
+2. `src/hooks/useAudioRecorder.ts`
+3. `src/pages/NouveauMemoVocal.tsx`
 
-1. Le composant initialise `loading = true` (ligne 76)
-2. `useEnfantId()` retourne `enfantId = null` pendant qu'il charge (le hook est asynchrone)
-3. Le `useEffect` (ligne 80) fait `if (!enfantId) return;` — il sort **sans jamais passer `loading` à `false`**
-4. Quand `enfantId` se résout, l'effet devrait se relancer... mais si `useAuth` ou `useEnfantId` ont un timing particulier (double render, re-mount), le composant peut rester bloqué sur `loading = true`
+## Modifications
 
-De plus, la requête Supabase sur `syntheses` n'a **aucune gestion d'erreur** : si la requête échoue (RLS, réseau), `setLoading(false)` n'est jamais appelé.
+### 1. `src/hooks/useVocalRecording.ts`
 
-### Plan de correction
+- Déclarer `let audioPath = ""` juste avant le `try` pour qu'il soit accessible dans le `catch`.
+- **Avant** `supabase.functions.invoke("process-memo", ...)` : ajouter `console.info("[vocal-recording] invoke process-memo", { hook, mode, mimeType, blobSizeBytes, durationMs, audioPath, timestamp })`.
+- **Après** retour OK (avant `setIsTranscribing(false)`) : ajouter `console.info("[vocal-recording] process-memo success", { hook, mode, durationMs, timestamp })`.
+- **Dans le `catch`** : ajouter `console.error("[vocal-recording] process-memo failed", { hook, mode, mimeType, blobSizeBytes, audioPath, errorMessage, errorStatus, errorBody, timestamp })` **avant** le `console.error("Vocal recording error:", err)` existant (qui reste en place).
 
-**Fichier unique modifié** : `src/pages/Archives.tsx`
+### 2. `src/hooks/useAudioRecorder.ts`
 
-1. **Utiliser le `loading` du hook `useEnfantId`** — Destructurer `{ enfantId, loading: loadingEnfant }` au lieu de `{ enfantId }` seul
+- **Après** `setAudioBlob(blob)` dans `recorder.onstop` : ajouter `console.info("[vocal-recording] recording stopped, blob ready", { hook: "useAudioRecorder", mimeType, blobSizeBytes, timestamp })`. `durationMs` omis (pas de nouveau ref).
 
-2. **Gérer le cas enfantId null après chargement** — Si le hook a fini de charger mais `enfantId` est null, passer `loading` à `false` immédiatement (l'utilisateur verra "Aucune synthèse")
+### 3. `src/pages/NouveauMemoVocal.tsx`
 
-3. **Ajouter un try/catch** autour de `fetchData` pour que `setLoading(false)` soit toujours appelé, même en cas d'erreur réseau ou RLS
+Dans `processMemo`, autour de l'`invoke` :
 
-4. **Afficher le vrai état de chargement** — Conditionner le "Chargement…" sur `loading || loadingEnfant`
+- **Avant** `supabase.functions.invoke("process-memo", ...)` : ajouter `console.info("[vocal-recording] invoke process-memo", { hook: "NouveauMemoVocal", mode, mimeType, blobSizeBytes, audioPath, timestamp })`.
+- **Après** vérifications OK (avant `setProcessingStatus("structuring")`) : ajouter `console.info("[vocal-recording] process-memo success", { hook: "NouveauMemoVocal", mode, timestamp })`.
+- **Dans le `catch (err)`** : ajouter `console.error("[vocal-recording] process-memo failed", { hook, mode, mimeType, blobSizeBytes, errorMessage, errorStatus, errorBody, timestamp })` **avant** le `console.error("Process memo error:", err)` existant (qui reste en place).
 
-### Détail technique
+## Garanties
 
-```typescript
-// Avant
-const { enfantId } = useEnfantId();
-const [loading, setLoading] = useState(true);
-
-useEffect(() => {
-  if (!enfantId) return; // ← BUG: loading reste true si enfantId est null
-  const fetchData = async () => { ... };
-  fetchData();
-}, [enfantId]);
-
-// Après
-const { enfantId, loading: loadingEnfant } = useEnfantId();
-const [loading, setLoading] = useState(true);
-
-useEffect(() => {
-  if (loadingEnfant) return; // attendre que le hook ait fini
-  if (!enfantId) {
-    setLoading(false); // ← FIX: pas d'enfant = pas de données
-    return;
-  }
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      // ... requête syntheses + profiles (inchangé)
-    } catch (e) {
-      console.error("Erreur chargement archives:", e);
-    } finally {
-      setLoading(false); // ← toujours exécuté
-    }
-  };
-  fetchData();
-}, [enfantId, loadingEnfant]);
-```
-
-Aucun autre fichier modifié.
+- Aucune modification de logique métier, `try/catch`, `setError`, `resolve()`, ou appels Supabase.
+- Aucun nouveau `useState`, `useEffect`, `useRef`, ou dépendance npm.
+- Aucune signature de hook modifiée.
+- Aucune PII loggée (pas de `user_id`, `memo_id`, `child_id`, transcription, audio).
+- Préfixe uniforme `[vocal-recording]`.
+- `console.error` existants conservés.
+- Seuil 10 s et fallback mimeType non touchés.
 
