@@ -183,9 +183,10 @@ const NouveauMemoVocal = () => {
       navigate(`/memo-result/${memo.id}`);
     } catch (err) {
       const err2 = err as { message?: string; status?: number; context?: { body?: unknown }; body?: unknown };
+      const isTextModeCatch = !blob && !!text;
       console.error("[vocal-recording] process-memo failed", {
         hook: "NouveauMemoVocal",
-        mode: isTextMode ? "text" : "voice",
+        mode: isTextModeCatch ? "text" : "voice",
         mimeType: blob?.type ?? "unknown",
         blobSizeBytes: blob?.size ?? 0,
         errorMessage: err2?.message ?? String(err),
