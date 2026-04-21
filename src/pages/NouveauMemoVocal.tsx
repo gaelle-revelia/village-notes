@@ -150,6 +150,14 @@ const NouveauMemoVocal = () => {
 
       // 3. Invoke edge function
       setProcessingStatus("transcribing");
+      console.info("[vocal-recording] invoke process-memo", {
+        hook: "NouveauMemoVocal",
+        mode: isTextMode ? "text" : "voice",
+        mimeType: blob?.type ?? "unknown",
+        blobSizeBytes: blob?.size ?? 0,
+        audioPath: isTextMode ? null : `${user.id}/${memo.id}.webm`,
+        timestamp: new Date().toISOString(),
+      });
       const { data: fnData, error: fnError } = await supabase.functions.invoke("process-memo", {
         body: {
           memo_id: memo.id,
@@ -161,6 +169,12 @@ const NouveauMemoVocal = () => {
       if (fnError) throw new Error(fnError.message || "Échec du traitement");
       if (fnData?.error) throw new Error(fnData.error);
 
+      console.info("[vocal-recording] process-memo success", {
+        hook: "NouveauMemoVocal",
+        mode: isTextMode ? "text" : "voice",
+        timestamp: new Date().toISOString(),
+      });
+
       setProcessingStatus("structuring");
       // Brief delay to show structuring step
       await new Promise((r) => setTimeout(r, 800));
@@ -168,6 +182,17 @@ const NouveauMemoVocal = () => {
       setProcessingStatus("done");
       navigate(`/memo-result/${memo.id}`);
     } catch (err) {
+      const err2 = err as { message?: string; status?: number; context?: { body?: unknown }; body?: unknown };
+      console.error("[vocal-recording] process-memo failed", {
+        hook: "NouveauMemoVocal",
+        mode: isTextMode ? "text" : "voice",
+        mimeType: blob?.type ?? "unknown",
+        blobSizeBytes: blob?.size ?? 0,
+        errorMessage: err2?.message ?? String(err),
+        errorStatus: err2?.status ?? null,
+        errorBody: err2?.context?.body ?? err2?.body ?? null,
+        timestamp: new Date().toISOString(),
+      });
       console.error("Process memo error:", err);
       const msg = err instanceof Error ? err.message : "Une erreur est survenue";
       setErrorMessage(msg);
