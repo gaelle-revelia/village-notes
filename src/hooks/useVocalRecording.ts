@@ -292,8 +292,6 @@ export function useVocalRecording(mode: string = "transcription_only", childId?:
     setRetryAttempt(0);
   }, [mode]);
 
-  }, [executeUploadAndInvoke, isTranscribing, mode]);
-
   // Garder stopRecordingRef à jour pour l'arrêt automatique à MAX_DURATION
   stopRecordingRef.current = stopRecording;
 
