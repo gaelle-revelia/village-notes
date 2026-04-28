@@ -554,6 +554,20 @@ RÈGLES ABSOLUES :
         throw new Error("Failed to download audio: " + downloadError?.message);
       }
 
+      if (audioData.size > MAX_AUDIO_BYTES) {
+        console.error("[process-memo] audio too large", {
+          memo_id,
+          audioPath: storagePath,
+          sizeBytes: audioData.size,
+          maxBytes: MAX_AUDIO_BYTES,
+        });
+        await supabase
+          .from("memos")
+          .update({ processing_status: "error" })
+          .eq("id", memo_id);
+        return jsonResponse({ error: "Audio trop long (max 8 minutes)" }, corsHeaders, 400);
+      }
+
       const base64Audio = toBase64(await audioData.arrayBuffer());
       const transcribeResponse = await fetch(AI_GATEWAY_URL, {
         method: "POST",
