@@ -172,6 +172,15 @@ async function transcribeTempAudio(
 
     shouldDeleteAudio = true;
 
+    if (audioData.size > MAX_AUDIO_BYTES) {
+      console.error("[process-memo] audio too large", {
+        audioPath,
+        sizeBytes: audioData.size,
+        maxBytes: MAX_AUDIO_BYTES,
+      });
+      throw new HttpError(400, "Audio trop long (max 8 minutes)");
+    }
+
     const base64Audio = toBase64(await audioData.arrayBuffer());
     const transcribeResponse = await fetch(AI_GATEWAY_URL, {
       method: "POST",
