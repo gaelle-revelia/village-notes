@@ -27,5 +27,3 @@ verify_jwt = false
 [functions.verify-access-code]
 verify_jwt = false
 
-[functions.debug-signed-url]
-verify_jwt = false
