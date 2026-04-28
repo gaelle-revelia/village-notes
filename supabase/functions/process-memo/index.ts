@@ -70,10 +70,17 @@ function cleanJsonResponse(rawContent: string) {
   return rawContent.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
 }
 
-function toBase64(arrayBuffer: ArrayBuffer) {
-  return btoa(
-    new Uint8Array(arrayBuffer).reduce((data, byte) => data + String.fromCharCode(byte), "")
-  );
+function toBase64(arrayBuffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(arrayBuffer);
+  // Encodage par chunks pour éviter O(n²) allocations (reduce + concat)
+  // et "Maximum call stack size exceeded" sur fromCharCode.apply de gros tableaux.
+  const CHUNK_SIZE = 32768; // 32 KB
+  let binary = "";
+  for (let i = 0; i < bytes.length; i += CHUNK_SIZE) {
+    const chunk = bytes.subarray(i, i + CHUNK_SIZE);
+    binary += String.fromCharCode.apply(null, Array.from(chunk));
+  }
+  return btoa(binary);
 }
 
 async function detectPepites(
