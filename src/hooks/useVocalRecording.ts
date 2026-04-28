@@ -31,6 +31,7 @@ export function useVocalRecording(mode: string = "transcription_only", childId?:
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [pendingRetry, setPendingRetry] = useState(false);
   const [retryAttempt, setRetryAttempt] = useState(0);
+  const [stoppedAtMaxDuration, setStoppedAtMaxDuration] = useState(false);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -38,9 +39,12 @@ export function useVocalRecording(mode: string = "transcription_only", childId?:
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const elapsedSecondsRef = useRef(0);
   const lastBlobRef = useRef<PendingBlob | null>(null);
+  // Ref vers stopRecording pour permettre l'arrêt automatique sans dépendance circulaire
+  const stopRecordingRef = useRef<(() => Promise<string | null>) | null>(null);
 
   const startRecording = useCallback(async () => {
     setError(null);
+    setStoppedAtMaxDuration(false);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
@@ -61,7 +65,18 @@ export function useVocalRecording(mode: string = "transcription_only", childId?:
       setElapsedSeconds(0);
       elapsedSecondsRef.current = 0;
       timerRef.current = setInterval(() => {
-        setElapsedSeconds((s) => { elapsedSecondsRef.current = s + 1; return s + 1; });
+        setElapsedSeconds((s) => {
+          const next = s + 1;
+          elapsedSecondsRef.current = next;
+          if (next >= MAX_DURATION) {
+            setStoppedAtMaxDuration(true);
+            // Différer pour éviter les effets de bord pendant le setState
+            queueMicrotask(() => {
+              stopRecordingRef.current?.();
+            });
+          }
+          return next;
+        });
       }, 1000);
       setIsRecording(true);
     } catch {
