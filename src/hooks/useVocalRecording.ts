@@ -292,6 +292,11 @@ export function useVocalRecording(mode: string = "transcription_only", childId?:
     setRetryAttempt(0);
   }, [mode]);
 
+  }, [executeUploadAndInvoke, isTranscribing, mode]);
+
+  // Garder stopRecordingRef à jour pour l'arrêt automatique à MAX_DURATION
+  stopRecordingRef.current = stopRecording;
+
   useEffect(() => {
     return () => {
       if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
@@ -307,6 +312,7 @@ export function useVocalRecording(mode: string = "transcription_only", childId?:
     isTranscribing,
     error,
     elapsedSeconds,
+    stoppedAtMaxDuration,
     startRecording,
     stopRecording,
     retry,
