@@ -70,6 +70,10 @@ function cleanJsonResponse(rawContent: string) {
   return rawContent.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
 }
 
+// Filet de sécurité serveur : refuser les audios > 16 MB (~8 min @ 32 kbps webm/opus avec marge).
+// La borne UX (480 s) est posée côté client; ce filet protège le worker (limite mémoire ~150 MB).
+const MAX_AUDIO_BYTES = 16 * 1024 * 1024;
+
 function toBase64(arrayBuffer: ArrayBuffer): string {
   const bytes = new Uint8Array(arrayBuffer);
   // Encodage par chunks pour éviter O(n²) allocations (reduce + concat)

@@ -8,11 +8,14 @@ interface PendingBlob {
   durationMs: number;
 }
 
+const MAX_DURATION = 480; // 8 minutes — borne technique côté client
+
 interface UseVocalRecordingReturn {
   isRecording: boolean;
   isTranscribing: boolean;
   error: string | null;
   elapsedSeconds: number;
+  stoppedAtMaxDuration: boolean;
   startRecording: () => Promise<void>;
   stopRecording: () => Promise<string | null>;
   retry: () => Promise<string | null>;

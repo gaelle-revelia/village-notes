@@ -12,8 +12,8 @@ interface UseAudioRecorderReturn {
   clearLastBlob: () => void;
 }
 
-const MAX_DURATION = 600; // 10 minutes
-const WARNING_DURATION = 540; // 9 minutes
+const MAX_DURATION = 480; // 8 minutes
+const WARNING_DURATION = 420; // 7 minutes
 
 export function useAudioRecorder(onWarning?: () => void): UseAudioRecorderReturn {
   const [isRecording, setIsRecording] = useState(false);
