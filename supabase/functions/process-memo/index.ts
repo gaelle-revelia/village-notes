@@ -70,6 +70,10 @@ function cleanJsonResponse(rawContent: string) {
   return rawContent.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
 }
 
+// Filet de sécurité serveur : refuser les audios > 16 MB (~8 min @ 32 kbps webm/opus avec marge).
+// La borne UX (480 s) est posée côté client; ce filet protège le worker (limite mémoire ~150 MB).
+const MAX_AUDIO_BYTES = 16 * 1024 * 1024;
+
 function toBase64(arrayBuffer: ArrayBuffer): string {
   const bytes = new Uint8Array(arrayBuffer);
   // Encodage par chunks pour éviter O(n²) allocations (reduce + concat)
@@ -167,6 +171,15 @@ async function transcribeTempAudio(
     }
 
     shouldDeleteAudio = true;
+
+    if (audioData.size > MAX_AUDIO_BYTES) {
+      console.error("[process-memo] audio too large", {
+        audioPath,
+        sizeBytes: audioData.size,
+        maxBytes: MAX_AUDIO_BYTES,
+      });
+      throw new HttpError(400, "Audio trop long (max 8 minutes)");
+    }
 
     const base64Audio = toBase64(await audioData.arrayBuffer());
     const transcribeResponse = await fetch(AI_GATEWAY_URL, {
@@ -539,6 +552,20 @@ RÈGLES ABSOLUES :
           .update({ processing_status: "error" })
           .eq("id", memo_id);
         throw new Error("Failed to download audio: " + downloadError?.message);
+      }
+
+      if (audioData.size > MAX_AUDIO_BYTES) {
+        console.error("[process-memo] audio too large", {
+          memo_id,
+          audioPath: storagePath,
+          sizeBytes: audioData.size,
+          maxBytes: MAX_AUDIO_BYTES,
+        });
+        await supabase
+          .from("memos")
+          .update({ processing_status: "error" })
+          .eq("id", memo_id);
+        return jsonResponse({ error: "Audio trop long (max 8 minutes)" }, corsHeaders, 400);
       }
 
       const base64Audio = toBase64(await audioData.arrayBuffer());
