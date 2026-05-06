@@ -217,7 +217,15 @@ const Timeline = () => {
     const groups: { key: string; label: string; memos: Memo[] }[] = [];
     const map = new Map<string, Memo[]>();
 
-    for (const memo of filteredMemos) {
+    // Sort ascending (oldest → newest) BEFORE grouping so the Map's
+    // insertion order matches the desired display order (top = oldest).
+    const sorted = [...filteredMemos].sort((a, b) => {
+      const da = new Date(a.memo_date || a.created_at).getTime();
+      const db = new Date(b.memo_date || b.created_at).getTime();
+      return da - db;
+    });
+
+    for (const memo of sorted) {
       const d = new Date(memo.memo_date || memo.created_at);
       const key = `${d.getFullYear()}-${String(d.getMonth()).padStart(2, "0")}`;
       if (!map.has(key)) map.set(key, []);
@@ -230,11 +238,6 @@ const Timeline = () => {
       const label = format(d, "MMMM yyyy", { locale: fr }).toUpperCase();
       groups.push({ key, label, memos: items });
     }
-
-    // Reverse: oldest group first (top), newest last (bottom)
-    // Within each group, oldest memo first, newest last
-    groups.reverse();
-    for (const g of groups) g.memos.reverse();
 
     return groups;
   }, [filteredMemos]);
