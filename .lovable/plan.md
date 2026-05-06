@@ -1,70 +1,56 @@
+## Problème
 
-# Réinvocation manuelle de process-memo sur memo `280ea1eb…`
+Après un clic sur "Charger plus", la 2e page de mémos est correctement chargée depuis la base (26 mémos, dont les 2 documents de février 2025), mais ils n'apparaissent pas en haut de la timeline. Cause : le regroupement par mois utilise une `Map`, qui préserve l'ordre d'insertion. Comme la nouvelle page est **préfixée** au tableau (`[...mapped, ...prev]`) sans tri global, l'ordre des clés mois devient incohérent et les anciens mois (2024, fév 2025) se retrouvent au milieu de la timeline au lieu d'être tout en haut.
 
-## Objectif
+## Correction
 
-Relancer le pipeline de transcription pour ce memo bloqué en `transcribing`, après avoir sauvegardé l'audio source.
+Un seul changement dans `src/pages/Timeline.tsx`, dans le `useMemo` `grouped` (juste avant la boucle qui remplit la `Map`) :
 
-## Contraintes respectées
+Trier `filteredMemos` par date **croissante** avant le groupage. Cela garantit que les clés de mois sont insérées dans la `Map` du plus ancien au plus récent. Le `groups.reverse()` existant peut alors être supprimé (ou conservé en inversant la logique de tri — au choix).
 
-- Aucune modification permanente du code applicatif.
-- Aucune nouvelle edge function permanente : les 2 fonctions debug créées seront supprimées immédiatement après usage.
-- Audio sauvegardé avant tout appel (process-memo termine par un `try/finally` qui supprime l'objet d'`audio-temp`).
+```ts
+const grouped = useMemo(() => {
+  const groups: { key: string; label: string; memos: Memo[] }[] = [];
+  const map = new Map<string, Memo[]>();
 
-## Paramètres reproduits depuis NouveauMemoVocal.tsx (lignes 182-195)
+  // Tri croissant par date avant groupage : garantit l'ordre des mois
+  const sorted = [...filteredMemos].sort((a, b) => {
+    const da = new Date(a.memo_date || a.created_at).getTime();
+    const db = new Date(b.memo_date || b.created_at).getTime();
+    return da - db; // ancien → récent
+  });
 
-Body envoyé à `process-memo` :
-```json
-{
-  "memo_id": "280ea1eb-1ceb-4e75-bca8-9d6de90874f6",
-  "mode": "voice",
-  "text_input": undefined
-}
+  for (const memo of sorted) {
+    const d = new Date(memo.memo_date || memo.created_at);
+    const key = `${d.getFullYear()}-${String(d.getMonth()).padStart(2, "0")}`;
+    if (!map.has(key)) map.set(key, []);
+    map.get(key)!.push(memo);
+  }
+
+  for (const [key, items] of map) {
+    const [y, m] = key.split("-");
+    const d = new Date(Number(y), Number(m), 1);
+    const label = format(d, "MMMM yyyy", { locale: fr }).toUpperCase();
+    groups.push({ key, label, memos: items });
+  }
+
+  // Plus besoin de groups.reverse() ni de g.memos.reverse() :
+  // déjà dans l'ordre ancien → récent (top → bottom)
+
+  return groups;
+}, [filteredMemos]);
 ```
 
-> Le client n'envoie pas `audio_path` : la function le déduit depuis `memo_id` (path = `<user_id>/<memo_id>.webm` dans `audio-temp`).
+## Effet attendu
 
-## Étapes d'exécution
+- Avant : "le plus ancien visible" = 16 mai 2025 (faussement, car les anciens étaient au milieu).
+- Après : en scrollant vers le haut, l'utilisateur voit successivement avr 2025 → mar 2025 → **fév 2025 (avec les 2 documents)** → oct 2024 → sept 2024 → mai 2024.
+- L'ordre interne (le plus récent en bas de la timeline globale) est conservé.
 
-### 1. Sauvegarde de l'audio
-Le copy intra-bucket nécessite le service role (RLS bloque sinon). Je déploie une edge function temporaire `debug-copy` qui appelle `supabase.storage.from(bucket).copy(from, to)`.
+## Fichiers touchés
 
-- Source : `audio-temp/dce7bf78-…/280ea1eb-….webm`
-- Destination : `audio-temp/backup/280ea1eb-….webm`
-- Vérification : SELECT sur `storage.objects` pour confirmer présence + taille identique (10 146 504 octets).
+- `src/pages/Timeline.tsx` — uniquement le `useMemo grouped`.
 
-### 2. Invocation manuelle de process-memo
-Via `supabase--curl_edge_functions` (POST `/process-memo` avec le body ci-dessus). Mesure :
-- Status code HTTP
-- Durée d'exécution (chrono côté outil)
-- Body de réponse complet
+## Risques
 
-⚠️ Risque attendu : timeout >150 s probable sur un audio de ~6m30 (déjà observé ce matin, 0 log côté Edge). L'invocation peut donc échouer aussi.
-
-### 3. Vérification BDD post-invocation
-SELECT sur `memos` :
-- `processing_status` (attendu : `done` ou `error`)
-- `transcription_raw`
-- `content_structured`
-- `created_at` / `updated_at`
-
-Et lecture des logs runtime de `process-memo` via `supabase--edge_function_logs` pour récupérer console.log/error et stack trace éventuelle.
-
-### 4. Restauration éventuelle de l'audio
-Si la function a supprimé l'audio source ET qu'on veut pouvoir relancer plus tard, copy backup → path original via `debug-copy`.
-
-### 5. Nettoyage
-- `supabase--delete_edge_functions(["debug-copy"])`
-- Suppression du dossier `supabase/functions/debug-copy/`
-- Suppression du bloc `[functions.debug-copy]` dans `supabase/config.toml`
-- Conservation du backup `audio-temp/backup/280ea1eb-….webm` (à supprimer manuellement plus tard si besoin)
-
-## Livrable
-
-Rapport factuel :
-- Statut + durée de l'invocation
-- État BDD final du memo
-- Logs runtime émis pendant l'exécution
-- Confirmation présence/absence du backup audio
-
-Aucune correction de code proposée à ce stade.
+Très faible. Modification purement présentationnelle, isolée à un `useMemo`. Le comportement initial (page 1 seule) reste identique car les mémos arrivent déjà triés par la requête SQL.
