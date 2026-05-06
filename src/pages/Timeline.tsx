@@ -404,7 +404,7 @@ const Timeline = () => {
           </div>
         ) : (
           <div>
-          {hasMore && searchQuery === "" && !isFilterActive && (
+          {hasMore && searchQuery === "" && (
             <button
               onClick={async () => {
                 const scrollContainer = document.documentElement;
