@@ -287,7 +287,7 @@ export default function MemberDetailPanel({
             Annuler
           </button>
           <button
-            onClick={() => { onDelete(member); close(); }}
+            onClick={() => onDelete(member)}
             className="w-full py-2 flex items-center justify-center gap-1 text-sm text-[#E8736A] hover:text-[#d4625a] font-medium"
           >
             <Trash2 className="w-4 h-4" />

@@ -220,11 +220,20 @@ export default function VillageSettings() {
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
-    await supabase
+    const target = deleteTarget;
+    const { data, error } = await supabase
       .from("intervenants")
       .update({ actif: false })
-      .eq("id", deleteTarget.id);
+      .eq("id", target.id)
+      .select("id");
     setDeleteTarget(null);
+    if (error || !data || data.length === 0) {
+      console.error("[Village] retrait impossible", error);
+      toast({ title: "Erreur", description: "Le membre n'a pas pu être retiré, réessayez.", variant: "destructive" });
+      return;
+    }
+    setEditTarget(null);
+    toast({ title: "Membre retiré ✓", description: `${target.nom} ne fait plus partie du village.` });
     fetchMembers();
   };
 
